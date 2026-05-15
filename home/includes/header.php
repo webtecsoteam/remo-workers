@@ -6,6 +6,7 @@
 <title>Remoworkers – Where Great Work Gets Done</title>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="<?php echo baseUrl("home/css/style.css"); ?>">
+<script>const APP_URL = '<?php echo baseUrl(); ?>';</script>
 </head>
 <body>
 <!-- TOAST -->
@@ -61,8 +62,29 @@
     <li><a onclick="openModal('pricing')">Pricing</a></li>
   </ul>
   <div class="na">
-    <a class="btn btn-ghost" href="<?php echo baseUrl('remoworkers-dashboard'); ?>">Log In</a>
-    <a class="btn btn-outline" href="<?php echo baseUrl('remoworkers-dashboard'); ?>">Sign Up Free</a>
-    <a class="btn btn-dark" href="<?php echo baseUrl('client'); ?>">Post a Job</a>
+    <?php 
+    require_once __DIR__ . '/../../includes/classes/Auth.php';
+    $user = Auth::user();
+    if ($user): 
+    ?>
+        <div style="display: flex; align-items: center; gap: 12px; margin-right: 12px;">
+            <div style="width: 32px; height: 32px; background: #14a800; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px;">
+                <?php echo substr($user['name'], 0, 1); ?>
+            </div>
+            <div style="font-size: 14px; font-weight: 600; color: #1e293b;">
+                <?php echo $user['name']; ?>
+            </div>
+        </div>
+        <?php if ($user['role'] === 'client'): ?>
+            <a class="btn btn-dark" href="<?php echo baseUrl('client'); ?>">Dashboard</a>
+        <?php else: ?>
+            <a class="btn btn-dark" href="<?php echo baseUrl('remoworkers-dashboard'); ?>">Dashboard</a>
+        <?php endif; ?>
+        <a class="btn btn-ghost" href="<?php echo baseUrl('logout'); ?>">Log Out</a>
+    <?php else: ?>
+        <a class="btn btn-ghost" onclick="openModal('login')">Log In</a>
+        <a class="btn btn-outline" onclick="openModal('signup')">Sign Up Free</a>
+        <a class="btn btn-dark" onclick="openModal('login')">Post a Job</a>
+    <?php endif; ?>
   </div>
 </nav>

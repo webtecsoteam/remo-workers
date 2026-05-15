@@ -458,7 +458,7 @@
   <h2>Start hiring — or<br>start <em>earning</em> — today</h2>
   <p>Join 5 million professionals. No commitment. No credit card required to post a job.</p>
   <div class="cta-acts">
-    <a class="btn btn-lime btn-lg" onclick="openModal('post-job')">Hire a Freelancer</a>
+    <a class="btn btn-lime btn-lg" onclick="openModal('login')">Hire a Freelancer</a>
     <a class="btn btn-white btn-lg" onclick="openModal('signup')">Find Work</a>
   </div>
   <div class="cta-trust">

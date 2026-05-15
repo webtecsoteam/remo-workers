@@ -55,7 +55,7 @@
   </nav>
   <div class="sb-footer">
     <a onclick="toast('Upgrade','Opening Business Plus details')">⬆️ Upgrade to Business Plus</a>
-    <a href="<?php echo baseUrl(); ?>">🚪 Sign Out</a>
+    <a href="<?php echo baseUrl('logout'); ?>">🚪 Sign Out</a>
   </div>
 </aside>
 

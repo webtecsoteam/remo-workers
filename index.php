@@ -31,6 +31,20 @@ switch ($section) {
         include __DIR__ . '/home/index.php';
         break;
 
+    case 'login':
+        include __DIR__ . '/actions/login.php';
+        break;
+
+    case 'register':
+        include __DIR__ . '/actions/register.php';
+        break;
+
+    case 'logout':
+        require_once __DIR__ . '/includes/classes/Auth.php';
+        Auth::logout();
+        redirect(baseUrl());
+        break;
+
     // ------------------------------------------
     // Route 2: Client Section (/client/*)
     // ------------------------------------------

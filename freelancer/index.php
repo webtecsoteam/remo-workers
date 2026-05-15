@@ -55,7 +55,7 @@
   <div class="sb-footer">
     <a onclick="toast('Availability','Set to Available for Work')">🟢 Available for Work</a>
     <a onclick="openModal('change-password')">🔑 Change Password</a>
-    <a href="<?php echo baseUrl(); ?>">🚪 Log Out</a>
+    <a href="<?php echo baseUrl('logout'); ?>">🚪 Log Out</a>
   </div>
 </aside>
 
