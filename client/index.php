@@ -9,6 +9,111 @@ $vDoc = $db->prepare("SELECT status FROM user_documents WHERE user_id = ? ORDER 
 $vDoc->execute([$user['id']]);
 $vStatus = $vDoc->fetchColumn() ?: 'unverified';
 if(isset($user['is_verified']) && $user['is_verified']) $vStatus = 'approved';
+
+// --- DASHBOARD DATA ---
+// 1. Stats
+$activeContractsCount = $db->prepare("SELECT COUNT(*) FROM contracts WHERE client_id = ? AND status = 'active'");
+$activeContractsCount->execute([$user['id']]);
+$stats['active_contracts'] = $activeContractsCount->fetchColumn();
+
+$openProposalsCount = $db->prepare("SELECT COUNT(*) FROM proposals p JOIN jobs j ON p.job_id = j.id WHERE j.client_id = ? AND p.status = 'pending'");
+$openProposalsCount->execute([$user['id']]);
+$stats['open_proposals'] = $openProposalsCount->fetchColumn();
+
+$totalSpent = $db->prepare("SELECT SUM(amount) FROM payments WHERE payer_id = ? AND status = 'completed' AND MONTH(created_at) = MONTH(CURRENT_DATE())");
+$totalSpent->execute([$user['id']]);
+$stats['total_spent'] = $totalSpent->fetchColumn() ?: 0;
+
+// 2. Active Contracts List
+$contractsStmt = $db->prepare("SELECT c.*, j.title as job_title, u.name as freelancer_name FROM contracts c 
+                                JOIN jobs j ON c.job_id = j.id 
+                                JOIN users u ON c.freelancer_id = u.id 
+                                WHERE c.client_id = ? AND c.status = 'active' ORDER BY c.created_at DESC LIMIT 4");
+$contractsStmt->execute([$user['id']]);
+$activeContracts = $contractsStmt->fetchAll(PDO::FETCH_ASSOC);
+
+// 3. Open Jobs List
+$jobsStmt = $db->prepare("SELECT j.*, (SELECT COUNT(*) FROM proposals WHERE job_id = j.id) as proposal_count 
+                          FROM jobs j WHERE j.client_id = ? AND j.status = 'open' ORDER BY j.created_at DESC LIMIT 3");
+$jobsStmt->execute([$user['id']]);
+$openJobs = $jobsStmt->fetchAll(PDO::FETCH_ASSOC);
+
+// 4. Messages
+$msgStmt = $db->prepare("SELECT m.*, u.name as sender_name FROM messages m 
+                         JOIN users u ON m.sender_id = u.id 
+                         WHERE m.receiver_id = ? ORDER BY m.created_at DESC LIMIT 4");
+$msgStmt->execute([$user['id']]);
+$recentMessages = $msgStmt->fetchAll(PDO::FETCH_ASSOC);
+
+$unreadCount = $db->prepare("SELECT COUNT(*) FROM messages WHERE receiver_id = ? AND is_read = 0");
+$unreadCount->execute([$user['id']]);
+$unreadMessagesCount = $unreadCount->fetchColumn();
+
+// 5. All Jobs for Jobs Page
+$allJobsStmt = $db->prepare("SELECT j.*, (SELECT COUNT(*) FROM proposals WHERE job_id = j.id) as proposal_count 
+                             FROM jobs j WHERE j.client_id = ? ORDER BY j.created_at DESC");
+$allJobsStmt->execute([$user['id']]);
+$allJobs = $allJobsStmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Counts for job statuses
+$jobCounts = [
+    'open' => 0,
+    'paused' => 0,
+    'closed' => 0
+];
+foreach ($allJobs as $aj) {
+    if (isset($jobCounts[$aj['status']])) {
+        $jobCounts[$aj['status']]++;
+    }
+}
+
+// 6. All Proposals for Proposals Page
+$proposalsStmt = $db->prepare("SELECT p.*, j.title as job_title, u.name as freelancer_name, u.email as freelancer_email 
+                               FROM proposals p 
+                               JOIN jobs j ON p.job_id = j.id 
+                               JOIN users u ON p.freelancer_id = u.id 
+                               WHERE j.client_id = ? AND p.status = 'pending' 
+                               ORDER BY p.created_at DESC");
+$proposalsStmt->execute([$user['id']]);
+$allProposals = $proposalsStmt->fetchAll(PDO::FETCH_ASSOC);
+
+// 7. All Contracts for Contracts Page
+$allContractsStmt = $db->prepare("SELECT c.*, j.title as job_title, u.name as freelancer_name FROM contracts c 
+                                  JOIN jobs j ON c.job_id = j.id 
+                                  JOIN users u ON c.freelancer_id = u.id 
+                                  WHERE c.client_id = ? ORDER BY c.created_at DESC");
+$allContractsStmt->execute([$user['id']]);
+$allContracts = $allContractsStmt->fetchAll(PDO::FETCH_ASSOC);
+
+$contractCounts = ['active' => 0, 'completed' => 0];
+foreach ($allContracts as $ac) {
+    if (isset($contractCounts[$ac['status']])) {
+        $contractCounts[$ac['status']]++;
+    }
+}
+// 9. Transaction History for Payments Page
+$clientTransactionsStmt = $db->prepare("
+    SELECT p.*, u.name as freelancer_name 
+    FROM payments p 
+    JOIN users u ON p.payee_id = u.id 
+    WHERE p.payer_id = ? 
+    ORDER BY p.created_at DESC LIMIT 10
+");
+$clientTransactionsStmt->execute([$user['id']]);
+$clientTransactions = $clientTransactionsStmt->fetchAll(PDO::FETCH_ASSOC);
+
+// 10. Reports Data
+$reportStatsStmt = $db->prepare("
+    SELECT 
+        (SELECT SUM(amount) FROM payments WHERE payer_id = ? AND status = 'completed') as total_spent_all_time,
+        COUNT(DISTINCT id) as total_jobs_posted,
+        (SELECT COUNT(DISTINCT freelancer_id) FROM contracts WHERE client_id = ?) as freelancers_hired,
+        (SELECT COUNT(*) FROM contracts WHERE client_id = ? AND status = 'completed') as contracts_completed
+    FROM jobs 
+    WHERE client_id = ?
+");
+$reportStatsStmt->execute([$user['id'], $user['id'], $user['id'], $user['id']]);
+$reportStats = $reportStatsStmt->fetch(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -43,9 +148,9 @@ if(isset($user['is_verified']) && $user['is_verified']) $vStatus = 'approved';
 <aside class="sidebar">
   <a class="sb-logo" href="<?php echo baseUrl(); ?>"><div class="sb-wordmark">up<em>work</em></div></a>
   <div class="sb-user">
-    <div class="sb-av">NX</div>
+    <div class="sb-av"><?php echo strtoupper(substr($user['name'], 0, 1)); ?></div>
     <div>
-      <div class="sb-name">NexaFlow Inc.</div>
+      <div class="sb-name"><?php echo htmlspecialchars($user['name']); ?></div>
       <div class="sb-role">Client Account</div>
     </div>
   </div>
@@ -98,8 +203,8 @@ if(isset($user['is_verified']) && $user['is_verified']) $vStatus = 'approved';
     <div class="page active" id="page-home">
       <div class="pg-header" style="margin-bottom:18px">
         <div>
-          <div class="pg-title">Welcome back, NexaFlow 👋</div>
-          <div class="pg-sub">You have 4 unread messages and 12 new proposals waiting.</div>
+          <div class="pg-title">Welcome back, <?php echo htmlspecialchars($user['name']); ?> 👋</div>
+          <div class="pg-sub">You have <?php echo $unreadMessagesCount; ?> unread messages and <?php echo $stats['open_proposals']; ?> new proposals waiting.</div>
         </div>
         <button class="btn btn-g btn-lg" onclick="openModal('post-job')">+ Post a Job</button>
       </div>
@@ -108,23 +213,23 @@ if(isset($user['is_verified']) && $user['is_verified']) $vStatus = 'approved';
       <div class="stat-row">
         <div class="stat-c" onclick="showPage('contracts',document.querySelector('[onclick*=contracts]'))">
           <div class="stat-label">Active Contracts<div class="stat-icon">🤝</div></div>
-          <div class="stat-val">8</div>
-          <div class="stat-sub up">↑ 2 new this month</div>
+          <div class="stat-val"><?php echo $stats['active_contracts']; ?></div>
+          <div class="stat-sub">Active work streams</div>
         </div>
         <div class="stat-c" onclick="showPage('proposals',document.querySelector('[onclick*=proposals]'))">
           <div class="stat-label">Open Proposals<div class="stat-icon">📩</div></div>
-          <div class="stat-val">12</div>
-          <div class="stat-sub">Across 3 job posts</div>
+          <div class="stat-val"><?php echo $stats['open_proposals']; ?></div>
+          <div class="stat-sub">Waiting for review</div>
         </div>
         <div class="stat-c" onclick="showPage('payments',document.querySelector('[onclick*=payments]'))">
-          <div class="stat-label">Total Spent (May)<div class="stat-icon">💳</div></div>
-          <div class="stat-val">$4,820</div>
-          <div class="stat-sub up">↑ 18% vs last month</div>
+          <div class="stat-label">Total Spent (<?php echo date('M'); ?>)<div class="stat-icon">💳</div></div>
+          <div class="stat-val">$<?php echo number_format($stats['total_spent']); ?></div>
+          <div class="stat-sub">This month's billing</div>
         </div>
         <div class="stat-c" onclick="toast('Satisfaction','Based on completed contract reviews')">
           <div class="stat-label">Avg Rating Given<div class="stat-icon">⭐</div></div>
           <div class="stat-val">4.9</div>
-          <div class="stat-sub">From 34 reviews given</div>
+          <div class="stat-sub">From your reviews</div>
         </div>
       </div>
 
@@ -136,26 +241,20 @@ if(isset($user['is_verified']) && $user['is_verified']) $vStatus = 'approved';
             <button class="btn btn-w btn-sm" onclick="showPage('contracts',document.querySelector('[onclick*=contracts]'))">View all</button>
           </div>
           <div class="card-body" style="padding:0 20px">
-            <div class="contract-row">
-              <div class="av" style="background:#d1fae5;color:#065f46">AN</div>
-              <div class="cr-info"><div class="cr-title">UI/UX Redesign — Dashboard</div><div class="cr-sub">Anika Nkosi · Hourly · Active</div></div>
-              <div class="cr-amt">$90/hr<span>34.5 hrs logged</span></div>
-            </div>
-            <div class="contract-row">
-              <div class="av" style="background:#dbeafe;color:#1e40af">JK</div>
-              <div class="cr-info"><div class="cr-title">Backend API Development</div><div class="cr-sub">James Kowalski · Fixed · Milestone 2/3</div></div>
-              <div class="cr-amt">$6,500<span>$4,200 released</span></div>
-            </div>
-            <div class="contract-row">
-              <div class="av" style="background:#fef3c7;color:#92400e">LT</div>
-              <div class="cr-info"><div class="cr-title">SEO Strategy & Content</div><div class="cr-sub">Lena Thornton · Hourly · Active</div></div>
-              <div class="cr-amt">$65/hr<span>22.0 hrs logged</span></div>
-            </div>
-            <div class="contract-row">
-              <div class="av" style="background:#ede9fe;color:#5b21b6">MP</div>
-              <div class="cr-info"><div class="cr-title">AI Chatbot Integration</div><div class="cr-sub">Marcus Patel · Fixed · Milestone 1/2</div></div>
-              <div class="cr-amt">$2,200<span>$1,100 released</span></div>
-            </div>
+            <?php if (empty($activeContracts)): ?>
+                <div style="padding:20px;text-align:center;color:var(--uw-gray)">No active contracts found.</div>
+            <?php else: ?>
+                <?php foreach ($activeContracts as $c): ?>
+                <div class="contract-row">
+                  <div class="av" style="background:var(--uw-green-light);color:var(--uw-green)"><?php echo strtoupper(substr($c['freelancer_name'], 0, 2)); ?></div>
+                  <div class="cr-info">
+                    <div class="cr-title"><?php echo htmlspecialchars($c['job_title']); ?></div>
+                    <div class="cr-sub"><?php echo htmlspecialchars($c['freelancer_name']); ?> · <?php echo ucfirst($c['contract_type']); ?> · Active</div>
+                  </div>
+                  <div class="cr-amt">$<?php echo number_format($c['amount']); ?><?php echo $c['contract_type'] === 'hourly' ? '/hr' : ''; ?></div>
+                </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
           </div>
         </div>
 
@@ -166,36 +265,20 @@ if(isset($user['is_verified']) && $user['is_verified']) $vStatus = 'approved';
             <button class="btn btn-w btn-sm" onclick="showPage('messages',document.querySelector('[onclick*=messages]'))">View all</button>
           </div>
           <div class="card-body" style="padding:6px 12px">
-            <div class="msg-item unread" onclick="openModal('msg-anika')">
-              <div class="av" style="background:#d1fae5;color:#065f46">AN</div>
-              <div class="msg-meta">
-                <div class="msg-name">Anika Nkosi<span class="msg-time">10 min ago</span></div>
-                <div class="msg-text">I've completed the first set of screens — ready for your review!</div>
-              </div>
-              <div class="msg-dot"></div>
-            </div>
-            <div class="msg-item unread" onclick="openModal('msg-james')">
-              <div class="av" style="background:#dbeafe;color:#1e40af">JK</div>
-              <div class="msg-meta">
-                <div class="msg-name">James Kowalski<span class="msg-time">2 hrs ago</span></div>
-                <div class="msg-text">Milestone 2 is done — all tests passing. Please review and release.</div>
-              </div>
-              <div class="msg-dot"></div>
-            </div>
-            <div class="msg-item" onclick="toast('Message','Opening conversation with Lena Thornton')">
-              <div class="av" style="background:#fef3c7;color:#92400e">LT</div>
-              <div class="msg-meta">
-                <div class="msg-name">Lena Thornton<span class="msg-time">Yesterday</span></div>
-                <div class="msg-text">Here's the Q2 keyword strategy — let me know your thoughts</div>
-              </div>
-            </div>
-            <div class="msg-item" onclick="toast('Support','Opening Upwork support message')">
-              <div class="av" style="background:var(--uw-green-light);color:var(--uw-green)">UW</div>
-              <div class="msg-meta">
-                <div class="msg-name">Upwork Support<span class="msg-time">2 days ago</span></div>
-                <div class="msg-text">Your dispute has been resolved in your favour.</div>
-              </div>
-            </div>
+            <?php if (empty($recentMessages)): ?>
+                <div style="padding:20px;text-align:center;color:var(--uw-gray)">No messages found.</div>
+            <?php else: ?>
+                <?php foreach ($recentMessages as $m): ?>
+                <div class="msg-item <?php echo $m['is_read'] ? '' : 'unread'; ?>" onclick="showPage('messages',document.querySelector('[onclick*=messages]'))">
+                  <div class="av" style="background:var(--uw-green-light);color:var(--uw-green)"><?php echo strtoupper(substr($m['sender_name'], 0, 2)); ?></div>
+                  <div class="msg-meta">
+                    <div class="msg-name"><?php echo htmlspecialchars($m['sender_name']); ?><span class="msg-time"><?php echo date('M j', strtotime($m['created_at'])); ?></span></div>
+                    <div class="msg-text"><?php echo htmlspecialchars($m['message']); ?></div>
+                  </div>
+                  <?php if (!$m['is_read']): ?><div class="msg-dot"></div><?php endif; ?>
+                </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
           </div>
         </div>
       </div>
@@ -206,41 +289,29 @@ if(isset($user['is_verified']) && $user['is_verified']) $vStatus = 'approved';
         <button class="sec-link" onclick="showPage('jobs',document.querySelector('[onclick*=jobs]'))">View all jobs →</button>
       </div>
 
-      <div class="job-card" onclick="openModal('job-1')">
-        <div class="job-card-ico">🖥️</div>
-        <div style="flex:1">
-          <h4>Senior React Developer — Analytics Dashboard</h4>
-          <p>Build interactive data visualizations, real-time WebSocket charts, and a filterable data table for our internal analytics platform.</p>
-          <div class="job-meta">
-            <span class="jm g">$8,000–$12,000</span>
-            <span class="jm">Fixed price</span>
-            <span class="jm">Remote</span>
-            <span class="jm">8 proposals</span>
+      <?php if (empty($openJobs)): ?>
+          <div class="job-card" style="justify-content:center;color:var(--uw-gray)">You have no open job posts at the moment.</div>
+      <?php else: ?>
+          <?php foreach ($openJobs as $j): ?>
+          <div class="job-card" onclick="showPage('jobs',document.querySelector('[onclick*=jobs]'))">
+            <div class="job-card-ico">📄</div>
+            <div style="flex:1">
+              <h4><?php echo htmlspecialchars($j['title']); ?></h4>
+              <p><?php echo htmlspecialchars(substr($j['description'], 0, 150)); ?>...</p>
+              <div class="job-meta">
+                <span class="jm g">$<?php echo number_format($j['budget']); ?></span>
+                <span class="jm"><?php echo ucfirst($j['budget_type']); ?> price</span>
+                <span class="jm"><?php echo $j['category']; ?></span>
+                <span class="jm"><?php echo $j['proposal_count']; ?> proposals</span>
+              </div>
+            </div>
+            <div style="text-align:right;flex-shrink:0">
+              <span class="badge b-green"><?php echo ucfirst($j['status']); ?></span>
+              <div style="font-size:11px;color:var(--uw-gray);margin-top:6px">Posted <?php echo date('M j', strtotime($j['created_at'])); ?></div>
+            </div>
           </div>
-        </div>
-        <div style="text-align:right;flex-shrink:0">
-          <span class="badge b-green">Open</span>
-          <div style="font-size:11px;color:var(--uw-gray);margin-top:6px">Posted 2 days ago</div>
-        </div>
-      </div>
-
-      <div class="job-card" onclick="openModal('job-2')">
-        <div class="job-card-ico">🎨</div>
-        <div style="flex:1">
-          <h4>Brand Designer — Full Identity Redesign</h4>
-          <p>Seeking an experienced brand designer for logo, color system, typography, and brand guidelines for our 2026 rebrand.</p>
-          <div class="job-meta">
-            <span class="jm g">$3,500–$6,000</span>
-            <span class="jm">Fixed price</span>
-            <span class="jm">Remote</span>
-            <span class="jm">4 proposals</span>
-          </div>
-        </div>
-        <div style="text-align:right;flex-shrink:0">
-          <span class="badge b-green">Open</span>
-          <div style="font-size:11px;color:var(--uw-gray);margin-top:6px">Posted 5 days ago</div>
-        </div>
-      </div>
+          <?php endforeach; ?>
+      <?php endif; ?>
 
       <!-- Spend Chart -->
       <div class="card" style="margin-top:6px">
@@ -277,7 +348,7 @@ if(isset($user['is_verified']) && $user['is_verified']) $vStatus = 'approved';
       <div class="pg-header">
         <div>
           <div class="pg-title">My Job Posts</div>
-          <div class="pg-sub">3 open · 1 paused · 12 closed</div>
+          <div class="pg-sub"><?php echo $jobCounts['open']; ?> open · <?php echo $jobCounts['paused']; ?> paused · <?php echo $jobCounts['closed']; ?> closed</div>
         </div>
         <button class="btn btn-g btn-lg" onclick="openModal('post-job')">+ Post a New Job</button>
       </div>
@@ -291,11 +362,21 @@ if(isset($user['is_verified']) && $user['is_verified']) $vStatus = 'approved';
         <table class="tbl">
           <thead><tr><th>Job Title</th><th>Type</th><th>Budget</th><th>Proposals</th><th>Posted</th><th>Status</th><th>Action</th></tr></thead>
           <tbody>
-            <tr><td class="cl" onclick="openModal('job-1')">Senior React Developer — Analytics Dashboard</td><td>Fixed</td><td>$8,000–$12,000</td><td><strong style="color:var(--uw-green)">8</strong></td><td>May 12</td><td><span class="badge b-green">Open</span></td><td><button class="btn btn-w btn-sm" onclick="openModal('job-1')">View</button></td></tr>
-            <tr><td class="cl" onclick="openModal('job-2')">Brand Designer — Full Identity Redesign</td><td>Fixed</td><td>$3,500–$6,000</td><td><strong style="color:var(--uw-green)">4</strong></td><td>May 9</td><td><span class="badge b-green">Open</span></td><td><button class="btn btn-w btn-sm" onclick="openModal('job-2')">View</button></td></tr>
-            <tr><td class="cl" onclick="toast('Job opened','SEO & Content Strategist')">SEO & Content Strategist (Ongoing)</td><td>Hourly</td><td>$55–$80/hr</td><td><strong style="color:var(--uw-green)">12</strong></td><td>May 7</td><td><span class="badge b-green">Open</span></td><td><button class="btn btn-w btn-sm" onclick="toast('Job','Viewing SEO Strategist post')">View</button></td></tr>
-            <tr><td class="cl" onclick="toast('Job','Viewing paused job')">AI Chatbot — LLM Integration</td><td>Fixed</td><td>$8,000–$15,000</td><td>7</td><td>Apr 28</td><td><span class="badge b-yellow">Paused</span></td><td><button class="btn btn-w btn-sm" onclick="toast('Job resumed','AI Chatbot job is now open again')">Resume</button></td></tr>
-            <tr><td>UI/UX Freelancer for Mobile App</td><td>Fixed</td><td>$5,000</td><td>22</td><td>Mar 15</td><td><span class="badge b-gray">Closed</span></td><td><button class="btn btn-w btn-sm" onclick="toast('Job reposted','New copy created as draft')">Repost</button></td></tr>
+            <?php if (empty($allJobs)): ?>
+                <tr><td colspan="7" style="text-align:center;padding:20px;color:var(--uw-gray)">No job posts found.</td></tr>
+            <?php else: ?>
+                <?php foreach ($allJobs as $aj): ?>
+                <tr>
+                  <td class="cl" onclick="toast('Job Details','Viewing <?php echo htmlspecialchars($aj['title']); ?>')"><?php echo htmlspecialchars($aj['title']); ?></td>
+                  <td><?php echo ucfirst($aj['budget_type']); ?></td>
+                  <td>$<?php echo number_format($aj['budget']); ?></td>
+                  <td><strong style="color:var(--uw-green)"><?php echo $aj['proposal_count']; ?></strong></td>
+                  <td><?php echo date('M j', strtotime($aj['created_at'])); ?></td>
+                  <td><span class="badge b-<?php echo ($aj['status'] === 'open' ? 'green' : ($aj['status'] === 'paused' ? 'yellow' : 'gray')); ?>"><?php echo ucfirst($aj['status']); ?></span></td>
+                  <td><button class="btn btn-w btn-sm" onclick="toast('Job','Viewing details')">View</button></td>
+                </tr>
+                <?php endforeach; ?>
+            <?php endif; ?>
           </tbody>
         </table>
       </div>
@@ -306,89 +387,44 @@ if(isset($user['is_verified']) && $user['is_verified']) $vStatus = 'approved';
       <div class="pg-header">
         <div>
           <div class="pg-title">Proposals</div>
-          <div class="pg-sub">12 new proposals across 3 jobs</div>
+          <div class="pg-sub"><?php echo count($allProposals); ?> new proposals waiting for review</div>
         </div>
-        <select style="padding:8px 14px;border:1.5px solid var(--uw-border);border-radius:50px;font-size:13px;font-family:inherit;color:var(--uw-dark);background:white;outline:none" onchange="toast('Filter','Showing proposals for selected job')">
-          <option>All Jobs</option><option>React Developer</option><option>Brand Designer</option><option>SEO Strategist</option>
-        </select>
       </div>
       <div class="tab-bar">
-        <div class="tab on" onclick="setTab(this)">New (12)</div>
-        <div class="tab" onclick="setTab(this)">Shortlisted (3)</div>
+        <div class="tab on" onclick="setTab(this)">New (<?php echo count($allProposals); ?>)</div>
+        <div class="tab" onclick="setTab(this)">Shortlisted (0)</div>
         <div class="tab" onclick="setTab(this)">Archived</div>
       </div>
 
-      <div class="prop-card" onclick="openModal('prop-anika')">
-        <div class="prop-top">
-          <div class="av" style="background:#d1fae5;color:#065f46;width:42px;height:42px;font-size:13px">AN</div>
-          <div class="prop-info">
-            <h4>Anika Nkosi <span class="uw-level-badge lvl-top-rated-plus">✦ Top Rated Plus</span></h4>
-            <p>UI/UX Designer · 127 reviews · ★ 5.0 · $90/hr · Berlin, Germany</p>
+      <?php if (empty($allProposals)): ?>
+          <div class="card" style="padding:40px;text-align:center;color:var(--uw-gray)">No pending proposals found.</div>
+      <?php else: ?>
+          <?php foreach ($allProposals as $p): ?>
+          <div class="prop-card" onclick="toast('Proposal','Viewing proposal details')">
+            <div class="prop-top">
+              <div class="av" style="background:var(--uw-green-light);color:var(--uw-green);width:42px;height:42px;font-size:13px"><?php echo strtoupper(substr($p['freelancer_name'], 0, 2)); ?></div>
+              <div class="prop-info">
+                <h4><?php echo htmlspecialchars($p['freelancer_name']); ?></h4>
+                <p>Freelancer · 0 reviews · ★ 0.0 · $0/hr</p>
+              </div>
+              <div style="margin-left:auto;text-align:right;flex-shrink:0">
+                <div class="prop-rate">$<?php echo number_format($p['bid_amount']); ?></div>
+                <div style="font-size:11px;color:var(--uw-gray);margin-top:2px">For: <?php echo htmlspecialchars($p['job_title']); ?></div>
+              </div>
+            </div>
+            <div class="prop-body">"<?php echo htmlspecialchars(substr($p['cover_letter'], 0, 200)); ?>..."</div>
+            <div class="prop-foot">
+              <div style="font-size:11.5px;color:var(--uw-gray)">Submitted <?php echo date('M j', strtotime($p['created_at'])); ?></div>
+              <div class="prop-actions">
+                <button class="btn btn-w btn-sm" onclick="event.stopPropagation();toast('Archived','Proposal archived')">Archive</button>
+                <button class="btn btn-o btn-sm" onclick="event.stopPropagation();toast('Shortlisted!','Freelancer added to your shortlist')">Shortlist</button>
+                <button class="btn btn-w btn-sm" onclick="event.stopPropagation();toast('Message','Chat feature coming soon')">💬 Message</button>
+                <button class="btn btn-g btn-sm" onclick="event.stopPropagation();hireFreelancer(<?php echo $p['id']; ?>)">Hire →</button>
+              </div>
+            </div>
           </div>
-          <div style="margin-left:auto;text-align:right;flex-shrink:0">
-            <div class="prop-rate">$5,800<span> fixed</span></div>
-            <div style="font-size:11px;color:var(--uw-gray);margin-top:2px">For: Brand Designer</div>
-          </div>
-        </div>
-        <div class="prop-body">"I specialize in brand identity systems and have redesigned 40+ brands across fintech and SaaS. I'd love to bring your 2026 brand vision to life with a comprehensive system that scales across every touchpoint."</div>
-        <div class="prop-foot">
-          <div style="font-size:11.5px;color:var(--uw-gray)">Submitted 1 hr ago · Est. delivery: 7 days</div>
-          <div class="prop-actions">
-            <button class="btn btn-w btn-sm" onclick="event.stopPropagation();toast('Archived','Proposal archived')">Archive</button>
-            <button class="btn btn-o btn-sm" onclick="event.stopPropagation();toast('Shortlisted!','Anika added to your shortlist')">Shortlist</button>
-            <button class="btn btn-w btn-sm" onclick="event.stopPropagation();openModal('dm-anika')">💬 Message</button>
-            <button class="btn btn-g btn-sm" onclick="event.stopPropagation();openModal('hire-anika')">Hire →</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="prop-card" onclick="openModal('prop-james')">
-        <div class="prop-top">
-          <div class="av" style="background:#dbeafe;color:#1e40af;width:42px;height:42px;font-size:13px">JK</div>
-          <div class="prop-info">
-            <h4>James Kowalski <span class="uw-level-badge lvl-expert-vetted">★ Expert-Vetted</span></h4>
-            <p>Full Stack Engineer · 89 reviews · ★ 4.9 · $130/hr · Toronto, Canada</p>
-          </div>
-          <div style="margin-left:auto;text-align:right;flex-shrink:0">
-            <div class="prop-rate">$130<span>/hr</span></div>
-            <div style="font-size:11px;color:var(--uw-gray);margin-top:2px">For: React Developer</div>
-          </div>
-        </div>
-        <div class="prop-body">"I've built 6 real-time analytics dashboards in the last 18 months, including one for a 50,000-user SaaS platform. I can start immediately and deliver milestone 1 within 5 business days."</div>
-        <div class="prop-foot">
-          <div style="font-size:11.5px;color:var(--uw-gray)">Submitted 3 hrs ago · Est. delivery: 14 days</div>
-          <div class="prop-actions">
-            <button class="btn btn-w btn-sm" onclick="event.stopPropagation();toast('Archived','Proposal archived')">Archive</button>
-            <button class="btn btn-o btn-sm" onclick="event.stopPropagation();toast('Shortlisted!','James added to your shortlist')">Shortlist</button>
-            <button class="btn btn-w btn-sm" onclick="event.stopPropagation();openModal('dm-james')">💬 Message</button>
-            <button class="btn btn-g btn-sm" onclick="event.stopPropagation();openModal('hire-james')">Hire →</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="prop-card" onclick="toast('Proposal','Opening Sofia Reyes proposal')">
-        <div class="prop-top">
-          <div class="av" style="background:#fef3c7;color:#92400e;width:42px;height:42px;font-size:13px">SR</div>
-          <div class="prop-info">
-            <h4>Sofia Reyes <span class="uw-level-badge lvl-rising">↑ Rising Talent</span></h4>
-            <p>AI/ML Engineer · 22 reviews · ★ 4.7 · $85/hr · Mexico City</p>
-          </div>
-          <div style="margin-left:auto;text-align:right;flex-shrink:0">
-            <div class="prop-rate">$10,500<span> fixed</span></div>
-            <div style="font-size:11px;color:var(--uw-gray);margin-top:2px">For: React Developer</div>
-          </div>
-        </div>
-        <div class="prop-body">"I have deep experience in LLM integrations and RAG architectures. For your analytics project, I'd combine React on the frontend with a Python FastAPI backend to power real-time AI insights."</div>
-        <div class="prop-foot">
-          <div style="font-size:11.5px;color:var(--uw-gray)">Submitted 5 hrs ago · Est. delivery: 12 days</div>
-          <div class="prop-actions">
-            <button class="btn btn-w btn-sm" onclick="event.stopPropagation();toast('Archived','Proposal archived')">Archive</button>
-            <button class="btn btn-o btn-sm" onclick="event.stopPropagation();toast('Shortlisted!','Sofia added to your shortlist')">Shortlist</button>
-            <button class="btn btn-w btn-sm" onclick="event.stopPropagation();openModal('dm-sofia')">💬 Message</button>
-            <button class="btn btn-g btn-sm" onclick="event.stopPropagation();toast('Hire flow','Opening contract setup for Sofia')">Hire →</button>
-          </div>
-        </div>
-      </div>
+          <?php endforeach; ?>
+      <?php endif; ?>
     </div>
 
     <!-- ══ CONTRACTS PAGE ══ -->
@@ -396,56 +432,34 @@ if(isset($user['is_verified']) && $user['is_verified']) $vStatus = 'approved';
       <div class="pg-header">
         <div>
           <div class="pg-title">Contracts</div>
-          <div class="pg-sub">8 active contracts</div>
+          <div class="pg-sub"><?php echo $contractCounts['active']; ?> active contracts</div>
         </div>
       </div>
       <div class="tab-bar">
-        <div class="tab on" onclick="setTab(this)">Active (8)</div>
-        <div class="tab" onclick="setTab(this)">Completed (24)</div>
+        <div class="tab on" onclick="setTab(this)">Active (<?php echo $contractCounts['active']; ?>)</div>
+        <div class="tab" onclick="setTab(this)">Completed (<?php echo $contractCounts['completed']; ?>)</div>
         <div class="tab" onclick="setTab(this)">Paused</div>
       </div>
+
       <div class="card" style="margin-bottom:0;overflow:auto">
         <table class="tbl">
-          <thead><tr><th>Freelancer</th><th>Role</th><th>Type</th><th>Amount</th><th>Progress</th><th>Started</th><th>Actions</th></tr></thead>
+          <thead><tr><th>Freelancer</th><th>Job Title</th><th>Type</th><th>Budget</th><th>Start Date</th><th>Status</th><th>Action</th></tr></thead>
           <tbody>
-            <tr>
-              <td><div style="display:flex;align-items:center;gap:10px"><div class="av" style="background:#d1fae5;color:#065f46">AN</div><div><div style="font-weight:600">Anika Nkosi</div><div style="font-size:11px;color:var(--uw-gray)">UI/UX Designer</div></div></div></td>
-              <td>Dashboard Redesign</td><td><span class="badge b-blue">Hourly</span></td>
-              <td><div style="font-weight:700">$90/hr</div><div style="font-size:11px;color:var(--uw-gray)">34.5 hrs logged</div></td>
-              <td><div style="font-size:11.5px;color:var(--uw-gray);margin-bottom:4px">Active · No end date</div><div class="progress-bar"><div class="progress-fill" style="width:60%"></div></div></td>
-              <td>Apr 28</td>
-              <td><button class="btn btn-w btn-sm" onclick="openModal('contract-anika')">Details</button></td>
-            </tr>
-            <tr>
-              <td><div style="display:flex;align-items:center;gap:10px"><div class="av" style="background:#dbeafe;color:#1e40af">JK</div><div><div style="font-weight:600">James Kowalski</div><div style="font-size:11px;color:var(--uw-gray)">Full Stack Engineer</div></div></div></td>
-              <td>Backend API Dev</td><td><span class="badge b-purple">Fixed</span></td>
-              <td><div style="font-weight:700">$6,500</div><div style="font-size:11px;color:var(--uw-gray)">$4,200 released</div></td>
-              <td><div style="font-size:11.5px;color:var(--uw-gray);margin-bottom:4px">Milestone 2 of 3</div><div class="progress-bar"><div class="progress-fill" style="width:66%"></div></div></td>
-              <td>May 1</td>
-              <td style="display:flex;gap:6px;flex-wrap:wrap">
-                <button class="btn btn-o btn-sm" onclick="openModal('fund-milestone-james')">Fund M3 $2,300</button>
-                <button class="btn btn-g btn-sm" onclick="toast('Released ✓','$2,300 released to James')">Release $2,300</button>
-              </td>
-            </tr>
-            <tr>
-              <td><div style="display:flex;align-items:center;gap:10px"><div class="av" style="background:#fef3c7;color:#92400e">LT</div><div><div style="font-weight:600">Lena Thornton</div><div style="font-size:11px;color:var(--uw-gray)">SEO Strategist</div></div></div></td>
-              <td>SEO & Content</td><td><span class="badge b-blue">Hourly</span></td>
-              <td><div style="font-weight:700">$65/hr</div><div style="font-size:11px;color:var(--uw-gray)">22 hrs logged</div></td>
-              <td><div style="font-size:11.5px;color:var(--uw-gray);margin-bottom:4px">Active · Ongoing</div><div class="progress-bar"><div class="progress-fill" style="width:45%"></div></div></td>
-              <td>Apr 15</td>
-              <td><button class="btn btn-w btn-sm" onclick="openModal('contract-lena')">Details</button></td>
-            </tr>
-            <tr>
-              <td><div style="display:flex;align-items:center;gap:10px"><div class="av" style="background:#ede9fe;color:#5b21b6">MP</div><div><div style="font-weight:600">Marcus Patel</div><div style="font-size:11px;color:var(--uw-gray)">AI/ML Engineer</div></div></div></td>
-              <td>AI Chatbot Build</td><td><span class="badge b-purple">Fixed</span></td>
-              <td><div style="font-weight:700">$2,200</div><div style="font-size:11px;color:var(--uw-gray)">$1,100 released</div></td>
-              <td><div style="font-size:11.5px;color:var(--uw-gray);margin-bottom:4px">Milestone 1 of 2</div><div class="progress-bar"><div class="progress-fill" style="width:50%"></div></div></td>
-              <td>May 5</td>
-              <td style="display:flex;gap:6px;flex-wrap:wrap">
-                <button class="btn btn-o btn-sm" onclick="openModal('fund-milestone-marcus')">Fund M2 $1,100</button>
-                <button class="btn btn-g btn-sm" onclick="toast('Released ✓','$1,100 released to Marcus')">Release $1,100</button>
-              </td>
-            </tr>
+            <?php if (empty($allContracts)): ?>
+                <tr><td colspan="7" style="text-align:center;padding:20px;color:var(--uw-gray)">No contracts found.</td></tr>
+            <?php else: ?>
+                <?php foreach ($allContracts as $ac): ?>
+                <tr>
+                  <td class="cl" onclick="toast('Freelancer','Viewing profile')"><?php echo htmlspecialchars($ac['freelancer_name']); ?></td>
+                  <td><?php echo htmlspecialchars($ac['job_title']); ?></td>
+                  <td><?php echo ucfirst($ac['contract_type']); ?></td>
+                  <td>$<?php echo number_format($ac['amount']); ?></td>
+                  <td><?php echo date('M j, Y', strtotime($ac['start_date'])); ?></td>
+                  <td><span class="badge b-<?php echo ($ac['status'] === 'active' ? 'green' : 'gray'); ?>"><?php echo ucfirst($ac['status']); ?></span></td>
+                  <td><button class="btn btn-w btn-sm" onclick="toast('Contract','Viewing details')">Manage</button></td>
+                </tr>
+                <?php endforeach; ?>
+            <?php endif; ?>
           </tbody>
         </table>
       </div>
@@ -590,11 +604,20 @@ if(isset($user['is_verified']) && $user['is_verified']) $vStatus = 'approved';
         <table class="tbl">
           <thead><tr><th>Date</th><th>Description</th><th>Freelancer</th><th>Type</th><th>Amount</th><th>Status</th></tr></thead>
           <tbody>
-            <tr><td>May 12, 2026</td><td>Milestone 2 Release</td><td>James Kowalski</td><td><span class="badge b-purple">Fixed</span></td><td style="font-weight:700;color:#dc2626">−$2,100</td><td><span class="badge b-green">Paid</span></td></tr>
-            <tr><td>May 10, 2026</td><td>Weekly Billing (34.5 hrs)</td><td>Anika Nkosi</td><td><span class="badge b-blue">Hourly</span></td><td style="font-weight:700;color:#dc2626">−$3,105</td><td><span class="badge b-green">Paid</span></td></tr>
-            <tr><td>May 7, 2026</td><td>Weekly Billing (22 hrs)</td><td>Lena Thornton</td><td><span class="badge b-blue">Hourly</span></td><td style="font-weight:700;color:#dc2626">−$1,430</td><td><span class="badge b-green">Paid</span></td></tr>
-            <tr><td>May 5, 2026</td><td>Milestone 1 Release</td><td>Marcus Patel</td><td><span class="badge b-purple">Fixed</span></td><td style="font-weight:700;color:#dc2626">−$1,100</td><td><span class="badge b-green">Paid</span></td></tr>
-            <tr><td>May 1, 2026</td><td>Funds Added via Visa ••4821</td><td>—</td><td><span class="badge b-teal">Deposit</span></td><td style="font-weight:700;color:#14a800">+$5,000</td><td><span class="badge b-green">Completed</span></td></tr>
+            <?php if(empty($clientTransactions)): ?>
+                <tr><td colspan="6" style="text-align:center;padding:20px;color:var(--uw-gray)">No transactions found.</td></tr>
+            <?php else: ?>
+                <?php foreach($clientTransactions as $ct): ?>
+                <tr>
+                  <td><?php echo date('M j, Y', strtotime($ct['created_at'])); ?></td>
+                  <td>Payment for contract</td>
+                  <td><?php echo htmlspecialchars($ct['freelancer_name']); ?></td>
+                  <td><span class="badge b-purple">Fixed</span></td>
+                  <td style="font-weight:700;color:#dc2626">−$<?php echo number_format($ct['amount']); ?></td>
+                  <td><span class="badge b-green"><?php echo ucfirst($ct['status']); ?></span></td>
+                </tr>
+                <?php endforeach; ?>
+            <?php endif; ?>
           </tbody>
         </table>
       </div>
@@ -613,9 +636,9 @@ if(isset($user['is_verified']) && $user['is_verified']) $vStatus = 'approved';
       </div>
 
       <div class="g3" style="margin-bottom:18px">
-        <div class="report-metric"><div class="rm-lbl">Total Spent (All Time)</div><div class="rm-val">$38,450</div></div>
-        <div class="report-metric"><div class="rm-lbl">Contracts Completed</div><div class="rm-val">24</div></div>
-        <div class="report-metric"><div class="rm-lbl">Avg Spend / Contract</div><div class="rm-val">$1,602</div></div>
+        <div class="report-metric"><div class="rm-lbl">Total Spent (All Time)</div><div class="rm-val">$<?php echo number_format($reportStats['total_spent_all_time'] ?? 0); ?></div></div>
+        <div class="report-metric"><div class="rm-lbl">Contracts Completed</div><div class="rm-val"><?php echo $reportStats['contracts_completed']; ?></div></div>
+        <div class="report-metric"><div class="rm-lbl">Avg Spend / Contract</div><div class="rm-val">$<?php echo $reportStats['contracts_completed'] > 0 ? number_format($reportStats['total_spent_all_time'] / $reportStats['contracts_completed']) : 0; ?></div></div>
       </div>
 
       <div class="g2">
@@ -634,11 +657,11 @@ if(isset($user['is_verified']) && $user['is_verified']) $vStatus = 'approved';
           <div class="card-head"><h3>Account Summary</h3></div>
           <div class="card-body">
             <table class="tbl" style="font-size:13px">
-              <tr><td style="color:var(--uw-gray)">Total jobs posted</td><td><strong>16</strong></td></tr>
-              <tr><td style="color:var(--uw-gray)">Freelancers hired</td><td><strong>12</strong></td></tr>
-              <tr><td style="color:var(--uw-gray)">Contracts completed</td><td><strong>24</strong></td></tr>
-              <tr><td style="color:var(--uw-gray)">Total spent (all time)</td><td><strong>$38,450</strong></td></tr>
-              <tr><td style="color:var(--uw-gray)">Total hours tracked</td><td><strong>812 hrs</strong></td></tr>
+              <tr><td style="color:var(--uw-gray)">Total jobs posted</td><td><strong><?php echo $reportStats['total_jobs_posted']; ?></strong></td></tr>
+              <tr><td style="color:var(--uw-gray)">Freelancers hired</td><td><strong><?php echo $reportStats['freelancers_hired']; ?></strong></td></tr>
+              <tr><td style="color:var(--uw-gray)">Contracts completed</td><td><strong><?php echo $reportStats['contracts_completed']; ?></strong></td></tr>
+              <tr><td style="color:var(--uw-gray)">Total spent (all time)</td><td><strong>$<?php echo number_format($reportStats['total_spent_all_time'] ?? 0); ?></strong></td></tr>
+              <tr><td style="color:var(--uw-gray)">Total hours tracked</td><td><strong>0 hrs</strong></td></tr>
               <tr><td style="color:var(--uw-gray)">Disputes filed</td><td><strong style="color:var(--uw-green)">0</strong></td></tr>
             </table>
           </div>

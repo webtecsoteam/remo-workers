@@ -154,55 +154,39 @@ function insertQuickReply(initials, text){
 
 const MODALS = {
   'post-job':{t:'Post a New Job',b:`
-    <div class="fg"><label>Job Title</label><input type="text" placeholder="e.g. Senior React Developer for Analytics Dashboard"></div>
+    <div id="pj-form">
+      <div class="fg"><label>Job Title</label><input type="text" id="pj-title" placeholder="e.g. Senior React Developer for Analytics Dashboard"></div>
 
-    <div class="fg">
-      <label>Category</label>
-      <select id="pj-cat" onchange="updateSubcats()">
-        <option value="">— Select a category —</option>
-        <option value="Accounting &amp; Consulting">Accounting &amp; Consulting</option>
-        <option value="Admin Support">Admin Support</option>
-        <option value="Customer Service">Customer Service</option>
-        <option value="Data Science &amp; Analytics">Data Science &amp; Analytics</option>
-        <option value="Design &amp; Creative">Design &amp; Creative</option>
-        <option value="Engineering &amp; Architecture">Engineering &amp; Architecture</option>
-        <option value="IT &amp; Networking">IT &amp; Networking</option>
-        <option value="Legal">Legal</option>
-        <option value="Sales &amp; Marketing">Sales &amp; Marketing</option>
-        <option value="Translation">Translation</option>
-        <option value="Web, Mobile &amp; Software Dev">Web, Mobile &amp; Software Dev</option>
-        <option value="Writing">Writing</option>
-      </select>
-    </div>
+      <div class="fg">
+        <label>Category</label>
+        <select id="pj-cat" onchange="updateSubcats()">
+          <option value="">— Select a category —</option>
+          <option value="Accounting &amp; Consulting">Accounting &amp; Consulting</option>
+          <option value="Admin Support">Admin Support</option>
+          <option value="Customer Service">Customer Service</option>
+          <option value="Data Science &amp; Analytics">Data Science &amp; Analytics</option>
+          <option value="Design &amp; Creative">Design &amp; Creative</option>
+          <option value="Engineering &amp; Architecture">Engineering &amp; Architecture</option>
+          <option value="IT &amp; Networking">IT &amp; Networking</option>
+          <option value="Legal">Legal</option>
+          <option value="Sales &amp; Marketing">Sales &amp; Marketing</option>
+          <option value="Translation">Translation</option>
+          <option value="Web, Mobile &amp; Software Dev">Web, Mobile &amp; Software Dev</option>
+          <option value="Writing">Writing</option>
+        </select>
+      </div>
 
-    <div class="fg" id="pj-subcat-wrap" style="display:none">
-      <label>Subcategory</label>
-      <select id="pj-subcat" onchange="updateSpecialties()">
-        <option value="">— Select a subcategory —</option>
-      </select>
-    </div>
+      <div class="fg"><label>Billing Type</label><select id="pj-billing-type" onchange="updatePostJobFields()"><option value="fixed">Fixed Price</option><option value="hourly">Hourly Rate</option></select></div>
+      
+      <div class="fg"><label>Budget ($)</label><input type="number" id="pj-budget" placeholder="e.g. 5000"></div>
 
-    <div class="fg" id="pj-spec-wrap" style="display:none">
-      <label>Specialty</label>
-      <select id="pj-spec">
-        <option value="">— Select a specialty —</option>
-      </select>
+      <div class="fg"><label>Project Description</label><textarea id="pj-desc" placeholder="Describe the scope, goals, and requirements of your project…" style="min-height:100px"></textarea></div>
+      <div class="fg"><label>Required Skills (comma separated)</label><input type="text" id="pj-skills" placeholder="e.g. React, Node.js, TypeScript"></div>
+      
+      <button class="btn btn-g" id="pj-submit-btn" style="width:100%;justify-content:center;margin-top:4px;padding:11px" onclick="submitPostJob()">
+        <span id="pj-btn-text">Post Job →</span>
+      </button>
     </div>
-
-    <div class="fg"><label>Billing Type</label><select id="pj-billing-type" onchange="updatePostJobFields()"><option value="fixed">Fixed Price</option><option value="hourly">Hourly Rate</option><option value="monthly">Monthly Retainer</option></select></div>
-    <div id="pj-fixed-fields">
-      <div class="fg"><label>Budget Range ($)</label><div style="display:flex;gap:10px"><input type="number" placeholder="Min" style="flex:1"><input type="number" placeholder="Max" style="flex:1"></div></div>
-    </div>
-    <div id="pj-hourly-fields" style="display:none">
-      <div class="fg"><label>Hourly Rate Range ($/hr)</label><div style="display:flex;gap:10px"><input type="number" placeholder="Min" style="flex:1"><input type="number" placeholder="Max" style="flex:1"></div></div>
-    </div>
-    <div id="pj-monthly-fields" style="display:none">
-      <div class="fg"><label>Monthly Budget ($/mo)</label><input type="number" placeholder="e.g. 3000"></div>
-    </div>
-    <div class="fg"><label>Project Description</label><textarea placeholder="Describe the scope, goals, and requirements of your project…"></textarea></div>
-    <div class="fg"><label>Required Skills</label><input type="text" placeholder="e.g. React, Node.js, TypeScript, PostgreSQL"></div>
-    <div class="fg"><label>Experience Level</label><select><option>Entry Level</option><option selected>Intermediate</option><option>Expert</option></select></div>
-    <button class="btn btn-g" style="width:100%;justify-content:center;margin-top:4px;padding:11px" onclick="submitPostJob()">Post Job →</button>
   `},
   'job-1':{t:'Senior React Developer — Analytics Dashboard',b:`
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
@@ -621,10 +605,76 @@ function updatePostJobFields(){
     if(el)el.style.display=(k===v)?'block':'none';
   });
 }
-function submitPostJob(){
-  toast('Posted! 🎉','Your job is live — expect proposals soon');
-  closeModal();
+async function submitPostJob(){
+  const title = document.getElementById('pj-title').value.trim();
+  const cat = document.getElementById('pj-cat').value;
+  const type = document.getElementById('pj-billing-type').value;
+  const budget = document.getElementById('pj-budget').value;
+  const desc = document.getElementById('pj-desc').value.trim();
+  const skills = document.getElementById('pj-skills').value.trim();
+
+  if(!title || !cat || !budget || !desc) {
+    return toast('Error', 'Please fill in all required fields');
+  }
+
+  const btn = document.getElementById('pj-submit-btn');
+  const btnText = document.getElementById('pj-btn-text');
+  if(btn) btn.disabled = true;
+  if(btnText) btnText.innerHTML = '<span class="spinner" style="width:16px;height:16px;border-width:2px;margin-right:8px"></span>Posting...';
+
+  const formData = new FormData();
+  formData.append('title', title);
+  formData.append('category', cat);
+  formData.append('budget_type', type);
+  formData.append('budget', budget);
+  formData.append('description', desc);
+  formData.append('skills', skills);
+
+  try {
+    const res = await fetch(BASE_URL + '/actions/post_job.php', {
+      method: 'POST',
+      body: formData
+    });
+    const result = await res.json();
+    if(result.success) {
+      toast('Success! 🎉', 'Your job has been posted.');
+      setTimeout(() => location.reload(), 1500);
+    } else {
+      toast('Error', result.error || 'Failed to post job');
+      if(btn) btn.disabled = false;
+      if(btnText) btnText.innerText = 'Post Job →';
+    }
+  } catch(err) {
+    toast('Error', 'An unexpected error occurred.');
+    if(btn) btn.disabled = false;
+    if(btnText) btnText.innerText = 'Post Job →';
+  }
 }
+async function hireFreelancer(proposalId) {
+  if(!confirm('Are you sure you want to hire this freelancer?')) return;
+  
+  toast('Processing...', 'Setting up your contract');
+  
+  const formData = new FormData();
+  formData.append('proposal_id', proposalId);
+
+  try {
+    const res = await fetch(BASE_URL + '/actions/hire_freelancer.php', {
+      method: 'POST',
+      body: formData
+    });
+    const result = await res.json();
+    if(result.success) {
+      toast('Hired! 🎉', 'Contract created successfully.');
+      setTimeout(() => location.reload(), 1500);
+    } else {
+      toast('Error', result.error || 'Failed to hire freelancer');
+    }
+  } catch(err) {
+    toast('Error', 'An unexpected error occurred.');
+  }
+}
+
 function toggleHireFields(prefix){
   const sel=document.getElementById(prefix+'-contract-type');
   if(!sel)return;

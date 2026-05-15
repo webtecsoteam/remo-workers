@@ -1,0 +1,4583 @@
+{
+  "directed": false,
+  "multigraph": false,
+  "graph": {},
+  "nodes": [
+    {
+      "label": "index.php",
+      "file_type": "code",
+      "source_file": "index.php",
+      "source_location": "L1",
+      "id": "index_php",
+      "community": 14,
+      "norm_label": "index.php"
+    },
+    {
+      "label": "migrate.php",
+      "file_type": "code",
+      "source_file": "migrate.php",
+      "source_location": "L1",
+      "id": "migrate_php",
+      "community": 15,
+      "norm_label": "migrate.php"
+    },
+    {
+      "label": "verification.php",
+      "file_type": "code",
+      "source_file": "home/verification.php",
+      "source_location": "L1",
+      "id": "home_verification_php",
+      "community": 16,
+      "norm_label": "verification.php"
+    },
+    {
+      "label": "index.php",
+      "file_type": "code",
+      "source_file": "home/index.php",
+      "source_location": "L1",
+      "id": "home_index_php",
+      "community": 17,
+      "norm_label": "index.php"
+    },
+    {
+      "label": "header.php",
+      "file_type": "code",
+      "source_file": "home/includes/header.php",
+      "source_location": "L1",
+      "id": "home_includes_header_php",
+      "community": 18,
+      "norm_label": "header.php"
+    },
+    {
+      "label": "footer.php",
+      "file_type": "code",
+      "source_file": "home/includes/footer.php",
+      "source_location": "L1",
+      "id": "home_includes_footer_php",
+      "community": 19,
+      "norm_label": "footer.php"
+    },
+    {
+      "label": "404.php",
+      "file_type": "code",
+      "source_file": "includes/404.php",
+      "source_location": "L1",
+      "id": "includes_404_php",
+      "community": 20,
+      "norm_label": "404.php"
+    },
+    {
+      "label": "config.php",
+      "file_type": "code",
+      "source_file": "includes/config.php",
+      "source_location": "L1",
+      "id": "includes_config_php",
+      "community": 5,
+      "norm_label": "config.php"
+    },
+    {
+      "label": "loadEnv()",
+      "file_type": "code",
+      "source_file": "includes/config.php",
+      "source_location": "L10",
+      "id": "includes_config_loadenv",
+      "community": 5,
+      "norm_label": "loadenv()"
+    },
+    {
+      "label": "env()",
+      "file_type": "code",
+      "source_file": "includes/config.php",
+      "source_location": "L41",
+      "id": "includes_config_env",
+      "community": 5,
+      "norm_label": "env()"
+    },
+    {
+      "label": "getDB()",
+      "file_type": "code",
+      "source_file": "includes/config.php",
+      "source_location": "L78",
+      "id": "includes_config_getdb",
+      "community": 5,
+      "norm_label": "getdb()"
+    },
+    {
+      "label": "baseUrl()",
+      "file_type": "code",
+      "source_file": "includes/config.php",
+      "source_location": "L99",
+      "id": "includes_config_baseurl",
+      "community": 5,
+      "norm_label": "baseurl()"
+    },
+    {
+      "label": "redirect()",
+      "file_type": "code",
+      "source_file": "includes/config.php",
+      "source_location": "L104",
+      "id": "includes_config_redirect",
+      "community": 5,
+      "norm_label": "redirect()"
+    },
+    {
+      "label": "isRoute()",
+      "file_type": "code",
+      "source_file": "includes/config.php",
+      "source_location": "L110",
+      "id": "includes_config_isroute",
+      "community": 5,
+      "norm_label": "isroute()"
+    },
+    {
+      "label": "header.php",
+      "file_type": "code",
+      "source_file": "includes/header.php",
+      "source_location": "L1",
+      "id": "includes_header_php",
+      "community": 21,
+      "norm_label": "header.php"
+    },
+    {
+      "label": "footer.php",
+      "file_type": "code",
+      "source_file": "includes/footer.php",
+      "source_location": "L1",
+      "id": "includes_footer_php",
+      "community": 22,
+      "norm_label": "footer.php"
+    },
+    {
+      "label": "Auth.php",
+      "file_type": "code",
+      "source_file": "includes/classes/Auth.php",
+      "source_location": "L1",
+      "id": "includes_classes_auth_php",
+      "community": 5,
+      "norm_label": "auth.php"
+    },
+    {
+      "label": "Auth",
+      "file_type": "code",
+      "source_file": "includes/classes/Auth.php",
+      "source_location": "L2",
+      "id": "classes_auth_auth",
+      "community": 5,
+      "norm_label": "auth"
+    },
+    {
+      "label": ".register()",
+      "file_type": "code",
+      "source_file": "includes/classes/Auth.php",
+      "source_location": "L3",
+      "id": "classes_auth_auth_register",
+      "community": 5,
+      "norm_label": ".register()"
+    },
+    {
+      "label": ".login()",
+      "file_type": "code",
+      "source_file": "includes/classes/Auth.php",
+      "source_location": "L11",
+      "id": "classes_auth_auth_login",
+      "community": 5,
+      "norm_label": ".login()"
+    },
+    {
+      "label": ".logout()",
+      "file_type": "code",
+      "source_file": "includes/classes/Auth.php",
+      "source_location": "L35",
+      "id": "classes_auth_auth_logout",
+      "community": 5,
+      "norm_label": ".logout()"
+    },
+    {
+      "label": ".user()",
+      "file_type": "code",
+      "source_file": "includes/classes/Auth.php",
+      "source_location": "L47",
+      "id": "classes_auth_auth_user",
+      "community": 2,
+      "norm_label": ".user()"
+    },
+    {
+      "label": ".check()",
+      "file_type": "code",
+      "source_file": "includes/classes/Auth.php",
+      "source_location": "L55",
+      "id": "classes_auth_auth_check",
+      "community": 5,
+      "norm_label": ".check()"
+    },
+    {
+      "label": "api.laravel.php",
+      "file_type": "code",
+      "source_file": "admin/api.laravel.php",
+      "source_location": "L1",
+      "id": "admin_api_laravel_php",
+      "community": 23,
+      "norm_label": "api.laravel.php"
+    },
+    {
+      "label": "UserController.php",
+      "file_type": "code",
+      "source_file": "admin/UserController.php",
+      "source_location": "L1",
+      "id": "admin_usercontroller_php",
+      "community": 2,
+      "norm_label": "usercontroller.php"
+    },
+    {
+      "label": "UserController",
+      "file_type": "code",
+      "source_file": "admin/UserController.php",
+      "source_location": "L9",
+      "id": "admin_usercontroller_usercontroller",
+      "community": 2,
+      "norm_label": "usercontroller"
+    },
+    {
+      "label": ".index()",
+      "file_type": "code",
+      "source_file": "admin/UserController.php",
+      "source_location": "L11",
+      "id": "admin_usercontroller_usercontroller_index",
+      "community": 2,
+      "norm_label": ".index()"
+    },
+    {
+      "label": ".show()",
+      "file_type": "code",
+      "source_file": "admin/UserController.php",
+      "source_location": "L40",
+      "id": "admin_usercontroller_usercontroller_show",
+      "community": 2,
+      "norm_label": ".show()"
+    },
+    {
+      "label": ".update()",
+      "file_type": "code",
+      "source_file": "admin/UserController.php",
+      "source_location": "L52",
+      "id": "admin_usercontroller_usercontroller_update",
+      "community": 2,
+      "norm_label": ".update()"
+    },
+    {
+      "label": ".destroy()",
+      "file_type": "code",
+      "source_file": "admin/UserController.php",
+      "source_location": "L71",
+      "id": "admin_usercontroller_usercontroller_destroy",
+      "community": 2,
+      "norm_label": ".destroy()"
+    },
+    {
+      "label": ".suspend()",
+      "file_type": "code",
+      "source_file": "admin/UserController.php",
+      "source_location": "L90",
+      "id": "admin_usercontroller_usercontroller_suspend",
+      "community": 2,
+      "norm_label": ".suspend()"
+    },
+    {
+      "label": ".activate()",
+      "file_type": "code",
+      "source_file": "admin/UserController.php",
+      "source_location": "L101",
+      "id": "admin_usercontroller_usercontroller_activate",
+      "community": 2,
+      "norm_label": ".activate()"
+    },
+    {
+      "label": ".verify()",
+      "file_type": "code",
+      "source_file": "admin/UserController.php",
+      "source_location": "L112",
+      "id": "admin_usercontroller_usercontroller_verify",
+      "community": 2,
+      "norm_label": ".verify()"
+    },
+    {
+      "label": ".jobs()",
+      "file_type": "code",
+      "source_file": "admin/UserController.php",
+      "source_location": "L123",
+      "id": "admin_usercontroller_usercontroller_jobs",
+      "community": 2,
+      "norm_label": ".jobs()"
+    },
+    {
+      "label": ".payments()",
+      "file_type": "code",
+      "source_file": "admin/UserController.php",
+      "source_location": "L138",
+      "id": "admin_usercontroller_usercontroller_payments",
+      "community": 2,
+      "norm_label": ".payments()"
+    },
+    {
+      "label": "login.php",
+      "file_type": "code",
+      "source_file": "admin/login.php",
+      "source_location": "L1",
+      "id": "admin_login_php",
+      "community": 24,
+      "norm_label": "login.php"
+    },
+    {
+      "label": "index.php",
+      "file_type": "code",
+      "source_file": "admin/index.php",
+      "source_location": "L1",
+      "id": "admin_index_php",
+      "community": 25,
+      "norm_label": "index.php"
+    },
+    {
+      "label": "DashboardController.php",
+      "file_type": "code",
+      "source_file": "admin/DashboardController.php",
+      "source_location": "L1",
+      "id": "admin_dashboardcontroller_php",
+      "community": 2,
+      "norm_label": "dashboardcontroller.php"
+    },
+    {
+      "label": "DashboardController",
+      "file_type": "code",
+      "source_file": "admin/DashboardController.php",
+      "source_location": "L12",
+      "id": "admin_dashboardcontroller_dashboardcontroller",
+      "community": 2,
+      "norm_label": "dashboardcontroller"
+    },
+    {
+      "label": ".stats()",
+      "file_type": "code",
+      "source_file": "admin/DashboardController.php",
+      "source_location": "L14",
+      "id": "admin_dashboardcontroller_dashboardcontroller_stats",
+      "community": 2,
+      "norm_label": ".stats()"
+    },
+    {
+      "label": ".revenueChart()",
+      "file_type": "code",
+      "source_file": "admin/DashboardController.php",
+      "source_location": "L42",
+      "id": "admin_dashboardcontroller_dashboardcontroller_revenuechart",
+      "community": 2,
+      "norm_label": ".revenuechart()"
+    },
+    {
+      "label": ".recentActivity()",
+      "file_type": "code",
+      "source_file": "admin/DashboardController.php",
+      "source_location": "L59",
+      "id": "admin_dashboardcontroller_dashboardcontroller_recentactivity",
+      "community": 2,
+      "norm_label": ".recentactivity()"
+    },
+    {
+      "label": "AuthController.php",
+      "file_type": "code",
+      "source_file": "admin/AuthController.php",
+      "source_location": "L1",
+      "id": "admin_authcontroller_php",
+      "community": 8,
+      "norm_label": "authcontroller.php"
+    },
+    {
+      "label": "AuthController",
+      "file_type": "code",
+      "source_file": "admin/AuthController.php",
+      "source_location": "L12",
+      "id": "admin_authcontroller_authcontroller",
+      "community": 8,
+      "norm_label": "authcontroller"
+    },
+    {
+      "label": ".login()",
+      "file_type": "code",
+      "source_file": "admin/AuthController.php",
+      "source_location": "L14",
+      "id": "admin_authcontroller_authcontroller_login",
+      "community": 8,
+      "norm_label": ".login()"
+    },
+    {
+      "label": ".logout()",
+      "file_type": "code",
+      "source_file": "admin/AuthController.php",
+      "source_location": "L49",
+      "id": "admin_authcontroller_authcontroller_logout",
+      "community": 8,
+      "norm_label": ".logout()"
+    },
+    {
+      "label": ".me()",
+      "file_type": "code",
+      "source_file": "admin/AuthController.php",
+      "source_location": "L59",
+      "id": "admin_authcontroller_authcontroller_me",
+      "community": 8,
+      "norm_label": ".me()"
+    },
+    {
+      "label": ".formatUser()",
+      "file_type": "code",
+      "source_file": "admin/AuthController.php",
+      "source_location": "L67",
+      "id": "admin_authcontroller_authcontroller_formatuser",
+      "community": 8,
+      "norm_label": ".formatuser()"
+    },
+    {
+      "label": "ReportController.php",
+      "file_type": "code",
+      "source_file": "admin/ReportController.php",
+      "source_location": "L1",
+      "id": "admin_reportcontroller_php",
+      "community": 2,
+      "norm_label": "reportcontroller.php"
+    },
+    {
+      "label": "ReportController",
+      "file_type": "code",
+      "source_file": "admin/ReportController.php",
+      "source_location": "L12",
+      "id": "admin_reportcontroller_reportcontroller",
+      "community": 2,
+      "norm_label": "reportcontroller"
+    },
+    {
+      "label": ".overview()",
+      "file_type": "code",
+      "source_file": "admin/ReportController.php",
+      "source_location": "L14",
+      "id": "admin_reportcontroller_reportcontroller_overview",
+      "community": 2,
+      "norm_label": ".overview()"
+    },
+    {
+      "label": ".users()",
+      "file_type": "code",
+      "source_file": "admin/ReportController.php",
+      "source_location": "L48",
+      "id": "admin_reportcontroller_reportcontroller_users",
+      "community": 2,
+      "norm_label": ".users()"
+    },
+    {
+      "label": ".jobs()",
+      "file_type": "code",
+      "source_file": "admin/ReportController.php",
+      "source_location": "L80",
+      "id": "admin_reportcontroller_reportcontroller_jobs",
+      "community": 2,
+      "norm_label": ".jobs()"
+    },
+    {
+      "label": ".revenue()",
+      "file_type": "code",
+      "source_file": "admin/ReportController.php",
+      "source_location": "L105",
+      "id": "admin_reportcontroller_reportcontroller_revenue",
+      "community": 2,
+      "norm_label": ".revenue()"
+    },
+    {
+      "label": ".export()",
+      "file_type": "code",
+      "source_file": "admin/ReportController.php",
+      "source_location": "L130",
+      "id": "admin_reportcontroller_reportcontroller_export",
+      "community": 2,
+      "norm_label": ".export()"
+    },
+    {
+      "label": "2024_01_01_create_tables.php",
+      "file_type": "code",
+      "source_file": "admin/2024_01_01_create_tables.php",
+      "source_location": "L1",
+      "id": "admin_2024_01_01_create_tables_php",
+      "community": 10,
+      "norm_label": "2024_01_01_create_tables.php"
+    },
+    {
+      "label": "up()",
+      "file_type": "code",
+      "source_file": "admin/2024_01_01_create_tables.php",
+      "source_location": "L9",
+      "id": "admin_2024_01_01_create_tables_up",
+      "community": 10,
+      "norm_label": "up()"
+    },
+    {
+      "label": "down()",
+      "file_type": "code",
+      "source_file": "admin/2024_01_01_create_tables.php",
+      "source_location": "L68",
+      "id": "admin_2024_01_01_create_tables_down",
+      "community": 10,
+      "norm_label": "down()"
+    },
+    {
+      "label": "JobController.php",
+      "file_type": "code",
+      "source_file": "admin/JobController.php",
+      "source_location": "L1",
+      "id": "admin_jobcontroller_php",
+      "community": 6,
+      "norm_label": "jobcontroller.php"
+    },
+    {
+      "label": "JobController",
+      "file_type": "code",
+      "source_file": "admin/JobController.php",
+      "source_location": "L9",
+      "id": "admin_jobcontroller_jobcontroller",
+      "community": 6,
+      "norm_label": "jobcontroller"
+    },
+    {
+      "label": ".index()",
+      "file_type": "code",
+      "source_file": "admin/JobController.php",
+      "source_location": "L11",
+      "id": "admin_jobcontroller_jobcontroller_index",
+      "community": 6,
+      "norm_label": ".index()"
+    },
+    {
+      "label": ".show()",
+      "file_type": "code",
+      "source_file": "admin/JobController.php",
+      "source_location": "L44",
+      "id": "admin_jobcontroller_jobcontroller_show",
+      "community": 6,
+      "norm_label": ".show()"
+    },
+    {
+      "label": ".approve()",
+      "file_type": "code",
+      "source_file": "admin/JobController.php",
+      "source_location": "L57",
+      "id": "admin_jobcontroller_jobcontroller_approve",
+      "community": 6,
+      "norm_label": ".approve()"
+    },
+    {
+      "label": ".reject()",
+      "file_type": "code",
+      "source_file": "admin/JobController.php",
+      "source_location": "L68",
+      "id": "admin_jobcontroller_jobcontroller_reject",
+      "community": 6,
+      "norm_label": ".reject()"
+    },
+    {
+      "label": ".close()",
+      "file_type": "code",
+      "source_file": "admin/JobController.php",
+      "source_location": "L79",
+      "id": "admin_jobcontroller_jobcontroller_close",
+      "community": 6,
+      "norm_label": ".close()"
+    },
+    {
+      "label": ".flag()",
+      "file_type": "code",
+      "source_file": "admin/JobController.php",
+      "source_location": "L90",
+      "id": "admin_jobcontroller_jobcontroller_flag",
+      "community": 6,
+      "norm_label": ".flag()"
+    },
+    {
+      "label": ".destroy()",
+      "file_type": "code",
+      "source_file": "admin/JobController.php",
+      "source_location": "L103",
+      "id": "admin_jobcontroller_jobcontroller_destroy",
+      "community": 6,
+      "norm_label": ".destroy()"
+    },
+    {
+      "label": "api.php",
+      "file_type": "code",
+      "source_file": "admin/api.php",
+      "source_location": "L1",
+      "id": "admin_api_php",
+      "community": 26,
+      "norm_label": "api.php"
+    },
+    {
+      "label": "PaymentController.php",
+      "file_type": "code",
+      "source_file": "admin/PaymentController.php",
+      "source_location": "L1",
+      "id": "admin_paymentcontroller_php",
+      "community": 7,
+      "norm_label": "paymentcontroller.php"
+    },
+    {
+      "label": "PaymentController",
+      "file_type": "code",
+      "source_file": "admin/PaymentController.php",
+      "source_location": "L9",
+      "id": "admin_paymentcontroller_paymentcontroller",
+      "community": 7,
+      "norm_label": "paymentcontroller"
+    },
+    {
+      "label": ".index()",
+      "file_type": "code",
+      "source_file": "admin/PaymentController.php",
+      "source_location": "L11",
+      "id": "admin_paymentcontroller_paymentcontroller_index",
+      "community": 7,
+      "norm_label": ".index()"
+    },
+    {
+      "label": ".show()",
+      "file_type": "code",
+      "source_file": "admin/PaymentController.php",
+      "source_location": "L48",
+      "id": "admin_paymentcontroller_paymentcontroller_show",
+      "community": 7,
+      "norm_label": ".show()"
+    },
+    {
+      "label": ".refund()",
+      "file_type": "code",
+      "source_file": "admin/PaymentController.php",
+      "source_location": "L62",
+      "id": "admin_paymentcontroller_paymentcontroller_refund",
+      "community": 7,
+      "norm_label": ".refund()"
+    },
+    {
+      "label": ".resolveDispute()",
+      "file_type": "code",
+      "source_file": "admin/PaymentController.php",
+      "source_location": "L91",
+      "id": "admin_paymentcontroller_paymentcontroller_resolvedispute",
+      "community": 7,
+      "norm_label": ".resolvedispute()"
+    },
+    {
+      "label": ".summary()",
+      "file_type": "code",
+      "source_file": "admin/PaymentController.php",
+      "source_location": "L113",
+      "id": "admin_paymentcontroller_paymentcontroller_summary",
+      "community": 7,
+      "norm_label": ".summary()"
+    },
+    {
+      "label": "api.js",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L1",
+      "id": "admin_api_js",
+      "community": 0,
+      "norm_label": "api.js"
+    },
+    {
+      "label": "ApiService",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L4",
+      "id": "admin_api_apiservice",
+      "community": 0,
+      "norm_label": "apiservice"
+    },
+    {
+      "label": ".constructor()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L5",
+      "id": "admin_api_apiservice_constructor",
+      "community": 0,
+      "norm_label": ".constructor()"
+    },
+    {
+      "label": ".getToken()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L9",
+      "id": "admin_api_apiservice_gettoken",
+      "community": 0,
+      "norm_label": ".gettoken()"
+    },
+    {
+      "label": ".request()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L13",
+      "id": "admin_api_apiservice_request",
+      "community": 0,
+      "norm_label": ".request()"
+    },
+    {
+      "label": ".get()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L41",
+      "id": "admin_api_apiservice_get",
+      "community": 0,
+      "norm_label": ".get()"
+    },
+    {
+      "label": ".post()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L42",
+      "id": "admin_api_apiservice_post",
+      "community": 0,
+      "norm_label": ".post()"
+    },
+    {
+      "label": ".put()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L43",
+      "id": "admin_api_apiservice_put",
+      "community": 0,
+      "norm_label": ".put()"
+    },
+    {
+      "label": ".patch()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L44",
+      "id": "admin_api_apiservice_patch",
+      "community": 0,
+      "norm_label": ".patch()"
+    },
+    {
+      "label": ".delete()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L45",
+      "id": "admin_api_apiservice_delete",
+      "community": 0,
+      "norm_label": ".delete()"
+    },
+    {
+      "label": "api",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L48",
+      "id": "admin_api_api",
+      "community": 0,
+      "norm_label": "api"
+    },
+    {
+      "label": "login()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L51",
+      "id": "admin_api_login",
+      "community": 0,
+      "norm_label": "login()"
+    },
+    {
+      "label": "logout()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L52",
+      "id": "admin_api_logout",
+      "community": 0,
+      "norm_label": "logout()"
+    },
+    {
+      "label": "getMe()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L53",
+      "id": "admin_api_getme",
+      "community": 0,
+      "norm_label": "getme()"
+    },
+    {
+      "label": "getDashboardStats()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L56",
+      "id": "admin_api_getdashboardstats",
+      "community": 0,
+      "norm_label": "getdashboardstats()"
+    },
+    {
+      "label": "getRevenueChart()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L57",
+      "id": "admin_api_getrevenuechart",
+      "community": 0,
+      "norm_label": "getrevenuechart()"
+    },
+    {
+      "label": "getRecentActivity()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L58",
+      "id": "admin_api_getrecentactivity",
+      "community": 0,
+      "norm_label": "getrecentactivity()"
+    },
+    {
+      "label": "getUsers()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L61",
+      "id": "admin_api_getusers",
+      "community": 0,
+      "norm_label": "getusers()"
+    },
+    {
+      "label": "getUser()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L62",
+      "id": "admin_api_getuser",
+      "community": 0,
+      "norm_label": "getuser()"
+    },
+    {
+      "label": "updateUser()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L63",
+      "id": "admin_api_updateuser",
+      "community": 0,
+      "norm_label": "updateuser()"
+    },
+    {
+      "label": "deleteUser()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L64",
+      "id": "admin_api_deleteuser",
+      "community": 0,
+      "norm_label": "deleteuser()"
+    },
+    {
+      "label": "suspendUser()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L65",
+      "id": "admin_api_suspenduser",
+      "community": 0,
+      "norm_label": "suspenduser()"
+    },
+    {
+      "label": "activateUser()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L66",
+      "id": "admin_api_activateuser",
+      "community": 0,
+      "norm_label": "activateuser()"
+    },
+    {
+      "label": "verifyUser()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L67",
+      "id": "admin_api_verifyuser",
+      "community": 0,
+      "norm_label": "verifyuser()"
+    },
+    {
+      "label": "getUserJobs()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L68",
+      "id": "admin_api_getuserjobs",
+      "community": 0,
+      "norm_label": "getuserjobs()"
+    },
+    {
+      "label": "getUserPayments()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L69",
+      "id": "admin_api_getuserpayments",
+      "community": 0,
+      "norm_label": "getuserpayments()"
+    },
+    {
+      "label": "getJobs()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L72",
+      "id": "admin_api_getjobs",
+      "community": 0,
+      "norm_label": "getjobs()"
+    },
+    {
+      "label": "getJob()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L73",
+      "id": "admin_api_getjob",
+      "community": 0,
+      "norm_label": "getjob()"
+    },
+    {
+      "label": "approveJob()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L74",
+      "id": "admin_api_approvejob",
+      "community": 0,
+      "norm_label": "approvejob()"
+    },
+    {
+      "label": "rejectJob()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L75",
+      "id": "admin_api_rejectjob",
+      "community": 0,
+      "norm_label": "rejectjob()"
+    },
+    {
+      "label": "closeJob()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L76",
+      "id": "admin_api_closejob",
+      "community": 0,
+      "norm_label": "closejob()"
+    },
+    {
+      "label": "flagJob()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L77",
+      "id": "admin_api_flagjob",
+      "community": 0,
+      "norm_label": "flagjob()"
+    },
+    {
+      "label": "deleteJob()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L78",
+      "id": "admin_api_deletejob",
+      "community": 0,
+      "norm_label": "deletejob()"
+    },
+    {
+      "label": "getPayments()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L81",
+      "id": "admin_api_getpayments",
+      "community": 0,
+      "norm_label": "getpayments()"
+    },
+    {
+      "label": "getPayment()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L82",
+      "id": "admin_api_getpayment",
+      "community": 0,
+      "norm_label": "getpayment()"
+    },
+    {
+      "label": "refundPayment()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L83",
+      "id": "admin_api_refundpayment",
+      "community": 0,
+      "norm_label": "refundpayment()"
+    },
+    {
+      "label": "resolveDispute()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L84",
+      "id": "admin_api_resolvedispute",
+      "community": 0,
+      "norm_label": "resolvedispute()"
+    },
+    {
+      "label": "getPaymentSummary()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L85",
+      "id": "admin_api_getpaymentsummary",
+      "community": 0,
+      "norm_label": "getpaymentsummary()"
+    },
+    {
+      "label": "getReportOverview()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L88",
+      "id": "admin_api_getreportoverview",
+      "community": 0,
+      "norm_label": "getreportoverview()"
+    },
+    {
+      "label": "getUserReport()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L89",
+      "id": "admin_api_getuserreport",
+      "community": 0,
+      "norm_label": "getuserreport()"
+    },
+    {
+      "label": "getJobReport()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L90",
+      "id": "admin_api_getjobreport",
+      "community": 0,
+      "norm_label": "getjobreport()"
+    },
+    {
+      "label": "getRevenueReport()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L91",
+      "id": "admin_api_getrevenuereport",
+      "community": 0,
+      "norm_label": "getrevenuereport()"
+    },
+    {
+      "label": "exportReport()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L92",
+      "id": "admin_api_exportreport",
+      "community": 0,
+      "norm_label": "exportreport()"
+    },
+    {
+      "label": "seed_dashboard.php",
+      "file_type": "code",
+      "source_file": "scratch/seed_dashboard.php",
+      "source_location": "L1",
+      "id": "scratch_seed_dashboard_php",
+      "community": 27,
+      "norm_label": "seed_dashboard.php"
+    },
+    {
+      "label": "check_db.php",
+      "file_type": "code",
+      "source_file": "scratch/check_db.php",
+      "source_location": "L1",
+      "id": "scratch_check_db_php",
+      "community": 28,
+      "norm_label": "check_db.php"
+    },
+    {
+      "label": "run_migration.php",
+      "file_type": "code",
+      "source_file": "scratch/run_migration.php",
+      "source_location": "L1",
+      "id": "scratch_run_migration_php",
+      "community": 29,
+      "norm_label": "run_migration.php"
+    },
+    {
+      "label": "upload_doc.php",
+      "file_type": "code",
+      "source_file": "actions/upload_doc.php",
+      "source_location": "L1",
+      "id": "actions_upload_doc_php",
+      "community": 11,
+      "norm_label": "upload_doc.php"
+    },
+    {
+      "label": "json_response()",
+      "file_type": "code",
+      "source_file": "actions/upload_doc.php",
+      "source_location": "L6",
+      "id": "actions_upload_doc_json_response",
+      "community": 11,
+      "norm_label": "json_response()"
+    },
+    {
+      "label": "post_job.php",
+      "file_type": "code",
+      "source_file": "actions/post_job.php",
+      "source_location": "L1",
+      "id": "actions_post_job_php",
+      "community": 30,
+      "norm_label": "post_job.php"
+    },
+    {
+      "label": "login.php",
+      "file_type": "code",
+      "source_file": "actions/login.php",
+      "source_location": "L1",
+      "id": "actions_login_php",
+      "community": 31,
+      "norm_label": "login.php"
+    },
+    {
+      "label": "register.php",
+      "file_type": "code",
+      "source_file": "actions/register.php",
+      "source_location": "L1",
+      "id": "actions_register_php",
+      "community": 32,
+      "norm_label": "register.php"
+    },
+    {
+      "label": "hire_freelancer.php",
+      "file_type": "code",
+      "source_file": "actions/hire_freelancer.php",
+      "source_location": "L1",
+      "id": "actions_hire_freelancer_php",
+      "community": 33,
+      "norm_label": "hire_freelancer.php"
+    },
+    {
+      "label": "submit_proposal.php",
+      "file_type": "code",
+      "source_file": "actions/submit_proposal.php",
+      "source_location": "L1",
+      "id": "actions_submit_proposal_php",
+      "community": 34,
+      "norm_label": "submit_proposal.php"
+    },
+    {
+      "label": "main.js",
+      "file_type": "code",
+      "source_file": "assets/js/main.js",
+      "source_location": "L1",
+      "id": "assets_js_main_js",
+      "community": 9,
+      "norm_label": "main.js"
+    },
+    {
+      "label": "toggle",
+      "file_type": "code",
+      "source_file": "assets/js/main.js",
+      "source_location": "L7",
+      "id": "js_main_toggle",
+      "community": 9,
+      "norm_label": "toggle"
+    },
+    {
+      "label": "menu",
+      "file_type": "code",
+      "source_file": "assets/js/main.js",
+      "source_location": "L8",
+      "id": "js_main_menu",
+      "community": 9,
+      "norm_label": "menu"
+    },
+    {
+      "label": "navbar",
+      "file_type": "code",
+      "source_file": "assets/js/main.js",
+      "source_location": "L17",
+      "id": "js_main_navbar",
+      "community": 9,
+      "norm_label": "navbar"
+    },
+    {
+      "label": "observerOptions",
+      "file_type": "code",
+      "source_file": "assets/js/main.js",
+      "source_location": "L31",
+      "id": "js_main_observeroptions",
+      "community": 9,
+      "norm_label": "observeroptions"
+    },
+    {
+      "label": "observer",
+      "file_type": "code",
+      "source_file": "assets/js/main.js",
+      "source_location": "L36",
+      "id": "js_main_observer",
+      "community": 9,
+      "norm_label": "observer"
+    },
+    {
+      "label": "index.php",
+      "file_type": "code",
+      "source_file": "client/index.php",
+      "source_location": "L1",
+      "id": "client_index_php",
+      "community": 35,
+      "norm_label": "index.php"
+    },
+    {
+      "label": "header.php",
+      "file_type": "code",
+      "source_file": "client/includes/header.php",
+      "source_location": "L1",
+      "id": "client_includes_header_php",
+      "community": 36,
+      "norm_label": "header.php"
+    },
+    {
+      "label": "footer.php",
+      "file_type": "code",
+      "source_file": "client/includes/footer.php",
+      "source_location": "L1",
+      "id": "client_includes_footer_php",
+      "community": 37,
+      "norm_label": "footer.php"
+    },
+    {
+      "label": "login.php",
+      "file_type": "code",
+      "source_file": "freelancer/login.php",
+      "source_location": "L1",
+      "id": "freelancer_login_php",
+      "community": 38,
+      "norm_label": "login.php"
+    },
+    {
+      "label": "index.php",
+      "file_type": "code",
+      "source_file": "freelancer/index.php",
+      "source_location": "L1",
+      "id": "freelancer_index_php",
+      "community": 39,
+      "norm_label": "index.php"
+    },
+    {
+      "label": "header.php",
+      "file_type": "code",
+      "source_file": "freelancer/includes/header.php",
+      "source_location": "L1",
+      "id": "freelancer_includes_header_php",
+      "community": 40,
+      "norm_label": "header.php"
+    },
+    {
+      "label": "footer.php",
+      "file_type": "code",
+      "source_file": "freelancer/includes/footer.php",
+      "source_location": "L1",
+      "id": "freelancer_includes_footer_php",
+      "community": 41,
+      "norm_label": "footer.php"
+    },
+    {
+      "label": "footer_test.js",
+      "file_type": "code",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L1",
+      "id": "freelancer_includes_footer_test_js",
+      "community": 1,
+      "norm_label": "footer_test.js"
+    },
+    {
+      "label": "CLIENTS",
+      "file_type": "code",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L8",
+      "id": "includes_footer_test_clients",
+      "community": 1,
+      "norm_label": "clients"
+    },
+    {
+      "label": "spentBadge()",
+      "file_type": "code",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L18",
+      "id": "includes_footer_test_spentbadge",
+      "community": 1,
+      "norm_label": "spentbadge()"
+    },
+    {
+      "label": "jobRowHTML()",
+      "file_type": "code",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L25",
+      "id": "includes_footer_test_jobrowhtml",
+      "community": 1,
+      "norm_label": "jobrowhtml()"
+    },
+    {
+      "label": "renderJobs()",
+      "file_type": "code",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L68",
+      "id": "includes_footer_test_renderjobs",
+      "community": 1,
+      "norm_label": "renderjobs()"
+    },
+    {
+      "label": "MODALS",
+      "file_type": "code",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L77",
+      "id": "includes_footer_test_modals",
+      "community": 1,
+      "norm_label": "modals"
+    },
+    {
+      "label": "togglePwVis()",
+      "file_type": "code",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L317",
+      "id": "includes_footer_test_togglepwvis",
+      "community": 1,
+      "norm_label": "togglepwvis()"
+    },
+    {
+      "label": "checkPwStrength()",
+      "file_type": "code",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L324",
+      "id": "includes_footer_test_checkpwstrength",
+      "community": 1,
+      "norm_label": "checkpwstrength()"
+    },
+    {
+      "label": "checkPwMatch()",
+      "file_type": "code",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L352",
+      "id": "includes_footer_test_checkpwmatch",
+      "community": 1,
+      "norm_label": "checkpwmatch()"
+    },
+    {
+      "label": "checkAndApply()",
+      "file_type": "code",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L367",
+      "id": "includes_footer_test_checkandapply",
+      "community": 1,
+      "norm_label": "checkandapply()"
+    },
+    {
+      "label": "submitProposal()",
+      "file_type": "code",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L386",
+      "id": "includes_footer_test_submitproposal",
+      "community": 1,
+      "norm_label": "submitproposal()"
+    },
+    {
+      "label": "submitPasswordReset()",
+      "file_type": "code",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L436",
+      "id": "includes_footer_test_submitpasswordreset",
+      "community": 1,
+      "norm_label": "submitpasswordreset()"
+    },
+    {
+      "label": "openModal()",
+      "file_type": "code",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L464",
+      "id": "includes_footer_test_openmodal",
+      "community": 1,
+      "norm_label": "openmodal()"
+    },
+    {
+      "label": "closeModal()",
+      "file_type": "code",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L465",
+      "id": "includes_footer_test_closemodal",
+      "community": 1,
+      "norm_label": "closemodal()"
+    },
+    {
+      "label": "toast()",
+      "file_type": "code",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L468",
+      "id": "includes_footer_test_toast",
+      "community": 1,
+      "norm_label": "toast()"
+    },
+    {
+      "label": "toggleSidebar()",
+      "file_type": "code",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L469",
+      "id": "includes_footer_test_togglesidebar",
+      "community": 1,
+      "norm_label": "togglesidebar()"
+    },
+    {
+      "label": "showPage()",
+      "file_type": "code",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L475",
+      "id": "includes_footer_test_showpage",
+      "community": 1,
+      "norm_label": "showpage()"
+    },
+    {
+      "label": "EARNINGS_INFO",
+      "file_type": "code",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L493",
+      "id": "includes_footer_test_earnings_info",
+      "community": 1,
+      "norm_label": "earnings_info"
+    },
+    {
+      "label": "showEarningsInfo()",
+      "file_type": "code",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L514",
+      "id": "includes_footer_test_showearningsinfo",
+      "community": 1,
+      "norm_label": "showearningsinfo()"
+    },
+    {
+      "label": "freelancerState",
+      "file_type": "code",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L534",
+      "id": "includes_footer_test_freelancerstate",
+      "community": 1,
+      "norm_label": "freelancerstate"
+    },
+    {
+      "label": "selectedPkg",
+      "file_type": "code",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L542",
+      "id": "includes_footer_test_selectedpkg",
+      "community": 1,
+      "norm_label": "selectedpkg"
+    },
+    {
+      "label": "selectConnectPkg()",
+      "file_type": "code",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L544",
+      "id": "includes_footer_test_selectconnectpkg",
+      "community": 1,
+      "norm_label": "selectconnectpkg()"
+    },
+    {
+      "label": "initiatePaystackPayment()",
+      "file_type": "code",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L573",
+      "id": "includes_footer_test_initiatepaystackpayment",
+      "community": 1,
+      "norm_label": "initiatepaystackpayment()"
+    },
+    {
+      "label": "onPaystackSuccess()",
+      "file_type": "code",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L606",
+      "id": "includes_footer_test_onpaystacksuccess",
+      "community": 1,
+      "norm_label": "onpaystacksuccess()"
+    },
+    {
+      "label": "updateApplyModalConnects()",
+      "file_type": "code",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L661",
+      "id": "includes_footer_test_updateapplymodalconnects",
+      "community": 1,
+      "norm_label": "updateapplymodalconnects()"
+    },
+    {
+      "label": "SKILL_TREE",
+      "file_type": "code",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L678",
+      "id": "includes_footer_test_skill_tree",
+      "community": 1,
+      "norm_label": "skill_tree"
+    },
+    {
+      "label": "selectedSkills",
+      "file_type": "code",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L806",
+      "id": "includes_footer_test_selectedskills",
+      "community": 1,
+      "norm_label": "selectedskills"
+    },
+    {
+      "label": "openSkillSelector()",
+      "file_type": "code",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L809",
+      "id": "includes_footer_test_openskillselector",
+      "community": 1,
+      "norm_label": "openskillselector()"
+    },
+    {
+      "label": "closeSkillSelector()",
+      "file_type": "code",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L819",
+      "id": "includes_footer_test_closeskillselector",
+      "community": 1,
+      "norm_label": "closeskillselector()"
+    },
+    {
+      "label": "renderCatCol()",
+      "file_type": "code",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L824",
+      "id": "includes_footer_test_rendercatcol",
+      "community": 1,
+      "norm_label": "rendercatcol()"
+    },
+    {
+      "label": "renderSpecCol()",
+      "file_type": "code",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L836",
+      "id": "includes_footer_test_renderspeccol",
+      "community": 1,
+      "norm_label": "renderspeccol()"
+    },
+    {
+      "label": "toggleSkill()",
+      "file_type": "code",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L855",
+      "id": "includes_footer_test_toggleskill",
+      "community": 1,
+      "norm_label": "toggleskill()"
+    },
+    {
+      "label": "el",
+      "file_type": "code",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L873",
+      "id": "includes_footer_test_el",
+      "community": 1,
+      "norm_label": "el"
+    },
+    {
+      "label": "arr",
+      "file_type": "code",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L874",
+      "id": "includes_footer_test_arr",
+      "community": 1,
+      "norm_label": "arr"
+    },
+    {
+      "label": "submit_proposal.php",
+      "file_type": "code",
+      "source_file": "freelancer/actions/submit_proposal.php",
+      "source_location": "L1",
+      "id": "freelancer_actions_submit_proposal_php",
+      "community": 42,
+      "norm_label": "submit_proposal.php"
+    },
+    {
+      "label": "verification.php",
+      "file_type": "code",
+      "source_file": "freelancer/views/verification.php",
+      "source_location": "L1",
+      "id": "freelancer_views_verification_php",
+      "community": 43,
+      "norm_label": "verification.php"
+    },
+    {
+      "label": "catalog.php",
+      "file_type": "code",
+      "source_file": "freelancer/views/catalog.php",
+      "source_location": "L1",
+      "id": "freelancer_views_catalog_php",
+      "community": 44,
+      "norm_label": "catalog.php"
+    },
+    {
+      "label": "find-work.php",
+      "file_type": "code",
+      "source_file": "freelancer/views/find-work.php",
+      "source_location": "L1",
+      "id": "freelancer_views_find_work_php",
+      "community": 45,
+      "norm_label": "find-work.php"
+    },
+    {
+      "label": "reports.php",
+      "file_type": "code",
+      "source_file": "freelancer/views/reports.php",
+      "source_location": "L1",
+      "id": "freelancer_views_reports_php",
+      "community": 46,
+      "norm_label": "reports.php"
+    },
+    {
+      "label": "home.php",
+      "file_type": "code",
+      "source_file": "freelancer/views/home.php",
+      "source_location": "L1",
+      "id": "freelancer_views_home_php",
+      "community": 47,
+      "norm_label": "home.php"
+    },
+    {
+      "label": "earnings.php",
+      "file_type": "code",
+      "source_file": "freelancer/views/earnings.php",
+      "source_location": "L1",
+      "id": "freelancer_views_earnings_php",
+      "community": 48,
+      "norm_label": "earnings.php"
+    },
+    {
+      "label": "profile.php",
+      "file_type": "code",
+      "source_file": "freelancer/views/profile.php",
+      "source_location": "L1",
+      "id": "freelancer_views_profile_php",
+      "community": 49,
+      "norm_label": "profile.php"
+    },
+    {
+      "label": "contracts.php",
+      "file_type": "code",
+      "source_file": "freelancer/views/contracts.php",
+      "source_location": "L1",
+      "id": "freelancer_views_contracts_php",
+      "community": 50,
+      "norm_label": "contracts.php"
+    },
+    {
+      "label": "messages.php",
+      "file_type": "code",
+      "source_file": "freelancer/views/messages.php",
+      "source_location": "L1",
+      "id": "freelancer_views_messages_php",
+      "community": 51,
+      "norm_label": "messages.php"
+    },
+    {
+      "label": "proposals.php",
+      "file_type": "code",
+      "source_file": "freelancer/views/proposals.php",
+      "source_location": "L1",
+      "id": "freelancer_views_proposals_php",
+      "community": 52,
+      "norm_label": "proposals.php"
+    },
+    {
+      "label": "graphify.md",
+      "file_type": "document",
+      "source_file": ".agents/workflows/graphify.md",
+      "source_location": "L1",
+      "id": "agents_workflows_graphify_md",
+      "community": 13,
+      "norm_label": "graphify.md"
+    },
+    {
+      "label": "Workflow: graphify",
+      "file_type": "document",
+      "source_file": ".agents/workflows/graphify.md",
+      "source_location": "L6",
+      "id": "workflows_graphify_workflow_graphify",
+      "community": 13,
+      "norm_label": "workflow: graphify"
+    },
+    {
+      "label": "graphify.md",
+      "file_type": "document",
+      "source_file": ".agents/rules/graphify.md",
+      "source_location": "L1",
+      "id": "agents_rules_graphify_md",
+      "community": 12,
+      "norm_label": "graphify.md"
+    },
+    {
+      "label": "graphify",
+      "file_type": "document",
+      "source_file": ".agents/rules/graphify.md",
+      "source_location": "L6",
+      "id": "rules_graphify_graphify",
+      "community": 12,
+      "norm_label": "graphify"
+    },
+    {
+      "label": "README.md",
+      "file_type": "document",
+      "source_file": "admin/README.md",
+      "source_location": "L1",
+      "id": "admin_readme_md",
+      "community": 3,
+      "norm_label": "readme.md"
+    },
+    {
+      "label": "UpAdmin \u2014 Upwork-Style Admin Panel",
+      "file_type": "document",
+      "source_file": "admin/README.md",
+      "source_location": "L1",
+      "id": "admin_readme_upadmin_upwork_style_admin_panel",
+      "community": 3,
+      "norm_label": "upadmin \u2014 upwork-style admin panel"
+    },
+    {
+      "label": "Project Structure",
+      "file_type": "document",
+      "source_file": "admin/README.md",
+      "source_location": "L7",
+      "id": "admin_readme_project_structure",
+      "community": 3,
+      "norm_label": "project structure"
+    },
+    {
+      "label": "code:block1 (upwork-admin/)",
+      "file_type": "document",
+      "source_file": "admin/README.md",
+      "source_location": "L9",
+      "id": "admin_readme_codeblock_1",
+      "community": 3,
+      "norm_label": "code:block1 (upwork-admin/)"
+    },
+    {
+      "label": "Backend Setup (Laravel)",
+      "file_type": "document",
+      "source_file": "admin/README.md",
+      "source_location": "L41",
+      "id": "admin_readme_backend_setup_laravel",
+      "community": 4,
+      "norm_label": "backend setup (laravel)"
+    },
+    {
+      "label": "1. Install in your existing Laravel project",
+      "file_type": "document",
+      "source_file": "admin/README.md",
+      "source_location": "L43",
+      "id": "admin_readme_1_install_in_your_existing_laravel_project",
+      "community": 4,
+      "norm_label": "1. install in your existing laravel project"
+    },
+    {
+      "label": "code:bash (# Copy controllers)",
+      "file_type": "document",
+      "source_file": "admin/README.md",
+      "source_location": "L47",
+      "id": "admin_readme_codeblock_2",
+      "community": 4,
+      "norm_label": "code:bash (# copy controllers)"
+    },
+    {
+      "label": "2. Register middleware in `app/Http/Kernel.php`",
+      "file_type": "document",
+      "source_file": "admin/README.md",
+      "source_location": "L63",
+      "id": "admin_readme_2_register_middleware_in_app_http_kernel_php",
+      "community": 4,
+      "norm_label": "2. register middleware in `app/http/kernel.php`"
+    },
+    {
+      "label": "code:php (protected $routeMiddleware = [)",
+      "file_type": "document",
+      "source_file": "admin/README.md",
+      "source_location": "L65",
+      "id": "admin_readme_codeblock_3",
+      "community": 4,
+      "norm_label": "code:php (protected $routemiddleware = [)"
+    },
+    {
+      "label": "3. Install Laravel Sanctum (if not already)",
+      "file_type": "document",
+      "source_file": "admin/README.md",
+      "source_location": "L72",
+      "id": "admin_readme_3_install_laravel_sanctum_if_not_already",
+      "community": 4,
+      "norm_label": "3. install laravel sanctum (if not already)"
+    },
+    {
+      "label": "code:bash (composer require laravel/sanctum)",
+      "file_type": "document",
+      "source_file": "admin/README.md",
+      "source_location": "L74",
+      "id": "admin_readme_codeblock_4",
+      "community": 4,
+      "norm_label": "code:bash (composer require laravel/sanctum)"
+    },
+    {
+      "label": "4. Run migrations",
+      "file_type": "document",
+      "source_file": "admin/README.md",
+      "source_location": "L80",
+      "id": "admin_readme_4_run_migrations",
+      "community": 4,
+      "norm_label": "4. run migrations"
+    },
+    {
+      "label": "code:bash (php artisan migrate)",
+      "file_type": "document",
+      "source_file": "admin/README.md",
+      "source_location": "L82",
+      "id": "admin_readme_codeblock_5",
+      "community": 4,
+      "norm_label": "code:bash (php artisan migrate)"
+    },
+    {
+      "label": "5. Create your first admin user",
+      "file_type": "document",
+      "source_file": "admin/README.md",
+      "source_location": "L86",
+      "id": "admin_readme_5_create_your_first_admin_user",
+      "community": 4,
+      "norm_label": "5. create your first admin user"
+    },
+    {
+      "label": "code:bash (php artisan tinker)",
+      "file_type": "document",
+      "source_file": "admin/README.md",
+      "source_location": "L88",
+      "id": "admin_readme_codeblock_6",
+      "community": 4,
+      "norm_label": "code:bash (php artisan tinker)"
+    },
+    {
+      "label": "code:php (\\App\\Models\\User::create([)",
+      "file_type": "document",
+      "source_file": "admin/README.md",
+      "source_location": "L91",
+      "id": "admin_readme_codeblock_7",
+      "community": 4,
+      "norm_label": "code:php (\\app\\models\\user::create([)"
+    },
+    {
+      "label": "6. Add CORS headers (if frontend is on a different domain)",
+      "file_type": "document",
+      "source_file": "admin/README.md",
+      "source_location": "L101",
+      "id": "admin_readme_6_add_cors_headers_if_frontend_is_on_a_different_domain",
+      "community": 4,
+      "norm_label": "6. add cors headers (if frontend is on a different domain)"
+    },
+    {
+      "label": "code:php ('paths' => ['api/*'],)",
+      "file_type": "document",
+      "source_file": "admin/README.md",
+      "source_location": "L104",
+      "id": "admin_readme_codeblock_8",
+      "community": 4,
+      "norm_label": "code:php ('paths' => ['api/*'],)"
+    },
+    {
+      "label": "Frontend Setup",
+      "file_type": "document",
+      "source_file": "admin/README.md",
+      "source_location": "L113",
+      "id": "admin_readme_frontend_setup",
+      "community": 3,
+      "norm_label": "frontend setup"
+    },
+    {
+      "label": "Option A \u2014 Drop-in HTML (simplest)",
+      "file_type": "document",
+      "source_file": "admin/README.md",
+      "source_location": "L115",
+      "id": "admin_readme_option_a_drop_in_html_simplest",
+      "community": 3,
+      "norm_label": "option a \u2014 drop-in html (simplest)"
+    },
+    {
+      "label": "code:js (const API = (window.API_BASE_URL || 'http://localhost:8000/a)",
+      "file_type": "document",
+      "source_file": "admin/README.md",
+      "source_location": "L119",
+      "id": "admin_readme_codeblock_9",
+      "community": 3,
+      "norm_label": "code:js (const api = (window.api_base_url || 'http://localhost:8000/a)"
+    },
+    {
+      "label": "code:js (const API = 'https://yoursite.com/api';)",
+      "file_type": "document",
+      "source_file": "admin/README.md",
+      "source_location": "L123",
+      "id": "admin_readme_codeblock_10",
+      "community": 3,
+      "norm_label": "code:js (const api = 'https://yoursite.com/api';)"
+    },
+    {
+      "label": "Option B \u2014 Inject API URL via server",
+      "file_type": "document",
+      "source_file": "admin/README.md",
+      "source_location": "L128",
+      "id": "admin_readme_option_b_inject_api_url_via_server",
+      "community": 3,
+      "norm_label": "option b \u2014 inject api url via server"
+    },
+    {
+      "label": "code:html (<script>window.API_BASE_URL = '<?= env(\"APP_URL\") ?>/api';</)",
+      "file_type": "document",
+      "source_file": "admin/README.md",
+      "source_location": "L131",
+      "id": "admin_readme_codeblock_11",
+      "community": 3,
+      "norm_label": "code:html (<script>window.api_base_url = '<?= env(\"app_url\") ?>/api';</)"
+    },
+    {
+      "label": "Option C \u2014 React/Vue integration",
+      "file_type": "document",
+      "source_file": "admin/README.md",
+      "source_location": "L135",
+      "id": "admin_readme_option_c_react_vue_integration",
+      "community": 3,
+      "norm_label": "option c \u2014 react/vue integration"
+    },
+    {
+      "label": "code:js (import { login, getUsers, getJobs, getPayments } from './ser)",
+      "file_type": "document",
+      "source_file": "admin/README.md",
+      "source_location": "L138",
+      "id": "admin_readme_codeblock_12",
+      "community": 3,
+      "norm_label": "code:js (import { login, getusers, getjobs, getpayments } from './ser)"
+    },
+    {
+      "label": "API Reference",
+      "file_type": "document",
+      "source_file": "admin/README.md",
+      "source_location": "L147",
+      "id": "admin_readme_api_reference",
+      "community": 3,
+      "norm_label": "api reference"
+    },
+    {
+      "label": "Authentication",
+      "file_type": "document",
+      "source_file": "admin/README.md",
+      "source_location": "L149",
+      "id": "admin_readme_authentication",
+      "community": 3,
+      "norm_label": "authentication"
+    },
+    {
+      "label": "Dashboard",
+      "file_type": "document",
+      "source_file": "admin/README.md",
+      "source_location": "L156",
+      "id": "admin_readme_dashboard",
+      "community": 3,
+      "norm_label": "dashboard"
+    },
+    {
+      "label": "Users",
+      "file_type": "document",
+      "source_file": "admin/README.md",
+      "source_location": "L163",
+      "id": "admin_readme_users",
+      "community": 3,
+      "norm_label": "users"
+    },
+    {
+      "label": "Jobs",
+      "file_type": "document",
+      "source_file": "admin/README.md",
+      "source_location": "L174",
+      "id": "admin_readme_jobs",
+      "community": 3,
+      "norm_label": "jobs"
+    },
+    {
+      "label": "Payments",
+      "file_type": "document",
+      "source_file": "admin/README.md",
+      "source_location": "L183",
+      "id": "admin_readme_payments",
+      "community": 3,
+      "norm_label": "payments"
+    },
+    {
+      "label": "Reports",
+      "file_type": "document",
+      "source_file": "admin/README.md",
+      "source_location": "L191",
+      "id": "admin_readme_reports",
+      "community": 3,
+      "norm_label": "reports"
+    },
+    {
+      "label": "Admin Panel Features",
+      "file_type": "document",
+      "source_file": "admin/README.md",
+      "source_location": "L202",
+      "id": "admin_readme_admin_panel_features",
+      "community": 3,
+      "norm_label": "admin panel features"
+    },
+    {
+      "label": "Security Notes",
+      "file_type": "document",
+      "source_file": "admin/README.md",
+      "source_location": "L213",
+      "id": "admin_readme_security_notes",
+      "community": 3,
+      "norm_label": "security notes"
+    }
+  ],
+  "links": [
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "includes/config.php",
+      "source_location": "L10",
+      "weight": 1.0,
+      "source": "includes_config_php",
+      "target": "includes_config_loadenv",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "includes/config.php",
+      "source_location": "L41",
+      "weight": 1.0,
+      "source": "includes_config_php",
+      "target": "includes_config_env",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "includes/config.php",
+      "source_location": "L78",
+      "weight": 1.0,
+      "source": "includes_config_php",
+      "target": "includes_config_getdb",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "includes/config.php",
+      "source_location": "L99",
+      "weight": 1.0,
+      "source": "includes_config_php",
+      "target": "includes_config_baseurl",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "includes/config.php",
+      "source_location": "L104",
+      "weight": 1.0,
+      "source": "includes_config_php",
+      "target": "includes_config_redirect",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "includes/config.php",
+      "source_location": "L110",
+      "weight": 1.0,
+      "source": "includes_config_php",
+      "target": "includes_config_isroute",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "includes/classes/Auth.php",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "classes_auth_auth_register",
+      "target": "includes_config_getdb"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "includes/classes/Auth.php",
+      "source_location": "L12",
+      "weight": 1.0,
+      "source": "classes_auth_auth_login",
+      "target": "includes_config_getdb"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "includes/classes/Auth.php",
+      "source_location": "L49",
+      "weight": 1.0,
+      "source": "classes_auth_auth_user",
+      "target": "includes_config_getdb"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "includes/classes/Auth.php",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "includes_classes_auth_php",
+      "target": "classes_auth_auth",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "includes/classes/Auth.php",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "classes_auth_auth",
+      "target": "classes_auth_auth_register",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "includes/classes/Auth.php",
+      "source_location": "L11",
+      "weight": 1.0,
+      "source": "classes_auth_auth",
+      "target": "classes_auth_auth_login",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "includes/classes/Auth.php",
+      "source_location": "L35",
+      "weight": 1.0,
+      "source": "classes_auth_auth",
+      "target": "classes_auth_auth_logout",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "includes/classes/Auth.php",
+      "source_location": "L47",
+      "weight": 1.0,
+      "source": "classes_auth_auth",
+      "target": "classes_auth_auth_user",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "includes/classes/Auth.php",
+      "source_location": "L55",
+      "weight": 1.0,
+      "source": "classes_auth_auth",
+      "target": "classes_auth_auth_check",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "admin/UserController.php",
+      "source_location": "L13",
+      "weight": 1.0,
+      "source": "admin_usercontroller_usercontroller_index",
+      "target": "classes_auth_auth_user"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "admin/UserController.php",
+      "source_location": "L42",
+      "weight": 1.0,
+      "source": "admin_usercontroller_usercontroller_show",
+      "target": "classes_auth_auth_user"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "admin/UserController.php",
+      "source_location": "L54",
+      "weight": 1.0,
+      "source": "admin_usercontroller_usercontroller_update",
+      "target": "classes_auth_auth_user"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "admin/UserController.php",
+      "source_location": "L73",
+      "weight": 1.0,
+      "source": "admin_usercontroller_usercontroller_destroy",
+      "target": "classes_auth_auth_user"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "admin/UserController.php",
+      "source_location": "L92",
+      "weight": 1.0,
+      "source": "admin_usercontroller_usercontroller_suspend",
+      "target": "classes_auth_auth_user"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "admin/UserController.php",
+      "source_location": "L103",
+      "weight": 1.0,
+      "source": "admin_usercontroller_usercontroller_activate",
+      "target": "classes_auth_auth_user"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "admin/UserController.php",
+      "source_location": "L114",
+      "weight": 1.0,
+      "source": "admin_usercontroller_usercontroller_verify",
+      "target": "classes_auth_auth_user"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "admin/UserController.php",
+      "source_location": "L125",
+      "weight": 1.0,
+      "source": "admin_usercontroller_usercontroller_jobs",
+      "target": "classes_auth_auth_user"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "admin/UserController.php",
+      "source_location": "L140",
+      "weight": 1.0,
+      "source": "admin_usercontroller_usercontroller_payments",
+      "target": "classes_auth_auth_user"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "admin/DashboardController.php",
+      "source_location": "L16",
+      "weight": 1.0,
+      "source": "admin_dashboardcontroller_dashboardcontroller_stats",
+      "target": "classes_auth_auth_user"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "admin/DashboardController.php",
+      "source_location": "L61",
+      "weight": 1.0,
+      "source": "admin_dashboardcontroller_dashboardcontroller_recentactivity",
+      "target": "classes_auth_auth_user"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "admin/AuthController.php",
+      "source_location": "L21",
+      "weight": 1.0,
+      "source": "admin_authcontroller_authcontroller_login",
+      "target": "classes_auth_auth_user"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "admin/ReportController.php",
+      "source_location": "L24",
+      "weight": 1.0,
+      "source": "admin_reportcontroller_reportcontroller_overview",
+      "target": "classes_auth_auth_user"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "admin/ReportController.php",
+      "source_location": "L52",
+      "weight": 1.0,
+      "source": "admin_reportcontroller_reportcontroller_users",
+      "target": "classes_auth_auth_user"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "admin/ReportController.php",
+      "source_location": "L143",
+      "weight": 1.0,
+      "source": "admin_reportcontroller_reportcontroller_export",
+      "target": "classes_auth_auth_user"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/UserController.php",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "admin_usercontroller_php",
+      "target": "admin_usercontroller_usercontroller",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/UserController.php",
+      "source_location": "L11",
+      "weight": 1.0,
+      "source": "admin_usercontroller_usercontroller",
+      "target": "admin_usercontroller_usercontroller_index",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/UserController.php",
+      "source_location": "L40",
+      "weight": 1.0,
+      "source": "admin_usercontroller_usercontroller",
+      "target": "admin_usercontroller_usercontroller_show",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/UserController.php",
+      "source_location": "L52",
+      "weight": 1.0,
+      "source": "admin_usercontroller_usercontroller",
+      "target": "admin_usercontroller_usercontroller_update",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/UserController.php",
+      "source_location": "L71",
+      "weight": 1.0,
+      "source": "admin_usercontroller_usercontroller",
+      "target": "admin_usercontroller_usercontroller_destroy",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/UserController.php",
+      "source_location": "L90",
+      "weight": 1.0,
+      "source": "admin_usercontroller_usercontroller",
+      "target": "admin_usercontroller_usercontroller_suspend",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/UserController.php",
+      "source_location": "L101",
+      "weight": 1.0,
+      "source": "admin_usercontroller_usercontroller",
+      "target": "admin_usercontroller_usercontroller_activate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/UserController.php",
+      "source_location": "L112",
+      "weight": 1.0,
+      "source": "admin_usercontroller_usercontroller",
+      "target": "admin_usercontroller_usercontroller_verify",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/UserController.php",
+      "source_location": "L123",
+      "weight": 1.0,
+      "source": "admin_usercontroller_usercontroller",
+      "target": "admin_usercontroller_usercontroller_jobs",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/UserController.php",
+      "source_location": "L138",
+      "weight": 1.0,
+      "source": "admin_usercontroller_usercontroller",
+      "target": "admin_usercontroller_usercontroller_payments",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/UserController.php",
+      "source_location": "L93",
+      "weight": 1.0,
+      "source": "admin_usercontroller_usercontroller_suspend",
+      "target": "admin_usercontroller_usercontroller_update",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/UserController.php",
+      "source_location": "L104",
+      "weight": 1.0,
+      "source": "admin_usercontroller_usercontroller_activate",
+      "target": "admin_usercontroller_usercontroller_update",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/UserController.php",
+      "source_location": "L115",
+      "weight": 1.0,
+      "source": "admin_usercontroller_usercontroller_verify",
+      "target": "admin_usercontroller_usercontroller_update",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/DashboardController.php",
+      "source_location": "L12",
+      "weight": 1.0,
+      "source": "admin_dashboardcontroller_php",
+      "target": "admin_dashboardcontroller_dashboardcontroller",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/DashboardController.php",
+      "source_location": "L14",
+      "weight": 1.0,
+      "source": "admin_dashboardcontroller_dashboardcontroller",
+      "target": "admin_dashboardcontroller_dashboardcontroller_stats",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/DashboardController.php",
+      "source_location": "L42",
+      "weight": 1.0,
+      "source": "admin_dashboardcontroller_dashboardcontroller",
+      "target": "admin_dashboardcontroller_dashboardcontroller_revenuechart",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/DashboardController.php",
+      "source_location": "L59",
+      "weight": 1.0,
+      "source": "admin_dashboardcontroller_dashboardcontroller",
+      "target": "admin_dashboardcontroller_dashboardcontroller_recentactivity",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/AuthController.php",
+      "source_location": "L12",
+      "weight": 1.0,
+      "source": "admin_authcontroller_php",
+      "target": "admin_authcontroller_authcontroller",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/AuthController.php",
+      "source_location": "L14",
+      "weight": 1.0,
+      "source": "admin_authcontroller_authcontroller",
+      "target": "admin_authcontroller_authcontroller_login",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/AuthController.php",
+      "source_location": "L49",
+      "weight": 1.0,
+      "source": "admin_authcontroller_authcontroller",
+      "target": "admin_authcontroller_authcontroller_logout",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/AuthController.php",
+      "source_location": "L59",
+      "weight": 1.0,
+      "source": "admin_authcontroller_authcontroller",
+      "target": "admin_authcontroller_authcontroller_me",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/AuthController.php",
+      "source_location": "L67",
+      "weight": 1.0,
+      "source": "admin_authcontroller_authcontroller",
+      "target": "admin_authcontroller_authcontroller_formatuser",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/AuthController.php",
+      "source_location": "L45",
+      "weight": 1.0,
+      "source": "admin_authcontroller_authcontroller_login",
+      "target": "admin_authcontroller_authcontroller_formatuser",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/AuthController.php",
+      "source_location": "L63",
+      "weight": 1.0,
+      "source": "admin_authcontroller_authcontroller_me",
+      "target": "admin_authcontroller_authcontroller_formatuser",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/ReportController.php",
+      "source_location": "L12",
+      "weight": 1.0,
+      "source": "admin_reportcontroller_php",
+      "target": "admin_reportcontroller_reportcontroller",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/ReportController.php",
+      "source_location": "L14",
+      "weight": 1.0,
+      "source": "admin_reportcontroller_reportcontroller",
+      "target": "admin_reportcontroller_reportcontroller_overview",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/ReportController.php",
+      "source_location": "L48",
+      "weight": 1.0,
+      "source": "admin_reportcontroller_reportcontroller",
+      "target": "admin_reportcontroller_reportcontroller_users",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/ReportController.php",
+      "source_location": "L80",
+      "weight": 1.0,
+      "source": "admin_reportcontroller_reportcontroller",
+      "target": "admin_reportcontroller_reportcontroller_jobs",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/ReportController.php",
+      "source_location": "L105",
+      "weight": 1.0,
+      "source": "admin_reportcontroller_reportcontroller",
+      "target": "admin_reportcontroller_reportcontroller_revenue",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/ReportController.php",
+      "source_location": "L130",
+      "weight": 1.0,
+      "source": "admin_reportcontroller_reportcontroller",
+      "target": "admin_reportcontroller_reportcontroller_export",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/2024_01_01_create_tables.php",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "admin_2024_01_01_create_tables_php",
+      "target": "admin_2024_01_01_create_tables_up",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/2024_01_01_create_tables.php",
+      "source_location": "L68",
+      "weight": 1.0,
+      "source": "admin_2024_01_01_create_tables_php",
+      "target": "admin_2024_01_01_create_tables_down",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/JobController.php",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "admin_jobcontroller_php",
+      "target": "admin_jobcontroller_jobcontroller",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/JobController.php",
+      "source_location": "L11",
+      "weight": 1.0,
+      "source": "admin_jobcontroller_jobcontroller",
+      "target": "admin_jobcontroller_jobcontroller_index",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/JobController.php",
+      "source_location": "L44",
+      "weight": 1.0,
+      "source": "admin_jobcontroller_jobcontroller",
+      "target": "admin_jobcontroller_jobcontroller_show",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/JobController.php",
+      "source_location": "L57",
+      "weight": 1.0,
+      "source": "admin_jobcontroller_jobcontroller",
+      "target": "admin_jobcontroller_jobcontroller_approve",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/JobController.php",
+      "source_location": "L68",
+      "weight": 1.0,
+      "source": "admin_jobcontroller_jobcontroller",
+      "target": "admin_jobcontroller_jobcontroller_reject",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/JobController.php",
+      "source_location": "L79",
+      "weight": 1.0,
+      "source": "admin_jobcontroller_jobcontroller",
+      "target": "admin_jobcontroller_jobcontroller_close",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/JobController.php",
+      "source_location": "L90",
+      "weight": 1.0,
+      "source": "admin_jobcontroller_jobcontroller",
+      "target": "admin_jobcontroller_jobcontroller_flag",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/JobController.php",
+      "source_location": "L103",
+      "weight": 1.0,
+      "source": "admin_jobcontroller_jobcontroller",
+      "target": "admin_jobcontroller_jobcontroller_destroy",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/PaymentController.php",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "admin_paymentcontroller_php",
+      "target": "admin_paymentcontroller_paymentcontroller",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/PaymentController.php",
+      "source_location": "L11",
+      "weight": 1.0,
+      "source": "admin_paymentcontroller_paymentcontroller",
+      "target": "admin_paymentcontroller_paymentcontroller_index",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/PaymentController.php",
+      "source_location": "L48",
+      "weight": 1.0,
+      "source": "admin_paymentcontroller_paymentcontroller",
+      "target": "admin_paymentcontroller_paymentcontroller_show",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/PaymentController.php",
+      "source_location": "L62",
+      "weight": 1.0,
+      "source": "admin_paymentcontroller_paymentcontroller",
+      "target": "admin_paymentcontroller_paymentcontroller_refund",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/PaymentController.php",
+      "source_location": "L91",
+      "weight": 1.0,
+      "source": "admin_paymentcontroller_paymentcontroller",
+      "target": "admin_paymentcontroller_paymentcontroller_resolvedispute",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/PaymentController.php",
+      "source_location": "L113",
+      "weight": 1.0,
+      "source": "admin_paymentcontroller_paymentcontroller",
+      "target": "admin_paymentcontroller_paymentcontroller_summary",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "admin_api_js",
+      "target": "admin_api_apiservice",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L48",
+      "weight": 1.0,
+      "source": "admin_api_js",
+      "target": "admin_api_api",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L51",
+      "weight": 1.0,
+      "source": "admin_api_js",
+      "target": "admin_api_login",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L52",
+      "weight": 1.0,
+      "source": "admin_api_js",
+      "target": "admin_api_logout",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L53",
+      "weight": 1.0,
+      "source": "admin_api_js",
+      "target": "admin_api_getme",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L56",
+      "weight": 1.0,
+      "source": "admin_api_js",
+      "target": "admin_api_getdashboardstats",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L57",
+      "weight": 1.0,
+      "source": "admin_api_js",
+      "target": "admin_api_getrevenuechart",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L58",
+      "weight": 1.0,
+      "source": "admin_api_js",
+      "target": "admin_api_getrecentactivity",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L61",
+      "weight": 1.0,
+      "source": "admin_api_js",
+      "target": "admin_api_getusers",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L62",
+      "weight": 1.0,
+      "source": "admin_api_js",
+      "target": "admin_api_getuser",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L63",
+      "weight": 1.0,
+      "source": "admin_api_js",
+      "target": "admin_api_updateuser",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L64",
+      "weight": 1.0,
+      "source": "admin_api_js",
+      "target": "admin_api_deleteuser",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L65",
+      "weight": 1.0,
+      "source": "admin_api_js",
+      "target": "admin_api_suspenduser",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L66",
+      "weight": 1.0,
+      "source": "admin_api_js",
+      "target": "admin_api_activateuser",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L67",
+      "weight": 1.0,
+      "source": "admin_api_js",
+      "target": "admin_api_verifyuser",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L68",
+      "weight": 1.0,
+      "source": "admin_api_js",
+      "target": "admin_api_getuserjobs",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L69",
+      "weight": 1.0,
+      "source": "admin_api_js",
+      "target": "admin_api_getuserpayments",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L72",
+      "weight": 1.0,
+      "source": "admin_api_js",
+      "target": "admin_api_getjobs",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L73",
+      "weight": 1.0,
+      "source": "admin_api_js",
+      "target": "admin_api_getjob",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L74",
+      "weight": 1.0,
+      "source": "admin_api_js",
+      "target": "admin_api_approvejob",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L75",
+      "weight": 1.0,
+      "source": "admin_api_js",
+      "target": "admin_api_rejectjob",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L76",
+      "weight": 1.0,
+      "source": "admin_api_js",
+      "target": "admin_api_closejob",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L77",
+      "weight": 1.0,
+      "source": "admin_api_js",
+      "target": "admin_api_flagjob",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L78",
+      "weight": 1.0,
+      "source": "admin_api_js",
+      "target": "admin_api_deletejob",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L81",
+      "weight": 1.0,
+      "source": "admin_api_js",
+      "target": "admin_api_getpayments",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L82",
+      "weight": 1.0,
+      "source": "admin_api_js",
+      "target": "admin_api_getpayment",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L83",
+      "weight": 1.0,
+      "source": "admin_api_js",
+      "target": "admin_api_refundpayment",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L84",
+      "weight": 1.0,
+      "source": "admin_api_js",
+      "target": "admin_api_resolvedispute",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L85",
+      "weight": 1.0,
+      "source": "admin_api_js",
+      "target": "admin_api_getpaymentsummary",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L88",
+      "weight": 1.0,
+      "source": "admin_api_js",
+      "target": "admin_api_getreportoverview",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L89",
+      "weight": 1.0,
+      "source": "admin_api_js",
+      "target": "admin_api_getuserreport",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L90",
+      "weight": 1.0,
+      "source": "admin_api_js",
+      "target": "admin_api_getjobreport",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L91",
+      "weight": 1.0,
+      "source": "admin_api_js",
+      "target": "admin_api_getrevenuereport",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L92",
+      "weight": 1.0,
+      "source": "admin_api_js",
+      "target": "admin_api_exportreport",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "admin_api_apiservice",
+      "target": "admin_api_apiservice_constructor",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "admin_api_apiservice",
+      "target": "admin_api_apiservice_gettoken",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L13",
+      "weight": 1.0,
+      "source": "admin_api_apiservice",
+      "target": "admin_api_apiservice_request",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L41",
+      "weight": 1.0,
+      "source": "admin_api_apiservice",
+      "target": "admin_api_apiservice_get",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L42",
+      "weight": 1.0,
+      "source": "admin_api_apiservice",
+      "target": "admin_api_apiservice_post",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L43",
+      "weight": 1.0,
+      "source": "admin_api_apiservice",
+      "target": "admin_api_apiservice_put",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L44",
+      "weight": 1.0,
+      "source": "admin_api_apiservice",
+      "target": "admin_api_apiservice_patch",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L45",
+      "weight": 1.0,
+      "source": "admin_api_apiservice",
+      "target": "admin_api_apiservice_delete",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L22",
+      "weight": 1.0,
+      "source": "admin_api_apiservice_request",
+      "target": "admin_api_apiservice_gettoken",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L41",
+      "weight": 1.0,
+      "source": "admin_api_apiservice_get",
+      "target": "admin_api_apiservice_request",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L42",
+      "weight": 1.0,
+      "source": "admin_api_apiservice_post",
+      "target": "admin_api_apiservice_request",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L43",
+      "weight": 1.0,
+      "source": "admin_api_apiservice_put",
+      "target": "admin_api_apiservice_request",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L44",
+      "weight": 1.0,
+      "source": "admin_api_apiservice_patch",
+      "target": "admin_api_apiservice_request",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L45",
+      "weight": 1.0,
+      "source": "admin_api_apiservice_delete",
+      "target": "admin_api_apiservice_request",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L53",
+      "weight": 1.0,
+      "source": "admin_api_getme",
+      "target": "admin_api_apiservice_get",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L56",
+      "weight": 1.0,
+      "source": "admin_api_getdashboardstats",
+      "target": "admin_api_apiservice_get",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L57",
+      "weight": 1.0,
+      "source": "admin_api_getrevenuechart",
+      "target": "admin_api_apiservice_get",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L58",
+      "weight": 1.0,
+      "source": "admin_api_getrecentactivity",
+      "target": "admin_api_apiservice_get",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L61",
+      "weight": 1.0,
+      "source": "admin_api_getusers",
+      "target": "admin_api_apiservice_get",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L62",
+      "weight": 1.0,
+      "source": "admin_api_getuser",
+      "target": "admin_api_apiservice_get",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L68",
+      "weight": 1.0,
+      "source": "admin_api_getuserjobs",
+      "target": "admin_api_apiservice_get",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L69",
+      "weight": 1.0,
+      "source": "admin_api_getuserpayments",
+      "target": "admin_api_apiservice_get",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L72",
+      "weight": 1.0,
+      "source": "admin_api_getjobs",
+      "target": "admin_api_apiservice_get",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L73",
+      "weight": 1.0,
+      "source": "admin_api_getjob",
+      "target": "admin_api_apiservice_get",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L81",
+      "weight": 1.0,
+      "source": "admin_api_getpayments",
+      "target": "admin_api_apiservice_get",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L82",
+      "weight": 1.0,
+      "source": "admin_api_getpayment",
+      "target": "admin_api_apiservice_get",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L85",
+      "weight": 1.0,
+      "source": "admin_api_getpaymentsummary",
+      "target": "admin_api_apiservice_get",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L88",
+      "weight": 1.0,
+      "source": "admin_api_getreportoverview",
+      "target": "admin_api_apiservice_get",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L89",
+      "weight": 1.0,
+      "source": "admin_api_getuserreport",
+      "target": "admin_api_apiservice_get",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L90",
+      "weight": 1.0,
+      "source": "admin_api_getjobreport",
+      "target": "admin_api_apiservice_get",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L91",
+      "weight": 1.0,
+      "source": "admin_api_getrevenuereport",
+      "target": "admin_api_apiservice_get",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L92",
+      "weight": 1.0,
+      "source": "admin_api_exportreport",
+      "target": "admin_api_apiservice_get",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L51",
+      "weight": 1.0,
+      "source": "admin_api_login",
+      "target": "admin_api_apiservice_post",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L52",
+      "weight": 1.0,
+      "source": "admin_api_logout",
+      "target": "admin_api_apiservice_post",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L63",
+      "weight": 1.0,
+      "source": "admin_api_updateuser",
+      "target": "admin_api_apiservice_put",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L65",
+      "weight": 1.0,
+      "source": "admin_api_suspenduser",
+      "target": "admin_api_apiservice_patch",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L66",
+      "weight": 1.0,
+      "source": "admin_api_activateuser",
+      "target": "admin_api_apiservice_patch",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L67",
+      "weight": 1.0,
+      "source": "admin_api_verifyuser",
+      "target": "admin_api_apiservice_patch",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L74",
+      "weight": 1.0,
+      "source": "admin_api_approvejob",
+      "target": "admin_api_apiservice_patch",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L75",
+      "weight": 1.0,
+      "source": "admin_api_rejectjob",
+      "target": "admin_api_apiservice_patch",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L76",
+      "weight": 1.0,
+      "source": "admin_api_closejob",
+      "target": "admin_api_apiservice_patch",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L77",
+      "weight": 1.0,
+      "source": "admin_api_flagjob",
+      "target": "admin_api_apiservice_patch",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L83",
+      "weight": 1.0,
+      "source": "admin_api_refundpayment",
+      "target": "admin_api_apiservice_patch",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L84",
+      "weight": 1.0,
+      "source": "admin_api_resolvedispute",
+      "target": "admin_api_apiservice_patch",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L64",
+      "weight": 1.0,
+      "source": "admin_api_deleteuser",
+      "target": "admin_api_apiservice_delete",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/api.js",
+      "source_location": "L78",
+      "weight": 1.0,
+      "source": "admin_api_deletejob",
+      "target": "admin_api_apiservice_delete",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "actions/upload_doc.php",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "actions_upload_doc_php",
+      "target": "actions_upload_doc_json_response",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "assets/js/main.js",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "assets_js_main_js",
+      "target": "js_main_toggle",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "assets/js/main.js",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "assets_js_main_js",
+      "target": "js_main_menu",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "assets/js/main.js",
+      "source_location": "L17",
+      "weight": 1.0,
+      "source": "assets_js_main_js",
+      "target": "js_main_navbar",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "assets/js/main.js",
+      "source_location": "L31",
+      "weight": 1.0,
+      "source": "assets_js_main_js",
+      "target": "js_main_observeroptions",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "assets/js/main.js",
+      "source_location": "L36",
+      "weight": 1.0,
+      "source": "assets_js_main_js",
+      "target": "js_main_observer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "freelancer_includes_footer_test_js",
+      "target": "includes_footer_test_clients",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L18",
+      "weight": 1.0,
+      "source": "freelancer_includes_footer_test_js",
+      "target": "includes_footer_test_spentbadge",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L25",
+      "weight": 1.0,
+      "source": "freelancer_includes_footer_test_js",
+      "target": "includes_footer_test_jobrowhtml",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L68",
+      "weight": 1.0,
+      "source": "freelancer_includes_footer_test_js",
+      "target": "includes_footer_test_renderjobs",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L77",
+      "weight": 1.0,
+      "source": "freelancer_includes_footer_test_js",
+      "target": "includes_footer_test_modals",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L317",
+      "weight": 1.0,
+      "source": "freelancer_includes_footer_test_js",
+      "target": "includes_footer_test_togglepwvis",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L324",
+      "weight": 1.0,
+      "source": "freelancer_includes_footer_test_js",
+      "target": "includes_footer_test_checkpwstrength",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L352",
+      "weight": 1.0,
+      "source": "freelancer_includes_footer_test_js",
+      "target": "includes_footer_test_checkpwmatch",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L367",
+      "weight": 1.0,
+      "source": "freelancer_includes_footer_test_js",
+      "target": "includes_footer_test_checkandapply",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L386",
+      "weight": 1.0,
+      "source": "freelancer_includes_footer_test_js",
+      "target": "includes_footer_test_submitproposal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L436",
+      "weight": 1.0,
+      "source": "freelancer_includes_footer_test_js",
+      "target": "includes_footer_test_submitpasswordreset",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L464",
+      "weight": 1.0,
+      "source": "freelancer_includes_footer_test_js",
+      "target": "includes_footer_test_openmodal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L465",
+      "weight": 1.0,
+      "source": "freelancer_includes_footer_test_js",
+      "target": "includes_footer_test_closemodal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L468",
+      "weight": 1.0,
+      "source": "freelancer_includes_footer_test_js",
+      "target": "includes_footer_test_toast",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L469",
+      "weight": 1.0,
+      "source": "freelancer_includes_footer_test_js",
+      "target": "includes_footer_test_togglesidebar",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L475",
+      "weight": 1.0,
+      "source": "freelancer_includes_footer_test_js",
+      "target": "includes_footer_test_showpage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L493",
+      "weight": 1.0,
+      "source": "freelancer_includes_footer_test_js",
+      "target": "includes_footer_test_earnings_info",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L514",
+      "weight": 1.0,
+      "source": "freelancer_includes_footer_test_js",
+      "target": "includes_footer_test_showearningsinfo",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L534",
+      "weight": 1.0,
+      "source": "freelancer_includes_footer_test_js",
+      "target": "includes_footer_test_freelancerstate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L542",
+      "weight": 1.0,
+      "source": "freelancer_includes_footer_test_js",
+      "target": "includes_footer_test_selectedpkg",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L544",
+      "weight": 1.0,
+      "source": "freelancer_includes_footer_test_js",
+      "target": "includes_footer_test_selectconnectpkg",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L573",
+      "weight": 1.0,
+      "source": "freelancer_includes_footer_test_js",
+      "target": "includes_footer_test_initiatepaystackpayment",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L606",
+      "weight": 1.0,
+      "source": "freelancer_includes_footer_test_js",
+      "target": "includes_footer_test_onpaystacksuccess",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L661",
+      "weight": 1.0,
+      "source": "freelancer_includes_footer_test_js",
+      "target": "includes_footer_test_updateapplymodalconnects",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L678",
+      "weight": 1.0,
+      "source": "freelancer_includes_footer_test_js",
+      "target": "includes_footer_test_skill_tree",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L806",
+      "weight": 1.0,
+      "source": "freelancer_includes_footer_test_js",
+      "target": "includes_footer_test_selectedskills",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L809",
+      "weight": 1.0,
+      "source": "freelancer_includes_footer_test_js",
+      "target": "includes_footer_test_openskillselector",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L819",
+      "weight": 1.0,
+      "source": "freelancer_includes_footer_test_js",
+      "target": "includes_footer_test_closeskillselector",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L824",
+      "weight": 1.0,
+      "source": "freelancer_includes_footer_test_js",
+      "target": "includes_footer_test_rendercatcol",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L836",
+      "weight": 1.0,
+      "source": "freelancer_includes_footer_test_js",
+      "target": "includes_footer_test_renderspeccol",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L855",
+      "weight": 1.0,
+      "source": "freelancer_includes_footer_test_js",
+      "target": "includes_footer_test_toggleskill",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L873",
+      "weight": 1.0,
+      "source": "freelancer_includes_footer_test_js",
+      "target": "includes_footer_test_el",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L874",
+      "weight": 1.0,
+      "source": "freelancer_includes_footer_test_js",
+      "target": "includes_footer_test_arr",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L59",
+      "weight": 1.0,
+      "source": "includes_footer_test_jobrowhtml",
+      "target": "includes_footer_test_spentbadge",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L349",
+      "weight": 1.0,
+      "source": "includes_footer_test_checkpwstrength",
+      "target": "includes_footer_test_checkpwmatch",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L369",
+      "weight": 1.0,
+      "source": "includes_footer_test_checkandapply",
+      "target": "includes_footer_test_toast",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L371",
+      "weight": 1.0,
+      "source": "includes_footer_test_checkandapply",
+      "target": "includes_footer_test_openmodal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L393",
+      "weight": 1.0,
+      "source": "includes_footer_test_submitproposal",
+      "target": "includes_footer_test_toast",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L422",
+      "weight": 1.0,
+      "source": "includes_footer_test_submitproposal",
+      "target": "includes_footer_test_closemodal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L441",
+      "weight": 1.0,
+      "source": "includes_footer_test_submitpasswordreset",
+      "target": "includes_footer_test_toast",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L464",
+      "weight": 1.0,
+      "source": "includes_footer_test_openmodal",
+      "target": "includes_footer_test_toast",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L599",
+      "weight": 1.0,
+      "source": "includes_footer_test_initiatepaystackpayment",
+      "target": "includes_footer_test_toast",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L657",
+      "weight": 1.0,
+      "source": "includes_footer_test_onpaystacksuccess",
+      "target": "includes_footer_test_toast",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L860",
+      "weight": 1.0,
+      "source": "includes_footer_test_toggleskill",
+      "target": "includes_footer_test_toast",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L596",
+      "weight": 1.0,
+      "source": "includes_footer_test_initiatepaystackpayment",
+      "target": "includes_footer_test_onpaystacksuccess",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L813",
+      "weight": 1.0,
+      "source": "includes_footer_test_openskillselector",
+      "target": "includes_footer_test_rendercatcol",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L833",
+      "weight": 1.0,
+      "source": "includes_footer_test_rendercatcol",
+      "target": "includes_footer_test_renderspeccol",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L865",
+      "weight": 1.0,
+      "source": "includes_footer_test_toggleskill",
+      "target": "includes_footer_test_rendercatcol",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "freelancer/includes/footer_test.js",
+      "source_location": "L864",
+      "weight": 1.0,
+      "source": "includes_footer_test_toggleskill",
+      "target": "includes_footer_test_renderspeccol",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".agents/workflows/graphify.md",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "agents_workflows_graphify_md",
+      "target": "workflows_graphify_workflow_graphify",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".agents/rules/graphify.md",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "agents_rules_graphify_md",
+      "target": "rules_graphify_graphify",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/README.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "admin_readme_md",
+      "target": "admin_readme_upadmin_upwork_style_admin_panel",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/README.md",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "admin_readme_upadmin_upwork_style_admin_panel",
+      "target": "admin_readme_project_structure",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/README.md",
+      "source_location": "L41",
+      "weight": 1.0,
+      "source": "admin_readme_upadmin_upwork_style_admin_panel",
+      "target": "admin_readme_backend_setup_laravel",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/README.md",
+      "source_location": "L113",
+      "weight": 1.0,
+      "source": "admin_readme_upadmin_upwork_style_admin_panel",
+      "target": "admin_readme_frontend_setup",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/README.md",
+      "source_location": "L147",
+      "weight": 1.0,
+      "source": "admin_readme_upadmin_upwork_style_admin_panel",
+      "target": "admin_readme_api_reference",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/README.md",
+      "source_location": "L202",
+      "weight": 1.0,
+      "source": "admin_readme_upadmin_upwork_style_admin_panel",
+      "target": "admin_readme_admin_panel_features",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/README.md",
+      "source_location": "L213",
+      "weight": 1.0,
+      "source": "admin_readme_upadmin_upwork_style_admin_panel",
+      "target": "admin_readme_security_notes",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/README.md",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "admin_readme_project_structure",
+      "target": "admin_readme_codeblock_1",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/README.md",
+      "source_location": "L43",
+      "weight": 1.0,
+      "source": "admin_readme_backend_setup_laravel",
+      "target": "admin_readme_1_install_in_your_existing_laravel_project",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/README.md",
+      "source_location": "L63",
+      "weight": 1.0,
+      "source": "admin_readme_backend_setup_laravel",
+      "target": "admin_readme_2_register_middleware_in_app_http_kernel_php",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/README.md",
+      "source_location": "L72",
+      "weight": 1.0,
+      "source": "admin_readme_backend_setup_laravel",
+      "target": "admin_readme_3_install_laravel_sanctum_if_not_already",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/README.md",
+      "source_location": "L80",
+      "weight": 1.0,
+      "source": "admin_readme_backend_setup_laravel",
+      "target": "admin_readme_4_run_migrations",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/README.md",
+      "source_location": "L86",
+      "weight": 1.0,
+      "source": "admin_readme_backend_setup_laravel",
+      "target": "admin_readme_5_create_your_first_admin_user",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/README.md",
+      "source_location": "L101",
+      "weight": 1.0,
+      "source": "admin_readme_backend_setup_laravel",
+      "target": "admin_readme_6_add_cors_headers_if_frontend_is_on_a_different_domain",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/README.md",
+      "source_location": "L47",
+      "weight": 1.0,
+      "source": "admin_readme_1_install_in_your_existing_laravel_project",
+      "target": "admin_readme_codeblock_2",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/README.md",
+      "source_location": "L65",
+      "weight": 1.0,
+      "source": "admin_readme_2_register_middleware_in_app_http_kernel_php",
+      "target": "admin_readme_codeblock_3",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/README.md",
+      "source_location": "L74",
+      "weight": 1.0,
+      "source": "admin_readme_3_install_laravel_sanctum_if_not_already",
+      "target": "admin_readme_codeblock_4",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/README.md",
+      "source_location": "L82",
+      "weight": 1.0,
+      "source": "admin_readme_4_run_migrations",
+      "target": "admin_readme_codeblock_5",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/README.md",
+      "source_location": "L88",
+      "weight": 1.0,
+      "source": "admin_readme_5_create_your_first_admin_user",
+      "target": "admin_readme_codeblock_6",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/README.md",
+      "source_location": "L91",
+      "weight": 1.0,
+      "source": "admin_readme_5_create_your_first_admin_user",
+      "target": "admin_readme_codeblock_7",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/README.md",
+      "source_location": "L104",
+      "weight": 1.0,
+      "source": "admin_readme_6_add_cors_headers_if_frontend_is_on_a_different_domain",
+      "target": "admin_readme_codeblock_8",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/README.md",
+      "source_location": "L115",
+      "weight": 1.0,
+      "source": "admin_readme_frontend_setup",
+      "target": "admin_readme_option_a_drop_in_html_simplest",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/README.md",
+      "source_location": "L128",
+      "weight": 1.0,
+      "source": "admin_readme_frontend_setup",
+      "target": "admin_readme_option_b_inject_api_url_via_server",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/README.md",
+      "source_location": "L135",
+      "weight": 1.0,
+      "source": "admin_readme_frontend_setup",
+      "target": "admin_readme_option_c_react_vue_integration",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/README.md",
+      "source_location": "L119",
+      "weight": 1.0,
+      "source": "admin_readme_option_a_drop_in_html_simplest",
+      "target": "admin_readme_codeblock_9",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/README.md",
+      "source_location": "L123",
+      "weight": 1.0,
+      "source": "admin_readme_option_a_drop_in_html_simplest",
+      "target": "admin_readme_codeblock_10",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/README.md",
+      "source_location": "L131",
+      "weight": 1.0,
+      "source": "admin_readme_option_b_inject_api_url_via_server",
+      "target": "admin_readme_codeblock_11",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/README.md",
+      "source_location": "L138",
+      "weight": 1.0,
+      "source": "admin_readme_option_c_react_vue_integration",
+      "target": "admin_readme_codeblock_12",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/README.md",
+      "source_location": "L149",
+      "weight": 1.0,
+      "source": "admin_readme_api_reference",
+      "target": "admin_readme_authentication",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/README.md",
+      "source_location": "L156",
+      "weight": 1.0,
+      "source": "admin_readme_api_reference",
+      "target": "admin_readme_dashboard",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/README.md",
+      "source_location": "L163",
+      "weight": 1.0,
+      "source": "admin_readme_api_reference",
+      "target": "admin_readme_users",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/README.md",
+      "source_location": "L174",
+      "weight": 1.0,
+      "source": "admin_readme_api_reference",
+      "target": "admin_readme_jobs",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/README.md",
+      "source_location": "L183",
+      "weight": 1.0,
+      "source": "admin_readme_api_reference",
+      "target": "admin_readme_payments",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "admin/README.md",
+      "source_location": "L191",
+      "weight": 1.0,
+      "source": "admin_readme_api_reference",
+      "target": "admin_readme_reports",
+      "confidence_score": 1.0
+    }
+  ],
+  "hyperedges": [],
+  "built_at_commit": "266bbf2ef638d48e72fbf8c453473f5dd4457948"
+}
