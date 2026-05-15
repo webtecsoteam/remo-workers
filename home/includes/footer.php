@@ -119,8 +119,44 @@ const M={
 <option>Chemical Engineering</option>
 </optgroup>
 </select></div><div class="form-group"><label>Project Type</label><select><option>One-time project</option><option>Ongoing / Long-term</option><option>Full-time contract</option><option>Fractional / Part-time</option><option>Consulting call (hourly)</option></select></div></div><div class="form-group"><label>Budget Type</label><div class="budget-opts"><div class="budget-opt sel" onclick="this.parentElement.querySelectorAll('.budget-opt').forEach(b=>b.classList.remove('sel'));this.classList.add('sel')"><h4>Hourly Rate</h4><p>Pay per hour worked</p></div><div class="budget-opt" onclick="this.parentElement.querySelectorAll('.budget-opt').forEach(b=>b.classList.remove('sel'));this.classList.add('sel')"><h4>Fixed Price</h4><p>Set a total budget</p></div></div></div><div class="form-row"><div class="form-group"><label>Budget From ($)</label><input type="number" placeholder="e.g. 500"></div><div class="form-group"><label>Budget To ($)</label><input type="number" placeholder="e.g. 2000"></div></div><div class="form-group"><label>Timeline</label><select><option>Less than 1 week</option><option>1–2 weeks</option><option>1 month</option><option>1–3 months</option><option>3–6 months</option><option>More than 6 months</option></select></div><div class="modal-actions"><button class="btn btn-dark btn-full" onclick="showToast('Job posted! 🎉','Your job is live — expect proposals within hours.')">Post Job Free →</button></div>`},
-'signup':{t:'Create your account',b:`<form action="${APP_URL}register" method="POST"><div style="text-align:center;color:#617a5a;font-size:13px;margin-bottom:20px;display:flex;align-items:center;gap:12px"><div style="flex:1;height:1px;background:#dce8d8"></div>sign up with email<div style="flex:1;height:1px;background:#dce8d8"></div></div><div class="form-group"><label>Full Name</label><input type="text" name="name" required placeholder="John Doe"></div><div class="form-group"><label>Email Address</label><input type="email" name="email" required placeholder="jane@company.com"></div><div class="form-group"><label>Password</label><input type="password" name="password" required placeholder="Min. 8 characters"></div><div class="form-group"><label>I want to...</label><div class="budget-opts"><label class="budget-opt sel" style="cursor:pointer" onclick="this.parentElement.querySelectorAll('.budget-opt').forEach(b=>b.classList.remove('sel'));this.classList.add('sel')"><input type="radio" name="role" value="client" checked style="display:none"><h4>Hire Talent</h4><p>Post jobs & find freelancers</p></label><label class="budget-opt" style="cursor:pointer" onclick="this.parentElement.querySelectorAll('.budget-opt').forEach(b=>b.classList.remove('sel'));this.classList.add('sel')"><input type="radio" name="role" value="freelancer" style="display:none"><h4>Find Work</h4><p>Get hired as a freelancer</p></label></div></div><div class="modal-actions"><button type="submit" class="btn btn-green btn-full">Create Free Account</button></div><p style="text-align:center;font-size:12.5px;color:#617a5a;margin-top:14px">Already have an account? <a onclick="openModal('login')" style="color:#14a800;font-weight:600;cursor:pointer">Log in</a></p></form>`},
-'login':{t:'Welcome back',b:`<form action="${APP_URL}login" method="POST"><div style="text-align:center;color:#617a5a;font-size:13px;margin-bottom:20px;display:flex;align-items:center;gap:12px"><div style="flex:1;height:1px;background:#dce8d8"></div>log in with email<div style="flex:1;height:1px;background:#dce8d8"></div></div><div class="form-group"><label>Email Address</label><input type="email" name="email" required placeholder="you@email.com"></div><div class="form-group"><label>Password</label><input type="password" name="password" required placeholder="Your password"><small style="text-align:right;display:block"><a style="color:#14a800;font-weight:600;cursor:pointer" onclick="showToast('Password reset','Check your email for a reset link')">Forgot password?</a></small></div><div class="modal-actions"><button type="submit" class="btn btn-green btn-full">Log In</button></div><p style="text-align:center;font-size:12.5px;color:#617a5a;margin-top:14px">New to Remoworkers? <a onclick="openModal('signup')" style="color:#14a800;font-weight:600;cursor:pointer">Sign up free</a></p></form>`},
+ 'signup':{t:'Create your account',b:`
+    <div id="register-error" style="display:none; background:rgba(239,68,68,0.1); color:#ef4444; padding:10px; border-radius:8px; font-size:13px; margin-bottom:16px; border:1px solid rgba(239,68,68,0.2); text-align:center;"></div>
+    <form id="register-form" onsubmit="handleRegister(event)">
+      <div style="text-align:center;color:#617a5a;font-size:13px;margin-bottom:20px;display:flex;align-items:center;gap:12px"><div style="flex:1;height:1px;background:#dce8d8"></div>sign up with email<div style="flex:1;height:1px;background:#dce8d8"></div></div>
+      <div class="form-group"><label>Full Name</label><input type="text" name="name" required placeholder="John Doe"></div>
+      <div class="form-group"><label>Email Address</label><input type="email" name="email" required placeholder="jane@company.com"></div>
+      <div class="form-group"><label>Password</label><input type="password" name="password" required placeholder="Min. 8 characters"></div>
+      <div class="form-group"><label>I want to...</label>
+        <div class="budget-opts">
+          <label class="budget-opt sel" style="cursor:pointer" onclick="this.parentElement.querySelectorAll('.budget-opt').forEach(b=>b.classList.remove('sel'));this.classList.add('sel')">
+            <input type="radio" name="role" value="client" checked style="display:none">
+            <h4>Hire Talent</h4><p>Post jobs & find freelancers</p>
+          </label>
+          <label class="budget-opt" style="cursor:pointer" onclick="this.parentElement.querySelectorAll('.budget-opt').forEach(b=>b.classList.remove('sel'));this.classList.add('sel')">
+            <input type="radio" name="role" value="freelancer" style="display:none">
+            <h4>Find Work</h4><p>Get hired as a freelancer</p>
+          </label>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="submit" class="btn btn-green btn-full btn-lg" id="register-btn">
+          <span class="btn-text">Create Free Account</span>
+          <span class="btn-loader" style="display:none;"><svg class="spinner" viewBox="0 0 50 50" style="width:20px;height:20px;"><circle cx="25" cy="25" r="20" fill="none" stroke="currentColor" stroke-width="5"></circle></svg></span>
+        </button>
+      </div>
+      <p style="text-align:center;font-size:12.5px;color:#617a5a;margin-top:14px">Already have an account? <a onclick="openModal('login')" style="color:#14a800;font-weight:600;cursor:pointer">Log in</a></p>
+    </form>`},
+ 'login':{t:'Welcome back',b:`
+    <div id="login-error" style="display:none; background:rgba(239,68,68,0.1); color:#ef4444; padding:10px; border-radius:8px; font-size:13px; margin-bottom:16px; border:1px solid rgba(239,68,68,0.2); text-align:center;"></div>
+    <form id="login-form" onsubmit="handleLogin(event)">
+      <div class="form-group"><label>Email Address</label><input type="email" name="email" required placeholder="name@company.com"></div>
+      <div class="form-group"><label>Password</label><input type="password" name="password" required placeholder="••••••••"></div>
+      <button type="submit" class="btn btn-green btn-full btn-lg" id="login-btn">
+        <span class="btn-text">Log In</span>
+        <span class="btn-loader" style="display:none;"><svg class="spinner" viewBox="0 0 50 50" style="width:20px;height:20px;"><circle cx="25" cy="25" r="20" fill="none" stroke="currentColor" stroke-width="5"></circle></svg></span>
+      </button>
+      <div style="text-align:center;margin-top:16px;font-size:13px;color:var(--muted)">Don't have an account? <a onclick="openModal('signup')" style="color:var(--g);font-weight:600;cursor:pointer">Sign up free</a></div>
+    </form>`},
 'prof-anika':{t:'Anika Nkosi',b:`<div class="prof-header"><div class="prof-av" style="background:#d1fae5;color:#065f46">AN</div><div class="prof-info"><h3>Anika Nkosi</h3><p>🇩🇪 Berlin, Germany · Member since 2020 · Online now</p><div class="prof-badges"><span class="pbadge pb-g">✦ Top Rated Plus</span><span class="pbadge pb-g">✓ ID Verified</span><span class="pbadge pb-g">📋 Available now</span></div></div></div><div class="prof-stats"><div class="ps"><span class="ps-val">★ 5.0</span><div class="ps-lbl">Rating</div></div><div class="ps"><span class="ps-val">127</span><div class="ps-lbl">Reviews</div></div><div class="ps"><span class="ps-val">98%</span><div class="ps-lbl">Job Success</div></div><div class="ps"><span class="ps-val">$90</span><div class="ps-lbl">Per Hour</div></div></div><div class="prof-section"><h4>About</h4><p>Senior UI/UX Designer with 8+ years crafting user-centered digital products for startups and Fortune 500 companies. Specialized in design systems, mobile apps, and Webflow. I've helped companies like Stripe, Notion, and Figma build products loved by millions.</p></div><div class="prof-section"><h4>Skills</h4><div class="skill-tags"><span class="stag">Figma</span><span class="stag">Webflow</span><span class="stag">Prototyping</span><span class="stag">Design Systems</span><span class="stag">User Research</span><span class="stag">Framer</span><span class="stag">Motion Design</span></div></div><div class="prof-section"><h4>Portfolio</h4><div class="portfolio-grid"><div class="port-item" onclick="showToast('Finance app redesign','2025 — NPS went from 32 to 71')">💳</div><div class="port-item" onclick="showToast('SaaS design system','Built for 12-person product team')">📊</div><div class="port-item" onclick="showToast('E-commerce mobile app','3M+ downloads on launch week')">🛍️</div></div></div><div class="prof-section"><h4>Reviews</h4><div class="reviews-list"><div class="rev"><div class="rev-top"><div class="rev-av" style="background:#dbeafe;color:#1e40af">TM</div><div><div class="rev-name">TechMate Inc.</div><div class="rev-date">March 2026 · ★★★★★</div></div></div><div class="rev-text">"Anika completely transformed our product. Delivered a comprehensive design system in 2 weeks. Exceptional quality and communication throughout."</div></div><div class="rev"><div class="rev-top"><div class="rev-av" style="background:#fef3c7;color:#92400e">FP</div><div><div class="rev-name">FinPulse</div><div class="rev-date">February 2026 · ★★★★★</div></div></div><div class="rev-text">"Best designer I've ever worked with. She understood our users better than we did. Will hire again for our v2 redesign."</div></div></div></div><div class="modal-actions"><button class="btn btn-green btn-full" onclick="showToast('Message sent!','Anika will respond within 1 hour')">Message Anika</button><button class="btn btn-dark btn-full" onclick="showToast('Invite sent!','Anika has been invited to your job')">Invite to Job</button></div>`},
 'prof-james':{t:'James Kowalski',b:`<div class="prof-header"><div class="prof-av" style="background:#dbeafe;color:#1e40af">JK</div><div class="prof-info"><h3>James Kowalski</h3><p>🇨🇦 Toronto, Canada · Member since 2019 · Online now</p><div class="prof-badges"><span class="pbadge pb-b">★ Expert Vetted</span><span class="pbadge pb-g">✓ ID Verified</span><span class="pbadge pb-g">⚡ Fast Responder</span></div></div></div><div class="prof-stats"><div class="ps"><span class="ps-val">★ 4.9</span><div class="ps-lbl">Rating</div></div><div class="ps"><span class="ps-val">89</span><div class="ps-lbl">Reviews</div></div><div class="ps"><span class="ps-val">96%</span><div class="ps-lbl">Job Success</div></div><div class="ps"><span class="ps-val">$130</span><div class="ps-lbl">Per Hour</div></div></div><div class="prof-section"><h4>About</h4><p>Full Stack Engineer with 10+ years building scalable web applications. Specialized in React, Node.js, TypeScript, and AWS. Previously an engineering lead at a Series B fintech. I build fast, clean, maintainable code and communicate clearly throughout every project.</p></div><div class="prof-section"><h4>Skills</h4><div class="skill-tags"><span class="stag">React</span><span class="stag">TypeScript</span><span class="stag">Node.js</span><span class="stag">AWS</span><span class="stag">PostgreSQL</span><span class="stag">Docker</span><span class="stag">GraphQL</span><span class="stag">Next.js</span></div></div><div class="prof-section"><h4>Portfolio</h4><div class="portfolio-grid"><div class="port-item" onclick="showToast('Fintech payment API','Handles $2M/day in transactions')">💰</div><div class="port-item" onclick="showToast('Real-time chat platform','WebSocket architecture, 50K users')">💬</div><div class="port-item" onclick="showToast('E-commerce backend','Shopify + custom checkout, 99.9% uptime')">🏗️</div></div></div><div class="prof-section"><h4>Reviews</h4><div class="reviews-list"><div class="rev"><div class="rev-top"><div class="rev-av" style="background:#d1fae5;color:#065f46">NV</div><div><div class="rev-name">NexaVault</div><div class="rev-date">April 2026 · ★★★★★</div></div></div><div class="rev-text">"James delivered our entire backend in 3 weeks, ahead of schedule. Code is incredibly clean and well-documented. Highest recommendation."</div></div></div></div><div class="modal-actions"><button class="btn btn-green btn-full" onclick="showToast('Message sent!','James typically responds in under 1 hour')">Message James</button><button class="btn btn-dark btn-full" onclick="showToast('Invite sent!','James has been invited to your job')">Invite to Job</button></div>`},
 'prof-lena':{t:'Lena Thornton',b:`<div class="prof-header"><div class="prof-av" style="background:#fef3c7;color:#92400e">LT</div><div class="prof-info"><h3>Lena Thornton</h3><p>🇬🇧 London, UK · Member since 2018 · Responds within 2hrs</p><div class="prof-badges"><span class="pbadge pb-g">✦ Top Rated Plus</span><span class="pbadge pb-g">✓ ID Verified</span><span class="pbadge pb-y">🎓 Certified SEO</span></div></div></div><div class="prof-stats"><div class="ps"><span class="ps-val">★ 5.0</span><div class="ps-lbl">Rating</div></div><div class="ps"><span class="ps-val">203</span><div class="ps-lbl">Reviews</div></div><div class="ps"><span class="ps-val">100%</span><div class="ps-lbl">Job Success</div></div><div class="ps"><span class="ps-val">$65</span><div class="ps-lbl">Per Hour</div></div></div><div class="prof-section"><h4>About</h4><p>SEO strategist and content marketing lead with 9 years growing organic traffic for SaaS, fintech, and e-commerce brands. I specialize in technical SEO audits, keyword strategy, and content that ranks and converts. Former Head of Content at a $50M SaaS company.</p></div><div class="prof-section"><h4>Skills</h4><div class="skill-tags"><span class="stag">SEO</span><span class="stag">Copywriting</span><span class="stag">Content Strategy</span><span class="stag">Ahrefs</span><span class="stag">Google Analytics</span><span class="stag">Technical SEO</span><span class="stag">Link Building</span></div></div><div class="modal-actions"><button class="btn btn-green btn-full" onclick="showToast('Message sent!','Lena will respond within 2 hours')">Message Lena</button><button class="btn btn-dark btn-full" onclick="showToast('Invite sent!','Lena has been invited to your job')">Invite to Job</button></div>`},
@@ -242,6 +278,7 @@ if (urlParams.has('error')) {
     if (err === 'login_failed') showToast('Login Failed','Invalid email or password');
     if (err === 'registration_failed') showToast('Registration Failed','Email already exists or system error');
     if (err === 'missing_fields') showToast('Missing Fields','Please fill all required fields');
+    if (err === 'unauthorized') showToast('Access Denied','Please login as an Admin to access that section');
 }
 
 // ─── NEW MODALS ───
@@ -265,6 +302,88 @@ const NM = {
 Object.assign(M, NM);
 
 document.querySelectorAll('.uma-grid>div').forEach(el=>io.observe(el));
+async function handleLogin(e) {
+  e.preventDefault();
+  const form = e.target;
+  const btn = document.getElementById('login-btn');
+  const errorDiv = document.getElementById('login-error');
+  const btnText = btn.querySelector('.btn-text');
+  const btnLoader = btn.querySelector('.btn-loader');
+  
+  // Reset
+  errorDiv.style.display = 'none';
+  btnText.style.display = 'none';
+  btnLoader.style.display = 'inline-block';
+  btn.disabled = true;
+
+  try {
+    const formData = new FormData(form);
+    const response = await fetch(`${APP_URL}login`, {
+      method: 'POST',
+      body: formData,
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      window.location.href = result.redirect;
+    } else {
+      errorDiv.textContent = result.message || 'Invalid email or password.';
+      errorDiv.style.display = 'block';
+      btnText.style.display = 'inline-block';
+      btnLoader.style.display = 'none';
+      btn.disabled = false;
+    }
+  } catch (err) {
+    errorDiv.textContent = 'An error occurred. Please try again.';
+    errorDiv.style.display = 'block';
+    btnText.style.display = 'inline-block';
+    btnLoader.style.display = 'none';
+    btn.disabled = false;
+  }
+}
+
+async function handleRegister(e) {
+  e.preventDefault();
+  const form = e.target;
+  const btn = document.getElementById('register-btn');
+  const errorDiv = document.getElementById('register-error');
+  const btnText = btn.querySelector('.btn-text');
+  const btnLoader = btn.querySelector('.btn-loader');
+  
+  errorDiv.style.display = 'none';
+  btnText.style.display = 'none';
+  btnLoader.style.display = 'inline-block';
+  btn.disabled = true;
+
+  try {
+    const formData = new FormData(form);
+    const response = await fetch(`${APP_URL}register`, {
+      method: 'POST',
+      body: formData,
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      window.location.href = result.redirect;
+    } else {
+      errorDiv.textContent = result.message || 'Registration failed.';
+      errorDiv.style.display = 'block';
+      btnText.style.display = 'inline-block';
+      btnLoader.style.display = 'none';
+      btn.disabled = false;
+    }
+  } catch (err) {
+    errorDiv.textContent = 'An error occurred. Please try again.';
+    errorDiv.style.display = 'block';
+    btnText.style.display = 'inline-block';
+    btnLoader.style.display = 'none';
+    btn.disabled = false;
+  }
+}
 </script>
 </body>
 </html>

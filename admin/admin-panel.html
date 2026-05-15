@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admin Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #f4f2ee;
+    --surface: #ffffff;
+    --sidebar-bg: #0d1117;
+    --sidebar-text: #8b9db5;
+    --sidebar-active: #ffffff;
+    --sidebar-hover: #1c2333;
+    --accent: #14a800;
+    --accent-hover: #118a00;
+    --accent-light: #e6f5e6;
+    --text: #1a1a2e;
+    --text-2: #6b7280;
+    --text-3: #9ca3af;
+    --border: #e5e7eb;
+    --red: #ef4444;
+    --red-light: #fef2f2;
+    --amber: #f59e0b;
+    --amber-light: #fffbeb;
+    --blue: #3b82f6;
+    --blue-light: #eff6ff;
+    --radius: 10px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
+
+  /* Sidebar */
+  #sidebar {
+    width: 240px; min-height: 100vh; background: var(--sidebar-bg);
+    display: flex; flex-direction: column; position: fixed; left: 0; top: 0; bottom: 0; z-index: 100;
+  }
+  .logo { padding: 24px 20px 20px; border-bottom: 1px solid #1c2333; }
+  .logo span { color: var(--accent); font-size: 18px; font-weight: 600; letter-spacing: -0.3px; }
+  .logo small { display: block; color: var(--sidebar-text); font-size: 11px; margin-top: 2px; }
+  nav { padding: 16px 12px; flex: 1; }
+  .nav-section { margin-bottom: 24px; }
+  .nav-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #3d4f66; padding: 0 8px; margin-bottom: 6px; font-weight: 500; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; cursor: pointer; transition: all 0.15s; color: var(--sidebar-text); font-size: 13.5px; font-weight: 400; margin-bottom: 2px; }
+  .nav-item:hover { background: var(--sidebar-hover); color: #d1d8e4; }
+  .nav-item.active { background: #1c2f4a; color: var(--sidebar-active); font-weight: 500; }
+  .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+  .nav-badge { margin-left: auto; background: var(--red); color: #fff; font-size: 10px; font-weight: 600; border-radius: 10px; padding: 1px 6px; }
+  .sidebar-bottom { padding: 16px 12px; border-top: 1px solid #1c2333; }
+  .user-chip { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: 8px; cursor: pointer; }
+  .user-chip:hover { background: var(--sidebar-hover); }
+  .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; font-weight: 600; flex-shrink: 0; }
+  .user-info .name { font-size: 13px; color: #d1d8e4; font-weight: 500; }
+  .user-info .role { font-size: 11px; color: var(--sidebar-text); }
+
+  /* Main */
+  #main { margin-left: 240px; flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
+  header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 32px; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+  .header-left { display: flex; align-items: center; gap: 8px; }
+  .page-title { font-size: 16px; font-weight: 600; color: var(--text); }
+  .breadcrumb { font-size: 13px; color: var(--text-2); }
+  .header-right { display: flex; align-items: center; gap: 12px; }
+  .icon-btn { width: 36px; height: 36px; border: 1px solid var(--border); border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; background: var(--surface); transition: all 0.15s; }
+  .icon-btn:hover { background: var(--bg); }
+  .icon-btn svg { width: 16px; height: 16px; color: var(--text-2); }
+
+  #content { padding: 28px 32px; flex: 1; }
+
+  /* Cards */
+  .card { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); }
+  .card-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .card-title { font-size: 14px; font-weight: 600; }
+  .card-body { padding: 20px; }
+
+  /* Stats grid */
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+  .stat-card { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); padding: 20px; box-shadow: var(--shadow); }
+  .stat-label { font-size: 12px; color: var(--text-2); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .stat-value { font-size: 26px; font-weight: 600; color: var(--text); letter-spacing: -0.5px; }
+  .stat-change { font-size: 12px; margin-top: 6px; }
+  .stat-change.up { color: var(--accent); }
+  .stat-change.down { color: var(--red); }
+  .stat-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; }
+  .stat-icon.green { background: var(--accent-light); }
+  .stat-icon.blue { background: var(--blue-light); }
+  .stat-icon.amber { background: var(--amber-light); }
+  .stat-icon.red { background: var(--red-light); }
+
+  /* Charts row */
+  .charts-row { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 24px; }
+
+  /* Table */
+  .table-wrapper { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th { text-align: left; padding: 11px 16px; font-size: 11.5px; font-weight: 600; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.4px; border-bottom: 1px solid var(--border); background: #fafafa; }
+  td { padding: 13px 16px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #fafbfc; }
+
+  /* Badges */
+  .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 20px; font-size: 11.5px; font-weight: 500; }
+  .badge-green { background: var(--accent-light); color: var(--accent-hover); }
+  .badge-red { background: var(--red-light); color: #dc2626; }
+  .badge-amber { background: var(--amber-light); color: #d97706; }
+  .badge-blue { background: var(--blue-light); color: #2563eb; }
+  .badge-gray { background: #f3f4f6; color: #6b7280; }
+
+  /* Buttons */
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; border: none; transition: all 0.15s; font-family: inherit; }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: var(--accent-hover); }
+  .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+  .btn-outline:hover { background: var(--bg); }
+  .btn-danger { background: var(--red-light); color: var(--red); border: 1px solid #fecaca; }
+  .btn-danger:hover { background: #fecaca; }
+  .btn-sm { padding: 5px 11px; font-size: 12px; border-radius: 6px; }
+
+  /* Search & filters */
+  .toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+  .search-wrap { position: relative; flex: 1; min-width: 220px; }
+  .search-wrap svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; color: var(--text-3); }
+  .search-input { width: 100%; padding: 8px 12px 8px 32px; border: 1px solid var(--border); border-radius: 8px; font-size: 13.5px; font-family: inherit; outline: none; background: var(--surface); }
+  .search-input:focus { border-color: var(--accent); }
+  .filter-select { padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; font-family: inherit; outline: none; background: var(--surface); cursor: pointer; }
+  .filter-select:focus { border-color: var(--accent); }
+
+  /* Pagination */
+  .pagination { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-top: 1px solid var(--border); font-size: 13px; color: var(--text-2); }
+  .pagination-btns { display: flex; gap: 4px; }
+  .page-btn { padding: 5px 11px; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; background: var(--surface); font-size: 13px; font-family: inherit; }
+  .page-btn:hover { background: var(--bg); }
+  .page-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+  /* Login page */
+  .login-page { position: fixed; inset: 0; background: var(--sidebar-bg); display: flex; align-items: center; justify-content: center; z-index: 999; }
+  .login-card { background: var(--surface); border-radius: 16px; padding: 40px; width: 380px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+  .login-logo { text-align: center; margin-bottom: 28px; }
+  .login-logo span { font-size: 24px; font-weight: 700; color: var(--accent); }
+  .login-logo p { font-size: 13px; color: var(--text-2); margin-top: 4px; }
+  .form-group { margin-bottom: 16px; }
+  label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; color: var(--text); }
+  input[type="email"], input[type="password"], input[type="text"], textarea, select {
+    width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px;
+    font-size: 14px; font-family: inherit; outline: none; transition: border-color 0.15s; background: var(--surface);
+  }
+  input:focus, textarea:focus, select:focus { border-color: var(--accent); }
+  .login-btn { width: 100%; padding: 12px; background: var(--accent); color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit; margin-top: 8px; transition: background 0.15s; }
+  .login-btn:hover { background: var(--accent-hover); }
+  .error-msg { background: var(--red-light); color: var(--red); border: 1px solid #fecaca; border-radius: 8px; padding: 10px 14px; font-size: 13px; margin-bottom: 14px; }
+
+  /* Page sections */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* Charts */
+  .chart-container { position: relative; height: 260px; }
+
+  /* Action menu */
+  .action-btns { display: flex; gap: 6px; }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+  .tab { padding: 10px 18px; font-size: 13.5px; cursor: pointer; color: var(--text-2); border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.15s; font-weight: 500; }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab:hover:not(.active) { color: var(--text); }
+
+  /* Toast */
+  #toast { position: fixed; bottom: 24px; right: 24px; background: var(--sidebar-bg); color: #fff; padding: 12px 18px; border-radius: 10px; font-size: 13.5px; font-weight: 500; z-index: 9999; transform: translateY(100px); opacity: 0; transition: all 0.25s; box-shadow: 0 8px 32px rgba(0,0,0,0.2); max-width: 320px; }
+  #toast.show { transform: translateY(0); opacity: 1; }
+  #toast.success { border-left: 3px solid var(--accent); }
+  #toast.error { border-left: 3px solid var(--red); }
+
+  /* Responsive helpers */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .section-title { font-size: 20px; font-weight: 600; }
+
+  /* Modal */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; display: none; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--surface); border-radius: 14px; padding: 28px; width: 480px; max-width: 95vw; max-height: 85vh; overflow-y: auto; }
+  .modal-title { font-size: 17px; font-weight: 600; margin-bottom: 20px; }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+
+  /* User avatar in table */
+  .user-cell { display: flex; align-items: center; gap: 10px; }
+  .mini-avatar { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: #fff; flex-shrink: 0; }
+
+  /* Loading */
+  .loading { text-align: center; padding: 40px; color: var(--text-2); font-size: 14px; }
+  .spinner { width: 24px; height: 24px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; margin-right: 8px; vertical-align: middle; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Metrics row */
+  .metric-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .metric-row:last-child { border-bottom: none; }
+  .metric-label { font-size: 13.5px; color: var(--text-2); }
+  .metric-val { font-size: 14px; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<!-- Login -->
+<div class="login-page" id="loginPage">
+  <div class="login-card">
+    <div class="login-logo">
+      <span>UpAdmin</span>
+      <p>Freelance Platform Administration</p>
+    </div>
+    <div id="loginError" class="error-msg" style="display:none"></div>
+    <div class="form-group">
+      <label>Email address</label>
+      <input type="email" id="loginEmail" placeholder="admin@example.com" value="admin@example.com" />
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="loginPassword" placeholder="••••••••" value="password" />
+    </div>
+    <button class="login-btn" onclick="doLogin()">Sign in to Admin Panel</button>
+  </div>
+</div>
+
+<!-- Sidebar -->
+<div id="sidebar">
+  <div class="logo">
+    <span>⬡ UpAdmin</span>
+    <small>Platform Administration</small>
+  </div>
+  <nav>
+    <div class="nav-section">
+      <div class="nav-label">Overview</div>
+      <div class="nav-item active" onclick="showPage('dashboard', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Management</div>
+      <div class="nav-item" onclick="showPage('users', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Users
+      </div>
+      <div class="nav-item" onclick="showPage('jobs', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+        Jobs &amp; Listings
+        <span class="nav-badge" id="flaggedCount">0</span>
+      </div>
+      <div class="nav-item" onclick="showPage('payments', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        Payments
+        <span class="nav-badge" id="disputeCount" style="background:var(--amber)">0</span>
+      </div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Intelligence</div>
+      <div class="nav-item" onclick="showPage('reports', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Reports &amp; Analytics
+      </div>
+    </div>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="user-chip">
+      <div class="avatar" id="sidebarAvatar">A</div>
+      <div class="user-info">
+        <div class="name" id="sidebarName">Admin</div>
+        <div class="role">Super Admin</div>
+      </div>
+    </div>
+    <button class="btn btn-outline btn-sm" onclick="doLogout()" style="width:100%;margin-top:10px;justify-content:center">Sign out</button>
+  </div>
+</div>
+
+<!-- Main -->
+<div id="main">
+  <header>
+    <div class="header-left">
+      <div class="page-title" id="headerTitle">Dashboard</div>
+    </div>
+    <div class="header-right">
+      <div class="icon-btn" title="Refresh" onclick="refreshPage()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      </div>
+      <div class="icon-btn" title="Notifications">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      </div>
+    </div>
+  </header>
+
+  <div id="content">
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div class="stats-grid" id="statsGrid">
+        <div class="loading"><span class="spinner"></span>Loading stats…</div>
+      </div>
+      <div class="charts-row">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Revenue Overview</span>
+            <select class="filter-select" id="chartPeriod" onchange="loadRevenueChart()" style="font-size:12px;padding:5px 10px;">
+              <option value="7">Last 7 days</option>
+              <option value="30" selected>Last 30 days</option>
+              <option value="90">Last 90 days</option>
+            </select>
+          </div>
+          <div class="card-body">
+            <div class="chart-container"><canvas id="revenueChart"></canvas></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Quick Stats</span></div>
+          <div class="card-body" id="quickStats">
+            <div class="loading"><span class="spinner"></span></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Recent Users</span></div>
+        <div class="table-wrapper" id="recentUsersTable">
+          <div class="loading"><span class="spinner"></span>Loading…</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- USERS -->
+    <div class="page" id="page-users">
+      <div class="section-header">
+        <div class="section-title">User Management</div>
+        <button class="btn btn-primary btn-sm" onclick="exportData('users')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export CSV
+        </button>
+      </div>
+      <div class="card">
+        <div class="card-body" style="padding-bottom:0">
+          <div class="toolbar">
+            <div class="search-wrap">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input class="search-input" placeholder="Search users by name or email…" id="userSearch" oninput="debounce(loadUsers, 400)()" />
+            </div>
+            <select class="filter-select" id="userRoleFilter" onchange="loadUsers()">
+              <option value="">All roles</option>
+              <option value="client">Clients</option>
+              <option value="freelancer">Freelancers</option>
+              <option value="admin">Admins</option>
+            </select>
+            <select class="filter-select" id="userStatusFilter" onchange="loadUsers()">
+              <option value="">All statuses</option>
+              <option value="active">Active</option>
+              <option value="suspended">Suspended</option>
+              <option value="pending">Pending</option>
+            </select>
+          </div>
+        </div>
+        <div class="table-wrapper" id="usersTable">
+          <div class="loading"><span class="spinner"></span>Loading users…</div>
+        </div>
+        <div class="pagination" id="usersPagination"></div>
+      </div>
+    </div>
+
+    <!-- JOBS -->
+    <div class="page" id="page-jobs">
+      <div class="section-header">
+        <div class="section-title">Jobs &amp; Listings</div>
+        <button class="btn btn-primary btn-sm" onclick="exportData('jobs')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export
+        </button>
+      </div>
+      <div class="card">
+        <div class="card-body" style="padding-bottom:0">
+          <div class="toolbar">
+            <div class="search-wrap">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input class="search-input" placeholder="Search jobs…" id="jobSearch" oninput="debounce(loadJobs, 400)()" />
+            </div>
+            <select class="filter-select" id="jobStatusFilter" onchange="loadJobs()">
+              <option value="">All statuses</option>
+              <option value="pending">Pending review</option>
+              <option value="open">Open</option>
+              <option value="in_progress">In progress</option>
+              <option value="closed">Closed</option>
+              <option value="rejected">Rejected</option>
+            </select>
+            <select class="filter-select" id="jobFlagFilter" onchange="loadJobs()">
+              <option value="">All</option>
+              <option value="1">Flagged only</option>
+            </select>
+          </div>
+        </div>
+        <div class="table-wrapper" id="jobsTable">
+          <div class="loading"><span class="spinner"></span>Loading jobs…</div>
+        </div>
+        <div class="pagination" id="jobsPagination"></div>
+      </div>
+    </div>
+
+    <!-- PAYMENTS -->
+    <div class="page" id="page-payments">
+      <div class="section-header">
+        <div class="section-title">Payments &amp; Transactions</div>
+        <button class="btn btn-primary btn-sm" onclick="exportData('payments')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export
+        </button>
+      </div>
+      <div class="stats-grid" id="paymentStats" style="margin-bottom:16px">
+        <div class="loading"><span class="spinner"></span></div>
+      </div>
+      <div class="card">
+        <div class="card-body" style="padding-bottom:0">
+          <div class="toolbar">
+            <div class="search-wrap">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input class="search-input" placeholder="Search by transaction ID or user…" id="paySearch" oninput="debounce(loadPayments, 400)()" />
+            </div>
+            <select class="filter-select" id="payStatusFilter" onchange="loadPayments()">
+              <option value="">All statuses</option>
+              <option value="completed">Completed</option>
+              <option value="pending">Pending</option>
+              <option value="refunded">Refunded</option>
+              <option value="disputed">Disputed</option>
+              <option value="resolved">Resolved</option>
+            </select>
+          </div>
+        </div>
+        <div class="table-wrapper" id="paymentsTable">
+          <div class="loading"><span class="spinner"></span>Loading payments…</div>
+        </div>
+        <div class="pagination" id="paymentsPagination"></div>
+      </div>
+    </div>
+
+    <!-- REPORTS -->
+    <div class="page" id="page-reports">
+      <div class="section-header">
+        <div class="section-title">Reports &amp; Analytics</div>
+        <div style="display:flex;gap:10px;align-items:center">
+          <select class="filter-select" id="reportPeriod" onchange="loadReports()">
+            <option value="7">Last 7 days</option>
+            <option value="30" selected>Last 30 days</option>
+            <option value="90">Last 90 days</option>
+          </select>
+          <button class="btn btn-primary btn-sm" onclick="exportData('revenue')">Export Report</button>
+        </div>
+      </div>
+      <div class="tabs">
+        <div class="tab active" onclick="switchReportTab('overview', this)">Overview</div>
+        <div class="tab" onclick="switchReportTab('revenue', this)">Revenue</div>
+        <div class="tab" onclick="switchReportTab('users-report', this)">Users</div>
+        <div class="tab" onclick="switchReportTab('jobs-report', this)">Jobs</div>
+      </div>
+      <div id="reportContent">
+        <div class="loading"><span class="spinner"></span>Loading reports…</div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<!-- Refund Modal -->
+<div class="modal-overlay" id="refundModal">
+  <div class="modal">
+    <div class="modal-title">Process Refund</div>
+    <div class="form-group">
+      <label>Transaction ID</label>
+      <input type="text" id="refundTxId" readonly />
+    </div>
+    <div class="form-group">
+      <label>Refund Reason *</label>
+      <textarea id="refundReason" rows="3" placeholder="Describe the reason for the refund…"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('refundModal')">Cancel</button>
+      <button class="btn btn-danger" onclick="submitRefund()">Process Refund</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = (window.API_BASE_URL || 'http://localhost:8000/api');
+let token = localStorage.getItem('admin_token');
+let currentPage = { users: 1, jobs: 1, payments: 1 };
+let revenueChartInst = null;
+let currentRefundId = null;
+let currentReportTab = 'overview';
+
+// ========== AUTH ==========
+async function apiFetch(method, path, body = null, params = null) {
+  const url = new URL(API + path);
+  if (params) Object.entries(params).forEach(([k,v]) => { if (v !== null && v !== undefined && v !== '') url.searchParams.append(k, v); });
+  const headers = { 'Content-Type': 'application/json', Accept: 'application/json' };
+  if (token) headers['Authorization'] = 'Bearer ' + token;
+  const res = await fetch(url, { method, headers, body: body ? JSON.stringify(body) : null });
+  if (res.status === 401) { doLogout(); return null; }
+  return res.json();
+}
+
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value;
+  const password = document.getElementById('loginPassword').value;
+  const errEl = document.getElementById('loginError');
+  errEl.style.display = 'none';
+  // Simulate login for demo (replace with real API call)
+  try {
+    const data = await apiFetch('POST', '/admin/login', { email, password });
+    if (data && data.token) {
+      token = data.token;
+      localStorage.setItem('admin_token', token);
+      if (data.user) {
+        document.getElementById('sidebarName').textContent = data.user.name;
+        document.getElementById('sidebarAvatar').textContent = data.user.name.charAt(0).toUpperCase();
+      }
+      document.getElementById('loginPage').style.display = 'none';
+      initApp();
+    } else {
+      throw new Error((data && data.message) || 'Login failed');
+    }
+  } catch (e) {
+    // For demo: bypass auth if API not connected
+    if (!navigator.onLine || e.message.includes('fetch')) {
+      token = 'demo-token';
+      localStorage.setItem('admin_token', token);
+      document.getElementById('loginPage').style.display = 'none';
+      document.getElementById('sidebarName').textContent = 'Demo Admin';
+      initApp();
+    } else {
+      errEl.textContent = e.message;
+      errEl.style.display = 'block';
+    }
+  }
+}
+
+function doLogout() {
+  apiFetch('POST', '/admin/logout').catch(()=>{});
+  token = null;
+  localStorage.removeItem('admin_token');
+  location.reload();
+}
+
+// ========== NAVIGATION ==========
+function showPage(name, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  if (el) el.classList.add('active');
+  const titles = { dashboard: 'Dashboard', users: 'User Management', jobs: 'Jobs & Listings', payments: 'Payments & Transactions', reports: 'Reports & Analytics' };
+  document.getElementById('headerTitle').textContent = titles[name] || name;
+  refreshPage(name);
+}
+
+function refreshPage(name) {
+  const active = name || document.querySelector('.page.active')?.id?.replace('page-', '');
+  if (active === 'dashboard') { loadDashboard(); }
+  else if (active === 'users') { loadUsers(); }
+  else if (active === 'jobs') { loadJobs(); }
+  else if (active === 'payments') { loadPayments(); loadPaymentStats(); }
+  else if (active === 'reports') { loadReports(); }
+}
+
+function initApp() {
+  loadDashboard();
+}
+
+// ========== DASHBOARD ==========
+async function loadDashboard() {
+  loadDashboardStats();
+  loadRevenueChart();
+  loadRecentUsers();
+}
+
+async function loadDashboardStats() {
+  const data = await apiFetch('GET', '/admin/dashboard/stats');
+  const grid = document.getElementById('statsGrid');
+  const d = (data && data.data) || { total_users: 12847, new_users_today: 34, active_jobs: 3291, total_revenue: 284930, revenue_today: 1823, pending_payments: 47, flagged_jobs: 12, open_disputes: 5 };
+
+  document.getElementById('flaggedCount').textContent = d.flagged_jobs || 0;
+  document.getElementById('disputeCount').textContent = d.open_disputes || 0;
+
+  grid.innerHTML = `
+    ${statCard('Total Users', fmtNum(d.total_users), '+' + d.new_users_today + ' today', 'up', 'green', userIcon())}
+    ${statCard('Active Jobs', fmtNum(d.active_jobs), d.flagged_jobs + ' flagged', 'down', 'amber', jobIcon())}
+    ${statCard('Total Revenue', '$' + fmtMoney(d.total_revenue), '+$' + fmtMoney(d.revenue_today) + ' today', 'up', 'blue', revenueIcon())}
+    ${statCard('Open Disputes', d.open_disputes, d.pending_payments + ' pending payments', d.open_disputes > 0 ? 'down' : 'up', 'red', disputeIcon())}
+  `;
+
+  const qs = document.getElementById('quickStats');
+  qs.innerHTML = `
+    <div class="metric-row"><span class="metric-label">Platform fee earned</span><span class="metric-val" style="color:var(--accent)">$${fmtMoney(d.total_revenue)}</span></div>
+    <div class="metric-row"><span class="metric-label">Pending payments</span><span class="metric-val">${d.pending_payments}</span></div>
+    <div class="metric-row"><span class="metric-label">Flagged jobs</span><span class="metric-val" style="color:var(--red)">${d.flagged_jobs}</span></div>
+    <div class="metric-row"><span class="metric-label">Open disputes</span><span class="metric-val" style="color:var(--amber)">${d.open_disputes}</span></div>
+    <div class="metric-row"><span class="metric-label">New users today</span><span class="metric-val">${d.new_users_today}</span></div>
+  `;
+}
+
+function statCard(label, value, change, dir, color, icon) {
+  return `<div class="stat-card">
+    <div class="stat-icon ${color}">${icon}</div>
+    <div class="stat-label">${label}</div>
+    <div class="stat-value">${value}</div>
+    <div class="stat-change ${dir}">${dir === 'up' ? '↑' : '↓'} ${change}</div>
+  </div>`;
+}
+
+async function loadRevenueChart() {
+  const period = document.getElementById('chartPeriod')?.value || 30;
+  const data = await apiFetch('GET', '/admin/dashboard/revenue-chart', null, { period });
+
+  // Demo data if API unavailable
+  const labels = [], revenues = [], fees = [];
+  const days = parseInt(period);
+  for (let i = days; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    labels.push(d.toLocaleDateString('en', { month: 'short', day: 'numeric' }));
+    revenues.push(Math.round(8000 + Math.random() * 6000));
+    fees.push(Math.round(400 + Math.random() * 400));
+  }
+
+  const ctx = document.getElementById('revenueChart').getContext('2d');
+  if (revenueChartInst) revenueChartInst.destroy();
+  revenueChartInst = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Transaction Volume ($)', data: (data?.data?.map(r => r.volume)) || revenues, borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.07)', tension: 0.4, fill: true, pointRadius: 2 },
+        { label: 'Platform Fees ($)', data: (data?.data?.map(r => r.fees)) || fees, borderColor: '#14a800', backgroundColor: 'rgba(20,168,0,0.07)', tension: 0.4, fill: true, pointRadius: 2 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'top', labels: { usePointStyle: true, font: { size: 12 } } } },
+      scales: {
+        x: { grid: { display: false }, ticks: { maxTicksLimit: 8, font: { size: 11 } } },
+        y: { grid: { color: '#f0f0f0' }, ticks: { font: { size: 11 }, callback: v => '$' + fmtNum(v) } }
+      }
+    }
+  });
+}
+
+async function loadRecentUsers() {
+  const data = await apiFetch('GET', '/admin/dashboard/recent-activity');
+  const users = data?.data?.recent_users || demoUsers().slice(0, 5);
+  const el = document.getElementById('recentUsersTable');
+  el.innerHTML = renderUsersTable(users, false);
+}
+
+// ========== USERS ==========
+async function loadUsers(page) {
+  if (page) currentPage.users = page;
+  const search = document.getElementById('userSearch')?.value;
+  const role = document.getElementById('userRoleFilter')?.value;
+  const status = document.getElementById('userStatusFilter')?.value;
+
+  const data = await apiFetch('GET', '/admin/users', null, { search, role, status, page: currentPage.users, per_page: 12 });
+  const users = data?.data?.data || demoUsers();
+  const meta = data?.data;
+
+  document.getElementById('usersTable').innerHTML = renderUsersTable(users, true);
+  renderPagination('usersPagination', meta, loadUsers);
+}
+
+function renderUsersTable(users, actions) {
+  if (!users.length) return '<div class="loading">No users found.</div>';
+  return `<table>
+    <thead><tr>
+      <th>User</th><th>Role</th><th>Status</th><th>Verified</th><th>Joined</th>
+      ${actions ? '<th>Actions</th>' : ''}
+    </tr></thead>
+    <tbody>
+    ${users.map(u => `<tr>
+      <td>
+        <div class="user-cell">
+          <div class="mini-avatar" style="background:${avatarColor(u.name)}">${u.name.charAt(0).toUpperCase()}</div>
+          <div>
+            <div style="font-weight:500">${escHtml(u.name)}</div>
+            <div style="font-size:12px;color:var(--text-2)">${escHtml(u.email)}</div>
+          </div>
+        </div>
+      </td>
+      <td><span class="badge ${roleBadge(u.role)}">${u.role}</span></td>
+      <td><span class="badge ${statusBadge(u.status)}">${u.status}</span></td>
+      <td>${u.is_verified ? '<span class="badge badge-green">✓ Verified</span>' : '<span class="badge badge-gray">Unverified</span>'}</td>
+      <td style="color:var(--text-2);font-size:13px">${fmtDate(u.created_at)}</td>
+      ${actions ? `<td>
+        <div class="action-btns">
+          ${u.status === 'active' ? `<button class="btn btn-danger btn-sm" onclick="userAction('suspend', ${u.id})">Suspend</button>` : `<button class="btn btn-outline btn-sm" onclick="userAction('activate', ${u.id})">Activate</button>`}
+          ${!u.is_verified ? `<button class="btn btn-outline btn-sm" onclick="userAction('verify', ${u.id})">Verify</button>` : ''}
+        </div>
+      </td>` : ''}
+    </tr>`).join('')}
+    </tbody>
+  </table>`;
+}
+
+async function userAction(action, id) {
+  const endpoints = { suspend: `/admin/users/${id}/suspend`, activate: `/admin/users/${id}/activate`, verify: `/admin/users/${id}/verify` };
+  await apiFetch('PATCH', endpoints[action]);
+  showToast(action.charAt(0).toUpperCase() + action.slice(1) + ' action applied', 'success');
+  loadUsers();
+}
+
+// ========== JOBS ==========
+async function loadJobs(page) {
+  if (page) currentPage.jobs = page;
+  const search = document.getElementById('jobSearch')?.value;
+  const status = document.getElementById('jobStatusFilter')?.value;
+  const flagged = document.getElementById('jobFlagFilter')?.value;
+
+  const data = await apiFetch('GET', '/admin/jobs', null, { search, status, flagged, page: currentPage.jobs, per_page: 12 });
+  const jobs = data?.data?.data || demoJobs();
+  const meta = data?.data;
+
+  const el = document.getElementById('jobsTable');
+  if (!jobs.length) { el.innerHTML = '<div class="loading">No jobs found.</div>'; return; }
+  el.innerHTML = `<table>
+    <thead><tr><th>Job Title</th><th>Client</th><th>Budget</th><th>Status</th><th>Posted</th><th>Actions</th></tr></thead>
+    <tbody>
+    ${jobs.map(j => `<tr>
+      <td>
+        <div style="font-weight:500">${escHtml(j.title)}${j.is_flagged ? ' <span style="color:var(--red);font-size:11px">⚑ Flagged</span>' : ''}</div>
+        <div style="font-size:12px;color:var(--text-2)">${escHtml(j.category || 'General')}</div>
+      </td>
+      <td style="font-size:13px">${escHtml(j.client?.name || 'Unknown')}</td>
+      <td style="font-weight:500">${j.budget ? '$' + fmtMoney(j.budget) : 'TBD'}</td>
+      <td><span class="badge ${jobStatusBadge(j.status)}">${j.status}</span></td>
+      <td style="color:var(--text-2);font-size:13px">${fmtDate(j.created_at)}</td>
+      <td>
+        <div class="action-btns">
+          ${j.status === 'pending' ? `<button class="btn btn-primary btn-sm" onclick="jobAction('approve',${j.id})">Approve</button>
+          <button class="btn btn-danger btn-sm" onclick="jobAction('reject',${j.id})">Reject</button>` : ''}
+          ${j.status === 'open' ? `<button class="btn btn-outline btn-sm" onclick="jobAction('close',${j.id})">Close</button>` : ''}
+          <button class="btn btn-outline btn-sm" onclick="jobAction('flag',${j.id})">${j.is_flagged ? 'Unflag' : 'Flag'}</button>
+        </div>
+      </td>
+    </tr>`).join('')}
+    </tbody>
+  </table>`;
+
+  renderPagination('jobsPagination', meta, loadJobs);
+}
+
+async function jobAction(action, id) {
+  await apiFetch('PATCH', `/admin/jobs/${id}/${action}`);
+  showToast('Job ' + action + 'd successfully', 'success');
+  loadJobs();
+}
+
+// ========== PAYMENTS ==========
+async function loadPaymentStats() {
+  const data = await apiFetch('GET', '/admin/payments/summary');
+  const d = data?.data || { total_volume: 4829301, total_fees: 289758, pending_amount: 34210, active_disputes: 5 };
+  document.getElementById('paymentStats').innerHTML = `
+    ${statCard('Total Volume', '$' + fmtMoney(d.total_volume || 0), 'all time', 'up', 'blue', revenueIcon())}
+    ${statCard('Platform Fees', '$' + fmtMoney(d.total_fees || 0), 'all time', 'up', 'green', revenueIcon())}
+    ${statCard('Pending Amount', '$' + fmtMoney(d.pending_amount || 0), 'awaiting clearance', 'down', 'amber', disputeIcon())}
+    ${statCard('Active Disputes', d.active_disputes || 0, 'require review', d.active_disputes > 0 ? 'down' : 'up', 'red', disputeIcon())}
+  `;
+}
+
+async function loadPayments(page) {
+  if (page) currentPage.payments = page;
+  const search = document.getElementById('paySearch')?.value;
+  const status = document.getElementById('payStatusFilter')?.value;
+
+  const data = await apiFetch('GET', '/admin/payments', null, { search, status, page: currentPage.payments, per_page: 12 });
+  const payments = data?.data?.data || demoPayments();
+  const meta = data?.data;
+
+  const el = document.getElementById('paymentsTable');
+  if (!payments.length) { el.innerHTML = '<div class="loading">No payments found.</div>'; return; }
+  el.innerHTML = `<table>
+    <thead><tr><th>Transaction</th><th>From → To</th><th>Amount</th><th>Fee</th><th>Method</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+    <tbody>
+    ${payments.map(p => `<tr>
+      <td><span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text-2)">${escHtml(p.transaction_id || '#' + p.id)}</span></td>
+      <td style="font-size:13px">
+        <strong>${escHtml(p.payer?.name || 'Client')}</strong>
+        <span style="color:var(--text-3)"> → </span>
+        <strong>${escHtml(p.payee?.name || 'Freelancer')}</strong>
+      </td>
+      <td style="font-weight:600">$${fmtMoney(p.amount)}</td>
+      <td style="color:var(--accent)">$${fmtMoney(p.platform_fee || 0)}</td>
+      <td style="font-size:12px">${escHtml(p.payment_method || 'Card')}</td>
+      <td><span class="badge ${payStatusBadge(p.status)}">${p.status}</span></td>
+      <td style="color:var(--text-2);font-size:13px">${fmtDate(p.created_at)}</td>
+      <td>
+        <div class="action-btns">
+          ${p.status === 'completed' ? `<button class="btn btn-danger btn-sm" onclick="openRefundModal(${p.id}, '${escHtml(p.transaction_id || p.id)}')">Refund</button>` : ''}
+          ${p.status === 'disputed' ? `<button class="btn btn-outline btn-sm" onclick="resolveDispute(${p.id})">Resolve</button>` : ''}
+        </div>
+      </td>
+    </tr>`).join('')}
+    </tbody>
+  </table>`;
+
+  renderPagination('paymentsPagination', meta, loadPayments);
+}
+
+function openRefundModal(id, txId) {
+  currentRefundId = id;
+  document.getElementById('refundTxId').value = txId;
+  document.getElementById('refundReason').value = '';
+  document.getElementById('refundModal').classList.add('open');
+}
+
+async function submitRefund() {
+  const reason = document.getElementById('refundReason').value;
+  if (!reason.trim()) { showToast('Please enter a refund reason', 'error'); return; }
+  await apiFetch('PATCH', `/admin/payments/${currentRefundId}/refund`, { reason });
+  closeModal('refundModal');
+  showToast('Refund processed successfully', 'success');
+  loadPayments();
+}
+
+async function resolveDispute(id) {
+  await apiFetch('PATCH', `/admin/payments/${id}/dispute`, { resolution: 'favor_client', notes: 'Resolved by admin' });
+  showToast('Dispute resolved', 'success');
+  loadPayments();
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// ========== REPORTS ==========
+function switchReportTab(tab, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  currentReportTab = tab;
+  loadReports();
+}
+
+async function loadReports() {
+  const period = document.getElementById('reportPeriod')?.value || 30;
+  const el = document.getElementById('reportContent');
+  el.innerHTML = '<div class="loading"><span class="spinner"></span>Loading…</div>';
+
+  if (currentReportTab === 'overview') {
+    const data = await apiFetch('GET', '/admin/reports/overview', null, { period });
+    const d = data?.data || { users: { total:12847, new:234, freelancers:8291, clients:4312, suspended:91, verified:9832 }, jobs: { total:28394, open:3291, closed:19283, new:412, flagged:12 }, revenue: { total_fees:284930, period_fees:18234, total_volume:4829301, period_volume:291834 } };
+    el.innerHTML = `
+      <div class="two-col" style="gap:16px">
+        <div class="card"><div class="card-header"><span class="card-title">👤 User Statistics</span></div><div class="card-body">
+          ${metrRow('Total users', fmtNum(d.users.total))}
+          ${metrRow('New in period', '+' + fmtNum(d.users.new), 'green')}
+          ${metrRow('Freelancers', fmtNum(d.users.freelancers))}
+          ${metrRow('Clients', fmtNum(d.users.clients))}
+          ${metrRow('Verified', fmtNum(d.users.verified))}
+          ${metrRow('Suspended', fmtNum(d.users.suspended), 'red')}
+        </div></div>
+        <div class="card"><div class="card-header"><span class="card-title">💼 Job Statistics</span></div><div class="card-body">
+          ${metrRow('Total jobs', fmtNum(d.jobs.total))}
+          ${metrRow('Currently open', fmtNum(d.jobs.open), 'green')}
+          ${metrRow('Completed', fmtNum(d.jobs.closed))}
+          ${metrRow('New in period', '+' + fmtNum(d.jobs.new), 'green')}
+          ${metrRow('Flagged', fmtNum(d.jobs.flagged), 'red')}
+        </div></div>
+        <div class="card" style="grid-column:1/-1"><div class="card-header"><span class="card-title">💰 Revenue Statistics</span></div><div class="card-body">
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px">
+            ${miniStat('All-time volume', '$' + fmtMoney(d.revenue.total_volume))}
+            ${miniStat('Period volume', '$' + fmtMoney(d.revenue.period_volume))}
+            ${miniStat('All-time fees', '$' + fmtMoney(d.revenue.total_fees), 'var(--accent)')}
+            ${miniStat('Period fees', '$' + fmtMoney(d.revenue.period_fees), 'var(--accent)')}
+          </div>
+        </div></div>
+      </div>`;
+  } else if (currentReportTab === 'revenue') {
+    const data = await apiFetch('GET', '/admin/reports/revenue', null, { period });
+    el.innerHTML = `<div class="card"><div class="card-header"><span class="card-title">Revenue Breakdown</span></div><div class="card-body"><div class="chart-container"><canvas id="reportRevenueChart"></canvas></div></div></div>`;
+    setTimeout(() => {
+      const labels = [], vols = [], fees = [];
+      for (let i = parseInt(period); i >= 0; i--) {
+        const d = new Date(); d.setDate(d.getDate()-i);
+        labels.push(d.toLocaleDateString('en',{month:'short',day:'numeric'}));
+        vols.push(Math.round(8000+Math.random()*6000));
+        fees.push(Math.round(400+Math.random()*400));
+      }
+      const rows = data?.data?.daily || [];
+      new Chart(document.getElementById('reportRevenueChart').getContext('2d'), {
+        type: 'bar',
+        data: { labels: rows.map(r=>r.date)||labels, datasets: [
+          { label: 'Volume', data: rows.map(r=>r.volume)||vols, backgroundColor: 'rgba(59,130,246,0.7)' },
+          { label: 'Fees', data: rows.map(r=>r.fees)||fees, backgroundColor: 'rgba(20,168,0,0.7)' }
+        ]},
+        options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'top'}}, scales:{x:{grid:{display:false}}, y:{ticks:{callback:v=>'$'+fmtNum(v)}}}}
+      });
+    }, 100);
+  } else if (currentReportTab === 'users-report') {
+    el.innerHTML = `<div class="card"><div class="card-header"><span class="card-title">User Growth</span></div><div class="card-body"><div class="chart-container"><canvas id="reportUsersChart"></canvas></div></div></div>`;
+    setTimeout(() => {
+      const labels = [], clients = [], freelancers = [];
+      for (let i = parseInt(period); i >= 0; i--) {
+        const d = new Date(); d.setDate(d.getDate()-i);
+        labels.push(d.toLocaleDateString('en',{month:'short',day:'numeric'}));
+        clients.push(Math.round(3+Math.random()*8));
+        freelancers.push(Math.round(5+Math.random()*12));
+      }
+      new Chart(document.getElementById('reportUsersChart').getContext('2d'), {
+        type: 'line',
+        data: { labels, datasets: [
+          { label: 'New clients', data: clients, borderColor: '#3b82f6', tension:0.4, fill:true, backgroundColor:'rgba(59,130,246,0.07)' },
+          { label: 'New freelancers', data: freelancers, borderColor: '#14a800', tension:0.4, fill:true, backgroundColor:'rgba(20,168,0,0.07)' }
+        ]},
+        options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'top'}}, scales:{x:{grid:{display:false}}}}
+      });
+    }, 100);
+  } else if (currentReportTab === 'jobs-report') {
+    el.innerHTML = `<div class="card"><div class="card-header"><span class="card-title">Job Postings Over Time</span></div><div class="card-body"><div class="chart-container"><canvas id="reportJobsChart"></canvas></div></div></div>`;
+    setTimeout(() => {
+      const labels = [], posted = [], closed = [];
+      for (let i = parseInt(period); i >= 0; i--) {
+        const d = new Date(); d.setDate(d.getDate()-i);
+        labels.push(d.toLocaleDateString('en',{month:'short',day:'numeric'}));
+        posted.push(Math.round(10+Math.random()*20));
+        closed.push(Math.round(5+Math.random()*15));
+      }
+      new Chart(document.getElementById('reportJobsChart').getContext('2d'), {
+        type: 'bar',
+        data: { labels, datasets: [
+          { label: 'Posted', data: posted, backgroundColor: 'rgba(59,130,246,0.7)' },
+          { label: 'Closed', data: closed, backgroundColor: 'rgba(107,114,128,0.5)' }
+        ]},
+        options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'top'}}, scales:{x:{grid:{display:false}}, y:{ticks:{stepSize:5}}}}
+      });
+    }, 100);
+  }
+}
+
+// ========== HELPERS ==========
+function metrRow(label, val, color) {
+  return `<div class="metric-row"><span class="metric-label">${label}</span><span class="metric-val" ${color?`style="color:var(--${color})"`:''}>${val}</span></div>`;
+}
+function miniStat(label, val, color) {
+  return `<div style="text-align:center;padding:12px;background:var(--bg);border-radius:8px"><div style="font-size:11px;color:var(--text-2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">${label}</div><div style="font-size:20px;font-weight:600;${color?'color:'+color:''}">${val}</div></div>`;
+}
+
+function renderPagination(elId, meta, loadFn) {
+  const el = document.getElementById(elId);
+  if (!meta || !meta.last_page) { el.innerHTML = ''; return; }
+  const { current_page, last_page, total, from, to } = meta;
+  el.innerHTML = `
+    <span>Showing ${from || 1}–${to || 10} of ${fmtNum(total || 0)}</span>
+    <div class="pagination-btns">
+      <button class="page-btn" onclick="${loadFn.name}(${current_page-1})" ${current_page<=1?'disabled':''}>← Prev</button>
+      <button class="page-btn active">${current_page}</button>
+      <button class="page-btn" onclick="${loadFn.name}(${current_page+1})" ${current_page>=last_page?'disabled':''}>Next →</button>
+    </div>`;
+}
+
+function showToast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  t.textContent = (type === 'success' ? '✓ ' : '✗ ') + msg;
+  t.className = 'show ' + type;
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.className = '', 3200);
+}
+
+function exportData(type) { showToast('Preparing ' + type + ' export…', 'success'); }
+
+function debounce(fn, delay) {
+  let t;
+  return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), delay); };
+}
+
+function fmtNum(n) { return Number(n || 0).toLocaleString(); }
+function fmtMoney(n) { return Number(n || 0).toLocaleString('en', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+function fmtDate(d) { if (!d) return '—'; return new Date(d).toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' }); }
+function escHtml(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function roleBadge(r) { return {client:'badge-blue',freelancer:'badge-green',admin:'badge-amber'}[r]||'badge-gray'; }
+function statusBadge(s) { return {active:'badge-green',suspended:'badge-red',pending:'badge-amber'}[s]||'badge-gray'; }
+function jobStatusBadge(s) { return {open:'badge-green',pending:'badge-amber',in_progress:'badge-blue',closed:'badge-gray',rejected:'badge-red'}[s]||'badge-gray'; }
+function payStatusBadge(s) { return {completed:'badge-green',pending:'badge-amber',refunded:'badge-gray',disputed:'badge-red',resolved:'badge-blue',failed:'badge-red'}[s]||'badge-gray'; }
+function avatarColor(name) { const colors = ['#14a800','#3b82f6','#8b5cf6','#f59e0b','#ef4444','#06b6d4','#ec4899']; return colors[name.charCodeAt(0) % colors.length]; }
+
+// SVG Icons
+function userIcon() { return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="${'#14a800'}" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`; }
+function jobIcon() { return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="${'#d97706'}" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>`; }
+function revenueIcon() { return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="${'#2563eb'}" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>`; }
+function disputeIcon() { return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="${'#dc2626'}" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`; }
+
+// Demo data
+function demoUsers() {
+  const roles = ['client','freelancer','freelancer','client','admin'];
+  const statuses = ['active','active','active','suspended','active'];
+  return Array.from({length:12}, (_,i) => ({
+    id: i+1, name: ['Alice Johnson','Bob Smith','Carol White','David Lee','Emma Brown','Frank Davis','Grace Kim','Henry Wilson','Iris Chen','Jack Martin','Karen Taylor','Liam Anderson'][i],
+    email: `user${i+1}@example.com`, role: roles[i%5], status: statuses[i%5], is_verified: i%3!==0, created_at: new Date(Date.now()-i*864e5).toISOString()
+  }));
+}
+function demoJobs() {
+  const statuses = ['open','pending','in_progress','closed','rejected','open'];
+  const cats = ['Web Dev','Design','Mobile','Marketing','Writing','Data'];
+  return Array.from({length:10}, (_,i) => ({
+    id: i+1, title: ['Build a React dashboard','Design a logo','iOS app development','SEO optimization','Blog writing','Data analysis'][i%6],
+    category: cats[i%6], budget: (i+1)*500, status: statuses[i%6], is_flagged: i===2||i===7,
+    client: {name: ['Alice J.','Bob S.','Carol W.'][i%3]}, created_at: new Date(Date.now()-i*864e5).toISOString()
+  }));
+}
+function demoPayments() {
+  const statuses = ['completed','completed','pending','disputed','refunded','completed'];
+  const methods = ['Stripe','PayPal','Stripe','Bank','Stripe','PayPal'];
+  return Array.from({length:10}, (_,i) => ({
+    id: i+1, transaction_id: 'TXN-' + String(1000+i).padStart(6,'0'),
+    payer: {name: ['Alice J.','Bob S.','Carol W.'][i%3]}, payee: {name: ['Frank D.','Grace K.','Henry W.'][i%3]},
+    amount: (i+1)*250 + 50, platform_fee: ((i+1)*250+50)*0.05,
+    payment_method: methods[i%6], status: statuses[i%6], created_at: new Date(Date.now()-i*864e5).toISOString()
+  }));
+}
+
+// ========== INIT ==========
+window.addEventListener('keydown', e => { if (e.key === 'Enter' && document.getElementById('loginPage').style.display !== 'none') doLogin(); });
+
+if (token) {
+  document.getElementById('loginPage').style.display = 'none';
+  initApp();
+}
+</script>
+</body>
+</html>

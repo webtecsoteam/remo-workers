@@ -57,6 +57,15 @@ switch ($section) {
         }
         break;
 
+    case 'admin':
+        $adminPage = __DIR__ . '/admin/' . $page . '.php';
+        if (file_exists($adminPage)) {
+            include $adminPage;
+        } else {
+            include __DIR__ . '/admin/index.php';
+        }
+        break;
+
     // ------------------------------------------
     // Route 3: Freelancer Dashboard (/remoworkers-dashboard/*)
     // ------------------------------------------

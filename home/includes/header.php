@@ -67,24 +67,72 @@
     $user = Auth::user();
     if ($user): 
     ?>
-        <div style="display: flex; align-items: center; gap: 12px; margin-right: 12px;">
-            <div style="width: 32px; height: 32px; background: #14a800; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px;">
+        <div class="user-pill">
+            <div class="user-av">
                 <?php echo substr($user['name'], 0, 1); ?>
             </div>
-            <div style="font-size: 14px; font-weight: 600; color: #1e293b;">
+            <div class="user-name">
                 <?php echo $user['name']; ?>
             </div>
         </div>
         <?php if ($user['role'] === 'client'): ?>
-            <a class="btn btn-dark" href="<?php echo baseUrl('client'); ?>">Dashboard</a>
+            <a class="btn btn-dark dash-btn" href="<?php echo baseUrl('client'); ?>">Dashboard</a>
         <?php else: ?>
-            <a class="btn btn-dark" href="<?php echo baseUrl('remoworkers-dashboard'); ?>">Dashboard</a>
+            <a class="btn btn-dark dash-btn" href="<?php echo baseUrl('remoworkers-dashboard'); ?>">Dashboard</a>
         <?php endif; ?>
-        <a class="btn btn-ghost" href="<?php echo baseUrl('logout'); ?>">Log Out</a>
+        <a class="btn btn-ghost logout-btn" href="<?php echo baseUrl('logout'); ?>">Log Out</a>
     <?php else: ?>
-        <a class="btn btn-ghost" onclick="openModal('login')">Log In</a>
-        <a class="btn btn-outline" onclick="openModal('signup')">Sign Up Free</a>
-        <a class="btn btn-dark" onclick="openModal('login')">Post a Job</a>
+        <a class="btn btn-ghost login-btn" onclick="openModal('login')">Log In</a>
+        <a class="btn btn-outline signup-btn" onclick="openModal('signup')">Sign Up Free</a>
+        <a class="btn btn-dark post-btn" onclick="openModal('login')">Post a Job</a>
     <?php endif; ?>
+    <button class="menu-toggle" id="menuToggle" onclick="toggleMobileMenu()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
   </div>
 </nav>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu">
+    <div class="mm-head">
+        <a class="logo" href="<?php echo baseUrl(); ?>"><span class="logo-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3"/><path d="M6 20c0-4 2.7-7 6-7s6 3 6 7"/><path d="M19 8c1.5.8 2.5 2.4 2.5 4.2 0 1.5-.6 2.9-1.6 3.8"/><path d="M5 8C3.5 8.8 2.5 10.4 2.5 12.2c0 1.5.6 2.9 1.6 3.8"/></svg></span><span class="logo-remo">Remo</span><span class="logo-workers">workers</span></a>
+        <button class="mm-close" onclick="toggleMobileMenu()">✕</button>
+    </div>
+    <div class="mm-body">
+        <div class="mm-section">
+            <h4>For Clients</h4>
+            <a onclick="openModal('talent-marketplace')">Talent Marketplace</a>
+            <a onclick="openModal('project-catalog-modal')">Project Catalog</a>
+            <a onclick="openModal('talent-scout')">Talent Scout</a>
+            <a onclick="openModal('enterprise')">Enterprise</a>
+        </div>
+        <div class="mm-section">
+            <h4>For Freelancers</h4>
+            <a onclick="openModal('browse-jobs')">Browse Jobs</a>
+            <a onclick="openModal('sell-services')">Sell Services</a>
+            <a onclick="openModal('certifications')">Skill Assessments</a>
+        </div>
+        <div class="mm-section">
+            <h4>Company</h4>
+            <a onclick="openModal('trust-safety')">Trust & Safety</a>
+            <a onclick="openModal('blog-all')">Blog & Resources</a>
+            <a onclick="openModal('pricing')">Pricing</a>
+        </div>
+        <div class="mm-actions">
+            <?php if ($user): ?>
+                <a class="btn btn-green btn-full" href="<?php echo $user['role'] === 'client' ? baseUrl('client') : baseUrl('remoworkers-dashboard'); ?>">Dashboard</a>
+                <a class="btn btn-outline btn-full" href="<?php echo baseUrl('logout'); ?>" style="margin-top:10px">Log Out</a>
+            <?php else: ?>
+                <a class="btn btn-green btn-full" onclick="openModal('signup');toggleMobileMenu()">Sign Up Free</a>
+                <a class="btn btn-outline btn-full" onclick="openModal('login');toggleMobileMenu()" style="margin-top:10px">Log In</a>
+            <?php endif; ?>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleMobileMenu() {
+    document.getElementById('mobileMenu').classList.toggle('open');
+    document.body.style.overflow = document.getElementById('mobileMenu').classList.contains('open') ? 'hidden' : '';
+}
+</script>

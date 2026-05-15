@@ -7,21 +7,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = $_POST['password'] ?? '';
     $role = $_POST['role'] ?? '';
     
+    $isAjax = (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest');
+    
     if ($name && $email && $password && $role) {
+        if ($role === 'admin') {
+            if ($isAjax) {
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'message' => 'Unauthorized role.']);
+                exit;
+            }
+            header('Location: ' . baseUrl('?error=unauthorized_role'));
+            exit;
+        }
+        
         try {
             if (Auth::register($name, $email, $password, $role)) {
                 Auth::login($email, $password);
-                if ($role === 'client') {
-                    redirect(baseUrl('client'));
-                } else {
-                    redirect(baseUrl('remoworkers-dashboard'));
+                $targetUrl = ($role === 'client') ? baseUrl('client') : baseUrl('remoworkers-dashboard');
+                
+                if ($isAjax) {
+                    header('Content-Type: application/json');
+                    echo json_encode(['success' => true, 'redirect' => $targetUrl]);
+                    exit;
                 }
+                redirect($targetUrl);
             }
         } catch (Exception $e) {
-            header('Location: ' . baseUrl('?error=registration_failed'));
+            $msg = $e->getMessage();
+            if (strpos($msg, 'Duplicate entry') !== false) $msg = 'Email already exists';
+            
+            if ($isAjax) {
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'message' => $msg]);
+                exit;
+            }
+            header('Location: ' . baseUrl('?error=' . urlencode($msg)));
             exit;
         }
     } else {
+        if ($isAjax) {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'Please fill all required fields.']);
+            exit;
+        }
         header('Location: ' . baseUrl('?error=missing_fields'));
         exit;
     }
