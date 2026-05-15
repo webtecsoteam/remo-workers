@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS users (
     email VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     role ENUM('client', 'freelancer', 'admin') NOT NULL DEFAULT 'client',
+    balance DECIMAL(12, 2) DEFAULT 0.00,
     status ENUM('active', 'suspended', 'pending') NOT NULL DEFAULT 'active',
     is_verified BOOLEAN DEFAULT FALSE,
     verified_at TIMESTAMP NULL,
@@ -57,4 +58,16 @@ CREATE TABLE IF NOT EXISTS payments (
     FOREIGN KEY (payer_id) REFERENCES users(id),
     FOREIGN KEY (payee_id) REFERENCES users(id),
     FOREIGN KEY (job_id) REFERENCES jobs(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS user_documents (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    doc_type VARCHAR(50) NOT NULL,
+    file_path VARCHAR(255) NOT NULL,
+    status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
+    rejection_reason TEXT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

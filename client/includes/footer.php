@@ -1,5 +1,7 @@
 <script>
 let availableBalance = 1250.00;
+let selectedCVType = null;
+let selectedCVFile = null;
 
 // ─── MODALS ───
 function fundMilestoneBody(cfg){
@@ -631,6 +633,103 @@ function toggleHireFields(prefix){
     const el=document.getElementById(prefix+'-'+k+'-fields');
     if(el)el.style.display=(k===v)?'block':'none';
   });
+}
+
+function switchCVStep(n) {
+  document.querySelectorAll('[id^="cvpanel-"]').forEach(p => p.style.display = 'none');
+  const target = document.getElementById('cvpanel-' + n);
+  if (target) target.style.display = 'block';
+
+  // Update progress UI
+  for (let i = 1; i <= 3; i++) {
+    const s = document.getElementById('cvstep-' + i);
+    const ico = document.getElementById('cvstep-' + i + '-ico');
+    if (!s || !ico) continue;
+    if (i === n) {
+      s.style.background = 'var(--uw-green-light)';
+      ico.style.background = 'var(--uw-green)';
+      ico.style.color = 'white';
+    } else if (i < n) {
+      s.style.background = 'white';
+      ico.style.background = '#e6f5e6';
+      ico.style.color = 'var(--uw-green)';
+      ico.innerHTML = '✓';
+    } else {
+      s.style.background = 'white';
+      ico.style.background = 'var(--uw-border)';
+      ico.style.color = 'var(--uw-gray)';
+      ico.innerHTML = i;
+    }
+  }
+}
+
+function selectCDocType(type, id) {
+  selectedCVType = type;
+  document.querySelectorAll('.doc-type-card').forEach(c => {
+    c.style.borderColor = 'var(--uw-border)';
+    c.style.background = 'white';
+    c.classList.remove('selected');
+  });
+  const el = document.getElementById(id);
+  if (el) {
+    el.style.borderColor = 'var(--uw-green)';
+    el.style.background = 'var(--uw-green-light)';
+    el.classList.add('selected');
+  }
+  
+  const bar = document.getElementById('cdtype-selected-bar');
+  if (bar) {
+    bar.style.display = 'flex';
+    document.getElementById('cdtype-selected-text').textContent = type + ' selected';
+    document.getElementById('cvreview-type').textContent = type;
+  }
+}
+
+function handleCVFile(input) {
+  if (input.files && input.files[0]) {
+    selectedCVFile = input.files[0];
+    document.getElementById('cv-text').textContent = selectedCVFile.name;
+    document.getElementById('cvreview-file').textContent = selectedCVFile.name;
+    document.getElementById('cvnext-2').disabled = false;
+  }
+}
+
+async function submitClientFinalVerification() {
+  if (!selectedCVType || !selectedCVFile) {
+    return toast('Error', 'Please complete all steps');
+  }
+
+  const btn = document.getElementById('v-submit-btn');
+  const btnText = document.getElementById('v-btn-text');
+  
+  if (btn) btn.disabled = true;
+  if (btnText) btnText.innerHTML = '<span class="spinner" style="width:16px;height:16px;border-width:2px;margin-right:8px"></span>Submitting...';
+
+  const formData = new FormData();
+  formData.append('doc_type', selectedCVType);
+  formData.append('document', selectedCVFile);
+
+  try {
+    const response = await fetch(BASE_URL + '/upload-doc', {
+      method: 'POST',
+      body: formData
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      toast('Success!', 'Your documents have been submitted for verification.');
+      setTimeout(() => location.reload(), 1500);
+    } else {
+      toast('Error', result.error || 'Failed to submit verification');
+      if (btn) btn.disabled = false;
+      if (btnText) btnText.innerText = 'Submit for Review';
+    }
+  } catch (err) {
+    toast('Error', 'An unexpected error occurred.');
+    if (btn) btn.disabled = false;
+    if (btnText) btnText.innerText = 'Submit for Review';
+  }
 }
 
 setTimeout(()=>toast('Welcome back, NexaFlow!','You have 4 unread messages and 12 new proposals'),1000);

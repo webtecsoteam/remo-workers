@@ -1,3 +1,15 @@
+<?php 
+require_once __DIR__ . '/../includes/config.php';
+require_once __DIR__ . '/../includes/classes/Auth.php';
+$user = Auth::user();
+if(!$user) { redirect(baseUrl()); }
+
+$db = getDB();
+$vDoc = $db->prepare("SELECT status FROM user_documents WHERE user_id = ? ORDER BY created_at DESC LIMIT 1");
+$vDoc->execute([$user['id']]);
+$vStatus = $vDoc->fetchColumn() ?: 'unverified';
+if(isset($user['is_verified']) && $user['is_verified']) $vStatus = 'approved';
+?>
 <?php include __DIR__ . '/includes/header.php'; ?>
 <body>
 
@@ -700,209 +712,158 @@
           <div style="font-size:20px;font-weight:700">Identity Verification</div>
           <div style="font-size:13px;color:var(--muted);margin-top:3px">Verify your identity to build trust and unlock full platform features.</div>
         </div>
-        <span class="badge b-yellow" style="font-size:12px;padding:5px 12px">⏳ Pending</span>
+        <?php if($vStatus === 'approved'): ?>
+          <span class="badge b-green" style="font-size:12px;padding:5px 12px">✅ Verified</span>
+        <?php elseif($vStatus === 'pending'): ?>
+          <span class="badge b-yellow" style="font-size:12px;padding:5px 12px">⏳ Pending</span>
+        <?php else: ?>
+          <span class="badge b-gray" style="font-size:12px;padding:5px 12px">🛡️ Unverified</span>
+        <?php endif; ?>
       </div>
 
-      <!-- Why verify banner -->
-      <div style="background:linear-gradient(135deg,#16281a 0%,#1f3a23 100%);border-radius:12px;padding:20px 24px;margin-bottom:20px;display:flex;align-items:center;gap:20px;flex-wrap:wrap">
-        <div style="font-size:36px">🛡️</div>
-        <div style="flex:1;min-width:200px">
-          <div style="font-size:15px;font-weight:700;color:white;margin-bottom:6px">Why verify your identity?</div>
-          <div style="display:flex;flex-wrap:wrap;gap:10px">
-            <span style="font-size:12px;color:rgba(255,255,255,.75);display:flex;align-items:center;gap:5px"><span style="color:#c8f135">✓</span> Earn the "ID Verified" badge</span>
-            <span style="font-size:12px;color:rgba(255,255,255,.75);display:flex;align-items:center;gap:5px"><span style="color:#c8f135">✓</span> Higher withdrawal limits</span>
-            <span style="font-size:12px;color:rgba(255,255,255,.75);display:flex;align-items:center;gap:5px"><span style="color:#c8f135">✓</span> Increased client confidence</span>
-            <span style="font-size:12px;color:rgba(255,255,255,.75);display:flex;align-items:center;gap:5px"><span style="color:#c8f135">✓</span> Access to enterprise contracts</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Steps progress -->
-      <div style="display:flex;align-items:center;gap:0;margin-bottom:22px;background:white;border:1px solid var(--border);border-radius:10px;overflow:hidden">
-        <div id="vstep-1" style="flex:1;padding:14px 16px;border-right:1px solid var(--border);cursor:pointer;transition:background .15s;background:var(--gl)" onclick="switchVStep(1)">
-          <div style="display:flex;align-items:center;gap:8px">
-            <div id="vstep-1-ico" style="width:24px;height:24px;border-radius:50%;background:var(--g);color:white;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0">1</div>
-            <div>
-              <div style="font-size:12px;font-weight:700">Choose Document</div>
-              <div style="font-size:11px;color:var(--muted)">Select ID type</div>
-            </div>
-          </div>
-        </div>
-        <div id="vstep-2" style="flex:1;padding:14px 16px;border-right:1px solid var(--border);cursor:pointer;transition:background .15s" onclick="switchVStep(2)">
-          <div style="display:flex;align-items:center;gap:8px">
-            <div id="vstep-2-ico" style="width:24px;height:24px;border-radius:50%;background:var(--border);color:var(--muted);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0">2</div>
-            <div>
-              <div style="font-size:12px;font-weight:700">Upload Document</div>
-              <div style="font-size:11px;color:var(--muted)">Front & back / photo page</div>
-            </div>
-          </div>
-        </div>
-        <div id="vstep-3" style="flex:1;padding:14px 16px;cursor:pointer;transition:background .15s" onclick="switchVStep(3)">
-          <div style="display:flex;align-items:center;gap:8px">
-            <div id="vstep-3-ico" style="width:24px;height:24px;border-radius:50%;background:var(--border);color:var(--muted);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0">3</div>
-            <div>
-              <div style="font-size:12px;font-weight:700">Review & Submit</div>
-              <div style="font-size:11px;color:var(--muted)">Confirm & send</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Step panels -->
-
-      <!-- STEP 1: Choose document type -->
-      <div id="vpanel-1" class="card" style="margin-bottom:16px">
-        <div class="card-head"><h3>Step 1 — Choose Document Type</h3></div>
-        <div class="card-body">
-          <div style="font-size:13px;color:var(--muted);margin-bottom:16px">Select the government-issued document you want to use for verification.</div>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px" id="doc-type-grid">
-
-            <div class="doc-type-card" id="dtype-passport" onclick="selectDocType('passport','dtype-passport')" style="border:2px solid var(--border);border-radius:10px;padding:16px;cursor:pointer;transition:all .2s;text-align:center">
-              <div style="font-size:34px;margin-bottom:8px">🛂</div>
-              <div style="font-size:13px;font-weight:700;margin-bottom:3px">Passport</div>
-              <div style="font-size:11.5px;color:var(--muted)">Photo page only</div>
-            </div>
-
-            <div class="doc-type-card" id="dtype-national-id" onclick="selectDocType('national-id','dtype-national-id')" style="border:2px solid var(--border);border-radius:10px;padding:16px;cursor:pointer;transition:all .2s;text-align:center">
-              <div style="font-size:34px;margin-bottom:8px">🪪</div>
-              <div style="font-size:13px;font-weight:700;margin-bottom:3px">National ID</div>
-              <div style="font-size:11.5px;color:var(--muted)">Front & back</div>
-            </div>
-
-            <div class="doc-type-card" id="dtype-drivers" onclick="selectDocType('drivers','dtype-drivers')" style="border:2px solid var(--border);border-radius:10px;padding:16px;cursor:pointer;transition:all .2s;text-align:center">
-              <div style="font-size:34px;margin-bottom:8px">🚗</div>
-              <div style="font-size:13px;font-weight:700;margin-bottom:3px">Driver's Licence</div>
-              <div style="font-size:11.5px;color:var(--muted)">Front & back</div>
-            </div>
-
-            <div class="doc-type-card" id="dtype-residence" onclick="selectDocType('residence','dtype-residence')" style="border:2px solid var(--border);border-radius:10px;padding:16px;cursor:pointer;transition:all .2s;text-align:center">
-              <div style="font-size:34px;margin-bottom:8px">📋</div>
-              <div style="font-size:13px;font-weight:700;margin-bottom:3px">Residence Permit</div>
-              <div style="font-size:11.5px;color:var(--muted)">Front & back</div>
-            </div>
-
-          </div>
-          <div id="dtype-selected-bar" style="display:none;margin-top:16px;background:var(--gl);border:1px solid #c3e6c3;border-radius:8px;padding:10px 14px;display:none;align-items:center;gap:10px">
-            <span style="font-size:16px">✅</span>
-            <span id="dtype-selected-text" style="font-size:13px;font-weight:600;color:var(--g)">Passport selected</span>
-            <button class="btn btn-sm btn-g" style="margin-left:auto" onclick="switchVStep(2)">Next: Upload →</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- STEP 2: Upload -->
-      <div id="vpanel-2" class="card" style="margin-bottom:16px;display:none">
-        <div class="card-head">
-          <h3>Step 2 — Upload Your Document</h3>
-          <span id="upload-doc-label" class="badge b-green">Passport</span>
-        </div>
-        <div class="card-body">
-          <div style="font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.65">
-            Upload a clear, colour photo or scan. Make sure all four corners are visible and text is readable. Files must be <strong>JPG, PNG, or PDF</strong> and under <strong>10 MB</strong>.
-          </div>
-
-          <!-- Front / photo page upload -->
-          <div style="margin-bottom:16px">
-            <div style="font-size:12.5px;font-weight:700;margin-bottom:8px" id="front-label">📄 Front side / Photo page</div>
-            <div id="vdrop-front"
-              ondragover="event.preventDefault();this.style.borderColor='var(--g)';this.style.background='var(--gl)'"
-              ondragleave="this.style.borderColor='var(--border)';this.style.background='var(--off)'"
-              ondrop="handleVDrop(event,'front')"
-              style="border:2px dashed var(--border);border-radius:10px;padding:28px;text-align:center;background:var(--off);cursor:pointer;transition:all .2s"
-              onclick="document.getElementById('vinput-front').click()">
-              <div id="vfront-preview" style="display:none;flex-direction:column;align-items:center;gap:8px"></div>
-              <div id="vfront-placeholder">
-                <div style="font-size:32px;margin-bottom:8px">📤</div>
-                <div style="font-size:13px;font-weight:600;margin-bottom:4px">Drag & drop or click to upload</div>
-                <div style="font-size:12px;color:var(--muted)">JPG, PNG, PDF — max 10 MB</div>
-              </div>
-            </div>
-            <input type="file" id="vinput-front" accept=".jpg,.jpeg,.png,.pdf" style="display:none" onchange="handleVFileInput(this.files,'front')">
-          </div>
-
-          <!-- Back side (hidden for passport) -->
-          <div id="vback-section" style="margin-bottom:16px">
-            <div style="font-size:12.5px;font-weight:700;margin-bottom:8px">📄 Back side</div>
-            <div id="vdrop-back"
-              ondragover="event.preventDefault();this.style.borderColor='var(--g)';this.style.background='var(--gl)'"
-              ondragleave="this.style.borderColor='var(--border)';this.style.background='var(--off)'"
-              ondrop="handleVDrop(event,'back')"
-              style="border:2px dashed var(--border);border-radius:10px;padding:28px;text-align:center;background:var(--off);cursor:pointer;transition:all .2s"
-              onclick="document.getElementById('vinput-back').click()">
-              <div id="vback-preview" style="display:none;flex-direction:column;align-items:center;gap:8px"></div>
-              <div id="vback-placeholder">
-                <div style="font-size:32px;margin-bottom:8px">📤</div>
-                <div style="font-size:13px;font-weight:600;margin-bottom:4px">Drag & drop or click to upload</div>
-                <div style="font-size:12px;color:var(--muted)">JPG, PNG, PDF — max 10 MB</div>
-              </div>
-            </div>
-            <input type="file" id="vinput-back" accept=".jpg,.jpeg,.png,.pdf" style="display:none" onchange="handleVFileInput(this.files,'back')">
-          </div>
-
-          <!-- Tips -->
-          <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:12px 14px;font-size:12.5px;color:#1e40af;line-height:1.7;margin-bottom:16px">
-            <strong>📸 Photo tips</strong><br>
-            • Use a flat surface with good lighting — no flash glare<br>
-            • All four corners of the document must be visible<br>
-            • Do not crop, edit, or add filters<br>
-            • The document must not be expired
-          </div>
-
-          <div style="display:flex;gap:10px">
-            <button class="btn btn-w" onclick="switchVStep(1)">← Back</button>
-            <button class="btn btn-g" style="flex:1;justify-content:center" id="vnext-2" onclick="validateAndGoStep3()" disabled style="opacity:.5">Next: Review →</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- STEP 3: Review & Submit -->
-      <div id="vpanel-3" class="card" style="margin-bottom:16px;display:none">
-        <div class="card-head"><h3>Step 3 — Review & Submit</h3></div>
-        <div class="card-body">
-          <div style="font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.65">Please review your uploaded documents before submitting. Once submitted, verification typically takes <strong>1–3 business days</strong>.</div>
-
-          <div id="vreview-content" style="margin-bottom:18px"></div>
-
-          <!-- Personal details confirm -->
-          <div style="background:var(--off);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:18px">
-            <div style="font-size:12.5px;font-weight:700;margin-bottom:10px;color:var(--dark)">Confirm your details match your document</div>
-            <div class="g2" style="gap:10px">
-              <div class="fg" style="margin-bottom:0"><label>Full legal name</label><input type="text" value="Anika Nkosi" id="vlegal-name"></div>
-              <div class="fg" style="margin-bottom:0"><label>Date of birth</label><input type="date" value="1992-04-18" id="vdob"></div>
-              <div class="fg" style="margin-bottom:0"><label>Nationality</label><input type="text" value="German" id="vnationality"></div>
-              <div class="fg" style="margin-bottom:0"><label>Document number</label><input type="text" placeholder="e.g. A12345678" id="vdoc-number"></div>
-            </div>
-          </div>
-
-          <!-- Consent -->
-          <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:12.5px;color:var(--dark3);line-height:1.6;margin-bottom:18px">
-            <input type="checkbox" id="vconsent" style="margin-top:2px;accent-color:var(--g);width:15px;height:15px;flex-shrink:0" onchange="toggleVSubmit()">
-            I consent to Remoworkers processing my personal data and identity document for the purpose of identity verification, in accordance with the <a href="#" style="color:var(--g)">Privacy Policy</a> and <a href="#" style="color:var(--g)">Terms of Service</a>.
-          </label>
-
-          <div style="display:flex;gap:10px">
-            <button class="btn btn-w" onclick="switchVStep(2)">← Back</button>
-            <button class="btn btn-g" style="flex:1;justify-content:center;opacity:.45" id="vsubmit-btn" disabled onclick="submitVerification()">🛡️ Submit for Verification</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Submitted state (hidden until submit) -->
-      <div id="vpanel-done" style="display:none">
+      <?php if($vStatus === 'approved'): ?>
         <div class="card" style="border:2px solid var(--g);background:var(--gl)">
           <div class="card-body" style="text-align:center;padding:36px 24px">
-            <div style="font-size:52px;margin-bottom:16px">🎉</div>
-            <div style="font-size:20px;font-weight:700;margin-bottom:8px;color:var(--forest)">Verification Submitted!</div>
-            <div style="font-size:13.5px;color:#166534;line-height:1.7;max-width:380px;margin:0 auto 20px">Your identity documents have been received. Our team will review your submission within <strong>1–3 business days</strong>. You'll receive an email notification once verified.</div>
-            <div style="display:inline-flex;align-items:center;gap:8px;background:white;border:1px solid #c3e6c3;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:600;color:var(--g);margin-bottom:20px">
-              <span>🔒</span> Status: <strong>Under Review</strong>
-            </div>
+            <div style="font-size:52px;margin-bottom:16px">✅</div>
+            <div style="font-size:20px;font-weight:700;margin-bottom:8px;color:var(--forest)">Identity Verified!</div>
+            <div style="font-size:13.5px;color:#166534;line-height:1.7;max-width:380px;margin:0 auto 20px">Your identity has been successfully verified. You now have full access to all platform features and your "Verified" badge is now visible on your profile.</div>
             <div>
-              <button class="btn btn-g" onclick="showPage('profile',document.querySelector('[onclick*=profile]'))">← Back to Profile</button>
+              <button class="btn btn-g" onclick="showPage('profile',document.querySelector('[onclick*=profile]'))">View Profile</button>
             </div>
           </div>
         </div>
-      </div>
+      <?php elseif($vStatus === 'pending'): ?>
+        <div class="card" style="border:1px solid #fde68a;background:#fffbeb">
+          <div class="card-body" style="text-align:center;padding:36px 24px">
+            <div style="font-size:52px;margin-bottom:16px">⏳</div>
+            <div style="font-size:20px;font-weight:700;margin-bottom:8px;color:#92400e">Verification Under Review</div>
+            <div style="font-size:13.5px;color:#92400e;line-height:1.7;max-width:380px;margin:0 auto 20px">Your identity documents have been received and are currently under review. This process typically takes 1-3 business days. We'll notify you once it's complete.</div>
+            <div style="display:inline-flex;align-items:center;gap:8px;background:white;border:1px solid #fde68a;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:600;color:#b27b16">
+              Status: <strong>Pending Review</strong>
+            </div>
+          </div>
+        </div>
+      <?php else: ?>
+        <!-- Why verify banner -->
+        <div style="background:linear-gradient(135deg,#16281a 0%,#1f3a23 100%);border-radius:12px;padding:20px 24px;margin-bottom:20px;display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+          <div style="font-size:36px">🛡️</div>
+          <div style="flex:1;min-width:200px">
+            <div style="font-size:15px;font-weight:700;color:white;margin-bottom:6px">Why verify your identity?</div>
+            <div style="display:flex;flex-wrap:wrap;gap:10px">
+              <span style="font-size:12px;color:rgba(255,255,255,.75);display:flex;align-items:center;gap:5px"><span style="color:#c8f135">✓</span> Earn the "ID Verified" badge</span>
+              <span style="font-size:12px;color:rgba(255,255,255,.75);display:flex;align-items:center;gap:5px"><span style="color:#c8f135">✓</span> Higher withdrawal limits</span>
+              <span style="font-size:12px;color:rgba(255,255,255,.75);display:flex;align-items:center;gap:5px"><span style="color:#c8f135">✓</span> Increased client confidence</span>
+              <span style="font-size:12px;color:rgba(255,255,255,.75);display:flex;align-items:center;gap:5px"><span style="color:#c8f135">✓</span> Access to enterprise contracts</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Steps progress -->
+        <div style="display:flex;align-items:center;gap:0;margin-bottom:22px;background:white;border:1px solid var(--border);border-radius:10px;overflow:hidden">
+          <div id="vstep-1" style="flex:1;padding:14px 16px;border-right:1px solid var(--border);cursor:pointer;transition:background .15s;background:var(--gl)" onclick="switchVStep(1)">
+            <div style="display:flex;align-items:center;gap:8px">
+              <div id="vstep-1-ico" style="width:24px;height:24px;border-radius:50%;background:var(--g);color:white;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0">1</div>
+              <div>
+                <div style="font-size:12px;font-weight:700">Choose Document</div>
+                <div style="font-size:11px;color:var(--muted)">Select ID type</div>
+              </div>
+            </div>
+          </div>
+          <div id="vstep-2" style="flex:1;padding:14px 16px;border-right:1px solid var(--border);cursor:pointer;transition:background .15s" onclick="switchVStep(2)">
+            <div style="display:flex;align-items:center;gap:8px">
+              <div id="vstep-2-ico" style="width:24px;height:24px;border-radius:50%;background:var(--border);color:var(--muted);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0">2</div>
+              <div>
+                <div style="font-size:12px;font-weight:700">Upload Document</div>
+                <div style="font-size:11px;color:var(--muted)">Front & back / photo page</div>
+              </div>
+            </div>
+          </div>
+          <div id="vstep-3" style="flex:1;padding:14px 16px;cursor:pointer;transition:background .15s" onclick="switchVStep(3)">
+            <div style="display:flex;align-items:center;gap:8px">
+              <div id="vstep-3-ico" style="width:24px;height:24px;border-radius:50%;background:var(--border);color:var(--muted);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0">3</div>
+              <div>
+                <div style="font-size:12px;font-weight:700">Review & Submit</div>
+                <div style="font-size:11px;color:var(--muted)">Confirm & send</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step panels -->
+        <div id="vpanel-1" class="card" style="margin-bottom:16px">
+          <div class="card-head"><h3>Step 1 — Choose Document Type</h3></div>
+          <div class="card-body">
+            <div style="font-size:13px;color:var(--muted);margin-bottom:16px">Select the government-issued document you want to use for verification.</div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px" id="doc-type-grid">
+              <div class="doc-type-card" id="dtype-passport" onclick="selectDocType('Passport','dtype-passport')" style="border:2px solid var(--border);border-radius:10px;padding:16px;cursor:pointer;transition:all .2s;text-align:center">
+                <div style="font-size:34px;margin-bottom:8px">🛂</div>
+                <div style="font-size:13px;font-weight:700;margin-bottom:3px">Passport</div>
+                <div style="font-size:11.5px;color:var(--muted)">Photo page only</div>
+              </div>
+              <div class="doc-type-card" id="dtype-national-id" onclick="selectDocType('National ID','dtype-national-id')" style="border:2px solid var(--border);border-radius:10px;padding:16px;cursor:pointer;transition:all .2s;text-align:center">
+                <div style="font-size:34px;margin-bottom:8px">🪪</div>
+                <div style="font-size:13px;font-weight:700;margin-bottom:3px">National ID</div>
+                <div style="font-size:11.5px;color:var(--muted)">Front & back</div>
+              </div>
+              <div class="doc-type-card" id="dtype-drivers" onclick="selectDocType('Drivers License','dtype-drivers')" style="border:2px solid var(--border);border-radius:10px;padding:16px;cursor:pointer;transition:all .2s;text-align:center">
+                <div style="font-size:34px;margin-bottom:8px">🚗</div>
+                <div style="font-size:13px;font-weight:700;margin-bottom:3px">Driver's Licence</div>
+                <div style="font-size:11.5px;color:var(--muted)">Front & back</div>
+              </div>
+            </div>
+            <div id="dtype-selected-bar" style="display:none;margin-top:16px;background:var(--gl);border:1px solid #c3e6c3;border-radius:8px;padding:10px 14px;align-items:center;gap:10px">
+              <span style="font-size:16px">✅</span>
+              <span id="dtype-selected-text" style="font-size:13px;font-weight:600;color:var(--g)">Passport selected</span>
+              <button class="btn btn-sm btn-g" style="margin-left:auto" onclick="switchVStep(2)">Next: Upload →</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 2: Upload -->
+        <div id="vpanel-2" class="card" style="margin-bottom:16px;display:none">
+          <div class="card-head">
+            <h3>Step 2 — Upload Your Document</h3>
+            <span id="upload-doc-label" class="badge b-green">Passport</span>
+          </div>
+          <div class="card-body">
+            <div style="font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.65">
+              Upload a clear, colour photo or scan. Make sure all four corners are visible and text is readable.
+            </div>
+            <div id="vdrop-front" style="border:2px dashed var(--border);border-radius:10px;padding:28px;text-align:center;background:var(--off);cursor:pointer;" onclick="document.getElementById('vinput-front').click()">
+              <div id="vfront-placeholder">
+                <div style="font-size:32px;margin-bottom:8px">📤</div>
+                <div id="vfront-text" style="font-size:13px;font-weight:600;">Click to upload document</div>
+                <div style="font-size:12px;color:var(--muted)">JPG, PNG, PDF — max 5 MB</div>
+              </div>
+              <input type="file" id="vinput-front" accept=".jpg,.jpeg,.png,.pdf" style="display:none" onchange="handleVFile(this)">
+            </div>
+            <div style="display:flex;gap:10px;margin-top:20px">
+              <button class="btn btn-w" onclick="switchVStep(1)">← Back</button>
+              <button class="btn btn-g" id="vnext-2" style="flex:1;justify-content:center" onclick="switchVStep(3)" disabled>Next: Review →</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 3: Review -->
+        <div id="vpanel-3" class="card" style="margin-bottom:16px;display:none">
+          <div class="card-head"><h3>Step 3 — Review & Submit</h3></div>
+          <div class="card-body">
+            <div style="font-size:13px;color:var(--muted);margin-bottom:16px">Please confirm your document type and file before submitting.</div>
+            <div style="background:var(--off);padding:14px;border-radius:8px;margin-bottom:20px">
+              <div style="font-size:12px;color:var(--muted)">Selected Document</div>
+              <div id="vreview-type" style="font-weight:700;margin-bottom:10px">Passport</div>
+              <div style="font-size:12px;color:var(--muted)">File</div>
+              <div id="vreview-file" style="font-weight:700">document.jpg</div>
+            </div>
+            <div style="display:flex;gap:10px">
+              <button class="btn btn-w" onclick="switchVStep(2)">← Back</button>
+              <button class="btn btn-g" id="v-submit-btn" style="flex:1;justify-content:center" onclick="submitFinalVerification()">
+                <span id="v-btn-text">🛡️ Submit for Verification</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      <?php endif; ?>
 
     </div><!-- end #page-verification -->
 

@@ -435,6 +435,7 @@ function showPage(id,navEl){
   if(id==='profile')setTimeout(renderSuggestedSkills,50);
   // Scroll main content to top on mobile
   if(window.innerWidth<=900){window.scrollTo({top:0,behavior:'smooth'});}
+  if(id==='verification' && typeof switchVStep === 'function') switchVStep(1);
 }
 function setTab(el){el.closest('.tab-bar').querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));el.classList.add('on');}
 const EARNINGS_INFO = {
@@ -1697,6 +1698,99 @@ function submitM2() {
   toast('Milestone submitted! 🎉', 'FinTech Co. notified — awaiting approval');
   m2Files = [];
   setTimeout(() => closeModal(), 2800);
+}
+let selectedVType = '';
+let selectedVFile = null;
+
+function switchVStep(n) {
+  document.querySelectorAll('[id^="vpanel-"]').forEach(p => p.style.display = 'none');
+  const target = document.getElementById('vpanel-' + n);
+  if (target) target.style.display = 'block';
+
+  // Update progress UI
+  for (let i = 1; i <= 3; i++) {
+    const s = document.getElementById('vstep-' + i);
+    const ico = document.getElementById('vstep-' + i + '-ico');
+    if (!s || !ico) continue;
+    if (i === n) {
+      s.style.background = 'var(--gl)';
+      ico.style.background = 'var(--g)';
+      ico.style.color = 'white';
+    } else if (i < n) {
+      s.style.background = 'white';
+      ico.style.background = '#e6f5e6';
+      ico.style.color = 'var(--g)';
+      ico.innerHTML = '✓';
+    } else {
+      s.style.background = 'white';
+      ico.style.background = 'var(--border)';
+      ico.style.color = 'var(--muted)';
+      ico.innerHTML = i;
+    }
+  }
+}
+
+function selectDocType(type, id) {
+  selectedVType = type;
+  document.querySelectorAll('.doc-type-card').forEach(c => {
+    c.style.borderColor = 'var(--border)';
+    c.style.background = 'white';
+  });
+  const el = document.getElementById(id);
+  el.style.borderColor = 'var(--g)';
+  el.style.background = 'var(--gl)';
+  
+  document.getElementById('dtype-selected-bar').style.display = 'flex';
+  document.getElementById('dtype-selected-text').textContent = type + ' selected';
+  document.getElementById('upload-doc-label').textContent = type;
+  document.getElementById('vreview-type').textContent = type;
+}
+
+function handleVFile(input) {
+  if (input.files && input.files[0]) {
+    selectedVFile = input.files[0];
+    document.getElementById('vfront-text').textContent = selectedVFile.name;
+    document.getElementById('vreview-file').textContent = selectedVFile.name;
+    document.getElementById('vnext-2').disabled = false;
+  }
+}
+
+async function submitFinalVerification() {
+  if (!selectedVType || !selectedVFile) {
+    return toast('Error', 'Please complete all steps');
+  }
+
+  const btn = document.getElementById('v-submit-btn');
+  const btnText = document.getElementById('v-btn-text');
+  
+  if (btn) btn.disabled = true;
+  if (btnText) btnText.innerHTML = '<span class="spinner" style="width:16px;height:16px;border-width:2px;margin-right:8px"></span>Submitting...';
+
+  const formData = new FormData();
+  formData.append('doc_type', selectedVType);
+  formData.append('document', selectedVFile);
+
+  try {
+    const response = await fetch(BASE_URL + '/upload-doc', {
+      method: 'POST',
+      body: formData
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      toast('Success!', 'Your documents have been submitted for verification.');
+      setTimeout(() => location.reload(), 1500);
+    } else {
+      toast('Error', result.error || 'Failed to submit verification');
+      if (btn) btn.disabled = false;
+      if (btnText) btnText.innerText = '🛡️ Submit for Verification';
+    }
+  } catch (err) {
+    toast('Error', 'An unexpected error occurred.');
+    if (btn) btn.disabled = false;
+    if (btnText) btnText.innerText = '🛡️ Submit for Verification';
+  }
 }
 </script>
 </body>

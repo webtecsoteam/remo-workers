@@ -45,6 +45,14 @@ switch ($section) {
         redirect(baseUrl());
         break;
 
+    case 'verification':
+        include __DIR__ . '/home/verification.php';
+        break;
+
+    case 'upload-doc':
+        include __DIR__ . '/actions/upload_doc.php';
+        break;
+
     // ------------------------------------------
     // Route 2: Client Section (/client/*)
     // ------------------------------------------

@@ -46,11 +46,10 @@ class Auth {
     
     public static function user() {
         if (!isset($_SESSION['user_id'])) return null;
-        return [
-            'id' => $_SESSION['user_id'],
-            'name' => $_SESSION['user_name'],
-            'role' => $_SESSION['user_role']
-        ];
+        $db = getDB();
+        $stmt = $db->prepare("SELECT * FROM users WHERE id = ?");
+        $stmt->execute([$_SESSION['user_id']]);
+        return $stmt->fetch();
     }
     
     public static function check() {

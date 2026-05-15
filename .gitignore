@@ -19,6 +19,9 @@ Thumbs.db
 *.swo
 *~
 
+
+uploads/
+
 # PHP / Composer
 vendor/
 composer.phar

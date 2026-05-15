@@ -174,9 +174,17 @@ if (!$user || $user['role'] !== 'admin') {
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
         Payments
       </div>
+      <div class="nav-item" onclick="showPage('verifications', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+        Verifications
+      </div>
     </div>
     <div class="nav-section">
       <div class="nav-label">System</div>
+      <div class="nav-item" onclick="showPage('security', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Security
+      </div>
       <div class="nav-item" onclick="showPage('migrations', this)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
         Migrations
@@ -258,15 +266,69 @@ if (!$user || $user['role'] !== 'admin') {
       </div>
     </div>
 
-    <!-- Placeholder for other pages -->
+    <!-- VERIFICATIONS -->
+    <div class="page" id="page-verifications">
+      <div class="card">
+        <div class="card-header"><span class="card-title">Document Verification Requests</span></div>
+        <div class="table-wrapper" id="verificationsTable">
+          <div class="loading"><span class="spinner"></span>Loading documents…</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECURITY -->
+    <div class="page" id="page-security">
+      <div class="card" style="max-width: 500px;">
+        <div class="card-header"><span class="card-title">Change Admin Password</span></div>
+        <div class="card-body">
+          <form id="passwordForm" onsubmit="changePassword(event)">
+            <div style="margin-bottom: 16px;">
+              <label style="display:block; font-size:12px; margin-bottom:6px; color:var(--text-2);">Current Password</label>
+              <input type="password" name="current_password" required style="width:100%; padding:10px; border:1px solid var(--border); border-radius:8px; outline:none;">
+            </div>
+            <div style="margin-bottom: 16px;">
+              <label style="display:block; font-size:12px; margin-bottom:6px; color:var(--text-2);">New Password</label>
+              <input type="password" name="new_password" required style="width:100%; padding:10px; border:1px solid var(--border); border-radius:8px; outline:none;">
+            </div>
+            <div style="margin-bottom: 20px;">
+              <label style="display:block; font-size:12px; margin-bottom:6px; color:var(--text-2);">Confirm New Password</label>
+              <input type="password" name="confirm_password" required style="width:100%; padding:10px; border:1px solid var(--border); border-radius:8px; outline:none;">
+            </div>
+            <button type="submit" class="btn btn-primary btn-full" style="width:100%; justify-content:center;">Update Password</button>
+          </form>
+          <div id="passwordStatus" style="margin-top: 15px; font-size: 13px;"></div>
+        </div>
+      </div>
+    </div>
+
     <div class="page" id="page-jobs"><div class="card"><div class="card-body">Jobs Management (Coming Soon)</div></div></div>
     <div class="page" id="page-payments"><div class="card"><div class="card-body">Payments Management (Coming Soon)</div></div></div>
 
   </div>
 </div>
 
+<!-- Balance Modal -->
+<div id="balanceModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:200; align-items:center; justify-content:center;">
+  <div class="card" style="width:100%; max-width:400px;">
+    <div class="card-header"><span class="card-title">Manage Balance</span> <span onclick="closeModal('balanceModal')" style="cursor:pointer">&times;</span></div>
+    <div class="card-body">
+      <p id="balanceUserName" style="margin-bottom:12px; font-weight:600;"></p>
+      <input type="hidden" id="balanceUserId">
+      <div style="margin-bottom:16px;">
+        <label style="display:block; font-size:12px; margin-bottom:6px;">Current Balance: <span id="currentBalanceVal">$0</span></label>
+        <input type="number" id="balanceAmount" step="0.01" placeholder="Enter amount to add (e.g. 50)" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:8px; outline:none;">
+      </div>
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-primary" onclick="updateBalance('add')" style="flex:1; justify-content:center;">Add</button>
+        <button class="btn btn-danger" onclick="updateBalance('set')" style="flex:1; justify-content:center;">Set Exact</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 const API = '<?php echo baseUrl('admin/api.php'); ?>';
+const BASE_URL = '<?php echo baseUrl(); ?>';
 
 async function apiFetch(action, params = {}) {
   const url = new URL(API, window.location.href);
@@ -289,6 +351,7 @@ function refreshPage(name) {
   const active = name || document.querySelector('.page.active')?.id?.replace('page-', '');
   if (active === 'dashboard') loadDashboard();
   if (active === 'users') loadUsers();
+  if (active === 'verifications') loadVerifications();
 }
 
 async function loadDashboard() {
@@ -342,17 +405,106 @@ async function loadUsers() {
 function renderUsersTable(users) {
   if (!users.length) return '<div class="loading">No users found.</div>';
   return `<table>
-    <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Joined</th></tr></thead>
+    <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Balance</th><th>Actions</th></tr></thead>
     <tbody>
       ${users.map(u => `<tr>
         <td><strong>${u.name}</strong></td>
         <td>${u.email}</td>
         <td><span class="badge ${u.role === 'admin' ? 'badge-red' : 'badge-blue'}">${u.role}</span></td>
         <td><span class="badge ${u.status === 'active' ? 'badge-green' : 'badge-amber'}">${u.status}</span></td>
-        <td>${new Date(u.created_at).toLocaleDateString()}</td>
+        <td><strong>$${parseFloat(u.balance || 0).toFixed(2)}</strong></td>
+        <td>
+          <button class="btn btn-outline btn-sm" onclick="openBalanceModal(${u.id}, '${u.name}', ${u.balance})">Balance</button>
+        </td>
       </tr>`).join('')}
     </tbody>
   </table>`;
+}
+
+function openBalanceModal(id, name, balance) {
+  document.getElementById('balanceUserId').value = id;
+  document.getElementById('balanceUserName').textContent = 'User: ' + name;
+  document.getElementById('currentBalanceVal').textContent = '$' + parseFloat(balance || 0).toFixed(2);
+  document.getElementById('balanceAmount').value = '';
+  document.getElementById('balanceModal').style.display = 'flex';
+}
+
+function closeModal(id) {
+  document.getElementById(id).style.display = 'none';
+}
+
+async function updateBalance(mode) {
+  const id = document.getElementById('balanceUserId').value;
+  const amount = document.getElementById('balanceAmount').value;
+  if (!amount) return alert('Please enter an amount');
+
+  const res = await apiFetch('update_balance', { user_id: id, amount: amount, mode: mode });
+  if (res.success) {
+    closeModal('balanceModal');
+    refreshPage('users');
+  } else {
+    alert(res.message);
+  }
+}
+
+async function changePassword(e) {
+  e.preventDefault();
+  const form = e.target;
+  const status = document.getElementById('passwordStatus');
+  status.innerHTML = '<span class="info">Updating…</span>';
+  
+  const formData = new FormData(form);
+  const params = {};
+  formData.forEach((v,k) => params[k] = v);
+  
+  const res = await apiFetch('change_password', params);
+  if (res.success) {
+    status.innerHTML = `<span class="success">${res.message}</span>`;
+    form.reset();
+  } else {
+    status.innerHTML = `<span class="error">${res.message}</span>`;
+  }
+}
+
+async function loadVerifications() {
+  const data = await apiFetch('get_verifications');
+  if (data.success) {
+    const docs = data.data;
+    if (!docs.length) {
+      document.getElementById('verificationsTable').innerHTML = '<div class="loading">No pending verifications.</div>';
+      return;
+    }
+    document.getElementById('verificationsTable').innerHTML = `<table>
+      <thead><tr><th>User</th><th>Type</th><th>View</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody>
+        ${docs.map(d => `<tr>
+          <td><strong>${d.user_name}</strong><br><small>${d.user_email}</small></td>
+          <td>${d.doc_type}</td>
+          <td><a href="${BASE_URL}/${d.file_path}" target="_blank" class="badge badge-blue">View Doc</a></td>
+          <td><span class="badge badge-amber">${d.status}</span></td>
+          <td>
+            <button class="btn btn-primary btn-sm" onclick="verifyDoc(${d.id}, 'approved')">Approve</button>
+            <button class="btn btn-danger btn-sm" onclick="verifyDoc(${d.id}, 'rejected')">Reject</button>
+          </td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
+  }
+}
+
+async function verifyDoc(id, status) {
+  let reason = '';
+  if (status === 'rejected') {
+    reason = prompt('Enter rejection reason:');
+    if (reason === null) return;
+  }
+  
+  const res = await apiFetch('update_verification', { id: id, status: status, reason: reason });
+  if (res.success) {
+    loadVerifications();
+  } else {
+    alert(res.message);
+  }
 }
 
 async function runMigrations() {
