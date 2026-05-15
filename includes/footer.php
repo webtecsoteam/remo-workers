@@ -18,9 +18,9 @@
                 <div class="footer-col">
                     <h4>For Clients</h4>
                     <ul>
-                        <li><a href="<?php echo baseUrl('upwork-client'); ?>">How to Hire</a></li>
-                        <li><a href="<?php echo baseUrl('upwork-client/talent'); ?>">Browse Talent</a></li>
-                        <li><a href="<?php echo baseUrl('upwork-client'); ?>">Post a Job</a></li>
+                        <li><a href="<?php echo baseUrl('client'); ?>">How to Hire</a></li>
+                        <li><a href="<?php echo baseUrl('client/talent'); ?>">Browse Talent</a></li>
+                        <li><a href="<?php echo baseUrl('client'); ?>">Post a Job</a></li>
                     </ul>
                 </div>
                 <div class="footer-col">

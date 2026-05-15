@@ -4,8 +4,8 @@
  * RemoWorkers - Main Router
  * =============================================
  * Routes:
- *   /                        → Home (remoworkers.html)
- *   /upwork-client/*         → Client section (upwork-client folder)
+ *   /                        → Home (home.php)
+ *   /client/*         → Client section (client folder)
  *   /remoworkers-dashboard/* → Freelancer section (freelancer folder)
  */
 
@@ -25,21 +25,21 @@ $page = $segments[1] ?? 'index';
 
 switch ($section) {
     // ------------------------------------------
-    // Route 1: Home Page (remoworkers.html)
+    // Route 1: Home Page (home.php)
     // ------------------------------------------
     case '':
-        include __DIR__ . '/remoworkers.html';
+        include __DIR__ . '/home/index.php';
         break;
 
     // ------------------------------------------
-    // Route 2: Client Section (/upwork-client/*)
+    // Route 2: Client Section (/client/*)
     // ------------------------------------------
-    case 'upwork-client':
-        $clientPage = __DIR__ . '/upwork-client/' . $page . '.php';
+    case 'client':
+        $clientPage = __DIR__ . '/client/' . $page . '.php';
         if (file_exists($clientPage)) {
             include $clientPage;
         } else {
-            include __DIR__ . '/upwork-client/index.php';
+            include __DIR__ . '/client/index.php';
         }
         break;
 

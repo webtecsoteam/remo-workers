@@ -46,7 +46,7 @@ $pageTitle = $pageTitle ?? APP_NAME;
                 <a href="<?php echo baseUrl(); ?>" class="nav-link <?php echo $section === '' ? 'active' : ''; ?>">
                     <i class="fas fa-home"></i> Home
                 </a>
-                <a href="<?php echo baseUrl('upwork-client'); ?>" class="nav-link <?php echo $section === 'upwork-client' ? 'active' : ''; ?>">
+                <a href="<?php echo baseUrl('client'); ?>" class="nav-link <?php echo $section === 'client' ? 'active' : ''; ?>">
                     <i class="fas fa-briefcase"></i> Hire Talent
                 </a>
                 <a href="<?php echo baseUrl('remoworkers-dashboard'); ?>" class="nav-link <?php echo $section === 'remoworkers-dashboard' ? 'active' : ''; ?>">

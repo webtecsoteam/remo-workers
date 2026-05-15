@@ -14,7 +14,7 @@ include __DIR__ . '/header.php';
                 <a href="<?php echo baseUrl(); ?>" class="btn btn-primary">
                     <i class="fas fa-home"></i> Back to Home
                 </a>
-                <a href="<?php echo baseUrl('upwork-client'); ?>" class="btn btn-outline">
+                <a href="<?php echo baseUrl('client'); ?>" class="btn btn-outline">
                     <i class="fas fa-briefcase"></i> Hire Talent
                 </a>
                 <a href="<?php echo baseUrl('remoworkers-dashboard'); ?>" class="btn btn-outline">
