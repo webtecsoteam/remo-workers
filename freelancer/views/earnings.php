@@ -67,7 +67,7 @@
   <div class="card">
     <div class="card-body" style="padding:0">
       <table class="tbl">
-        <thead><tr><th>Date</th><th>Description</th><th>Gross</th><th>Fee</th><th>Net</th><th>Status</th></tr></thead>
+        <thead><tr><th>Date</th><th>Description</th><th>Gross</th><th class="hide-mob">Fee</th><th>Net</th><th class="hide-mob">Status</th></tr></thead>
         <tbody>
           <?php if(empty($transactions)): ?>
             <tr><td colspan="6" style="text-align:center;padding:40px;color:var(--muted)">No transactions found yet.</td></tr>
@@ -77,9 +77,9 @@
                 <td><?php echo date('M j, Y', strtotime($t['created_at'])); ?></td>
                 <td><?php echo htmlspecialchars($t['description']); ?></td>
                 <td>$<?php echo number_format($t['amount'], 2); ?></td>
-                <td style="color:#ef4444">-$<?php echo number_format($t['platform_fee'], 2); ?></td>
+                <td class="hide-mob" style="color:#ef4444">-$<?php echo number_format($t['platform_fee'], 2); ?></td>
                 <td style="font-weight:700;color:var(--g)">$<?php echo number_format($t['amount'] - $t['platform_fee'], 2); ?></td>
-                <td>
+                <td class="hide-mob">
                   <span class="badge <?php 
                     echo $t['status'] === 'completed' ? 'b-green' : ($t['status'] === 'pending' ? 'b-blue' : 'b-gray'); 
                   ?>">

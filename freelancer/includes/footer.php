@@ -24,6 +24,11 @@
     document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
     const navEl = document.getElementById('nav-' + id);
     if (navEl) navEl.classList.add('active');
+
+    // Update mobile bottom nav sync
+    document.querySelectorAll('.mob-nav-item').forEach(i => i.classList.remove('active'));
+    const mobItem = document.querySelector(`.mob-nav-item[onclick*="'${id}'"]`);
+    if(mobItem) mobItem.classList.add('active');
     
     // Update title
     const titles = {
@@ -183,55 +188,50 @@
       const typeLabel = c.contract_type === 'hourly' ? 'Hourly' : 'Fixed';
       const typeColor = c.contract_type === 'hourly' ? '#e0f2fe' : '#f3e8ff';
       const typeText = c.contract_type === 'hourly' ? '#0369a1' : '#7e22ce';
-      const progressPercent = c.status === 'completed' ? 100 : (c.contract_type === 'hourly' ? 65 : 45);
+      
+      // Dynamic Progress Calculation
+      let progressPercent = 0;
+      if (c.status === 'completed') {
+        progressPercent = 100;
+      } else {
+        const budget = parseFloat(c.amount || 0);
+        const earned = parseFloat(c.total_earned || 0);
+        if (budget > 0) {
+          progressPercent = Math.min(100, Math.round((earned / budget) * 100));
+        } else {
+          progressPercent = c.contract_type === 'hourly' ? 65 : 10; // Default fallback
+        }
+      }
       
       return `
-        <div style="display:grid;grid-template-columns:1.2fr 1.2fr 0.6fr 0.8fr 1fr 0.6fr 0.8fr;padding:18px 20px;border-bottom:1px solid #eee;align-items:center;font-size:13px;cursor:pointer" onclick="openModal('contract-detail', ${c.id})">
-          <!-- Client -->
-          <div style="display:flex;align-items:center;gap:12px">
-            <div style="width:36px;height:36px;border-radius:50%;background:#e0f2fe;color:#0369a1;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px">${(c.client_name || 'C').charAt(0)}</div>
-            <div>
-              <div style="font-weight:700;color:#333">${c.client_name}</div>
-              <div style="font-size:11px;color:#999">★ 5.0 · Verified</div>
+        <div class="contract-list-item" style="padding:18px 20px;border-bottom:1px solid #eee;cursor:pointer" onclick="openModal('contract-detail', ${c.id})">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;justify-content:space-between">
+            <div style="display:flex;align-items:center;gap:12px">
+              <div style="width:36px;height:36px;border-radius:50%;background:#e0f2fe;color:#0369a1;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px">${(c.client_name || 'C').charAt(0)}</div>
+              <div>
+                <div style="font-weight:700;color:#333">${c.client_name}</div>
+                <div style="font-size:11px;color:#999">★ 5.0 · Verified</div>
+              </div>
             </div>
-          </div>
-
-          <!-- Project -->
-          <div style="color:#555;font-weight:500">${c.job_title}</div>
-
-          <!-- Type -->
-          <div>
             <span style="background:${typeColor};color:${typeText};padding:4px 10px;border-radius:4px;font-size:11px;font-weight:700">${typeLabel}</span>
           </div>
 
-          <!-- Earnings -->
-          <div>
-            <div style="font-weight:700;color:#333">$${parseFloat(c.total_earned || 0).toLocaleString()}</div>
-            <div style="font-size:11px;color:#999">
-              ${parseFloat(c.pending_earned || 0) > 0 
-                ? `<span style="color:#f59e0b">$${parseFloat(c.pending_earned).toLocaleString()} in review</span>` 
-                : (c.contract_type === 'hourly' ? 'Hourly basis' : `$${parseFloat(c.amount).toLocaleString()} total`)
-              }
-            </div>
+          <div style="margin-bottom:14px">
+            <div style="color:#333;font-weight:700;font-size:15px;margin-bottom:4px">${c.job_title}</div>
+            <div style="font-size:12px;color:#666">Started ${new Date(c.created_at).toLocaleDateString('en-US', {month:'short', day:'numeric'})}</div>
           </div>
 
-          <!-- Progress -->
-          <div style="padding-right:20px">
-            <div style="font-size:11px;color:#999;margin-bottom:6px">${c.status === 'active' ? (c.contract_type === 'hourly' ? 'Active - No end date' : 'Milestone 1 of 2 done') : 'Completed'}</div>
-            <div style="width:100%;height:6px;background:#f3f4f6;border-radius:3px">
-              <div style="width:${progressPercent}%;height:100%;background:#14a800;border-radius:3px"></div>
+          <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:20px">
+            <div style="flex:1">
+              <div style="font-size:11px;color:#999;margin-bottom:6px">${c.status === 'completed' ? '100% Completed' : progressPercent + '% of budget earned'}</div>
+              <div style="width:100%;height:6px;background:#f3f4f6;border-radius:3px">
+                <div style="width:${progressPercent}%;height:100%;background:#14a800;border-radius:3px"></div>
+              </div>
             </div>
-          </div>
-
-          <!-- Started -->
-          <div style="color:#666">${new Date(c.created_at).toLocaleDateString('en-US', {month:'short', day:'numeric'})}</div>
-
-          <!-- Action -->
-          <div>
-            ${c.status === 'active' 
-              ? `<button class="btn" style="padding:6px 15px;font-size:12px;border:1px solid #ddd;background:white;color:#333;font-weight:600;border-radius:15px">Details</button>`
-              : `<button class="btn" style="padding:6px 15px;font-size:12px;border:1px solid #ddd;background:white;color:#333;font-weight:600;border-radius:15px">View Feed</button>`
-            }
+            <div style="text-align:right">
+              <div style="font-weight:700;color:#333;font-size:16px">$${parseFloat(c.total_earned || 0).toLocaleString()}</div>
+              <div style="font-size:11px;color:#999">Earned</div>
+            </div>
           </div>
         </div>
       `;
@@ -262,20 +262,22 @@
     list.innerHTML = filtered.map(p => {
       const statusClass = p.status === 'accepted' ? 'b-green' : (p.status === 'rejected' ? 'b-red' : 'b-purple');
       return `
-        <div class="contract-row" style="padding:22px;border-bottom:1px solid var(--border);display:grid;grid-template-columns:1fr 150px 120px;align-items:center">
-          <div style="padding-right:20px">
+        <div class="contract-row" style="padding:22px;border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;align-items:center;gap:15px;justify-content:space-between">
+          <div style="flex:1;min-width:260px">
             <div style="font-weight:700;font-size:16px;margin-bottom:6px;color:var(--dark)">${p.job_title}</div>
             <div style="display:flex;gap:15px;font-size:12px;color:var(--muted)">
               <span>Submitted ${new Date(p.created_at).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'})}</span>
-              <span>${p.estimated_days || '7'} days delivery</span>
+              <span class="hide-mob">${p.estimated_days || '7'} days delivery</span>
             </div>
           </div>
-          <div style="text-align:center">
-            <div style="font-weight:700;font-size:15px;color:var(--dark)">$${parseFloat(p.bid_amount).toLocaleString()}</div>
-            <div style="font-size:11px;color:var(--muted2)">Proposed Bid</div>
-          </div>
-          <div style="text-align:right">
-            <span class="badge ${statusClass}" style="padding:6px 12px;border-radius:6px;text-transform:capitalize">${p.status}</span>
+          <div style="display:flex;align-items:center;gap:20px;flex-shrink:0">
+            <div style="text-align:right">
+              <div style="font-weight:700;font-size:15px;color:var(--dark)">$${parseFloat(p.bid_amount).toLocaleString()}</div>
+              <div style="font-size:11px;color:var(--muted2)">Proposed Bid</div>
+            </div>
+            <div style="text-align:right;min-width:100px">
+              <span class="badge ${statusClass}" style="padding:6px 12px;border-radius:6px;text-transform:capitalize">${p.status}</span>
+            </div>
           </div>
         </div>`;
     }).join('');
@@ -613,7 +615,7 @@
           <div style="display:flex;gap:15px;border-top:1px solid #eee;padding-top:25px">
             <button class="btn" style="flex:1;justify-content:center;border:1px solid #ddd;background:white;color:#333;font-weight:600;padding:12px;border-radius:8px" onclick="showPage('messages');closeModal()">Message Client</button>
             <button class="btn" style="flex:1;justify-content:center;border:1px solid #14a800;background:white;color:#14a800;font-weight:600;padding:12px;border-radius:8px" onclick="toast('Video Call', 'Starting call...')">📹 Video Call</button>
-            <button class="btn" style="flex:1;justify-content:center;background:#f3f4f6;color:#333;font-weight:600;padding:12px;border-radius:8px" onclick="toast('Paused', 'Contract paused')">Pause Contract</button>
+            <button class="btn" id="btn-pause-contract" style="flex:1;justify-content:center;background:#f3f4f6;color:#333;font-weight:600;padding:12px;border-radius:8px" onclick="updateContractStatus(${c.id}, 'paused')">${c.status === 'paused' ? 'Resume Contract' : 'Pause Contract'}</button>
           </div>
         </div>
       `;
@@ -909,25 +911,38 @@
     const btn = document.getElementById('btn-log-work');
 
     if (!desc) return toast('Error', 'Please provide work description');
+    if (!amount || amount <= 0) return toast('Error', 'Please provide a valid amount/hours');
+
+    const c = CONTRACTS.find(x => x.id == contractId);
+    if (!c) return;
 
     btn.disabled = true;
+    const originalText = btn.innerText;
     btn.innerText = 'Submitting...';
+
+    const payload = {
+      contract_id: contractId,
+      description: desc,
+      attachments: attach
+    };
+
+    if (c.contract_type === 'hourly') {
+      payload.hours = amount;
+    } else {
+      payload.amount = amount;
+    }
 
     fetch(BASE_URL + 'freelancer/api/log-work.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contract_id: contractId,
-        amount: amount,
-        description: desc,
-        attachments: attach
-      })
+      body: JSON.stringify(payload)
     })
     .then(res => res.json())
     .then(data => {
       if (data.success) {
         toast('Success', 'Work submitted successfully!');
         closeModal();
+        renderContracts(); // Refresh list if needed
       } else {
         toast('Error', data.message);
       }
@@ -935,7 +950,43 @@
     .catch(err => toast('Error', 'Submission failed'))
     .finally(() => {
       btn.disabled = false;
-      btn.innerText = 'Log Hours';
+      btn.innerText = originalText;
+    });
+  }
+
+  window.updateContractStatus = function(contractId, status) {
+    const btn = document.getElementById('btn-pause-contract');
+    const c = CONTRACTS.find(x => x.id == contractId);
+    if (!c) return;
+
+    // Toggle if already paused
+    const newStatus = (c.status === 'paused' && status === 'paused') ? 'active' : status;
+
+    btn.disabled = true;
+    btn.innerText = 'Updating...';
+
+    fetch(BASE_URL + 'freelancer/api/update-contract.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contract_id: contractId,
+        status: newStatus
+      })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        c.status = newStatus;
+        toast('Success', 'Contract ' + newStatus);
+        closeModal();
+        renderContracts(); 
+      } else {
+        toast('Error', data.message);
+      }
+    })
+    .catch(err => toast('Error', 'Update failed'))
+    .finally(() => {
+      btn.disabled = false;
     });
   }
 

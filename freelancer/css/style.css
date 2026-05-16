@@ -108,7 +108,7 @@ button{font-family:inherit;cursor:pointer}
 .tab:hover{color:var(--dark)}.tab.on{color:var(--g);border-bottom-color:var(--g)}
 .toast{position:fixed;bottom:calc(70px + env(safe-area-inset-bottom,0px));right:16px;background:var(--forest);color:white;padding:12px 18px;border-radius:9px;font-size:13px;font-weight:500;z-index:9999;transform:translateY(80px);opacity:0;transition:all .3s;max-width:300px;box-shadow:0 8px 24px rgba(0,0,0,.2);pointer-events:none}
 .toast.show{transform:translateY(0);opacity:1;pointer-events:none}.toast strong{display:block;margin-bottom:2px;color:#c8f135}
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:900;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s;backdrop-filter:blur(3px)}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s;backdrop-filter:blur(3px)}
 .overlay.open{opacity:1;pointer-events:all}
 .modal{background:white;border-radius:12px;max-width:950px;width:100%;max-height:92vh;overflow-y:auto;transform:translateY(16px);transition:transform .2s;box-shadow:0 30px 100px rgba(0,0,0,.25)}
 .overlay.open .modal{transform:translateY(0)}
@@ -342,14 +342,41 @@ button{font-family:inherit;cursor:pointer}
   .cr-amount{text-align:left;font-size:13px}
 
   /* ── Job rows ────────────────────────────────────────── */
-  .job-row{padding:14px 16px;border-radius:0;border-left:none;border-right:none}
+  .job-row{
+    padding:14px 16px!important;
+    border-radius:0!important;
+    border-left:none!important;
+    border-right:none!important;
+    grid-template-columns: 1fr!important;
+    gap: 15px!important;
+  }
+  .job-row > div:last-child {
+    border-left: none!important;
+    padding-left: 0!important;
+    text-align: left!important;
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .job-row > div:last-child .btn {
+    width: auto!important;
+    margin-bottom: 0!important;
+  }
+  .job-row > div:last-child .save-btn {
+    margin-top: 0!important;
+  }
 
-  /* ── Badges ──────────────────────────────────────────── */
-  .badge{font-size:10.5px}
-
-  /* ── Forms in modal ──────────────────────────────────── */
-  .g2 .fg{margin-bottom:12px}
-  .mc{padding:16px 18px}
+  /* ── touch experience fixes ────────────────────────────── */
+  * { -webkit-tap-highlight-color: transparent; }
+  .btn, .sb-item, .mob-nav-item, .tab, .stat-c, .job-row, .card, .mob-menu-btn {
+    cursor: pointer !important;
+    touch-action: manipulation;
+  }
+  
+  .content {
+    padding-bottom: 120px;
+  }
 }
 
 @media(max-width:480px){
@@ -359,7 +386,10 @@ button{font-family:inherit;cursor:pointer}
   .content{padding:0}
   #rpt-kpi-row{grid-template-columns:1fr 1fr!important}
   .tb-ico-btn:nth-child(2){display:none}
+  
+  .tbl .hide-mob { display: none; }
 }
+
 @media(max-width:900px){
   .mob-greeting{display:block!important}
 }
