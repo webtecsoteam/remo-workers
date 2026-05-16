@@ -16,9 +16,27 @@
       "label": "json_response()",
       "file_type": "code",
       "source_file": "actions/create_service.php",
-      "source_location": "L6",
+      "source_location": "L7",
       "id": "actions_create_service_json_response",
       "community": 57,
+      "norm_label": "json_response()"
+    },
+    {
+      "label": "delete_service.php",
+      "file_type": "code",
+      "source_file": "actions/delete_service.php",
+      "source_location": "L1",
+      "id": "actions_delete_service_php",
+      "community": 59,
+      "norm_label": "delete_service.php"
+    },
+    {
+      "label": "json_response()",
+      "file_type": "code",
+      "source_file": "actions/delete_service.php",
+      "source_location": "L7",
+      "id": "actions_delete_service_json_response",
+      "community": 59,
       "norm_label": "json_response()"
     },
     {
@@ -34,37 +52,82 @@
       "label": "json_response()",
       "file_type": "code",
       "source_file": "actions/submit_verification.php",
-      "source_location": "L6",
+      "source_location": "L7",
       "id": "actions_submit_verification_json_response",
       "community": 58,
       "norm_label": "json_response()"
     },
     {
-      "label": "log-work.php",
+      "label": "update_profile.php",
       "file_type": "code",
-      "source_file": "freelancer/api/log-work.php",
+      "source_file": "actions/update_profile.php",
       "source_location": "L1",
-      "id": "freelancer_api_log_work_php",
-      "community": 53,
-      "norm_label": "log-work.php"
+      "id": "actions_update_profile_php",
+      "community": 60,
+      "norm_label": "update_profile.php"
     },
     {
-      "label": "submit-proposal.php",
+      "label": "json_response()",
       "file_type": "code",
-      "source_file": "freelancer/api/submit-proposal.php",
-      "source_location": "L1",
-      "id": "freelancer_api_submit_proposal_php",
-      "community": 54,
-      "norm_label": "submit-proposal.php"
+      "source_file": "actions/update_profile.php",
+      "source_location": "L6",
+      "id": "actions_update_profile_json_response",
+      "community": 60,
+      "norm_label": "json_response()"
     },
     {
-      "label": "toggle-save.php",
+      "label": "update_service.php",
       "file_type": "code",
-      "source_file": "freelancer/api/toggle-save.php",
+      "source_file": "actions/update_service.php",
       "source_location": "L1",
-      "id": "freelancer_api_toggle_save_php",
-      "community": 55,
-      "norm_label": "toggle-save.php"
+      "id": "actions_update_service_php",
+      "community": 61,
+      "norm_label": "update_service.php"
+    },
+    {
+      "label": "json_response()",
+      "file_type": "code",
+      "source_file": "actions/update_service.php",
+      "source_location": "L7",
+      "id": "actions_update_service_json_response",
+      "community": 61,
+      "norm_label": "json_response()"
+    },
+    {
+      "label": "update_skills.php",
+      "file_type": "code",
+      "source_file": "actions/update_skills.php",
+      "source_location": "L1",
+      "id": "actions_update_skills_php",
+      "community": 62,
+      "norm_label": "update_skills.php"
+    },
+    {
+      "label": "json_response()",
+      "file_type": "code",
+      "source_file": "actions/update_skills.php",
+      "source_location": "L6",
+      "id": "actions_update_skills_json_response",
+      "community": 62,
+      "norm_label": "json_response()"
+    },
+    {
+      "label": "upload_doc.php",
+      "file_type": "code",
+      "source_file": "actions/upload_doc.php",
+      "source_location": "L1",
+      "id": "actions_upload_doc_php",
+      "community": 11,
+      "norm_label": "upload_doc.php"
+    },
+    {
+      "label": "json_response()",
+      "file_type": "code",
+      "source_file": "actions/upload_doc.php",
+      "source_location": "L7",
+      "id": "actions_upload_doc_json_response",
+      "community": 11,
+      "norm_label": "json_response()"
     },
     {
       "label": "footer.php",
@@ -85,15 +148,6 @@
       "norm_label": "index.php"
     },
     {
-      "label": "login.php",
-      "file_type": "code",
-      "source_file": "freelancer/login.php",
-      "source_location": "L1",
-      "id": "freelancer_login_php",
-      "community": 38,
-      "norm_label": "login.php"
-    },
-    {
       "label": "catalog.php",
       "file_type": "code",
       "source_file": "freelancer/views/catalog.php",
@@ -103,58 +157,13 @@
       "norm_label": "catalog.php"
     },
     {
-      "label": "contracts.php",
+      "label": "profile.php",
       "file_type": "code",
-      "source_file": "freelancer/views/contracts.php",
+      "source_file": "freelancer/views/profile.php",
       "source_location": "L1",
-      "id": "freelancer_views_contracts_php",
-      "community": 50,
-      "norm_label": "contracts.php"
-    },
-    {
-      "label": "earnings.php",
-      "file_type": "code",
-      "source_file": "freelancer/views/earnings.php",
-      "source_location": "L1",
-      "id": "freelancer_views_earnings_php",
-      "community": 48,
-      "norm_label": "earnings.php"
-    },
-    {
-      "label": "find-work.php",
-      "file_type": "code",
-      "source_file": "freelancer/views/find-work.php",
-      "source_location": "L1",
-      "id": "freelancer_views_find_work_php",
-      "community": 45,
-      "norm_label": "find-work.php"
-    },
-    {
-      "label": "home.php",
-      "file_type": "code",
-      "source_file": "freelancer/views/home.php",
-      "source_location": "L1",
-      "id": "freelancer_views_home_php",
-      "community": 47,
-      "norm_label": "home.php"
-    },
-    {
-      "label": "messages.php",
-      "file_type": "code",
-      "source_file": "freelancer/views/messages.php",
-      "source_location": "L1",
-      "id": "freelancer_views_messages_php",
-      "community": 51,
-      "norm_label": "messages.php"
-    },
-    {
-      "label": "proposals.php",
-      "file_type": "code",
-      "source_file": "freelancer/views/proposals.php",
-      "source_location": "L1",
-      "id": "freelancer_views_proposals_php",
-      "community": 52,
-      "norm_label": "proposals.php"
+      "id": "freelancer_views_profile_php",
+      "community": 49,
+      "norm_label": "profile.php"
     },
     {
       "label": "verification.php",
@@ -166,76 +175,166 @@
       "norm_label": "verification.php"
     },
     {
+      "label": "log-work.php",
+      "file_type": "code",
+      "source_file": "freelancer/api/log-work.php",
+      "source_location": "L1",
+      "community": 53,
+      "norm_label": "log-work.php",
+      "id": "freelancer_api_log_work_php"
+    },
+    {
+      "label": "submit-proposal.php",
+      "file_type": "code",
+      "source_file": "freelancer/api/submit-proposal.php",
+      "source_location": "L1",
+      "community": 54,
+      "norm_label": "submit-proposal.php",
+      "id": "freelancer_api_submit_proposal_php"
+    },
+    {
+      "label": "toggle-save.php",
+      "file_type": "code",
+      "source_file": "freelancer/api/toggle-save.php",
+      "source_location": "L1",
+      "community": 55,
+      "norm_label": "toggle-save.php",
+      "id": "freelancer_api_toggle_save_php"
+    },
+    {
+      "label": "login.php",
+      "file_type": "code",
+      "source_file": "freelancer/login.php",
+      "source_location": "L1",
+      "community": 38,
+      "norm_label": "login.php",
+      "id": "freelancer_login_php"
+    },
+    {
+      "label": "contracts.php",
+      "file_type": "code",
+      "source_file": "freelancer/views/contracts.php",
+      "source_location": "L1",
+      "community": 50,
+      "norm_label": "contracts.php",
+      "id": "freelancer_views_contracts_php"
+    },
+    {
+      "label": "earnings.php",
+      "file_type": "code",
+      "source_file": "freelancer/views/earnings.php",
+      "source_location": "L1",
+      "community": 48,
+      "norm_label": "earnings.php",
+      "id": "freelancer_views_earnings_php"
+    },
+    {
+      "label": "find-work.php",
+      "file_type": "code",
+      "source_file": "freelancer/views/find-work.php",
+      "source_location": "L1",
+      "community": 45,
+      "norm_label": "find-work.php",
+      "id": "freelancer_views_find_work_php"
+    },
+    {
+      "label": "home.php",
+      "file_type": "code",
+      "source_file": "freelancer/views/home.php",
+      "source_location": "L1",
+      "community": 47,
+      "norm_label": "home.php",
+      "id": "freelancer_views_home_php"
+    },
+    {
+      "label": "messages.php",
+      "file_type": "code",
+      "source_file": "freelancer/views/messages.php",
+      "source_location": "L1",
+      "community": 51,
+      "norm_label": "messages.php",
+      "id": "freelancer_views_messages_php"
+    },
+    {
+      "label": "proposals.php",
+      "file_type": "code",
+      "source_file": "freelancer/views/proposals.php",
+      "source_location": "L1",
+      "community": 52,
+      "norm_label": "proposals.php",
+      "id": "freelancer_views_proposals_php"
+    },
+    {
       "label": "config.php",
       "file_type": "code",
       "source_file": "includes/config.php",
       "source_location": "L1",
-      "id": "includes_config_php",
       "community": 5,
-      "norm_label": "config.php"
+      "norm_label": "config.php",
+      "id": "includes_config_php"
     },
     {
       "label": "loadEnv()",
       "file_type": "code",
       "source_file": "includes/config.php",
       "source_location": "L10",
-      "id": "includes_config_loadenv",
       "community": 5,
-      "norm_label": "loadenv()"
+      "norm_label": "loadenv()",
+      "id": "includes_config_loadenv"
     },
     {
       "label": "env()",
       "file_type": "code",
       "source_file": "includes/config.php",
       "source_location": "L41",
-      "id": "includes_config_env",
       "community": 5,
-      "norm_label": "env()"
+      "norm_label": "env()",
+      "id": "includes_config_env"
     },
     {
       "label": "getDB()",
       "file_type": "code",
       "source_file": "includes/config.php",
       "source_location": "L80",
-      "id": "includes_config_getdb",
       "community": 5,
-      "norm_label": "getdb()"
+      "norm_label": "getdb()",
+      "id": "includes_config_getdb"
     },
     {
       "label": "baseUrl()",
       "file_type": "code",
       "source_file": "includes/config.php",
       "source_location": "L101",
-      "id": "includes_config_baseurl",
       "community": 5,
-      "norm_label": "baseurl()"
+      "norm_label": "baseurl()",
+      "id": "includes_config_baseurl"
     },
     {
       "label": "redirect()",
       "file_type": "code",
       "source_file": "includes/config.php",
       "source_location": "L106",
-      "id": "includes_config_redirect",
       "community": 5,
-      "norm_label": "redirect()"
+      "norm_label": "redirect()",
+      "id": "includes_config_redirect"
     },
     {
       "label": "isRoute()",
       "file_type": "code",
       "source_file": "includes/config.php",
       "source_location": "L112",
-      "id": "includes_config_isroute",
       "community": 5,
-      "norm_label": "isroute()"
+      "norm_label": "isroute()",
+      "id": "includes_config_isroute"
     },
     {
       "label": "logout.php",
       "file_type": "code",
       "source_file": "logout.php",
       "source_location": "L1",
-      "id": "logout_php",
       "community": 56,
-      "norm_label": "logout.php"
+      "norm_label": "logout.php",
+      "id": "logout_php"
     },
     {
       "label": "index.php",
@@ -1264,24 +1363,6 @@
       "id": "scratch_run_migration_php"
     },
     {
-      "label": "upload_doc.php",
-      "file_type": "code",
-      "source_file": "actions/upload_doc.php",
-      "source_location": "L1",
-      "community": 11,
-      "norm_label": "upload_doc.php",
-      "id": "actions_upload_doc_php"
-    },
-    {
-      "label": "json_response()",
-      "file_type": "code",
-      "source_file": "actions/upload_doc.php",
-      "source_location": "L6",
-      "community": 11,
-      "norm_label": "json_response()",
-      "id": "actions_upload_doc_json_response"
-    },
-    {
       "label": "post_job.php",
       "file_type": "code",
       "source_file": "actions/post_job.php",
@@ -1741,15 +1822,6 @@
       "id": "freelancer_views_reports_php"
     },
     {
-      "label": "profile.php",
-      "file_type": "code",
-      "source_file": "freelancer/views/profile.php",
-      "source_location": "L1",
-      "community": 49,
-      "norm_label": "profile.php",
-      "id": "freelancer_views_profile_php"
-    },
-    {
       "label": "graphify.md",
       "file_type": "document",
       "source_file": ".agents/workflows/graphify.md",
@@ -2108,8 +2180,18 @@
       "source_file": "actions/create_service.php",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "actions_create_service_php",
-      "target": "actions_create_service_json_response",
+      "target": "actions_create_service_json_response"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "actions/delete_service.php",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "actions_delete_service_php",
+      "target": "actions_delete_service_json_response",
       "confidence_score": 1.0
     },
     {
@@ -2118,9 +2200,49 @@
       "source_file": "actions/submit_verification.php",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "actions_submit_verification_php",
-      "target": "actions_submit_verification_json_response",
+      "target": "actions_submit_verification_json_response"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "actions/update_profile.php",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "actions_update_profile_php",
+      "target": "actions_update_profile_json_response",
       "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "actions/update_service.php",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "actions_update_service_php",
+      "target": "actions_update_service_json_response",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "actions/update_skills.php",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "actions_update_skills_php",
+      "target": "actions_update_skills_json_response",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "actions/upload_doc.php",
+      "source_location": "L6",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "actions_upload_doc_php",
+      "target": "actions_upload_doc_json_response"
     },
     {
       "relation": "contains",
@@ -3746,16 +3868,6 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "actions/upload_doc.php",
-      "source_location": "L6",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "actions_upload_doc_php",
-      "target": "actions_upload_doc_json_response"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
       "source_file": "assets/js/main.js",
       "source_location": "L7",
       "weight": 1.0,
@@ -4671,5 +4783,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "12352038691f8e5dab4b142c155744ffe257457d"
+  "built_at_commit": "0a0f2e5ba8af82f8656a090f439821e3a6997be7"
 }

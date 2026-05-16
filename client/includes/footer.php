@@ -64,12 +64,40 @@ function confirmFundMilestone(amount, name, milestone){
   closeModal();
 }
 function selectPayMethod(el){document.querySelectorAll('.pay-method').forEach(x=>x.classList.remove('selected'));el.classList.add('selected');}
-function handleAddFunds(){
-  const v=parseFloat(document.getElementById('add-funds-amount')?.value||0);
-  if(v<50){toast('Minimum $50','Please enter at least $50 to add');return;}
-  availableBalance+=v;
-  toast('Funds Added!',`$${v.toFixed(2)} added. New balance: $${availableBalance.toFixed(2)}`);
-  closeModal();
+async function handleAddFunds(){
+  const input = document.getElementById('add-funds-amount');
+  const v = parseFloat(input?.value || 0);
+  if(v < 50){ toast('Minimum $50', 'Please enter at least $50 to add'); return; }
+  
+  const btn = event.target;
+  const originalText = btn.innerText;
+  btn.disabled = true;
+  btn.innerText = 'Processing...';
+
+  try {
+    const formData = new FormData();
+    formData.append('amount', v);
+    formData.append('method', 'Visa ••4821'); // Simulated
+
+    const response = await fetch(BASE_URL + '/actions/add_funds.php', {
+      method: 'POST',
+      body: formData
+    });
+    
+    const result = await response.json();
+    if(result.success) {
+      toast('Funds Added!', `$${v.toFixed(2)} added. Balance updated.`);
+      setTimeout(() => location.reload(), 1200);
+    } else {
+      toast('Error', result.error || 'Failed to add funds');
+      btn.disabled = false;
+      btn.innerText = originalText;
+    }
+  } catch (err) {
+    toast('Error', 'An unexpected error occurred.');
+    btn.disabled = false;
+    btn.innerText = originalText;
+  }
 }
 
 // ─── DM MODAL BUILDER ───
@@ -433,6 +461,15 @@ function closeModal(){
 }
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
 
+function filterTalent(query) {
+  const q = query.toLowerCase();
+  const cards = document.querySelectorAll('.talent-card');
+  cards.forEach(card => {
+    const text = card.innerText.toLowerCase();
+    card.style.display = text.includes(q) ? 'block' : 'none';
+  });
+}
+
 let tt;
 function toast(title,msg){
   const el=document.getElementById('toast');
@@ -441,6 +478,102 @@ function toast(title,msg){
   el.classList.add('show');
   clearTimeout(tt);
   tt=setTimeout(()=>el.classList.remove('show'),3500);
+}
+
+let activeChatId = null;
+
+async function loadChat(otherId, name, initials, el) {
+  activeChatId = otherId;
+  
+  // Highlight sidebar
+  if(el) {
+    document.querySelectorAll('.msg-item').forEach(i => i.classList.remove('active'));
+    el.classList.add('active');
+    el.classList.remove('unread');
+    const dot = el.querySelector('.msg-dot');
+    if(dot) dot.remove();
+  }
+
+  const chatWindow = document.getElementById('chat-window');
+  chatWindow.innerHTML = `<div style="flex:1;display:flex;align-items:center;justify-content:center"><span class="spinner"></span></div>`;
+
+  try {
+    const response = await fetch(`${BASE_URL}/actions/get_messages.php?with=${otherId}`);
+    const result = await response.json();
+    
+    if(result.success) {
+      renderChatWindow(name, initials, result.messages);
+    } else {
+      chatWindow.innerHTML = `<div style="padding:20px;text-align:center;color:red">${result.error}</div>`;
+    }
+  } catch (err) {
+    chatWindow.innerHTML = `<div style="padding:20px;text-align:center;color:red">Failed to load messages</div>`;
+  }
+}
+
+function renderChatWindow(name, initials, messages) {
+  const chatWindow = document.getElementById('chat-window');
+  const msgHtml = messages.map(m => {
+    const isMe = (m.sender_id != activeChatId);
+    return `
+      <div style="display:flex;gap:10px;${isMe ? 'flex-direction:row-reverse' : ''}">
+        <div class="av" style="width:30px;height:30px;font-size:10px;background:${isMe ? 'var(--uw-green)' : 'var(--uw-green-light)'};color:${isMe ? 'white' : 'var(--uw-green)'};flex-shrink:0">${isMe ? 'Me' : initials}</div>
+        <div style="max-width:75%;${isMe ? 'text-align:right' : ''}">
+          <div style="background:${isMe ? 'var(--uw-green)' : 'var(--uw-bg)'};color:${isMe ? 'white' : 'var(--uw-dark)'};border:${isMe ? 'none' : '1.5px solid var(--uw-border)'};border-radius:${isMe ? '12px 2px 12px 12px' : '2px 12px 12px 12px'};padding:10px 14px;font-size:13px;line-height:1.6;text-align:left">${m.message}</div>
+          <div style="font-size:11px;color:var(--uw-gray2);margin-top:4px">${new Date(m.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  chatWindow.innerHTML = `
+    <div style="padding:14px 18px;border-bottom:1px solid var(--uw-border);display:flex;align-items:center;gap:12px">
+      <div class="av" style="background:var(--uw-green-light);color:var(--uw-green);width:36px;height:36px">${initials}</div>
+      <div><div style="font-weight:700;font-size:14px">${name}</div><div style="font-size:12px;color:var(--uw-green)">Online</div></div>
+    </div>
+    <div style="flex:1;padding:18px;overflow-y:auto;display:flex;flex-direction:column;gap:12px" id="chat-messages-scroll">${msgHtml}</div>
+    <div style="padding:14px 18px;border-top:1px solid var(--uw-border);display:flex;gap:10px">
+      <input id="chat-input" style="flex:1;padding:9px 14px;border:1.5px solid var(--uw-border);border-radius:50px;font-size:13px;font-family:inherit;outline:none" placeholder="Type a message…" onkeydown="if(event.key==='Enter')sendMsg()">
+      <button class="btn btn-g" onclick="sendMsg()">Send</button>
+    </div>
+  `;
+  const scroll = document.getElementById('chat-messages-scroll');
+  scroll.scrollTop = scroll.scrollHeight;
+}
+
+async function sendMsg() {
+  const input = document.getElementById('chat-input');
+  const msg = input.value.trim();
+  if(!msg || !activeChatId) return;
+
+  input.value = '';
+  try {
+    const formData = new FormData();
+    formData.append('receiver_id', activeChatId);
+    formData.append('message', msg);
+    
+    const response = await fetch(`${BASE_URL}/actions/send_message.php`, {
+      method: 'POST',
+      body: formData
+    });
+    const result = await response.json();
+    if(result.success) {
+      // Re-load to show my message
+      const chatHeaderName = document.querySelector('#chat-window div[style*="font-weight:700"]');
+      const chatHeaderAv = document.querySelector('#chat-window .av');
+      loadChat(activeChatId, chatHeaderName ? chatHeaderName.innerText : 'User', chatHeaderAv ? chatHeaderAv.innerText : '??');
+    }
+  } catch(err) {
+    toast('Error', 'Failed to send message');
+  }
+}
+
+function filterConversations(query) {
+  const q = query.toLowerCase();
+  document.querySelectorAll('.msg-item').forEach(item => {
+    const text = item.innerText.toLowerCase();
+    item.style.display = text.includes(q) ? 'flex' : 'none';
+  });
 }
 
 // ── MOBILE SIDEBAR ──
@@ -461,24 +594,79 @@ function setMobNav(id){
   if(btn) btn.classList.add('active');
 }
 
-function showPage(id,navEl){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById('page-'+id).classList.add('active');
-  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
-  if(navEl)navEl.classList.add('active');
-  const titles={home:'Home',jobs:'My Jobs',proposals:'Proposals',contracts:'Contracts',talent:'Talent',messages:'Messages',payments:'Payments',reports:'Reports'};
-  document.getElementById('page-title').textContent=titles[id]||id;
-  closeMobSidebar();
-  // sync bottom nav
-  const mobMap={home:'home',jobs:'jobs',proposals:'proposals',messages:'messages'};
-  document.querySelectorAll('.mob-nav-item').forEach(b=>b.classList.remove('active'));
-  const mbn=document.getElementById('mbn-'+(mobMap[id]||''));
-  if(mbn) mbn.classList.add('active');
+function openChatWith(id, name, initials) {
+  showPage('messages', document.querySelector('.sb-item[onclick*="messages"]'));
+  
+  // Wait for page to switch
+  setTimeout(() => {
+    const list = document.getElementById('conversations-list');
+    const items = list.querySelectorAll('.msg-item');
+    let foundEl = null;
+    items.forEach(item => {
+      if (item.onclick.toString().includes(id.toString())) {
+        foundEl = item;
+      }
+    });
+    
+    if (foundEl) {
+      foundEl.click();
+    } else {
+      // Create temporary sidebar item
+      const newItem = document.createElement('div');
+      newItem.className = 'msg-item active';
+      newItem.style.cssText = 'border-radius:0;margin:0;padding:12px 14px';
+      newItem.onclick = function() { loadChat(id, name, initials, this); };
+      newItem.innerHTML = `
+        <div class="av" style="background:var(--uw-green-light);color:var(--uw-green)">${initials}</div>
+        <div class="msg-meta">
+          <div class="msg-name">${name}<span class="msg-time">Now</span></div>
+          <div class="msg-text">Starting conversation...</div>
+        </div>
+      `;
+      list.prepend(newItem);
+      loadChat(id, name, initials, newItem);
+    }
+  }, 150);
 }
 
-function setTab(el){
+function showPage(id, navEl) {
+  if (!id) id = 'home';
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const targetPage = document.getElementById('page-' + id);
+  if (targetPage) targetPage.classList.add('active');
+
+  document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
+  if (navEl) {
+    navEl.classList.add('active');
+  } else {
+    // Try to find the nav element by id or by its onclick attribute
+    const sideNav = document.querySelector(`.sb-item[onclick*="'${id}'"]`);
+    if (sideNav) sideNav.classList.add('active');
+  }
+
+  const titles = { home: 'Home', jobs: 'My Jobs', proposals: 'Proposals', contracts: 'Contracts', talent: 'Talent', messages: 'Messages', payments: 'Payments', reports: 'Reports' };
+  document.getElementById('page-title').textContent = titles[id] || id;
+  
+  // Update hash
+  window.location.hash = id;
+  
+  closeMobSidebar();
+  
+  // sync bottom nav
+  const mobMap = { home: 'home', jobs: 'jobs', proposals: 'proposals', messages: 'messages' };
+  document.querySelectorAll('.mob-nav-item').forEach(b => b.classList.remove('active'));
+  const mbn = document.getElementById('mbn-' + (mobMap[id] || ''));
+  if (mbn) mbn.classList.add('active');
+}
+
+function setTab(el, targetId){
   el.closest('.tab-bar').querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
   el.classList.add('on');
+  if(targetId && targetId.includes('talent')) {
+    document.querySelectorAll('.talent-list').forEach(l => l.style.display = 'none');
+    const target = document.getElementById(targetId);
+    if(target) target.style.display = 'table';
+  }
 }
 
 // ─── UPWORK CATEGORY DATA ───
@@ -781,6 +969,11 @@ async function submitClientFinalVerification() {
     if (btnText) btnText.innerText = 'Submit for Review';
   }
 }
+
+window.addEventListener('DOMContentLoaded', () => {
+  const hash = window.location.hash.replace('#', '');
+  showPage(hash || 'home');
+});
 
 setTimeout(()=>toast('Welcome back, NexaFlow!','You have 4 unread messages and 12 new proposals'),1000);
 </script>

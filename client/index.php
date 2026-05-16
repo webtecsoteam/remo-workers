@@ -38,12 +38,25 @@ $jobsStmt = $db->prepare("SELECT j.*, (SELECT COUNT(*) FROM proposals WHERE job_
 $jobsStmt->execute([$user['id']]);
 $openJobs = $jobsStmt->fetchAll(PDO::FETCH_ASSOC);
 
-// 4. Messages
-$msgStmt = $db->prepare("SELECT m.*, u.name as sender_name FROM messages m 
-                         JOIN users u ON m.sender_id = u.id 
-                         WHERE m.receiver_id = ? ORDER BY m.created_at DESC LIMIT 4");
-$msgStmt->execute([$user['id']]);
-$recentMessages = $msgStmt->fetchAll(PDO::FETCH_ASSOC);
+// 4. Conversations for Messages Page
+$conversationsStmt = $db->prepare("
+    SELECT 
+        u.id as other_id, u.name as other_name, 
+        m1.message as last_message, m1.created_at as last_time, m1.is_read, m1.sender_id
+    FROM users u
+    JOIN (
+        SELECT 
+            MAX(id) as max_id, 
+            CASE WHEN sender_id = ? THEN receiver_id ELSE sender_id END as other_user_id
+        FROM messages 
+        WHERE sender_id = ? OR receiver_id = ?
+        GROUP BY other_user_id
+    ) m2 ON u.id = m2.other_user_id
+    JOIN messages m1 ON m1.id = m2.max_id
+    ORDER BY m1.created_at DESC
+");
+$conversationsStmt->execute([$user['id'], $user['id'], $user['id']]);
+$conversations = $conversationsStmt->fetchAll(PDO::FETCH_ASSOC);
 
 $unreadCount = $db->prepare("SELECT COUNT(*) FROM messages WHERE receiver_id = ? AND is_read = 0");
 $unreadCount->execute([$user['id']]);
@@ -95,14 +108,58 @@ foreach ($allContracts as $ac) {
 $clientTransactionsStmt = $db->prepare("
     SELECT p.*, u.name as freelancer_name 
     FROM payments p 
-    JOIN users u ON p.payee_id = u.id 
-    WHERE p.payer_id = ? 
-    ORDER BY p.created_at DESC LIMIT 10
+    LEFT JOIN users u ON (p.payee_id = u.id AND p.payer_id = ?) OR (p.payer_id = u.id AND p.payee_id = ?)
+    WHERE p.payer_id = ? OR p.payee_id = ?
+    ORDER BY p.created_at DESC LIMIT 50
 ");
-$clientTransactionsStmt->execute([$user['id']]);
+$clientTransactionsStmt->execute([$user['id'], $user['id'], $user['id'], $user['id']]);
 $clientTransactions = $clientTransactionsStmt->fetchAll(PDO::FETCH_ASSOC);
 
-// 10. Reports Data
+// Monthly spending comparison
+$lastMonthSpentStmt = $db->prepare("SELECT SUM(amount) FROM payments WHERE payer_id = ? AND status = 'completed' AND MONTH(created_at) = MONTH(CURRENT_DATE() - INTERVAL 1 MONTH)");
+$lastMonthSpentStmt->execute([$user['id']]);
+$lastMonthSpent = $lastMonthSpentStmt->fetchColumn() ?: 0;
+$spendChange = 0;
+if ($lastMonthSpent > 0) {
+    $spendChange = (($stats['total_spent'] - $lastMonthSpent) / $lastMonthSpent) * 100;
+}
+
+// Escrow calculation (pending payments)
+$escrowStmt = $db->prepare("SELECT SUM(amount) FROM payments WHERE payer_id = ? AND status = 'pending'");
+$escrowStmt->execute([$user['id']]);
+$escrowAmount = $escrowStmt->fetchColumn() ?: 0;
+
+// 10. Talent Data
+// All Freelancers
+$allFreelancersStmt = $db->prepare("SELECT * FROM users WHERE role = 'freelancer' AND status = 'active' ORDER BY created_at DESC");
+$allFreelancersStmt->execute();
+$allTalent = $allFreelancersStmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Saved Talent
+$savedTalentStmt = $db->prepare("SELECT u.* FROM users u JOIN saved_talent s ON u.id = s.freelancer_id WHERE s.client_id = ? ORDER BY s.created_at DESC");
+$savedTalentStmt->execute([$user['id']]);
+$savedTalent = $savedTalentStmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Previously Hired Talent
+$hiredTalentStmt = $db->prepare("
+    SELECT u.*, MAX(c.created_at) as last_hired_at, 
+    (SELECT status FROM contracts WHERE freelancer_id = u.id AND client_id = ? ORDER BY created_at DESC LIMIT 1) as last_contract_status
+    FROM users u 
+    JOIN contracts c ON u.id = c.freelancer_id 
+    WHERE c.client_id = ? 
+    GROUP BY u.id 
+    ORDER BY last_hired_at DESC
+");
+$hiredTalentStmt->execute([$user['id'], $user['id']]);
+$hiredTalent = $hiredTalentStmt->fetchAll(PDO::FETCH_ASSOC);
+
+$talentCounts = [
+    'all' => count($allTalent),
+    'saved' => count($savedTalent),
+    'hired' => count($hiredTalent)
+];
+
+// 11. Reports Data
 $reportStatsStmt = $db->prepare("
     SELECT 
         (SELECT SUM(amount) FROM payments WHERE payer_id = ? AND status = 'completed') as total_spent_all_time,
@@ -156,13 +213,13 @@ $reportStats = $reportStatsStmt->fetch(PDO::FETCH_ASSOC);
   </div>
   <nav class="sb-nav">
     <div class="sb-section">Main</div>
-    <div class="sb-item active" onclick="showPage('home',this)"><span class="ico">🏠</span>Home</div>
-    <div class="sb-item" onclick="showPage('jobs',this)"><span class="ico">📋</span>My Jobs<span class="sb-badge g">3</span></div>
-    <div class="sb-item" onclick="showPage('proposals',this)"><span class="ico">📩</span>Proposals<span class="sb-badge">12</span></div>
+    <div class="sb-item" onclick="showPage('home',this)"><span class="ico">🏠</span>Home</div>
+    <div class="sb-item" onclick="showPage('jobs',this)"><span class="ico">📋</span>My Jobs<?php if($jobCounts['open'] > 0): ?><span class="sb-badge g"><?php echo $jobCounts['open']; ?></span><?php endif; ?></div>
+    <div class="sb-item" onclick="showPage('proposals',this)"><span class="ico">📩</span>Proposals<?php if(count($allProposals) > 0): ?><span class="sb-badge"><?php echo count($allProposals); ?></span><?php endif; ?></div>
     <div class="sb-item" onclick="showPage('contracts',this)"><span class="ico">🤝</span>Contracts</div>
     <div class="sb-item" onclick="showPage('talent',this)"><span class="ico">👥</span>Talent</div>
     <div class="sb-section">Tools</div>
-    <div class="sb-item" onclick="showPage('messages',this)"><span class="ico">💬</span>Messages<span class="sb-badge">4</span></div>
+    <div class="sb-item" onclick="showPage('messages',this)"><span class="ico">💬</span>Messages<?php if($unreadMessagesCount > 0): ?><span class="sb-badge"><?php echo $unreadMessagesCount; ?></span><?php endif; ?></div>
     <div class="sb-item" onclick="showPage('payments',this)"><span class="ico">💳</span>Payments</div>
     <div class="sb-item" onclick="showPage('reports',this)"><span class="ico">📊</span>Reports</div>
     <div class="sb-item" onclick="showPage('verification',this)"><span class="ico">🪪</span>Identity Verification</div>
@@ -472,24 +529,165 @@ $reportStats = $reportStatsStmt->fetch(PDO::FETCH_ASSOC);
           <div class="pg-title">Talent</div>
           <div class="pg-sub">Freelancers you've worked with or saved</div>
         </div>
-        <button class="btn btn-g" onclick="toast('Find Talent','Opening talent search...')">🔍 Find New Talent</button>
+        <button class="btn btn-g" onclick="showPage('find-talent')">🔍 Find New Talent</button>
       </div>
       <div class="tab-bar">
-        <div class="tab on" onclick="setTab(this)">All Talent (12)</div>
-        <div class="tab" onclick="setTab(this)">Saved (5)</div>
-        <div class="tab" onclick="setTab(this)">Previously Hired (7)</div>
+        <div class="tab on" onclick="setTab(this, 'all-talent')">All Talent (<?php echo $talentCounts['all']; ?>)</div>
+        <div class="tab" onclick="setTab(this, 'saved-talent')">Saved (<?php echo $talentCounts['saved']; ?>)</div>
+        <div class="tab" onclick="setTab(this, 'hired-talent')">Previously Hired (<?php echo $talentCounts['hired']; ?>)</div>
       </div>
+      
       <div class="card" style="margin-bottom:0;overflow:auto">
-        <table class="tbl">
+        <table class="tbl talent-list" id="all-talent">
           <thead><tr><th>Name</th><th>Skill</th><th>Rating</th><th>Rate</th><th>Status</th><th>Last Contract</th><th>Action</th></tr></thead>
           <tbody>
-            <tr><td><div style="display:flex;align-items:center;gap:10px"><div class="av" style="background:#d1fae5;color:#065f46">AN</div><div><div style="font-weight:600">Anika Nkosi</div><div style="font-size:11px;color:var(--uw-gray)">Berlin, Germany</div></div></div></td><td>UI/UX Design</td><td>★ 5.0 (127)</td><td>$90/hr</td><td><span class="badge b-green">Hired</span></td><td>Active now</td><td><button class="btn btn-w btn-sm" onclick="toast('Message sent','Chat opened with Anika')">Message</button></td></tr>
-            <tr><td><div style="display:flex;align-items:center;gap:10px"><div class="av" style="background:#dbeafe;color:#1e40af">JK</div><div><div style="font-weight:600">James Kowalski</div><div style="font-size:11px;color:var(--uw-gray)">Toronto, Canada</div></div></div></td><td>Full Stack Dev</td><td>★ 4.9 (89)</td><td>$130/hr</td><td><span class="badge b-green">Hired</span></td><td>Active now</td><td><button class="btn btn-w btn-sm" onclick="toast('Message sent','Chat opened with James')">Message</button></td></tr>
-            <tr><td><div style="display:flex;align-items:center;gap:10px"><div class="av" style="background:#fef3c7;color:#92400e">LT</div><div><div style="font-weight:600">Lena Thornton</div><div style="font-size:11px;color:var(--uw-gray)">London, UK</div></div></div></td><td>SEO / Marketing</td><td>★ 5.0 (203)</td><td>$65/hr</td><td><span class="badge b-green">Hired</span></td><td>Active now</td><td><button class="btn btn-w btn-sm" onclick="toast('Message sent','Chat opened with Lena')">Message</button></td></tr>
-            <tr><td><div style="display:flex;align-items:center;gap:10px"><div class="av" style="background:#ede9fe;color:#5b21b6">MP</div><div><div style="font-weight:600">Marcus Patel</div><div style="font-size:11px;color:var(--uw-gray)">Bangalore, India</div></div></div></td><td>AI / ML</td><td>★ 4.8 (41)</td><td>$110/hr</td><td><span class="badge b-green">Hired</span></td><td>Active now</td><td><button class="btn btn-w btn-sm" onclick="toast('Message sent','Chat opened with Marcus')">Message</button></td></tr>
-            <tr><td><div style="display:flex;align-items:center;gap:10px"><div class="av" style="background:#fce7f3;color:#9d174d">ZM</div><div><div style="font-weight:600">Zara Mehta</div><div style="font-size:11px;color:var(--uw-gray)">Dubai, UAE</div></div></div></td><td>Copywriting</td><td>★ 4.9 (74)</td><td>$55/hr</td><td><span class="badge b-gray">Saved</span></td><td>Never</td><td><button class="btn btn-g btn-sm" onclick="toast('Invite sent','Zara invited to your job post')">Invite</button></td></tr>
+            <?php if(empty($allTalent)): ?>
+              <tr><td colspan="7" style="text-align:center;padding:30px;color:var(--uw-gray)">No freelancers found.</td></tr>
+            <?php else: ?>
+              <?php foreach($allTalent as $t): 
+                $initials = strtoupper(substr($t['name'], 0, 1) . substr(explode(' ', $t['name'])[1] ?? '', 0, 1));
+                $isSaved = in_array($t['id'], array_column($savedTalent, 'id'));
+                $isHired = in_array($t['id'], array_column($hiredTalent, 'id'));
+              ?>
+                <tr>
+                  <td>
+                    <div style="display:flex;align-items:center;gap:10px">
+                      <div class="av" style="background:var(--uw-green-light);color:var(--uw-green)"><?php echo $initials; ?></div>
+                      <div>
+                        <div style="font-weight:600"><?php echo htmlspecialchars($t['name']); ?></div>
+                        <div style="font-size:11px;color:var(--uw-gray)"><?php echo htmlspecialchars($t['country'] ?? 'Unknown'); ?></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td><?php echo htmlspecialchars($t['title'] ?? 'Freelancer'); ?></td>
+                  <td>★ 5.0 (0)</td>
+                  <td>$<?php echo number_format($t['hourly_rate'] ?? 0); ?>/hr</td>
+                  <td>
+                    <?php if($isHired): ?>
+                      <span class="badge b-green">Hired</span>
+                    <?php elseif($isSaved): ?>
+                      <span class="badge b-gray">Saved</span>
+                    <?php else: ?>
+                      <span class="badge b-blue">New</span>
+                    <?php endif; ?>
+                  </td>
+                  <td><?php echo $isHired ? 'Active now' : 'Never'; ?></td>
+                  <td><button class="btn btn-w btn-sm" onclick="toast('Message','Opening chat...')">Message</button></td>
+                </tr>
+              <?php endforeach; ?>
+            <?php endif; ?>
           </tbody>
         </table>
+
+        <table class="tbl talent-list" id="saved-talent" style="display:none">
+          <thead><tr><th>Name</th><th>Skill</th><th>Rating</th><th>Rate</th><th>Date Saved</th><th>Action</th></tr></thead>
+          <tbody>
+            <?php if(empty($savedTalent)): ?>
+              <tr><td colspan="6" style="text-align:center;padding:30px;color:var(--uw-gray)">You haven't saved any talent yet.</td></tr>
+            <?php else: ?>
+              <?php foreach($savedTalent as $t): 
+                $initials = strtoupper(substr($t['name'], 0, 1) . substr(explode(' ', $t['name'])[1] ?? '', 0, 1));
+              ?>
+                <tr>
+                  <td>
+                    <div style="display:flex;align-items:center;gap:10px">
+                      <div class="av" style="background:var(--uw-green-light);color:var(--uw-green)"><?php echo $initials; ?></div>
+                      <div>
+                        <div style="font-weight:600"><?php echo htmlspecialchars($t['name']); ?></div>
+                        <div style="font-size:11px;color:var(--uw-gray)"><?php echo htmlspecialchars($t['country'] ?? 'Unknown'); ?></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td><?php echo htmlspecialchars($t['title'] ?? 'Freelancer'); ?></td>
+                  <td>★ 5.0 (0)</td>
+                  <td>$<?php echo number_format($t['hourly_rate'] ?? 0); ?>/hr</td>
+                  <td><?php echo date('M d, Y', strtotime($t['created_at'])); ?></td>
+                  <td><button class="btn btn-g btn-sm" onclick="toast('Invite','Invite sent to <?php echo htmlspecialchars($t['name']); ?>')">Invite</button></td>
+                </tr>
+              <?php endforeach; ?>
+            <?php endif; ?>
+          </tbody>
+        </table>
+
+        <table class="tbl talent-list" id="hired-talent" style="display:none">
+          <thead><tr><th>Name</th><th>Skill</th><th>Last Contract</th><th>Total Paid</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody>
+            <?php if(empty($hiredTalent)): ?>
+              <tr><td colspan="6" style="text-align:center;padding:30px;color:var(--uw-gray)">You haven't hired anyone yet.</td></tr>
+            <?php else: ?>
+              <?php foreach($hiredTalent as $t): 
+                $initials = strtoupper(substr($t['name'], 0, 1) . substr(explode(' ', $t['name'])[1] ?? '', 0, 1));
+              ?>
+                <tr>
+                  <td>
+                    <div style="display:flex;align-items:center;gap:10px">
+                      <div class="av" style="background:var(--uw-green-light);color:var(--uw-green)"><?php echo $initials; ?></div>
+                      <div>
+                        <div style="font-weight:600"><?php echo htmlspecialchars($t['name']); ?></div>
+                        <div style="font-size:11px;color:var(--uw-gray)"><?php echo htmlspecialchars($t['country'] ?? 'Unknown'); ?></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td><?php echo htmlspecialchars($t['title'] ?? 'Freelancer'); ?></td>
+                  <td><?php echo date('M d, Y', strtotime($t['last_hired_at'])); ?></td>
+                  <td>$<?php echo number_format(1500); // Dummy for now ?></td>
+                  <td><span class="badge b-green"><?php echo ucfirst($t['last_contract_status'] ?? 'Active'); ?></span></td>
+                  <td><button class="btn btn-w btn-sm" onclick="event.stopPropagation();openChatWith(<?php echo $t['id']; ?>, '<?php echo addslashes($t['name']); ?>', '<?php echo $initials; ?>')">Message</button></td>
+                </tr>
+              <?php endforeach; ?>
+            <?php endif; ?>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ FIND TALENT PAGE ══ -->
+    <div class="page" id="page-find-talent">
+      <div class="pg-header">
+        <div>
+          <div class="pg-title">Find Talent</div>
+          <div class="pg-sub">Discover and hire the best freelancers for your projects</div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:20px;padding:15px">
+        <div style="display:flex;gap:12px">
+          <div style="flex:1;position:relative">
+            <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--uw-gray)">🔍</span>
+            <input type="text" id="talent-search" placeholder="Search by skill, name or title..." style="width:100%;padding:12px 12px 12px 40px;border:1.5px solid var(--uw-border);border-radius:10px;font-family:inherit;outline:none" onkeyup="filterTalent(this.value)">
+          </div>
+          <button class="btn btn-w" onclick="toast('Filters','Advanced filters coming soon')">Filters</button>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px" id="talent-grid">
+        <?php foreach($allTalent as $t): 
+          $initials = strtoupper(substr($t['name'], 0, 1) . substr(explode(' ', $t['name'])[1] ?? '', 0, 1));
+          $rating = number_format(4.5 + (rand(0, 5) / 10), 1);
+          $reviews = rand(5, 150);
+        ?>
+          <div class="card talent-card" style="margin-bottom:0;transition:transform .2s, border-color .2s;cursor:pointer" onclick="openModal('hire-freelancer-<?php echo $t['id']; ?>')" onmouseover="this.style.borderColor='var(--uw-green)'" onmouseout="this.style.borderColor='var(--uw-border)'">
+            <div class="card-body">
+              <div style="display:flex;gap:15px;margin-bottom:15px">
+                <div class="av" style="width:50px;height:50px;background:var(--uw-green-light);color:var(--uw-green);font-size:18px"><?php echo $initials; ?></div>
+                <div style="flex:1;min-width:0">
+                  <div style="font-weight:700;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><?php echo htmlspecialchars($t['name']); ?></div>
+                  <div style="font-size:13px;color:var(--uw-green);font-weight:600"><?php echo htmlspecialchars($t['title'] ?? 'Freelancer'); ?></div>
+                  <div style="font-size:12px;color:var(--uw-gray);margin-top:2px">★ <?php echo $rating; ?> (<?php echo $reviews; ?> reviews)</div>
+                </div>
+              </div>
+              <div style="display:flex;gap:15px;font-size:13px;color:var(--uw-gray);margin-bottom:15px">
+                <div><strong>$<?php echo number_format($t['hourly_rate'] ?? 0); ?></strong> / hr</div>
+                <div><strong>$<?php echo number_format(rand(1000, 50000)); ?>+</strong> earned</div>
+                <div>📍 <?php echo htmlspecialchars($t['country'] ?? 'Global'); ?></div>
+              </div>
+              <div style="display:flex;gap:10px">
+                <button class="btn btn-g btn-sm" style="flex:1;justify-content:center">Hire Now</button>
+                <button class="btn btn-w btn-sm" style="flex:1;justify-content:center" onclick="event.stopPropagation();openChatWith(<?php echo $t['id']; ?>, '<?php echo addslashes($t['name']); ?>', '<?php echo $initials; ?>')">Message</button>
+              </div>
+            </div>
+          </div>
+        <?php endforeach; ?>
       </div>
     </div>
 
@@ -502,61 +700,34 @@ $reportStats = $reportStatsStmt->fetch(PDO::FETCH_ASSOC);
         <!-- Sidebar list -->
         <div style="width:270px;border-right:1.5px solid var(--uw-border);flex-shrink:0">
           <div style="padding:12px 14px;border-bottom:1px solid var(--uw-border)">
-            <input style="width:100%;padding:8px 12px;border:1.5px solid var(--uw-border);border-radius:50px;font-size:12.5px;font-family:inherit;outline:none;background:var(--uw-bg)" placeholder="Search messages…">
+            <input style="width:100%;padding:8px 12px;border:1.5px solid var(--uw-border);border-radius:50px;font-size:12.5px;font-family:inherit;outline:none;background:var(--uw-bg)" placeholder="Search messages…" onkeyup="filterConversations(this.value)">
           </div>
-          <div style="padding:6px 0">
-            <div class="msg-item unread" style="border-radius:0;margin:0;padding:12px 14px" onclick="toast('Chat','Opening Anika Nkosi conversation')">
-              <div class="av" style="background:#d1fae5;color:#065f46">AN</div>
-              <div class="msg-meta"><div class="msg-name">Anika Nkosi<span class="msg-time">10m</span></div><div class="msg-text">Screens are ready for review!</div></div>
-              <div class="msg-dot"></div>
-            </div>
-            <div class="msg-item unread" style="border-radius:0;margin:0;padding:12px 14px" onclick="toast('Chat','Opening James Kowalski conversation')">
-              <div class="av" style="background:#dbeafe;color:#1e40af">JK</div>
-              <div class="msg-meta"><div class="msg-name">James Kowalski<span class="msg-time">2h</span></div><div class="msg-text">All tests passing — please review</div></div>
-              <div class="msg-dot"></div>
-            </div>
-            <div class="msg-item" style="border-radius:0;margin:0;padding:12px 14px" onclick="toast('Chat','Opening Lena Thornton conversation')">
-              <div class="av" style="background:#fef3c7;color:#92400e">LT</div>
-              <div class="msg-meta"><div class="msg-name">Lena Thornton<span class="msg-time">1d</span></div><div class="msg-text">Here's the Q2 keyword strategy</div></div>
-            </div>
-            <div class="msg-item" style="border-radius:0;margin:0;padding:12px 14px" onclick="toast('Chat','Opening Marcus Patel conversation')">
-              <div class="av" style="background:#ede9fe;color:#5b21b6">MP</div>
-              <div class="msg-meta"><div class="msg-name">Marcus Patel<span class="msg-time">2d</span></div><div class="msg-text">Milestone 1 submitted for review</div></div>
-            </div>
+          <div style="padding:6px 0;max-height:600px;overflow-y:auto" id="conversations-list">
+            <?php if(empty($conversations)): ?>
+              <div style="padding:20px;text-align:center;color:var(--uw-gray);font-size:13px">No conversations yet.</div>
+            <?php else: ?>
+              <?php foreach($conversations as $c): 
+                $initials = strtoupper(substr($c['other_name'], 0, 1) . substr(explode(' ', $c['other_name'])[1] ?? '', 0, 1));
+                $isUnread = ($c['is_read'] == 0 && $c['sender_id'] != $user['id']);
+                $time = date('H:i', strtotime($c['last_time']));
+              ?>
+                <div class="msg-item <?php echo $isUnread ? 'unread' : ''; ?>" style="border-radius:0;margin:0;padding:12px 14px" onclick="loadChat(<?php echo $c['other_id']; ?>, '<?php echo addslashes($c['other_name']); ?>', '<?php echo $initials; ?>', this)">
+                  <div class="av" style="background:var(--uw-green-light);color:var(--uw-green)"><?php echo $initials; ?></div>
+                  <div class="msg-meta">
+                    <div class="msg-name"><?php echo htmlspecialchars($c['other_name']); ?><span class="msg-time"><?php echo $time; ?></span></div>
+                    <div class="msg-text"><?php echo htmlspecialchars($c['last_message']); ?></div>
+                  </div>
+                  <?php if($isUnread): ?><div class="msg-dot"></div><?php endif; ?>
+                </div>
+              <?php endforeach; ?>
+            <?php endif; ?>
           </div>
         </div>
         <!-- Chat window -->
-        <div style="flex:1;display:flex;flex-direction:column">
-          <div style="padding:14px 18px;border-bottom:1px solid var(--uw-border);display:flex;align-items:center;gap:12px">
-            <div class="av" style="background:#d1fae5;color:#065f46;width:36px;height:36px">AN</div>
-            <div>
-              <div style="font-weight:700;font-size:14px">Anika Nkosi</div>
-              <div style="font-size:12px;color:var(--uw-green);display:flex;align-items:center;gap:4px"><span style="width:6px;height:6px;background:var(--uw-green);border-radius:50%;display:inline-block"></span>Online now</div>
-            </div>
-            <div style="margin-left:auto;display:flex;gap:8px">
-              <button class="btn btn-w btn-sm" onclick="toast('Video call','Opening Upwork meeting room')">📹 Video Call</button>
-              <button class="btn btn-w btn-sm" onclick="openModal('contract-anika')">View Contract</button>
-            </div>
-          </div>
-          <div style="flex:1;padding:18px;overflow-y:auto;display:flex;flex-direction:column;gap:12px">
-            <div style="display:flex;gap:10px">
-              <div class="av" style="background:#d1fae5;color:#065f46;flex-shrink:0">AN</div>
-              <div style="max-width:70%">
-                <div style="background:var(--uw-bg);border:1.5px solid var(--uw-border);border-radius:0 var(--radius) var(--radius) var(--radius);padding:10px 14px;font-size:13px;line-height:1.6">Hi! I've completed the first set of dashboard screens — 6 screens total. Ready for your review!</div>
-                <div style="font-size:11px;color:var(--uw-gray2);margin-top:4px">10:24 AM</div>
-              </div>
-            </div>
-            <div style="display:flex;gap:10px;flex-direction:row-reverse">
-              <div class="av" style="background:var(--uw-green);color:#001e00;flex-shrink:0">NX</div>
-              <div style="max-width:70%;text-align:right">
-                <div style="background:var(--uw-green);color:white;border-radius:var(--radius) 0 var(--radius) var(--radius);padding:10px 14px;font-size:13px;line-height:1.6">Excellent! I'll review them this afternoon and send feedback by EOD.</div>
-                <div style="font-size:11px;color:var(--uw-gray2);margin-top:4px">10:31 AM</div>
-              </div>
-            </div>
-          </div>
-          <div style="padding:14px 18px;border-top:1px solid var(--uw-border);display:flex;gap:10px">
-            <input style="flex:1;padding:9px 14px;border:1.5px solid var(--uw-border);border-radius:50px;font-size:13px;font-family:inherit;outline:none" placeholder="Type a message…" onfocus="this.style.borderColor='var(--uw-green)'" onblur="this.style.borderColor='var(--uw-border)'">
-            <button class="btn btn-g" onclick="toast('Sent','Message delivered')">Send</button>
+        <div style="flex:1;display:flex;flex-direction:column" id="chat-window">
+          <div style="flex:1;display:flex;align-items:center;justify-content:center;color:var(--uw-gray);flex-direction:column;gap:15px">
+            <span style="font-size:40px">💬</span>
+            <div>Select a conversation to start chatting</div>
           </div>
         </div>
       </div>
@@ -579,22 +750,24 @@ $reportStats = $reportStatsStmt->fetch(PDO::FETCH_ASSOC);
         <div class="card" style="margin-bottom:0">
           <div class="card-body" style="text-align:center">
             <div style="font-size:11.5px;font-weight:700;color:var(--uw-gray);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Available Balance</div>
-            <div style="font-size:30px;font-weight:700;color:var(--uw-black)">$1,250.00</div>
+            <div style="font-size:30px;font-weight:700;color:var(--uw-black)">$<?php echo number_format($user['balance'] ?? 0, 2); ?></div>
             <button class="btn btn-g btn-sm" style="margin-top:12px;width:100%;justify-content:center" onclick="openModal('add-funds')">Add Funds</button>
           </div>
         </div>
         <div class="card" style="margin-bottom:0">
           <div class="card-body" style="text-align:center">
             <div style="font-size:11.5px;font-weight:700;color:var(--uw-gray);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">In Escrow</div>
-            <div style="font-size:30px;font-weight:700;color:#1d4ed8">$3,400.00</div>
+            <div style="font-size:30px;font-weight:700;color:#1d4ed8">$<?php echo number_format($escrowAmount, 2); ?></div>
             <div style="font-size:12px;color:var(--uw-gray);margin-top:8px">Protected milestone funds</div>
           </div>
         </div>
         <div class="card" style="margin-bottom:0">
           <div class="card-body" style="text-align:center">
             <div style="font-size:11.5px;font-weight:700;color:var(--uw-gray);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Spent This Month</div>
-            <div style="font-size:30px;font-weight:700;color:var(--uw-black)">$4,820</div>
-            <div style="font-size:12px;color:var(--uw-green);margin-top:8px;font-weight:600">↑ 18% vs April</div>
+            <div style="font-size:30px;font-weight:700;color:var(--uw-black)">$<?php echo number_format($stats['total_spent'], 0); ?></div>
+            <div style="font-size:12px;color:<?php echo $spendChange >= 0 ? 'var(--uw-green)' : '#dc2626'; ?>;margin-top:8px;font-weight:600">
+              <?php echo $spendChange >= 0 ? '↑' : '↓'; ?> <?php echo abs(round($spendChange)); ?>% vs <?php echo date('F', strtotime('-1 month')); ?>
+            </div>
           </div>
         </div>
       </div>
@@ -602,18 +775,22 @@ $reportStats = $reportStatsStmt->fetch(PDO::FETCH_ASSOC);
       <div class="card">
         <div class="card-head"><h3>Transaction History</h3></div>
         <table class="tbl">
-          <thead><tr><th>Date</th><th>Description</th><th>Freelancer</th><th>Type</th><th>Amount</th><th>Status</th></tr></thead>
+          <thead><tr><th>Date</th><th>Description</th><th>Freelancer / Source</th><th>Type</th><th>Amount</th><th>Status</th></tr></thead>
           <tbody>
             <?php if(empty($clientTransactions)): ?>
                 <tr><td colspan="6" style="text-align:center;padding:20px;color:var(--uw-gray)">No transactions found.</td></tr>
             <?php else: ?>
-                <?php foreach($clientTransactions as $ct): ?>
+                <?php foreach($clientTransactions as $ct): 
+                    $isDeposit = ($ct['payee_id'] == $user['id']);
+                ?>
                 <tr>
                   <td><?php echo date('M j, Y', strtotime($ct['created_at'])); ?></td>
-                  <td>Payment for contract</td>
-                  <td><?php echo htmlspecialchars($ct['freelancer_name']); ?></td>
-                  <td><span class="badge b-purple">Fixed</span></td>
-                  <td style="font-weight:700;color:#dc2626">−$<?php echo number_format($ct['amount']); ?></td>
+                  <td><?php echo $isDeposit ? 'Add Funds (Deposit)' : 'Payment for contract'; ?></td>
+                  <td><?php echo $ct['freelancer_name'] ?: ($isDeposit ? 'Self (Deposit)' : 'System'); ?></td>
+                  <td><span class="badge <?php echo $isDeposit ? 'b-blue' : 'b-purple'; ?>"><?php echo $isDeposit ? 'Deposit' : 'Fixed'; ?></span></td>
+                  <td style="font-weight:700;color:<?php echo $isDeposit ? 'var(--uw-green)' : '#dc2626'; ?>">
+                    <?php echo $isDeposit ? '+' : '−'; ?>$<?php echo number_format($ct['amount'], 2); ?>
+                  </td>
                   <td><span class="badge b-green"><?php echo ucfirst($ct['status']); ?></span></td>
                 </tr>
                 <?php endforeach; ?>

@@ -3,32 +3,37 @@
   <div style="display:grid;grid-template-columns:300px 1fr;background:white;border:1px solid var(--border);border-radius:12px;overflow:hidden;height:calc(100vh - 140px)">
     <!-- Sidebar -->
     <div style="border-right:1px solid var(--border);display:flex;flex-direction:column">
-      <div style="padding:15px;border-bottom:1px solid var(--border)"><input type="text" placeholder="Search messages..." style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:13px"></div>
-      <div style="flex:1;overflow-y:auto">
-        <?php foreach($recentMessages as $m): ?>
-          <div style="padding:15px;border-bottom:1px solid var(--border);cursor:pointer;background:<?php echo $m['id']==1?'var(--gl)':'transparent'; ?>" onclick="toast('Message','Loading chat...')">
-            <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-              <div style="font-weight:700;font-size:13.5px"><?php echo htmlspecialchars($m['sender_name']); ?></div>
-              <div style="font-size:11px;color:var(--muted)"><?php echo date('H:i', strtotime($m['created_at'])); ?></div>
+      <div style="padding:15px;border-bottom:1px solid var(--border)">
+        <input type="text" placeholder="Search messages..." style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:13px" onkeyup="filterConversations(this.value)">
+      </div>
+      <div style="flex:1;overflow-y:auto" id="conversations-list">
+        <?php if(empty($conversations)): ?>
+          <div style="padding:20px;text-align:center;color:var(--muted);font-size:13px">No conversations yet.</div>
+        <?php else: ?>
+          <?php foreach($conversations as $c): 
+            $initials = strtoupper(substr($c['other_name'], 0, 1) . substr(explode(' ', $c['other_name'])[1] ?? '', 0, 1));
+            $isUnread = ($c['is_read'] == 0 && $c['sender_id'] != $user['id']);
+            $time = date('H:i', strtotime($c['last_time']));
+          ?>
+            <div class="msg-item <?php echo $isUnread ? 'unread' : ''; ?>" style="padding:15px;border-bottom:1px solid var(--border);cursor:pointer;" onclick="loadChat(<?php echo $c['other_id']; ?>, '<?php echo addslashes($c['other_name']); ?>', '<?php echo $initials; ?>', this)">
+              <div style="display:flex;justify-content:space-between;margin-bottom:4px;align-items:center">
+                <div style="font-weight:700;font-size:13.5px;display:flex;align-items:center;gap:8px">
+                  <?php echo htmlspecialchars($c['other_name']); ?>
+                  <?php if($isUnread): ?><span style="width:8px;height:8px;background:var(--g);border-radius:50%"></span><?php endif; ?>
+                </div>
+                <div style="font-size:11px;color:var(--muted)"><?php echo $time; ?></div>
+              </div>
+              <div style="font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><?php echo htmlspecialchars($c['last_message']); ?></div>
             </div>
-            <div style="font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><?php echo htmlspecialchars($m['message']); ?></div>
-          </div>
-        <?php endforeach; ?>
+          <?php endforeach; ?>
+        <?php endif; ?>
       </div>
     </div>
     <!-- Chat Area -->
-    <div style="display:flex;flex-direction:column;background:var(--off)">
-      <div style="padding:15px;background:white;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px">
-        <div class="av" style="width:32px;height:32px">C</div>
-        <div style="font-weight:700;font-size:14px">ClearPath Finance</div>
-      </div>
-      <div style="flex:1;padding:20px;display:flex;flex-direction:column;gap:15px;overflow-y:auto">
-        <div style="align-self:flex-start;background:white;padding:10px 15px;border-radius:12px;max-width:70%;font-size:13.5px;box-shadow:0 1px 2px rgba(0,0,0,.05)">Hi there, we reviewed your proposal and would like to schedule a call.</div>
-        <div style="align-self:flex-end;background:var(--g);color:white;padding:10px 15px;border-radius:12px;max-width:70%;font-size:13.5px">That sounds great! I'm available tomorrow at 10 AM.</div>
-      </div>
-      <div style="padding:15px;background:white;border-top:1px solid var(--border);display:flex;gap:10px">
-        <input type="text" placeholder="Write a message..." style="flex:1;padding:10px;border:1px solid var(--border);border-radius:8px">
-        <button class="btn btn-g">Send</button>
+    <div style="display:flex;flex-direction:column;background:var(--off)" id="chat-window">
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;color:var(--muted);flex-direction:column;gap:15px">
+        <span style="font-size:40px">💬</span>
+        <div>Select a conversation to start chatting</div>
       </div>
     </div>
   </div>

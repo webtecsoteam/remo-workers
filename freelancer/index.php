@@ -38,6 +38,9 @@ $submittedProposals = [];
 $myServices = [];
 $workHistory = [];
 $savedJobs = [];
+$totalProposals = 0;
+$totalContracts = 0;
+$unreadMessages = 0;
 
 // Fetch data with safety fallbacks
 try {
@@ -63,6 +66,10 @@ try {
     $pendingEarnedStmt = $db->prepare("SELECT SUM(amount) FROM payments WHERE payee_id = ? AND status = 'pending'");
     $pendingEarnedStmt->execute([$user['id']]);
     $fStats['pending_earnings'] = (float)$pendingEarnedStmt->fetchColumn() ?: 0;
+
+    $wipStmt = $db->prepare("SELECT SUM(amount) FROM work_logs WHERE freelancer_id = ? AND status = 'pending'");
+    $wipStmt->execute([$user['id']]);
+    $fStats['wip_earnings'] = (float)$wipStmt->fetchColumn() ?: 0;
 
     $fStats['active_contracts'] = count($activeContracts);
     
@@ -103,6 +110,82 @@ try {
     $messagesStmt->execute([$user['id']]);
     $recentMessages = $messagesStmt->fetchAll() ?: [];
 
+    // --- REPORT DATA ---
+    // Full Transaction Ledger
+    $ledgerStmt = $db->prepare("
+        SELECT p.*, j.title as job_title, u.name as client_name,
+        'payment' as ledger_type,
+        CASE WHEN p.job_id IS NULL THEN 'bonus' ELSE 'hourly' END as p_type
+        FROM payments p
+        LEFT JOIN jobs j ON p.job_id = j.id
+        LEFT JOIN users u ON p.payer_id = u.id
+        WHERE p.payee_id = ? OR p.payer_id = ?
+        ORDER BY p.created_at DESC
+    ");
+    $ledgerStmt->execute([$user['id'], $user['id']]);
+    $fullLedger = $ledgerStmt->fetchAll() ?: [];
+
+    // Earnings by Client
+    $clientEarnStmt = $db->prepare("
+        SELECT u.name as client_name, SUM(p.amount) as total
+        FROM payments p
+        JOIN users u ON p.payer_id = u.id
+        WHERE p.payee_id = ? AND p.status = 'completed'
+        GROUP BY p.payer_id
+        ORDER BY total DESC
+    ");
+    $clientEarnStmt->execute([$user['id']]);
+    $earningsByClient = $clientEarnStmt->fetchAll() ?: [];
+
+    // Bonus Payments
+    $bonusPayments = array_filter($fullLedger, fn($l) => $l['p_type'] === 'bonus' && $l['status'] === 'completed');
+    
+    // Weekly Earnings Simulation (last 7 days)
+    $weeklyEarnings = [];
+    for ($i = 6; $i >= 0; $i--) {
+        $date = date('Y-m-d', strtotime("-$i days"));
+        $dailyTotal = 0;
+        foreach($fullLedger as $l) {
+            if (date('Y-m-d', strtotime($l['created_at'])) === $date && $l['status'] === 'completed') {
+                $dailyTotal += $l['amount'];
+            }
+        }
+        $weeklyEarnings[] = ['date' => $date, 'label' => date('D', strtotime($date)), 'total' => $dailyTotal];
+    }
+
+    // --- COUNTS FOR SIDEBAR BADGES ---
+    $countProposals = $db->prepare("SELECT COUNT(*) FROM proposals WHERE freelancer_id = ?");
+    $countProposals->execute([$user['id']]);
+    $totalProposals = $countProposals->fetchColumn();
+
+    $countContracts = $db->prepare("SELECT COUNT(*) FROM contracts WHERE freelancer_id = ? AND status = 'active'");
+    $countContracts->execute([$user['id']]);
+    $totalContracts = $countContracts->fetchColumn();
+
+    $countMessages = $db->prepare("SELECT COUNT(*) FROM messages WHERE receiver_id = ? AND is_read = 0");
+    $countMessages->execute([$user['id']]);
+    $unreadMessages = $countMessages->fetchColumn();
+
+    // Conversations for Messages Page
+    $conversationsStmt = $db->prepare("
+        SELECT 
+            u.id as other_id, u.name as other_name, 
+            m1.message as last_message, m1.created_at as last_time, m1.is_read, m1.sender_id
+        FROM users u
+        JOIN (
+            SELECT 
+                MAX(id) as max_id, 
+                CASE WHEN sender_id = ? THEN receiver_id ELSE sender_id END as other_user_id
+            FROM messages 
+            WHERE sender_id = ? OR receiver_id = ?
+            GROUP BY other_user_id
+        ) m2 ON u.id = m2.other_user_id
+        JOIN messages m1 ON m1.id = m2.max_id
+        ORDER BY m1.created_at DESC
+    ");
+    $conversationsStmt->execute([$user['id'], $user['id'], $user['id']]);
+    $conversations = $conversationsStmt->fetchAll(PDO::FETCH_ASSOC);
+
     // Submitted Proposals
     $proposalsStmt = $db->prepare("
         SELECT p.*, j.title as job_title 
@@ -115,7 +198,7 @@ try {
     $submittedProposals = $proposalsStmt->fetchAll() ?: [];
 
     // Project Catalog (Services)
-    $servicesStmt = $db->prepare("SELECT * FROM services WHERE user_id = ?");
+    $servicesStmt = $db->prepare("SELECT * FROM services WHERE freelancer_id = ?");
     $servicesStmt->execute([$user['id']]);
     $myServices = $servicesStmt->fetchAll() ?: [];
 
@@ -169,7 +252,10 @@ include __DIR__ . '/includes/header.php';
     </div>
     <div class="sb-stats">
       <div class="sb-stat"><div class="sb-stat-val">96%</div><div class="sb-stat-lbl">Job Success</div></div>
-      <div class="sb-stat"><div class="sb-stat-val" id="sb-connects-val"><?php echo $user['connects'] ?? 0; ?></div><div class="sb-stat-lbl">Connects</div></div>
+      <div class="sb-stat" onclick="openModal('connects')" style="cursor:pointer">
+        <div class="sb-stat-val" id="sb-connects-val"><?php echo $user['connects'] ?? 0; ?></div>
+        <div class="sb-stat-lbl">Connects</div>
+      </div>
     </div>
   </div>
 
@@ -177,16 +263,28 @@ include __DIR__ . '/includes/header.php';
     <div class="sb-section">Dashboard</div>
     <div id="nav-home" class="sb-item active" onclick="showPage('home')"><span class="sb-ico">🏠</span>Home</div>
     <div id="nav-find-work" class="sb-item" onclick="showPage('find-work')"><span class="sb-ico">🔍</span>Find Work</div>
-    <div id="nav-proposals" class="sb-item" onclick="showPage('proposals')"><span class="sb-ico">📝</span>My Proposals</div>
-    <div id="nav-contracts" class="sb-item" onclick="showPage('contracts')"><span class="sb-ico">🤝</span>My Contracts</div>
-    <div id="nav-messages" class="sb-item" onclick="showPage('messages')"><span class="sb-ico">💬</span>Messages</div>
+    <div id="nav-proposals" class="sb-item" onclick="showPage('proposals')">
+      <span class="sb-ico">📝</span>My Proposals
+      <?php if ($totalProposals > 0): ?><span class="sb-badge green"><?php echo $totalProposals; ?></span><?php endif; ?>
+    </div>
+    <div id="nav-contracts" class="sb-item" onclick="showPage('contracts')">
+      <span class="sb-ico">🤝</span>My Contracts
+      <?php if ($totalContracts > 0): ?><span class="sb-badge"><?php echo $totalContracts; ?></span><?php endif; ?>
+    </div>
+    <div id="nav-messages" class="sb-item" onclick="showPage('messages')">
+      <span class="sb-ico">💬</span>Messages
+      <?php if ($unreadMessages > 0): ?><span class="sb-badge"><?php echo $unreadMessages; ?></span><?php endif; ?>
+    </div>
     
     <div class="sb-section">Earnings</div>
-    <div id="nav-earnings" class="sb-item" onclick="showPage('earnings')"><span class="sb-ico">💰</span>Earnings</div>
+    <div id="nav-earnings" class="sb-item" onclick="showPage('earnings')"><span class="sb-ico">💰</span>Earnings & Payments</div>
+    <div id="nav-reports" class="sb-item" onclick="showPage('reports')"><span class="sb-ico">📊</span>Payment Reports</div>
+    <div id="nav-connects" class="sb-item" onclick="openModal('connects')"><span class="sb-ico">🔗</span>Connects (<?php echo $user['connects'] ?? 0; ?>)</div>
     <div id="nav-catalog" class="sb-item" onclick="showPage('catalog')"><span class="sb-ico">📦</span>My Services</div>
     
     <div class="sb-section">Settings</div>
     <div id="nav-profile" class="sb-item" onclick="showPage('profile')"><span class="sb-ico">👤</span>My Profile</div>
+    <div id="nav-password" class="sb-item" onclick="openModal('change-password')"><span class="sb-ico">🔑</span>Change Password</div>
     <div id="nav-verification" class="sb-item" onclick="showPage('verification')">
       <span class="sb-ico">🛡️</span>ID Verification
       <?php if (!($user['is_verified'] ?? false)): ?>
@@ -196,7 +294,22 @@ include __DIR__ . '/includes/header.php';
   </nav>
 
   <div class="sb-footer">
-    <a href="<?php echo baseUrl("logout.php"); ?>" class="sb-item" style="color:#ef4444"><span class="sb-ico">🚪</span>Log Out</a>
+    <?php
+      $avail = $user['availability'] ?? 'available';
+      $availLabel = 'Available for Work';
+      $availDot = '🟢';
+      if ($avail === 'limited') { $availLabel = 'Limited Availability'; $availDot = '🟡'; }
+      if ($avail === 'unavailable') { $availLabel = 'Not Available'; $availDot = '🔴'; }
+    ?>
+    <a onclick="toggleAvailability()" id="avail-status" style="cursor:pointer;display:flex;align-items:center;gap:8px;font-size:12.5px;padding:6px 0;color:rgba(255,255,255,.7);text-decoration:none">
+      <span id="avail-dot" style="font-size:14px"><?php echo $availDot; ?></span> <span id="avail-text"><?php echo $availLabel; ?></span>
+    </a>
+    <a onclick="openModal('change-password')" style="cursor:pointer;display:flex;align-items:center;gap:8px;font-size:12.5px;padding:6px 0;color:rgba(255,255,255,.6);text-decoration:none">
+      <span style="font-size:14px">🔑</span> Change Password
+    </a>
+    <a href="<?php echo baseUrl("logout.php"); ?>" style="display:flex;align-items:center;gap:8px;font-size:12.5px;padding:6px 0;color:#f87171;text-decoration:none">
+      <span style="font-size:14px">🚪</span> Log Out
+    </a>
   </div>
 </aside>
 

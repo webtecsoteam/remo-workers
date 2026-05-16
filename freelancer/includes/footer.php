@@ -1,5 +1,4 @@
 <script>
-(function() {
   const JOBS = <?php echo json_encode($allJobs ?? [], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?: '[]'; ?>;
   const SAVED_IDS = <?php echo json_encode(array_column($savedJobs ?? [], 'id'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?: '[]'; ?>;
   const PROPOSALS = <?php echo json_encode($submittedProposals ?? [], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?: '[]'; ?>;
@@ -18,7 +17,6 @@
     if (pg) {
       pg.classList.add('active');
       window.scrollTo(0, 0);
-      // Update hash without triggering hashchange again
       history.pushState(null, null, '#' + id);
     }
     
@@ -49,6 +47,116 @@
     if (id === 'contracts') renderContracts();
     if (id === 'reports') renderReports();
     if (id === 'profile') renderSuggestedSkills();
+  }
+
+  // Define all other functions here... (I will just remove the IIFE wrappers)
+
+  window.showEarningsInfo = function(type) {
+    const panel = document.getElementById('earnings-info-panel');
+    if (!panel) return;
+    
+    const info = {
+      'wip': '<strong>Work in Progress</strong>: These are hours you have logged during the current week that have not yet been billed to the client. This amount will move to "In Review" after the week ends (Sunday midnight UTC).',
+      'review': '<strong>In Review</strong>: This includes hours from the previous week or completed milestones that the client is currently reviewing. Clients have 5 days to dispute hourly work.',
+      'pending': '<strong>Pending</strong>: These are funds that have been approved by the client but are held for a standard 5-day security period before becoming available for withdrawal.',
+      'available': '<strong>Available</strong>: This is your balance ready to be withdrawn to your preferred payment method.'
+    };
+    
+    panel.style.display = 'block';
+    panel.innerHTML = info[type] || '';
+  }
+
+  window.initiateWithdrawal = function(amount) {
+    if (amount <= 0) return toast('Error', 'No funds available to withdraw');
+    const method = document.getElementById('withdraw-method').value;
+    
+    if (confirm(`Are you sure you want to withdraw $${parseFloat(amount).toFixed(2)} to ${method}?`)) {
+      toast('Success', 'Withdrawal initiated successfully!');
+    }
+  }
+
+  window.buyConnects = function(amount, price) {
+    if (confirm(`Buy ${amount} Connects for $${price.toFixed(2)}?`)) {
+      toast('Success', `Purchased ${amount} Connects!`);
+      // Update UI or hit API
+    }
+  }
+
+  window.togglePwVis = function(id, el) {
+    const input = document.getElementById(id);
+    if (input.type === 'password') {
+      input.type = 'text';
+      el.innerText = '👓';
+    } else {
+      input.type = 'password';
+      el.innerText = '👁';
+    }
+  }
+
+  window.submitChangePassword = function() {
+    const current = document.getElementById('pw-current').value;
+    const newPw = document.getElementById('pw-new').value;
+    const confirmPw = document.getElementById('pw-confirm').value;
+
+    if (!current || !newPw || !confirmPw) return toast('Required', 'Please fill all fields');
+    if (newPw !== confirmPw) return toast('Error', 'New passwords do not match');
+    if (newPw.length < 8) return toast('Short', 'Password must be at least 8 characters');
+
+    const fd = new FormData();
+    fd.append('current_password', current);
+    fd.append('new_password', newPw);
+
+    fetch(BASE_URL + 'actions/change_password.php', {
+      method: 'POST',
+      body: fd
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        toast('Success', 'Password changed successfully!');
+        closeModal();
+      } else {
+        toast('Error', data.error);
+      }
+    })
+    .catch(err => toast('Error', 'Failed to update password'));
+  }
+
+  window.toggleAvailability = function() {
+    const textEl = document.getElementById('avail-text');
+    const dotEl = document.getElementById('avail-dot');
+    const current = textEl.innerText;
+    
+    let next = 'available';
+    let label = 'Available for Work';
+    let dot = '🟢';
+    
+    if (current === 'Available for Work') {
+      next = 'limited';
+      label = 'Limited Availability';
+      dot = '🟡';
+    } else if (current === 'Limited Availability') {
+      next = 'unavailable';
+      label = 'Not Available';
+      dot = '🔴';
+    }
+    
+    const fd = new FormData();
+    fd.append('availability', next);
+    
+    fetch(BASE_URL + 'actions/update_availability.php', {
+      method: 'POST',
+      body: fd
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        textEl.innerText = label;
+        dotEl.innerText = dot;
+        toast('Availability', 'Set to ' + label);
+      }
+    })
+    .catch(err => toast('Error', 'Failed to update status'));
   }
 
   function renderContracts(filter = 'Active') {
@@ -569,6 +677,82 @@
       `;
       overlay.classList.add('open');
       document.body.style.overflow = 'hidden';
+    } else if (type === 'change-password') {
+      document.getElementById('mh-title').innerText = 'Change Password';
+      modal.style.maxWidth = '450px';
+      mc.innerHTML = `
+        <div style="padding:25px">
+          <div style="background:var(--gl);border:1px solid #c3e6c3;border-radius:8px;padding:11px 14px;font-size:12.5px;color:#166534;line-height:1.6;margin-bottom:18px">
+            🔒 Choose a strong password — at least 8 characters with a mix of letters and numbers.
+          </div>
+          <div class="fg">
+            <label>Current Password</label>
+            <div style="position:relative">
+              <input type="password" id="pw-current" placeholder="Enter your current password">
+              <span onclick="togglePwVis('pw-current',this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--muted);font-size:15px;user-select:none">👁</span>
+            </div>
+          </div>
+          <div class="fg">
+            <label>New Password</label>
+            <div style="position:relative">
+              <input type="password" id="pw-new" placeholder="At least 8 characters">
+              <span onclick="togglePwVis('pw-new',this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--muted);font-size:15px;user-select:none">👁</span>
+            </div>
+          </div>
+          <div class="fg">
+            <label>Confirm New Password</label>
+            <input type="password" id="pw-confirm" placeholder="Repeat new password">
+          </div>
+          <button class="btn btn-g" style="width:100%;padding:14px;border-radius:10px;font-weight:700;margin-top:10px" onclick="submitChangePassword()">Update Password →</button>
+        </div>
+      `;
+      overlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    } else if (type === 'connects') {
+      document.getElementById('mh-title').innerText = 'Connects';
+      modal.style.maxWidth = '500px';
+      const c = <?php echo $user['connects'] ?? 0; ?>;
+      const max = 200; 
+      const pct = Math.min((c / max) * 100, 100);
+      mc.innerHTML = `
+        <div style="padding:25px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px">
+            <div style="font-size:24px;font-weight:700">${c} Connects</div>
+            <div style="font-size:13px;color:var(--muted)">Available</div>
+          </div>
+          <div style="background:var(--border);border-radius:6px;height:10px;overflow:hidden;margin-bottom:8px">
+            <div style="height:100%;background:var(--g);width:${pct}%"></div>
+          </div>
+          <div style="font-size:12.5px;color:var(--muted);margin-bottom:25px">${c} of ${max} max connects</div>
+
+          <div style="font-size:15px;font-weight:700;margin-bottom:12px">Buy Connects</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:25px">
+            <div style="border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;cursor:pointer" onclick="buyConnects(10, 1.50)">
+              <div style="font-weight:700;font-size:14px">10 Connects</div>
+              <div style="font-size:12px;color:var(--muted)">$1.50</div>
+            </div>
+            <div style="border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;cursor:pointer" onclick="buyConnects(20, 3.00)">
+              <div style="font-weight:700;font-size:14px">20 Connects</div>
+              <div style="font-size:12px;color:var(--muted)">$3.00</div>
+            </div>
+          </div>
+
+          <div style="font-size:15px;font-weight:700;margin-bottom:12px">Recent Activity</div>
+          <div style="border-top:1px solid var(--border)">
+            <div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);font-size:13px">
+              <div>Monthly Refresh</div>
+              <div style="color:var(--g);font-weight:700">+10</div>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);font-size:13px">
+              <div>Proposal: Web Design</div>
+              <div style="color:#ef4444;font-weight:700">-6</div>
+            </div>
+          </div>
+          <button class="btn btn-g" style="width:100%;margin-top:25px;justify-content:center" onclick="closeModal()">Close</button>
+        </div>
+      `;
+      overlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
     } else {
       overlay.classList.add('open');
       document.body.style.overflow = 'hidden';
@@ -993,6 +1177,105 @@
   }
 
   // Initialize
+  let activeChatId = null;
+
+  async function loadChat(otherId, name, initials, el) {
+    activeChatId = otherId;
+    
+    // Highlight sidebar
+    if(el) {
+      document.querySelectorAll('.msg-item').forEach(i => {
+        i.style.background = 'transparent';
+        i.classList.remove('active');
+      });
+      el.style.background = 'var(--gl)';
+      el.classList.add('active');
+      const dot = el.querySelector('span[style*="background:var(--g)"]');
+      if(dot) dot.remove();
+    }
+
+    const chatWindow = document.getElementById('chat-window');
+    chatWindow.innerHTML = `<div style="flex:1;display:flex;align-items:center;justify-content:center"><span class="spinner"></span></div>`;
+
+    try {
+      const response = await fetch(`${BASE_URL}/actions/get_messages.php?with=${otherId}`);
+      const result = await response.json();
+      
+      if(result.success) {
+        renderChatWindow(name, initials, result.messages);
+      } else {
+        chatWindow.innerHTML = `<div style="padding:20px;text-align:center;color:red">${result.error}</div>`;
+      }
+    } catch (err) {
+      chatWindow.innerHTML = `<div style="padding:20px;text-align:center;color:red">Failed to load messages</div>`;
+    }
+  }
+
+  function renderChatWindow(name, initials, messages) {
+    const chatWindow = document.getElementById('chat-window');
+    const msgHtml = messages.map(m => {
+      const isMe = (m.sender_id != activeChatId);
+      return `
+        <div style="display:flex;gap:10px;${isMe ? 'flex-direction:row-reverse' : ''}">
+          <div class="av" style="width:30px;height:30px;font-size:10px;background:${isMe ? 'var(--g)' : 'white'};color:${isMe ? 'white' : 'var(--muted)'};border:${isMe ? 'none' : '1px solid var(--border)'};flex-shrink:0">${isMe ? 'Me' : initials}</div>
+          <div style="max-width:75%;${isMe ? 'text-align:right' : ''}">
+            <div style="background:${isMe ? 'var(--g)' : 'white'};color:${isMe ? 'white' : 'var(--forest)'};border-radius:12px;padding:10px 15px;font-size:13.5px;box-shadow:0 1px 2px rgba(0,0,0,.05);text-align:left">${m.message}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px">${new Date(m.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    chatWindow.innerHTML = `
+      <div style="padding:15px;background:white;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px">
+        <div class="av" style="width:32px;height:32px;background:var(--gl);color:var(--forest)">${initials}</div>
+        <div style="font-weight:700;font-size:14px">${name}</div>
+      </div>
+      <div style="flex:1;padding:20px;display:flex;flex-direction:column;gap:15px;overflow-y:auto" id="chat-messages-scroll">${msgHtml}</div>
+      <div style="padding:15px;background:white;border-top:1px solid var(--border);display:flex;gap:10px">
+        <input id="chat-input" type="text" placeholder="Write a message..." style="flex:1;padding:10px;border:1px solid var(--border);border-radius:8px" onkeydown="if(event.key==='Enter')sendMsg()">
+        <button class="btn btn-g" onclick="sendMsg()">Send</button>
+      </div>
+    `;
+    const scroll = document.getElementById('chat-messages-scroll');
+    scroll.scrollTop = scroll.scrollHeight;
+  }
+
+  async function sendMsg() {
+    const input = document.getElementById('chat-input');
+    const msg = input.value.trim();
+    if(!msg || !activeChatId) return;
+
+    input.value = '';
+    try {
+      const formData = new FormData();
+      formData.append('receiver_id', activeChatId);
+      formData.append('message', msg);
+      
+      const response = await fetch(`${BASE_URL}/actions/send_message.php`, {
+        method: 'POST',
+        body: formData
+      });
+      const result = await response.json();
+      if(result.success) {
+        // Re-load to show my message
+        const chatHeader = document.querySelector('#chat-window div[style*="font-weight:700"]');
+        const chatAv = document.querySelector('#chat-window .av');
+        loadChat(activeChatId, chatHeader ? chatHeader.innerText : 'User', chatAv ? chatAv.innerText : '??');
+      }
+    } catch(err) {
+      toast('Error', 'Failed to send message');
+    }
+  }
+
+  function filterConversations(query) {
+    const q = query.toLowerCase();
+    document.querySelectorAll('.msg-item').forEach(item => {
+      const text = item.innerText.toLowerCase();
+      item.style.display = text.includes(q) ? 'block' : 'none';
+    });
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
     const hash = window.location.hash.replace('#', '');
     showPage(hash || 'home');
@@ -1002,7 +1285,6 @@
     const hash = window.location.hash.replace('#', '');
     showPage(hash || 'home');
   });
-})();
 </script>
 
 <!-- Skill Selector Overlay -->
