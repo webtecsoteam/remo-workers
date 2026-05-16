@@ -1,6 +1,11 @@
-<script>
-  // Core Navigation
-  window.showPage = function(id) {
+
+  const JOBS = [];
+  const SAVED_IDS = [];
+  let PROPOSALS = [];
+  const CONTRACTS = [];
+  const USER_CONNECTS = 50;
+
+  function showPage(id) {
     if (!id) id = 'home';
     
     // Hide all pages
@@ -12,9 +17,7 @@
     if (pg) {
       pg.classList.add('active');
       window.scrollTo(0, 0);
-      if (window.history.pushState) {
-        history.pushState(null, null, '#' + id);
-      }
+      history.pushState(null, null, '#' + id);
     }
     
     // Update sidebar active state
@@ -43,23 +46,13 @@
     if (sb) sb.classList.remove('mob-open');
     if (ov) ov.classList.remove('open');
 
-    // Re-render (guarded in case functions not yet defined)
-    try {
-      if ((id === 'find-work' || id === 'home') && typeof renderJobs === 'function') renderJobs();
-      if (id === 'proposals' && typeof renderProposals === 'function') renderProposals();
-      if (id === 'contracts' && typeof renderContracts === 'function') renderContracts();
-      if (id === 'reports' && typeof renderReports === 'function') renderReports();
-      if (id === 'profile' && typeof renderSuggestedSkills === 'function') renderSuggestedSkills();
-    } catch (e) { console.warn("Deferred render error:", e); }
-  };
-
-  const JOBS = <?php echo json_encode($allJobs ?? [], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?: '[]'; ?>;
-  const SAVED_IDS = <?php echo json_encode(array_column($savedJobs ?? [], 'id'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?: '[]'; ?>;
-  let PROPOSALS = <?php echo json_encode($submittedProposals ?? [], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?: '[]'; ?>;
-  const CONTRACTS = <?php echo json_encode($allContracts ?? [], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?: '[]'; ?>;
-  const USER_CONNECTS = <?php echo (int)($user['connects'] ?? 0); ?>;
-  // Global showPage for legacy onclicks (redundant now but keeping it for safety at end of script if needed)
-  window.showPage = window.showPage;
+    // Re-render
+    if (id === 'find-work' || id === 'home') renderJobs();
+    if (id === 'proposals') renderProposals();
+    if (id === 'contracts') renderContracts();
+    if (id === 'reports') renderReports();
+    if (id === 'profile') renderSuggestedSkills();
+  }
 
   // Define all other functions here... (I will just remove the IIFE wrappers)
 
@@ -661,7 +654,8 @@
     setTimeout(() => t.classList.remove('show'), 3000);
   }
 
-  // window.showPage already defined at top
+  // Global showPage for legacy onclicks
+  window.showPage = showPage;
   window.setTab = function(el) {
     const p = el.parentElement;
     p.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
@@ -787,14 +781,14 @@
       mc.innerHTML = `
         <div style="padding:25px">
           <div class="g2">
-            <div class="fg"><label>Full Name</label><input type="text" id="edit-name" value="<?php echo addslashes($user['name']); ?>"></div>
-            <div class="fg"><label>Title / Headline</label><input type="text" id="edit-title" value="<?php echo addslashes($user['title'] ?? ''); ?>" placeholder="e.g. Senior UI/UX Designer"></div>
+            <div class="fg"><label>Full Name</label><input type="text" id="edit-name" value="Test User"></div>
+            <div class="fg"><label>Title / Headline</label><input type="text" id="edit-title" value="" placeholder="e.g. Senior UI/UX Designer"></div>
           </div>
           <div class="g2">
-            <div class="fg"><label>Hourly Rate ($/hr)</label><input type="number" id="edit-rate" value="<?php echo $user['hourly_rate'] ?? 0; ?>"></div>
-            <div class="fg"><label>Country / Location</label><input type="text" id="edit-location" value="<?php echo addslashes($user['country'] ?? ''); ?>" placeholder="e.g. Berlin, Germany"></div>
+            <div class="fg"><label>Hourly Rate ($/hr)</label><input type="number" id="edit-rate" value="0"></div>
+            <div class="fg"><label>Country / Location</label><input type="text" id="edit-location" value="" placeholder="e.g. Berlin, Germany"></div>
           </div>
-          <div class="fg"><label>Bio / Overview</label><textarea id="edit-bio" style="min-height:130px"><?php echo addslashes($user['bio'] ?? ''); ?></textarea></div>
+          <div class="fg"><label>Bio / Overview</label><textarea id="edit-bio" style="min-height:130px"></textarea></div>
           <div style="display:flex;gap:12px;margin-top:10px">
             <button class="btn btn-w" style="flex:1;justify-content:center" onclick="closeModal()">Cancel</button>
             <button class="btn btn-g" style="flex:2;justify-content:center" onclick="saveProfile()">Save Changes →</button>
@@ -873,7 +867,7 @@
     } else if (type === 'connects') {
       document.getElementById('mh-title').innerText = 'Connects';
       modal.style.maxWidth = '500px';
-      const c = <?php echo $user['connects'] ?? 0; ?>;
+      const c = 50;
       const max = 200; 
       const pct = Math.min((c / max) * 100, 100);
       mc.innerHTML = `
@@ -1177,7 +1171,7 @@
   };
 
   const MAX_SKILLS = 15;
-  let selectedSkills = new Set(<?php echo json_encode($userSkills ?? []); ?>);
+  let selectedSkills = new Set([]);
   let activeCat = null, activeSub = null;
 
   window.openSkillSelector = function() {
@@ -1635,37 +1629,3 @@ async function requestMilestone(milestoneId, btn) {
         btn.innerText = originalText;
     }
 }
-</script>
-
-
-<!-- Skill Selector Overlay -->
-<div id="skill-overlay" style="display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.45);align-items:center;justify-content:center">
-  <div style="background:white;border-radius:14px;width:min(820px,96vw);max-height:88vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.22);overflow:hidden">
-    <div style="padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
-      <div>
-        <div style="font-size:16px;font-weight:700">Add Skills</div>
-        <div style="font-size:12.5px;color:var(--muted);margin-top:2px">Browse by category · up to 15 skills</div>
-      </div>
-      <button onclick="closeSkillSelector()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;line-height:1;padding:4px">×</button>
-    </div>
-    <div style="padding:12px 22px;border-bottom:1px solid var(--border);flex-shrink:0">
-      <input id="skill-search" type="text" placeholder="Search skills (e.g. Python, Logo Design, SEO…)"
-        style="width:100%;padding:9px 13px;border:1.5px solid var(--border);border-radius:8px;font-size:13.5px;font-family:inherit;outline:none"
-        oninput="filterSkills(this.value)">
-    </div>
-    <div style="display:grid;grid-template-columns:190px 210px 1fr;flex:1;overflow:hidden;min-height:0">
-      <div id="cat-col" style="border-right:1px solid var(--border);overflow-y:auto;padding:8px 0"></div>
-      <div id="subcat-col" style="border-right:1px solid var(--border);overflow-y:auto;padding:8px 0"></div>
-      <div id="skill-col" style="overflow-y:auto;padding:12px 16px"></div>
-    </div>
-    <div style="padding:14px 22px;border-top:1px solid var(--border);flex-shrink:0;background:var(--off)">
-      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-        <div style="font-size:12px;color:var(--muted);font-weight:600;white-space:nowrap">Selected:</div>
-        <div id="selected-preview" style="display:flex;flex-wrap:wrap;gap:5px;flex:1"></div>
-        <button onclick="saveSkills()" class="btn btn-g" style="padding:9px 20px;white-space:nowrap">Save Skills</button>
-      </div>
-    </div>
-  </div>
-</div>
-</body>
-</html>
