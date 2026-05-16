@@ -392,7 +392,12 @@
 
   function timeAgo(date) {
     if(!date) return "Just now";
-    const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+    // Force UTC by replacing space with T and appending Z
+    const d = new Date(date.replace(' ', 'T') + 'Z');
+    const seconds = Math.floor((new Date() - d) / 1000);
+    
+    if (seconds < 0) return "Just now"; // Handle potential sync issues
+    if (seconds < 60) return "Just now";
     if (seconds < 3600) return Math.floor(seconds / 60) + "m ago";
     if (seconds < 86400) return Math.floor(seconds / 3600) + "h ago";
     return Math.floor(seconds / 86400) + "d ago";

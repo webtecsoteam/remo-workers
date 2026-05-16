@@ -6,9 +6,9 @@
     {
       "label": "footer.php",
       "file_type": "code",
-      "source_file": "client/includes/footer.php",
+      "source_file": "footer.php",
       "source_location": "L1",
-      "id": "client_includes_footer_php",
+      "id": "footer_php",
       "community": 58,
       "norm_label": "footer.php"
     },
@@ -17,36 +17,36 @@
       "file_type": "code",
       "source_file": "client/index.php",
       "source_location": "L1",
-      "id": "client_index_php",
       "community": 56,
-      "norm_label": "index.php"
+      "norm_label": "index.php",
+      "id": "client_index_php"
     },
     {
       "label": "repair_db.php",
       "file_type": "code",
       "source_file": "repair_db.php",
       "source_location": "L1",
-      "id": "repair_db_php",
       "community": 39,
-      "norm_label": "repair_db.php"
+      "norm_label": "repair_db.php",
+      "id": "repair_db_php"
     },
     {
       "label": "check_db.php",
       "file_type": "code",
       "source_file": "scratch/check_db.php",
       "source_location": "L1",
-      "id": "scratch_check_db_php",
       "community": 87,
-      "norm_label": "check_db.php"
+      "norm_label": "check_db.php",
+      "id": "scratch_check_db_php"
     },
     {
       "label": "check_db_proposals.php",
       "file_type": "code",
       "source_file": "scratch/check_db_proposals.php",
       "source_location": "L1",
-      "id": "scratch_check_db_proposals_php",
       "community": 88,
-      "norm_label": "check_db_proposals.php"
+      "norm_label": "check_db_proposals.php",
+      "id": "scratch_check_db_proposals_php"
     },
     {
       "label": "post_job.php",
@@ -5378,5 +5378,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "c3d716c42668aa5f09db4e1f9ef44fea0278d711"
+  "built_at_commit": "46825275672fc387fc8312f6e6845b26f0f338b5"
 }

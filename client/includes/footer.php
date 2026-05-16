@@ -511,16 +511,33 @@ function bindPostJobModal(){
   
   // Use a cleaner event listener approach
   const onSubmit = (e) => {
-    e.preventDefault();
     if(btn.disabled) return;
+    
+    // Only prevent default if it's a real event
+    if (e && e.preventDefault) e.preventDefault();
+    
     submitPostJob();
   };
 
+  // Use a more universal approach for mobile
+  btn.onclick = null; // Clear any old onclick
   btn.removeEventListener('click', btn._postJobHandler);
   btn.removeEventListener('touchstart', btn._postJobHandler);
+  btn.removeEventListener('pointerdown', btn._postJobHandler);
+  
   btn._postJobHandler = onSubmit;
+  
+  // Use pointerdown for fast response if supported, else touchstart
+  if (window.PointerEvent) {
+    btn.addEventListener('pointerdown', (e) => {
+      if (e.pointerType === 'touch' || e.pointerType === 'mouse') {
+        onSubmit(e);
+      }
+    });
+  } else {
+    btn.addEventListener('touchstart', onSubmit, {passive: false});
+  }
   btn.addEventListener('click', onSubmit);
-  btn.addEventListener('touchstart', onSubmit, {passive: false});
   
   // Also bind to enter key on inputs
   const formInputs = document.querySelectorAll('#pj-form input, #pj-form select, #pj-form textarea');
