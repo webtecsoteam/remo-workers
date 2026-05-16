@@ -14,6 +14,11 @@
     "ast_hash": "fe073c021d14ea1ec0ece38981470775",
     "semantic_hash": ""
   },
+  "/Users/chiraglimbachiya/Sites/upwork/upwork project/repair_db.php": {
+    "mtime": 1778956940.8614929,
+    "ast_hash": "992d9ed97a43ea10607a3c4315fd2d89",
+    "semantic_hash": ""
+  },
   "/Users/chiraglimbachiya/Sites/upwork/upwork project/home/verification.php": {
     "mtime": 1778837250.3035007,
     "ast_hash": "2679716f2e0eca709585ee902525716d",
@@ -150,8 +155,8 @@
     "semantic_hash": ""
   },
   "/Users/chiraglimbachiya/Sites/upwork/upwork project/scratch/check_db.php": {
-    "mtime": 1778843986.1227596,
-    "ast_hash": "20331da9ad19674eb8aebe8626a94db5",
+    "mtime": 1778956875.2404537,
+    "ast_hash": "bd2f285462f45806f358ac88e60e40ac",
     "semantic_hash": ""
   },
   "/Users/chiraglimbachiya/Sites/upwork/upwork project/scratch/fix_job_status.php": {
@@ -162,6 +167,11 @@
   "/Users/chiraglimbachiya/Sites/upwork/upwork project/scratch/fix_jobs_table.php": {
     "mtime": 1778940059.0326293,
     "ast_hash": "57023f5515d97a6ad1cb6c5fd2fa597f",
+    "semantic_hash": ""
+  },
+  "/Users/chiraglimbachiya/Sites/upwork/upwork project/scratch/check_db_proposals.php": {
+    "mtime": 1778956887.2224286,
+    "ast_hash": "d8ef593e3f43ad8c6e66098e0f4a63f9",
     "semantic_hash": ""
   },
   "/Users/chiraglimbachiya/Sites/upwork/upwork project/scratch/run_migration.php": {
@@ -315,8 +325,8 @@
     "semantic_hash": ""
   },
   "/Users/chiraglimbachiya/Sites/upwork/upwork project/client/index.php": {
-    "mtime": 1778954694.0373254,
-    "ast_hash": "36a9ad27adbb001e2b4ba8942d5694cc",
+    "mtime": 1778957068.8110418,
+    "ast_hash": "5b33a6db1986ce440670aa8f5405b329",
     "semantic_hash": ""
   },
   "/Users/chiraglimbachiya/Sites/upwork/upwork project/client/includes/header.php": {
@@ -325,8 +335,8 @@
     "semantic_hash": ""
   },
   "/Users/chiraglimbachiya/Sites/upwork/upwork project/client/includes/footer.php": {
-    "mtime": 1778954734.6152322,
-    "ast_hash": "896cc3c73a9f83c2a2c9e6eeaa827fd4",
+    "mtime": 1778957241.430626,
+    "ast_hash": "bbe3aae00bdb1811f85ba1553a95a6da",
     "semantic_hash": ""
   },
   "/Users/chiraglimbachiya/Sites/upwork/upwork project/client/api/release-milestone.php": {

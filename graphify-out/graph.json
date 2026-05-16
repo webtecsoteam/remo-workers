@@ -4,15 +4,6 @@
   "graph": {},
   "nodes": [
     {
-      "label": "post_job.php",
-      "file_type": "code",
-      "source_file": "actions/post_job.php",
-      "source_location": "L1",
-      "id": "actions_post_job_php",
-      "community": 45,
-      "norm_label": "post_job.php"
-    },
-    {
       "label": "footer.php",
       "file_type": "code",
       "source_file": "client/includes/footer.php",
@@ -29,6 +20,42 @@
       "id": "client_index_php",
       "community": 56,
       "norm_label": "index.php"
+    },
+    {
+      "label": "repair_db.php",
+      "file_type": "code",
+      "source_file": "repair_db.php",
+      "source_location": "L1",
+      "id": "repair_db_php",
+      "community": 39,
+      "norm_label": "repair_db.php"
+    },
+    {
+      "label": "check_db.php",
+      "file_type": "code",
+      "source_file": "scratch/check_db.php",
+      "source_location": "L1",
+      "id": "scratch_check_db_php",
+      "community": 87,
+      "norm_label": "check_db.php"
+    },
+    {
+      "label": "check_db_proposals.php",
+      "file_type": "code",
+      "source_file": "scratch/check_db_proposals.php",
+      "source_location": "L1",
+      "id": "scratch_check_db_proposals_php",
+      "community": 88,
+      "norm_label": "check_db_proposals.php"
+    },
+    {
+      "label": "post_job.php",
+      "file_type": "code",
+      "source_file": "actions/post_job.php",
+      "source_location": "L1",
+      "community": 45,
+      "norm_label": "post_job.php",
+      "id": "actions_post_job_php"
     },
     {
       "label": "verify_email.php",
@@ -1271,15 +1298,6 @@
       "community": 38,
       "norm_label": "seed_dashboard.php",
       "id": "users_chiraglimbachiya_sites_upwork_upwork_project_scratch_seed_dashboard_php"
-    },
-    {
-      "label": "check_db.php",
-      "file_type": "code",
-      "source_file": "scratch/check_db.php",
-      "source_location": "L1",
-      "community": 39,
-      "norm_label": "check_db.php",
-      "id": "users_chiraglimbachiya_sites_upwork_upwork_project_scratch_check_db_php"
     },
     {
       "label": "fix_job_status.php",
@@ -5360,5 +5378,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "1e486a258ff8a7ec362d388b32200816a37e001c"
+  "built_at_commit": "c3d716c42668aa5f09db4e1f9ef44fea0278d711"
 }

@@ -517,8 +517,10 @@ function bindPostJobModal(){
   };
 
   btn.removeEventListener('click', btn._postJobHandler);
+  btn.removeEventListener('touchstart', btn._postJobHandler);
   btn._postJobHandler = onSubmit;
   btn.addEventListener('click', onSubmit);
+  btn.addEventListener('touchstart', onSubmit, {passive: false});
   
   // Also bind to enter key on inputs
   const formInputs = document.querySelectorAll('#pj-form input, #pj-form select, #pj-form textarea');

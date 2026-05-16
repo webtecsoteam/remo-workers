@@ -432,7 +432,7 @@ body.modal-open{
   backdrop-filter:blur(4px);
   pointer-events:none;
 }
-.overlay.open{opacity:1;visibility:visible;pointer-events:none}
+.overlay.open{opacity:1;visibility:visible;pointer-events:auto}
 .overlay.open .overlay-backdrop{pointer-events:auto}
 .overlay.open .modal{pointer-events:auto}
 .modal{
@@ -800,7 +800,7 @@ body.modal-open{
     box-shadow: 0 -8px 24px rgba(0,0,0,0.08);
     background: white;
     z-index: 20;
-    touch-action: none;
+    touch-action: manipulation;
   }
   #pj-submit-btn{
     position:relative;
