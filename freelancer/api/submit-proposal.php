@@ -32,6 +32,16 @@ if (!Auth::isIdentityVerified($user)) {
     exit;
 }
 
+if (empty($user['avatar_url'])) {
+    ob_end_clean();
+    echo json_encode([
+        'success' => false,
+        'message' => 'Please upload a profile photo before applying to jobs.',
+        'code' => 'photo_required',
+    ]);
+    exit;
+}
+
 $rawInput = file_get_contents('php://input');
 $data = json_decode($rawInput, true);
 

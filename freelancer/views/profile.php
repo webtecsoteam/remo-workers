@@ -9,7 +9,13 @@
   <div class="card" style="margin-bottom:16px">
     <div class="card-body">
       <div style="display:flex;gap:16px;align-items:flex-start">
-        <div style="width:68px;height:68px;border-radius:50%;background:#c8f135;color:var(--forest);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:24px;flex-shrink:0"><?php echo strtoupper(substr($user['name'], 0, 2)); ?></div>
+        <div class="profile-av-wrap" style="width:68px;height:68px;border-radius:50%;background:#c8f135;color:var(--forest);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:24px;flex-shrink:0;overflow:hidden">
+          <?php if (!empty($user['avatar_url'])): ?>
+            <img src="<?php echo baseUrl($user['avatar_url']); ?>" style="width:100%;height:100%;object-fit:cover">
+          <?php else: ?>
+            <?php echo strtoupper(substr($user['name'], 0, 2)); ?>
+          <?php endif; ?>
+        </div>
         <div style="flex:1;min-width:0">
           <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap">
             <div>

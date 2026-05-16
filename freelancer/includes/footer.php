@@ -54,6 +54,7 @@
   };
 
   const JOBS = <?php echo json_encode($allJobs ?? [], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?: '[]'; ?>;
+  const SERVER_TIME = "<?php echo date('Y-m-d H:i:s'); ?>";
   const SAVED_IDS = <?php echo json_encode(array_column($savedJobs ?? [], 'id'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?: '[]'; ?>;
   let PROPOSALS = <?php echo json_encode($submittedProposals ?? [], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?: '[]'; ?>;
   const CONTRACTS = <?php echo json_encode($allContracts ?? [], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?: '[]'; ?>;
@@ -61,6 +62,7 @@
   const CONNECTS_PER_APPLICATION = <?php echo Auth::CONNECTS_PER_APPLICATION; ?>;
   const USER_EMAIL_VERIFIED = <?php echo Auth::isEmailVerified($user) ? 'true' : 'false'; ?>;
   const USER_ID_VERIFIED = <?php echo Auth::isIdentityVerified($user) ? 'true' : 'false'; ?>;
+  const USER_HAS_PHOTO = <?php echo !empty($user['avatar_url']) ? 'true' : 'false'; ?>;
   let userConnectsBalance = USER_CONNECTS;
   // Global showPage for legacy onclicks (redundant now but keeping it for safety at end of script if needed)
   window.showPage = window.showPage;
@@ -392,11 +394,12 @@
 
   function timeAgo(date) {
     if(!date) return "Just now";
-    // Force UTC by replacing space with T and appending Z
-    const d = new Date(date.replace(' ', 'T') + 'Z');
-    const seconds = Math.floor((new Date() - d) / 1000);
     
-    if (seconds < 0) return "Just now"; // Handle potential sync issues
+    // Use server time as reference to avoid timezone mismatches
+    const now = new Date(SERVER_TIME.replace(' ', 'T'));
+    const d = new Date(date.replace(' ', 'T'));
+    const seconds = Math.floor((now - d) / 1000);
+    
     if (seconds < 60) return "Just now";
     if (seconds < 3600) return Math.floor(seconds / 60) + "m ago";
     if (seconds < 86400) return Math.floor(seconds / 3600) + "h ago";
@@ -445,6 +448,13 @@
         action: function() { showPage('verification'); }
       };
     }
+    if (!USER_HAS_PHOTO) {
+      return {
+        title: 'Profile photo required',
+        message: 'Please upload a profile photo before applying to jobs.',
+        action: function() { showPage('profile'); }
+      };
+    }
     if (userConnectsBalance < CONNECTS_PER_APPLICATION) {
       return {
         title: 'Not enough Connects',
@@ -484,7 +494,7 @@
     
     document.getElementById('mh-title').textContent = 'Job Details';
     document.getElementById('mc-body').innerHTML = `
-      <div style="background:#f9fafb;min-height:400px">
+      <div style="background:#f9fafb;min-height:400px;padding-bottom:100px">
         <div style="background:white;padding:30px;border-bottom:1px solid var(--border)">
           <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:12px">
             <h2 style="font-size:24px;color:var(--dark);font-weight:700;line-height:1.3;flex:1">${job.title}</h2>
@@ -559,7 +569,7 @@
     
     document.getElementById('mh-title').textContent = 'Submit Proposal — ' + job.title;
     document.getElementById('mc-body').innerHTML = `
-      <div style="padding:25px">
+      <div style="padding:25px 25px 100px 25px">
         <div style="background:#f0f7ef;color:#14a800;padding:12px 18px;border-radius:8px;font-size:13.5px;margin-bottom:25px;border:1px solid #d4e8d4">
           Fixed Price · $${job.budget || 0} · ${CONNECTS_PER_APPLICATION} Connects required · You have ${userConnectsBalance}
         </div>
@@ -583,7 +593,6 @@
           </div>
           <div style="font-size:12px;color:var(--muted2);margin-top:10px;display:flex;justify-content:space-between">
             <span>Total Milestone Amount: <strong id="ms-total-display">$${job.budget || 0}</strong></span>
-            <span id="ms-warning" style="color:#ef4444;display:none">Doesn't match proposed rate!</span>
           </div>
         </div>
 
@@ -629,14 +638,6 @@
     let total = 0;
     amounts.forEach(a => total += parseFloat(a.value || 0));
     document.getElementById('ms-total-display').textContent = '$' + total.toLocaleString();
-    
-    const rate = parseFloat(document.getElementById('prop-rate').value || 0);
-    const warning = document.getElementById('ms-warning');
-    if (Math.abs(total - rate) > 0.01) {
-      warning.style.display = 'inline';
-    } else {
-      warning.style.display = 'none';
-    }
   }
 
 
@@ -663,10 +664,6 @@
 
     if (milestones.length === 0) {
       return toast('Error', 'Please add at least one milestone');
-    }
-
-    if (Math.abs(msTotal - parseFloat(rate)) > 0.01) {
-      return toast('Error', 'Milestone total ($' + msTotal.toFixed(2) + ') must match your proposed rate ($' + parseFloat(rate).toFixed(2) + ')');
     }
 
     const payload = {
@@ -890,6 +887,7 @@
             <div class="fg"><label>Country / Location</label><input type="text" id="edit-location" value="<?php echo addslashes($user['country'] ?? ''); ?>" placeholder="e.g. Berlin, Germany"></div>
           </div>
           <div class="fg"><label>Bio / Overview</label><textarea id="edit-bio" style="min-height:130px"><?php echo addslashes($user['bio'] ?? ''); ?></textarea></div>
+          <div class="fg"><label>Profile Photo</label><input type="file" id="edit-avatar" accept="image/*"></div>
           <div style="display:flex;gap:12px;margin-top:10px">
             <button class="btn btn-w" style="flex:1;justify-content:center" onclick="closeModal()">Cancel</button>
             <button class="btn btn-g" style="flex:2;justify-content:center" onclick="saveProfile()">Save Changes →</button>
@@ -1120,6 +1118,7 @@
     const rate = document.getElementById('edit-rate').value;
     const loc = document.getElementById('edit-location').value;
     const bio = document.getElementById('edit-bio').value;
+    const avatarInput = document.getElementById('edit-avatar');
 
     const fd = new FormData();
     fd.append('name', name);
@@ -1127,6 +1126,9 @@
     fd.append('hourly_rate', rate);
     fd.append('country', loc);
     fd.append('bio', bio);
+    if (avatarInput && avatarInput.files[0]) {
+      fd.append('avatar', avatarInput.files[0]);
+    }
 
     fetch(BASE_URL + 'actions/update_profile.php', {
       method: 'POST',
@@ -1136,6 +1138,18 @@
     .then(data => {
       if (data.success) {
         toast('Success', 'Profile updated successfully!');
+        if (data.avatar_url) {
+          // Update avatars in UI
+          const url = BASE_URL + data.avatar_url;
+          document.querySelectorAll('.sb-av, .tb-av, .profile-av').forEach(el => {
+            el.innerHTML = `<img src="${url}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`;
+          });
+          // Also update the large profile photo if it exists
+          const largeAv = document.querySelector('#page-profile [style*="width:68px"]');
+          if (largeAv) {
+            largeAv.innerHTML = `<img src="${url}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`;
+          }
+        }
         closeModal();
         // Update UI manually to avoid reload
         document.querySelector('#page-profile #field-title').textContent = title || 'Professional Specialist';

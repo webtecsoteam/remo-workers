@@ -25,7 +25,7 @@ $totalSpent->execute([$user['id']]);
 $stats['total_spent'] = $totalSpent->fetchColumn() ?: 0;
 
 // 2. Active Contracts List
-$contractsStmt = $db->prepare("SELECT c.*, j.title as job_title, u.name as freelancer_name FROM contracts c 
+$contractsStmt = $db->prepare("SELECT c.*, j.title as job_title, u.name as freelancer_name, u.avatar_url as freelancer_avatar FROM contracts c 
                                 JOIN jobs j ON c.job_id = j.id 
                                 JOIN users u ON c.freelancer_id = u.id 
                                 WHERE c.client_id = ? AND c.status = 'active' ORDER BY c.created_at DESC LIMIT 4");
@@ -41,7 +41,7 @@ $openJobs = $jobsStmt->fetchAll(PDO::FETCH_ASSOC);
 // 4. Conversations for Messages Page
 $conversationsStmt = $db->prepare("
     SELECT 
-        u.id as other_id, u.name as other_name, 
+        u.id as other_id, u.name as other_name, u.avatar_url as other_avatar,
         m1.message as last_message, m1.created_at as last_time, m1.is_read, m1.sender_id
     FROM users u
     JOIN (
@@ -61,6 +61,7 @@ $recentMessages = array_slice($conversations, 0, 5);
 // Map other_name to sender_name for consistency in the dashboard view
 foreach($recentMessages as &$rm) {
     $rm['sender_name'] = $rm['other_name'];
+    $rm['sender_avatar'] = $rm['other_avatar'];
 }
 unset($rm);
 
@@ -90,12 +91,12 @@ foreach ($allJobs as $aj) {
 }
 
 // 6. All Proposals for Proposals Page
-$proposalsStmt = $db->prepare("SELECT p.*, j.title as job_title, u.name as freelancer_name, u.email as freelancer_email 
-                               FROM proposals p 
-                               JOIN jobs j ON p.job_id = j.id 
-                               JOIN users u ON p.freelancer_id = u.id 
-                               WHERE j.client_id = ? 
-                               ORDER BY p.created_at DESC");
+$proposalsStmt = $db->prepare("SELECT p.*, j.title as job_title, u.name as freelancer_name, u.email as freelancer_email, u.avatar_url as freelancer_avatar 
+                                FROM proposals p 
+                                JOIN jobs j ON p.job_id = j.id 
+                                JOIN users u ON p.freelancer_id = u.id 
+                                WHERE j.client_id = ? 
+                                ORDER BY p.created_at DESC");
 $proposalsStmt->execute([$user['id']]);
 $allProposals = $proposalsStmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -129,7 +130,7 @@ foreach ($allProposals as $ap) {
 }
 
 // 7. All Contracts for Contracts Page
-$allContractsStmt = $db->prepare("SELECT c.*, j.title as job_title, u.name as freelancer_name FROM contracts c 
+$allContractsStmt = $db->prepare("SELECT c.*, j.title as job_title, u.name as freelancer_name, u.avatar_url as freelancer_avatar FROM contracts c 
                                   JOIN jobs j ON c.job_id = j.id 
                                   JOIN users u ON c.freelancer_id = u.id 
                                   WHERE c.client_id = ? ORDER BY c.created_at DESC");
@@ -417,7 +418,11 @@ window.closeModal = function() {
             <?php else: ?>
                 <?php foreach ($activeContracts as $c): ?>
                 <div class="contract-row">
+                <?php if (!empty($c['freelancer_avatar'])): ?>
+                  <div class="av"><img src="<?php echo baseUrl($c['freelancer_avatar']); ?>" style="width:100%;height:100%;border-radius:50%;object-fit:cover"></div>
+                <?php else: ?>
                   <div class="av" style="background:var(--uw-green-light);color:var(--uw-green)"><?php echo strtoupper(substr($c['freelancer_name'], 0, 2)); ?></div>
+                <?php endif; ?>
                   <div class="cr-info">
                     <div class="cr-title"><?php echo htmlspecialchars($c['job_title']); ?></div>
                     <div class="cr-sub"><?php echo htmlspecialchars($c['freelancer_name']); ?> · <?php echo ucfirst($c['contract_type']); ?> · Active</div>
@@ -613,7 +618,11 @@ window.closeModal = function() {
           <?php foreach ($allProposals as $p): ?>
           <div class="prop-card" data-status="<?php echo $p['status']; ?>" onclick="viewProposalDetails(<?php echo htmlspecialchars(json_encode($p)); ?>)">
             <div class="prop-top">
-              <div class="av" style="background:var(--uw-green-light);color:var(--uw-green);width:42px;height:42px;font-size:13px"><?php echo strtoupper(substr($p['freelancer_name'], 0, 2)); ?></div>
+                <?php if (!empty($p['freelancer_avatar'])): ?>
+                  <div class="av"><img src="<?php echo baseUrl($p['freelancer_avatar']); ?>" style="width:42px;height:42px;border-radius:50%;object-fit:cover"></div>
+                <?php else: ?>
+                  <div class="av" style="background:var(--uw-green-light);color:var(--uw-green);width:42px;height:42px;font-size:13px"><?php echo strtoupper(substr($p['freelancer_name'], 0, 2)); ?></div>
+                <?php endif; ?>
               <div class="prop-info">
                 <div style="display:flex;align-items:center;gap:8px">
                   <h4 style="margin:0"><?php echo htmlspecialchars($p['freelancer_name']); ?></h4>
@@ -707,7 +716,11 @@ window.closeModal = function() {
             <?php foreach ($allContracts as $ac): ?>
             <div class="prop-card" data-status="<?php echo $ac['status']; ?>" <?php echo $ac['status'] !== 'active' ? 'style="display:none"' : ''; ?> onclick="manageContract(<?php echo htmlspecialchars(json_encode($ac)); ?>)">
               <div class="prop-top" style="margin-bottom:8px">
-                <div class="av" style="background:var(--uw-green-light);color:var(--uw-green);width:40px;height:40px;font-size:14px"><?php echo strtoupper(substr($ac['freelancer_name'], 0, 2)); ?></div>
+                <?php if (!empty($ac['freelancer_avatar'])): ?>
+                  <div class="av"><img src="<?php echo baseUrl($ac['freelancer_avatar']); ?>" style="width:40px;height:40px;border-radius:50%;object-fit:cover"></div>
+                <?php else: ?>
+                  <div class="av" style="background:var(--uw-green-light);color:var(--uw-green);width:40px;height:40px;font-size:14px"><?php echo strtoupper(substr($ac['freelancer_name'], 0, 2)); ?></div>
+                <?php endif; ?>
                 <div class="prop-info">
                   <h4 style="margin-bottom:2px"><?php echo htmlspecialchars($ac['freelancer_name']); ?></h4>
                   <div style="font-size:12px;color:var(--uw-gray)"><?php echo ucfirst($ac['contract_type']); ?> Contract</div>

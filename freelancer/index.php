@@ -290,7 +290,13 @@ include __DIR__ . '/includes/header.php';
   
   <div class="sb-user" onclick="showPage('profile')">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
-      <div class="sb-av"><?php echo strtoupper(substr($user['name'] ?? 'CH', 0, 2)); ?></div>
+      <div class="sb-av">
+        <?php if (!empty($user['avatar_url'])): ?>
+          <img src="<?php echo baseUrl($user['avatar_url']); ?>" style="width:100%;height:100%;border-radius:50%;object-fit:cover">
+        <?php else: ?>
+          <?php echo strtoupper(substr($user['name'] ?? 'CH', 0, 2)); ?>
+        <?php endif; ?>
+      </div>
       <div style="min-width:0">
         <div class="sb-name"><?php echo htmlspecialchars($user['name'] ?? 'Chirag'); ?></div>
         <div class="sb-role">Freelancer</div>
@@ -363,7 +369,13 @@ include __DIR__ . '/includes/header.php';
   <header class="top-bar" style="background:white;padding:0 20px;height:60px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)">
     <button class="mob-toggle" onclick="toggleSidebar()" style="background:none;border:none;font-size:20px;cursor:pointer">☰</button>
     <div class="tb-title" id="page-title" style="font-weight:700">Dashboard</div>
-    <div class="tb-av" style="width:34px;height:34px;border-radius:50%;background:var(--lime);color:var(--forest);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;cursor:pointer" onclick="showPage('profile')"><?php echo strtoupper(substr($user['name'] ?? 'CH', 0, 2)); ?></div>
+    <div class="tb-av" style="width:34px;height:34px;border-radius:50%;background:var(--lime);color:var(--forest);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;cursor:pointer;overflow:hidden" onclick="showPage('profile')">
+      <?php if (!empty($user['avatar_url'])): ?>
+        <img src="<?php echo baseUrl($user['avatar_url']); ?>" style="width:100%;height:100%;object-fit:cover">
+      <?php else: ?>
+        <?php echo strtoupper(substr($user['name'] ?? 'CH', 0, 2)); ?>
+      <?php endif; ?>
+    </div>
   </header>
 
   <div class="content">

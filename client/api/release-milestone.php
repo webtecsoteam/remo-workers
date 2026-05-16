@@ -47,8 +47,8 @@ try {
     // 2. Create payment record
     $transactionId = 'TXN-' . strtoupper(uniqid());
     $pStmt = $db->prepare("
-        INSERT INTO payments (transaction_id, payer_id, payee_id, job_id, amount, status, type) 
-        VALUES (?, ?, ?, ?, ?, 'completed', 'milestone')
+        INSERT INTO payments (transaction_id, payer_id, payee_id, job_id, amount, status) 
+        VALUES (?, ?, ?, ?, ?, 'completed')
     ");
     $pStmt->execute([
         $transactionId,

@@ -6,11 +6,29 @@
     {
       "label": "footer.php",
       "file_type": "code",
+      "source_file": "client/includes/footer.php",
+      "source_location": "L1",
+      "id": "client_includes_footer_php",
+      "community": 89,
+      "norm_label": "footer.php"
+    },
+    {
+      "label": "footer.php",
+      "file_type": "code",
+      "source_file": "freelancer/includes/footer.php",
+      "source_location": "L1",
+      "id": "freelancer_includes_footer_php",
+      "community": 65,
+      "norm_label": "footer.php"
+    },
+    {
+      "label": "footer.php",
+      "file_type": "code",
       "source_file": "footer.php",
       "source_location": "L1",
-      "id": "footer_php",
       "community": 58,
-      "norm_label": "footer.php"
+      "norm_label": "footer.php",
+      "id": "footer_php"
     },
     {
       "label": "index.php",
@@ -83,15 +101,6 @@
       "community": 70,
       "norm_label": "submit-proposal.php",
       "id": "freelancer_api_submit_proposal_php"
-    },
-    {
-      "label": "footer.php",
-      "file_type": "code",
-      "source_file": "freelancer/includes/footer.php",
-      "source_location": "L1",
-      "community": 65,
-      "norm_label": "footer.php",
-      "id": "freelancer_includes_footer_php"
     },
     {
       "label": "header.php",
@@ -5378,5 +5387,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "46825275672fc387fc8312f6e6845b26f0f338b5"
+  "built_at_commit": "32d4e30c85662325f2eb9910d6bbea00b1ef9c25"
 }
