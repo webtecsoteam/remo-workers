@@ -4,58 +4,76 @@
   "graph": {},
   "nodes": [
     {
+      "label": "process-work.php",
+      "file_type": "code",
+      "source_file": "api/process-work.php",
+      "source_location": "L1",
+      "id": "api_process_work_php",
+      "community": 35,
+      "norm_label": "process-work.php"
+    },
+    {
+      "label": "update-profile.php",
+      "file_type": "code",
+      "source_file": "api/update-profile.php",
+      "source_location": "L1",
+      "id": "api_update_profile_php",
+      "community": 37,
+      "norm_label": "update-profile.php"
+    },
+    {
+      "label": "footer.php",
+      "file_type": "code",
+      "source_file": "includes/footer.php",
+      "source_location": "L1",
+      "id": "includes_footer_php",
+      "community": 22,
+      "norm_label": "footer.php"
+    },
+    {
+      "label": "index.php",
+      "file_type": "code",
+      "source_file": "index.php",
+      "source_location": "L1",
+      "id": "index_php",
+      "community": 14,
+      "norm_label": "index.php"
+    },
+    {
       "label": "edit_job.php",
       "file_type": "code",
       "source_file": "actions/edit_job.php",
       "source_location": "L1",
-      "id": "actions_edit_job_php",
       "community": 68,
-      "norm_label": "edit_job.php"
+      "norm_label": "edit_job.php",
+      "id": "actions_edit_job_php"
     },
     {
       "label": "post_job.php",
       "file_type": "code",
       "source_file": "actions/post_job.php",
       "source_location": "L1",
-      "id": "actions_post_job_php",
       "community": 30,
-      "norm_label": "post_job.php"
+      "norm_label": "post_job.php",
+      "id": "actions_post_job_php"
     },
     {
       "label": "update_job_status.php",
       "file_type": "code",
       "source_file": "actions/update_job_status.php",
       "source_location": "L1",
-      "id": "actions_update_job_status_php",
       "community": 69,
-      "norm_label": "update_job_status.php"
+      "norm_label": "update_job_status.php",
+      "id": "actions_update_job_status_php"
     },
     {
       "label": "update_proposal_status.php",
       "file_type": "code",
       "source_file": "actions/update_proposal_status.php",
       "source_location": "L1",
-      "id": "actions_update_proposal_status_php",
       "community": 70,
-      "norm_label": "update_proposal_status.php"
-    },
-    {
-      "label": "footer.php",
-      "file_type": "code",
-      "source_file": "client/includes/footer.php",
-      "source_location": "L1",
-      "id": "client_includes_footer_php",
-      "community": 37,
-      "norm_label": "footer.php"
-    },
-    {
-      "label": "index.php",
-      "file_type": "code",
-      "source_file": "client/index.php",
-      "source_location": "L1",
-      "id": "client_index_php",
-      "community": 35,
-      "norm_label": "index.php"
+      "norm_label": "update_proposal_status.php",
+      "id": "actions_update_proposal_status_php"
     },
     {
       "label": "add_funds.php",
@@ -490,15 +508,6 @@
       "id": "logout_php"
     },
     {
-      "label": "index.php",
-      "file_type": "code",
-      "source_file": "index.php",
-      "source_location": "L1",
-      "community": 14,
-      "norm_label": "index.php",
-      "id": "index_php"
-    },
-    {
       "label": "migrate.php",
       "file_type": "code",
       "source_file": "migrate.php",
@@ -560,15 +569,6 @@
       "community": 21,
       "norm_label": "header.php",
       "id": "includes_header_php"
-    },
-    {
-      "label": "footer.php",
-      "file_type": "code",
-      "source_file": "includes/footer.php",
-      "source_location": "L1",
-      "community": 22,
-      "norm_label": "footer.php",
-      "id": "includes_footer_php"
     },
     {
       "label": "Auth.php",
@@ -4950,5 +4950,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "90a7ce7f9f1feb07ca4884538f658dfeaf91a93d"
+  "built_at_commit": "3fd4c9c8826d17adf6849efde802f5a4eba2ed05"
 }
