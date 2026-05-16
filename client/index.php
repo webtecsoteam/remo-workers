@@ -141,7 +141,19 @@ $escrowStmt = $db->prepare("SELECT SUM(amount) FROM payments WHERE payer_id = ? 
 $escrowStmt->execute([$user['id']]);
 $escrowAmount = $escrowStmt->fetchColumn() ?: 0;
 
-// 10. Talent Data
+// 11. Pending Work Logs for Review
+$pendingWorkStmt = $db->prepare("
+    SELECT wl.*, c.job_id, j.title as job_title, u.name as freelancer_name, c.contract_type
+    FROM work_logs wl
+    JOIN contracts c ON wl.contract_id = c.id
+    JOIN jobs j ON c.job_id = j.id
+    JOIN users u ON wl.freelancer_id = u.id
+    WHERE c.client_id = ? AND wl.status = 'pending'
+    ORDER BY wl.created_at DESC
+");
+$pendingWorkStmt->execute([$user['id']]);
+$pendingWorkLogs = $pendingWorkStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+
 // All Freelancers
 $allFreelancersStmt = $db->prepare("SELECT * FROM users WHERE role = 'freelancer' AND status = 'active' ORDER BY created_at DESC");
 $allFreelancersStmt->execute();
@@ -229,6 +241,7 @@ $reportStats = $reportStatsStmt->fetch(PDO::FETCH_ASSOC);
     <div class="sb-item" onclick="showPage('jobs',this)"><span class="ico">📋</span>My Jobs</div>
     <div class="sb-item" onclick="showPage('proposals',this)"><span class="ico">📩</span>Proposals</div>
     <div class="sb-item" onclick="showPage('contracts',this)"><span class="ico">🤝</span>Contracts</div>
+    <div class="sb-item" onclick="showPage('review',this)"><span class="ico">📝</span>Review Work <?php if(count($pendingWorkLogs) > 0): ?><span class="sb-badge"><?php echo count($pendingWorkLogs); ?></span><?php endif; ?></div>
     <div class="sb-item" onclick="showPage('talent',this)"><span class="ico">👥</span>Talent</div>
     <div class="sb-section">Tools</div>
     <div class="sb-item" onclick="showPage('messages',this)"><span class="ico">💬</span>Messages<?php if($unreadMessagesCount > 0): ?><span class="sb-badge"><?php echo $unreadMessagesCount; ?></span><?php endif; ?></div>
@@ -237,7 +250,7 @@ $reportStats = $reportStatsStmt->fetch(PDO::FETCH_ASSOC);
     <div class="sb-item" onclick="showPage('verification',this)"><span class="ico">🪪</span>Identity Verification</div>
     <div class="sb-item" onclick="toast('Uma AI','AI work assistant analyzing your active projects...')"><span class="ico">✨</span>AI Assistant</div>
     <div class="sb-section">Account</div>
-    <div class="sb-item" onclick="toast('Settings','Account settings opened')"><span class="ico">⚙️</span>Settings</div>
+    <div class="sb-item" onclick="showPage('settings',this)"><span class="ico">⚙️</span>Settings</div>
     <div class="sb-item" onclick="toast('Help Center','Loading support articles...')"><span class="ico">❓</span>Help & Support</div>
   </nav>
   <div class="sb-footer">
@@ -539,24 +552,123 @@ $reportStats = $reportStatsStmt->fetch(PDO::FETCH_ASSOC);
       </div>
     </div>
 
+    <!-- ══ REVIEW WORK PAGE ══ -->
+    <div class="page" id="page-review">
+      <div class="pg-header">
+        <div>
+          <div class="pg-title">Review Work</div>
+          <div class="pg-sub">Verify submissions and release milestone payments</div>
+        </div>
+      </div>
+
+      <?php if(empty($pendingWorkLogs)): ?>
+        <div style="text-align:center;padding:80px 40px;background:white;border-radius:16px;border:1px solid var(--uw-border);box-shadow:var(--sh)">
+          <div style="font-size:56px;margin-bottom:20px">✨</div>
+          <div style="font-weight:700;font-size:20px;margin-bottom:8px;color:var(--uw-black)">No pending reviews</div>
+          <div style="font-size:14.5px;color:var(--uw-gray);max-width:320px;margin:0 auto">You're all caught up! Freelancer submissions will appear here for your approval.</div>
+        </div>
+      <?php else: ?>
+        <div style="display:grid;gap:20px">
+          <?php foreach($pendingWorkLogs as $wl): ?>
+            <div class="card" style="padding:28px;border-radius:16px;box-shadow:var(--sh);border:1px solid var(--uw-border)">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:24px">
+                <div style="flex:1;min-width:300px">
+                  <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+                    <div style="font-weight:700;font-size:18px;color:var(--uw-black)"><?php echo htmlspecialchars($wl['job_title']); ?></div>
+                    <span class="badge <?php echo $wl['contract_type']==='hourly'?'b-blue':'b-green'; ?>" style="font-size:10px;letter-spacing:0.02em"><?php echo strtoupper($wl['contract_type']); ?></span>
+                  </div>
+                  <div style="font-size:13px;color:var(--uw-gray);margin-bottom:20px;display:flex;align-items:center;gap:8px">
+                    <div class="sb-av" style="width:24px;height:24px;font-size:10px"><?php echo strtoupper(substr($wl['freelancer_name'],0,1)); ?></div>
+                    <span>By <strong><?php echo htmlspecialchars($wl['freelancer_name']); ?></strong> · Submitted <?php echo date('M d, Y', strtotime($wl['created_at'])); ?></span>
+                  </div>
+                  <div style="background:#f8faf9;padding:20px;border-radius:12px;font-size:14.5px;line-height:1.7;color:#333;border:1px solid #eef2ee">
+                    <?php echo nl2br(htmlspecialchars($wl['description'])); ?>
+                  </div>
+                  <?php if($wl['attachments']): ?>
+                    <div style="margin-top:16px;display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--uw-green-light);border-radius:8px;width:fit-content">
+                      <span style="font-size:14px">📎</span>
+                      <span style="font-size:13px;color:var(--uw-green-dark);font-weight:600"><?php echo htmlspecialchars($wl['attachments']); ?></span>
+                    </div>
+                  <?php endif; ?>
+                </div>
+                <div style="text-align:right;min-width:200px;border-left:1px solid var(--uw-border);padding-left:24px">
+                  <div style="font-size:11px;color:var(--uw-gray);text-transform:uppercase;margin-bottom:8px;font-weight:700;letter-spacing:0.05em">Payment Amount</div>
+                  <div style="font-size:32px;font-weight:800;color:var(--uw-black);margin-bottom:24px">$<?php echo number_format($wl['amount'], 2); ?></div>
+                  <div style="display:flex;flex-direction:column;gap:10px">
+                    <button class="btn btn-g" onclick="processWorkLog(<?php echo $wl['id']; ?>, 'approved')" style="width:100%;justify-content:center;padding:12px">Approve & Pay</button>
+                    <button class="btn btn-w" onclick="processWorkLog(<?php echo $wl['id']; ?>, 'rejected')" style="width:100%;justify-content:center;padding:12px;border-color:#ddd">Reject Submission</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <?php endforeach; ?>
+        </div>
+      <?php endif; ?>
+    </div>
+
+    <!-- ══ SETTINGS PAGE ══ -->
+    <div class="page" id="page-settings">
+      <div class="pg-header">
+        <div>
+          <div class="pg-title">Profile Settings</div>
+          <div class="pg-sub">Manage your personal and company information</div>
+        </div>
+        <button class="btn btn-g" onclick="saveClientProfile()">Save Changes</button>
+      </div>
+
+      <div class="card" style="padding:32px;border-radius:16px;box-shadow:var(--sh);max-width:800px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px">
+          <div>
+            <label style="display:block;font-size:13px;font-weight:700;margin-bottom:8px;color:var(--uw-black)">Full Name</label>
+            <input type="text" id="client-name" value="<?php echo htmlspecialchars($user['name']); ?>" style="width:100%;padding:12px;border:1.5px solid var(--uw-border);border-radius:10px;outline:none" placeholder="e.g. John Doe">
+          </div>
+          <div>
+            <label style="display:block;font-size:13px;font-weight:700;margin-bottom:8px;color:var(--uw-black)">Company Name</label>
+            <input type="text" id="client-company" value="<?php echo htmlspecialchars($user['title'] ?? ''); ?>" style="width:100%;padding:12px;border:1.5px solid var(--uw-border);border-radius:10px;outline:none" placeholder="e.g. Acme Corp">
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px">
+          <div>
+            <label style="display:block;font-size:13px;font-weight:700;margin-bottom:8px;color:var(--uw-black)">Email Address (Read-only)</label>
+            <input type="email" value="<?php echo htmlspecialchars($user['email']); ?>" disabled style="width:100%;padding:12px;border:1.5px solid var(--uw-border);border-radius:10px;background:#f9fafb;color:var(--uw-gray);cursor:not-allowed">
+          </div>
+          <div>
+            <label style="display:block;font-size:13px;font-weight:700;margin-bottom:8px;color:var(--uw-black)">Country / Location</label>
+            <input type="text" id="client-country" value="<?php echo htmlspecialchars($user['country'] ?? ''); ?>" style="width:100%;padding:12px;border:1.5px solid var(--uw-border);border-radius:10px;outline:none" placeholder="e.g. United States">
+          </div>
+        </div>
+
+        <div style="margin-bottom:24px">
+          <label style="display:block;font-size:13px;font-weight:700;margin-bottom:8px;color:var(--uw-black)">Company Bio / Description</label>
+          <textarea id="client-bio" style="width:100%;padding:12px;border:1.5px solid var(--uw-border);border-radius:10px;outline:none;height:120px;line-height:1.6"><?php echo htmlspecialchars($user['bio'] ?? ''); ?></textarea>
+        </div>
+
+        <div style="border-top:1px solid var(--uw-border);padding-top:24px;display:flex;justify-content:flex-end">
+            <button class="btn btn-g" style="padding:12px 30px;font-size:15px" onclick="saveClientProfile()">Save Profile Changes</button>
+        </div>
+      </div>
+    </div>
+
     <!-- ══ TALENT PAGE ══ -->
     <div class="page" id="page-talent">
       <div class="pg-header">
         <div>
           <div class="pg-title">Talent</div>
-          <div class="pg-sub">Freelancers you've worked with or saved</div>
+          <div class="pg-sub">Manage and hire freelancers for your team</div>
         </div>
         <button class="btn btn-g" onclick="showPage('find-talent')">🔍 Find New Talent</button>
       </div>
-      <div class="tab-bar">
-        <div class="tab on" onclick="setTab(this, 'all-talent')">All Talent (<?php echo $talentCounts['all']; ?>)</div>
+      
+      <div class="tab-bar" style="margin-bottom:24px">
+        <div class="tab on" onclick="setTab(this, 'all-talent')">Team (<?php echo $talentCounts['all']; ?>)</div>
         <div class="tab" onclick="setTab(this, 'saved-talent')">Saved (<?php echo $talentCounts['saved']; ?>)</div>
-        <div class="tab" onclick="setTab(this, 'hired-talent')">Previously Hired (<?php echo $talentCounts['hired']; ?>)</div>
+        <div class="tab" onclick="setTab(this, 'hired-talent')">Previous (<?php echo $talentCounts['hired']; ?>)</div>
       </div>
       
-      <div class="card" style="margin-bottom:0;overflow:auto">
+      <div class="card" style="margin-bottom:0;overflow:auto;border-radius:12px;box-shadow:var(--sh)">
         <table class="tbl talent-list" id="all-talent">
-          <thead><tr><th>Name</th><th class="hide-mob">Skill</th><th class="hide-mob">Rating</th><th>Rate</th><th>Status</th><th class="hide-mob">Last Contract</th><th>Action</th></tr></thead>
+          <thead><tr><th>Freelancer</th><th class="hide-mob">Role</th><th class="hide-mob">Rating</th><th>Rate</th><th>Status</th><th class="hide-mob">Last Contract</th><th>Action</th></tr></thead>
           <tbody>
             <?php if(empty($allTalent)): ?>
               <tr><td colspan="7" style="text-align:center;padding:30px;color:var(--uw-gray)">No freelancers found.</td></tr>

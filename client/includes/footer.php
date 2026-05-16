@@ -1283,6 +1283,64 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 setTimeout(()=>toast('Welcome back, NexaFlow!','You have 4 unread messages and 12 new proposals'),1000);
+function processWorkLog(logId, action) {
+  if (action === 'approved' && !confirm('Are you sure you want to approve this work and release payment?')) return;
+  if (action === 'rejected' && !confirm('Are you sure you want to reject this work?')) return;
+
+  fetch(BASE_URL + 'client/api/process-work.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ log_id: logId, action: action })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      toast('Success', data.message);
+      location.reload(); 
+    } else {
+      toast('Error', data.message);
+    }
+  })
+  .catch(err => toast('Error', 'Communication failed'));
+}
+function saveClientProfile() {
+  const name = document.getElementById('client-name').value;
+  const company = document.getElementById('client-company').value;
+  const country = document.getElementById('client-country').value;
+  const bio = document.getElementById('client-bio').value;
+
+  if (!name) return toast('Error', 'Name is required');
+
+  const btn = event.target;
+  const originalText = btn.innerText;
+  btn.disabled = true;
+  btn.innerText = 'Saving...';
+
+  fetch(BASE_URL + 'client/api/update-profile.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name: name,
+      company: company,
+      country: country,
+      bio: bio
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      toast('Success', 'Profile updated successfully!');
+      setTimeout(() => location.reload(), 1000);
+    } else {
+      toast('Error', data.message);
+    }
+  })
+  .catch(err => toast('Error', 'Update failed'))
+  .finally(() => {
+    btn.disabled = false;
+    btn.innerText = originalText;
+  });
+}
 </script>
 </body>
 </html>
