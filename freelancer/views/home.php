@@ -6,19 +6,33 @@
     <div style="font-size:13px;color:var(--muted)">Here's your work overview</div>
   </div>
 
+  <?php if (!($user['is_verified'] ?? false)): ?>
+    <!-- Verification Banner -->
+    <div style="background:#fff8e6;border:1px solid #ffeeba;border-radius:12px;padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:15px">
+        <div style="font-size:24px">🪪</div>
+        <div>
+          <div style="font-weight:700;font-size:14.5px;color:#854d0e">Verify your identity</div>
+          <div style="font-size:12.5px;color:#92400e">Unlock full platform features and build trust with clients.</div>
+        </div>
+      </div>
+      <button class="btn" style="background:#f59e0b;color:white;border:none;flex-shrink:0" onclick="showPage('verification')">Verify Now →</button>
+    </div>
+  <?php endif; ?>
+
   <!-- Stats -->
   <div class="stat-row">
-    <div class="stat-c" onclick="showPage('earnings',document.querySelector('[onclick*=earnings]'))">
+    <div class="stat-c" onclick="showPage('earnings')">
       <div class="stat-label">Total Earnings <span>💰</span></div>
       <div class="stat-val">$<?php echo number_format((float)($fStats['total_earned'] ?? 0)); ?></div>
       <div class="stat-sub up">Lifetime earnings</div>
     </div>
-    <div class="stat-c" onclick="showPage('contracts',document.querySelector('[onclick*=contracts]'))">
+    <div class="stat-c" onclick="showPage('contracts')">
       <div class="stat-label">Active Contracts <span>🤝</span></div>
       <div class="stat-val"><?php echo $fStats['active_contracts']; ?></div>
       <div class="stat-sub">Working now</div>
     </div>
-    <div class="stat-c" onclick="showPage('proposals',document.querySelector('[onclick*=proposals]'))">
+    <div class="stat-c" onclick="showPage('proposals')">
       <div class="stat-label">Pending Proposals <span>✉️</span></div>
       <div class="stat-val"><?php echo $fStats['pending_proposals']; ?></div>
       <div class="stat-sub">Waiting for response</div>
@@ -30,7 +44,7 @@
     <div class="card">
       <div class="card-head">
         <h3>My Active Contracts</h3>
-        <a onclick="showPage('contracts',document.querySelector('[onclick*=contracts]'))">View All</a>
+        <a onclick="showPage('contracts')">View All</a>
       </div>
       <div class="card-body">
         <?php if(empty($activeContracts)): ?>
@@ -56,7 +70,7 @@
     <div class="card">
       <div class="card-head">
         <h3>Best Matches for You</h3>
-        <a onclick="showPage('find-work',document.querySelector('[onclick*=find-work]'))">Search Jobs</a>
+        <a onclick="showPage('find-work')">Search Jobs</a>
       </div>
       <div class="card-body" id="home-job-list">
         <div style="text-align:center;padding:20px;">Loading matches...</div>
@@ -76,7 +90,7 @@
           <div style="font-size:22px;font-weight:700;margin-bottom:4px">$<?php echo number_format((float)($fStats['monthly_earnings'] ?? 0)); ?> <span style="font-size:13px;font-weight:400;color:var(--muted)"><?php echo date('F Y'); ?></span></div>
           <div style="font-size:12.5px;color:var(--g);font-weight:600">↑ 12% from last month</div>
         </div>
-        <button class="btn btn-w btn-sm" onclick="showPage('earnings',document.querySelector('[onclick*=earnings]'))">Full Report</button>
+        <button class="btn btn-w btn-sm" onclick="showPage('earnings')">Full Report</button>
       </div>
       <div class="chart-area" style="height:140px;background:linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);border-radius:8px;padding:15px;display:flex;flex-direction:column;justify-content:flex-end">
         <div class="chart-bars">

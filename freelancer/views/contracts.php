@@ -1,34 +1,27 @@
 <!-- CONTRACTS -->
 <div class="page" id="page-contracts">
-  <div style="font-size:20px;font-weight:700;margin-bottom:14px">My Contracts</div>
-  <div class="tab-bar">
-    <div class="tab on" onclick="setTab(this)">Active</div>
-    <div class="tab" onclick="setTab(this)">Completed</div>
-    <div class="tab" onclick="setTab(this)">Milestones</div>
+  <div style="font-size:22px;font-weight:700;margin-bottom:20px;display:flex;align-items:center;gap:10px">
+    My Contracts <span style="font-size:14px;color:var(--muted);font-weight:400">(3 active)</span>
   </div>
 
-  <div class="card">
-    <div class="card-head"><h3>Active Contracts (<?php echo count($activeContracts); ?>)</h3></div>
-    <div class="card-body" style="padding:0">
-      <?php if(empty($activeContracts)): ?>
-        <div style="text-align:center;padding:40px;color:var(--muted)">No active contracts at the moment.</div>
-      <?php else: ?>
-        <?php foreach($activeContracts as $c): ?>
-          <div class="contract-row" style="padding:18px 22px;border-bottom:1px solid var(--border)" onclick="openModal('contract-detail')">
-            <div style="display:flex;gap:15px;align-items:center">
-              <div class="av" style="background:var(--gl);color:var(--g);width:40px;height:40px;font-size:13px"><?php echo strtoupper(substr($c['client_name'], 0, 1)); ?></div>
-              <div>
-                <div style="font-weight:700;font-size:15px;margin-bottom:3px"><?php echo htmlspecialchars($c['job_title']); ?></div>
-                <div style="font-size:12.5px;color:var(--muted)"><?php echo htmlspecialchars($c['client_name']); ?> · Since <?php echo date('M j, Y', strtotime($c['created_at'])); ?></div>
-              </div>
-            </div>
-            <div style="text-align:right">
-              <div style="font-weight:700;font-size:15px;color:var(--dark)">$<?php echo number_format($c['amount']); ?></div>
-              <div style="font-size:11px;color:var(--g);font-weight:600">Active Now</div>
-            </div>
-          </div>
-        <?php endforeach; ?>
-      <?php endif; ?>
+  <div class="tab-bar" style="border-bottom:1px solid #eee;margin-bottom:20px;gap:30px">
+    <div class="tab on" onclick="setTab(this)" style="padding-bottom:10px;font-weight:600">Active (3)</div>
+    <div class="tab" onclick="setTab(this)" style="padding-bottom:10px;font-weight:600">Completed (18)</div>
+    <div class="tab" onclick="setTab(this)" style="padding-bottom:10px;font-weight:600">Paused</div>
+  </div>
+
+  <div class="card" style="border:1px solid #eee;border-radius:8px;overflow:hidden">
+    <div style="display:grid;grid-template-columns:1.2fr 1.2fr 0.6fr 0.8fr 1fr 0.6fr 0.8fr;padding:12px 20px;background:#f9fafb;border-bottom:1px solid #eee;font-size:11px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:0.5px">
+      <div>Client</div>
+      <div>Project</div>
+      <div>Type</div>
+      <div>Earnings</div>
+      <div>Progress</div>
+      <div>Started</div>
+      <div>Action</div>
+    </div>
+    <div id="contracts-list">
+      <!-- Dynamic list -->
     </div>
   </div>
 </div>

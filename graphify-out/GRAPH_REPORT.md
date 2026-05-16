@@ -1,16 +1,16 @@
-# Graph Report - upwork project  (2026-05-15)
+# Graph Report - upwork project  (2026-05-16)
 
 ## Corpus Check
-- 58 files · ~152,068 words
+- 62 files · ~155,250 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 225 nodes · 247 edges · 53 communities (47 shown, 6 thin omitted)
+- 229 nodes · 247 edges · 57 communities (51 shown, 6 thin omitted)
 - Extraction: 93% EXTRACTED · 7% INFERRED · 0% AMBIGUOUS · INFERRED: 18 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `266bbf2e`
+- Built from commit: `93da1f9a`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -43,7 +43,7 @@
 ## Surprising Connections (you probably didn't know these)
 - None detected - all connections are within the same source files.
 
-## Communities (53 total, 6 thin omitted)
+## Communities (57 total, 6 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.09
@@ -78,9 +78,9 @@ Nodes (5): menu, navbar, observer, observerOptions, toggle
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `UpAdmin — Upwork-Style Admin Panel` connect `Community 3` to `Community 4`?**
-  _High betweenness centrality (0.017) - this node is a cross-community bridge._
+  _High betweenness centrality (0.016) - this node is a cross-community bridge._
 - **Why does `Backend Setup (Laravel)` connect `Community 4` to `Community 3`?**
-  _High betweenness centrality (0.014) - this node is a cross-community bridge._
+  _High betweenness centrality (0.013) - this node is a cross-community bridge._
 - **Why does `getDB()` connect `Community 5` to `Community 2`?**
   _High betweenness centrality (0.010) - this node is a cross-community bridge._
 - **What connects `api`, `toggle`, `menu` to the rest of the system?**

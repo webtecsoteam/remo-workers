@@ -11,7 +11,7 @@
               <div style="font-weight:700;font-size:13.5px"><?php echo htmlspecialchars($m['sender_name']); ?></div>
               <div style="font-size:11px;color:var(--muted)"><?php echo date('H:i', strtotime($m['created_at'])); ?></div>
             </div>
-            <div style="font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><?php echo htmlspecialchars($m['message_text']); ?></div>
+            <div style="font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><?php echo htmlspecialchars($m['message']); ?></div>
           </div>
         <?php endforeach; ?>
       </div>

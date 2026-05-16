@@ -13,6 +13,15 @@
       "norm_label": "index.php"
     },
     {
+      "label": "logout.php",
+      "file_type": "code",
+      "source_file": "logout.php",
+      "source_location": "L1",
+      "id": "logout_php",
+      "community": 56,
+      "norm_label": "logout.php"
+    },
+    {
       "label": "migrate.php",
       "file_type": "code",
       "source_file": "migrate.php",
@@ -97,7 +106,7 @@
       "label": "getDB()",
       "file_type": "code",
       "source_file": "includes/config.php",
-      "source_location": "L78",
+      "source_location": "L80",
       "id": "includes_config_getdb",
       "community": 5,
       "norm_label": "getdb()"
@@ -106,7 +115,7 @@
       "label": "baseUrl()",
       "file_type": "code",
       "source_file": "includes/config.php",
-      "source_location": "L99",
+      "source_location": "L101",
       "id": "includes_config_baseurl",
       "community": 5,
       "norm_label": "baseurl()"
@@ -115,7 +124,7 @@
       "label": "redirect()",
       "file_type": "code",
       "source_file": "includes/config.php",
-      "source_location": "L104",
+      "source_location": "L106",
       "id": "includes_config_redirect",
       "community": 5,
       "norm_label": "redirect()"
@@ -124,7 +133,7 @@
       "label": "isRoute()",
       "file_type": "code",
       "source_file": "includes/config.php",
-      "source_location": "L110",
+      "source_location": "L112",
       "id": "includes_config_isroute",
       "community": 5,
       "norm_label": "isroute()"
@@ -1588,6 +1597,33 @@
       "norm_label": "submit_proposal.php"
     },
     {
+      "label": "toggle-save.php",
+      "file_type": "code",
+      "source_file": "freelancer/api/toggle-save.php",
+      "source_location": "L1",
+      "id": "freelancer_api_toggle_save_php",
+      "community": 55,
+      "norm_label": "toggle-save.php"
+    },
+    {
+      "label": "log-work.php",
+      "file_type": "code",
+      "source_file": "freelancer/api/log-work.php",
+      "source_location": "L1",
+      "id": "freelancer_api_log_work_php",
+      "community": 53,
+      "norm_label": "log-work.php"
+    },
+    {
+      "label": "submit-proposal.php",
+      "file_type": "code",
+      "source_file": "freelancer/api/submit-proposal.php",
+      "source_location": "L1",
+      "id": "freelancer_api_submit_proposal_php",
+      "community": 54,
+      "norm_label": "submit-proposal.php"
+    },
+    {
       "label": "verification.php",
       "file_type": "code",
       "source_file": "freelancer/views/verification.php",
@@ -2036,9 +2072,9 @@
       "source_file": "includes/config.php",
       "source_location": "L10",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "includes_config_php",
-      "target": "includes_config_loadenv",
-      "confidence_score": 1.0
+      "target": "includes_config_loadenv"
     },
     {
       "relation": "contains",
@@ -2046,9 +2082,9 @@
       "source_file": "includes/config.php",
       "source_location": "L41",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "includes_config_php",
-      "target": "includes_config_env",
-      "confidence_score": 1.0
+      "target": "includes_config_env"
     },
     {
       "relation": "contains",
@@ -2056,9 +2092,9 @@
       "source_file": "includes/config.php",
       "source_location": "L78",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "includes_config_php",
-      "target": "includes_config_getdb",
-      "confidence_score": 1.0
+      "target": "includes_config_getdb"
     },
     {
       "relation": "contains",
@@ -2066,9 +2102,9 @@
       "source_file": "includes/config.php",
       "source_location": "L99",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "includes_config_php",
-      "target": "includes_config_baseurl",
-      "confidence_score": 1.0
+      "target": "includes_config_baseurl"
     },
     {
       "relation": "contains",
@@ -2076,9 +2112,9 @@
       "source_file": "includes/config.php",
       "source_location": "L104",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "includes_config_php",
-      "target": "includes_config_redirect",
-      "confidence_score": 1.0
+      "target": "includes_config_redirect"
     },
     {
       "relation": "contains",
@@ -2086,9 +2122,9 @@
       "source_file": "includes/config.php",
       "source_location": "L110",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "includes_config_php",
-      "target": "includes_config_isroute",
-      "confidence_score": 1.0
+      "target": "includes_config_isroute"
     },
     {
       "relation": "calls",
@@ -2129,9 +2165,9 @@
       "source_file": "includes/classes/Auth.php",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "includes_classes_auth_php",
-      "target": "classes_auth_auth",
-      "confidence_score": 1.0
+      "target": "classes_auth_auth"
     },
     {
       "relation": "method",
@@ -2139,9 +2175,9 @@
       "source_file": "includes/classes/Auth.php",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "classes_auth_auth",
-      "target": "classes_auth_auth_register",
-      "confidence_score": 1.0
+      "target": "classes_auth_auth_register"
     },
     {
       "relation": "method",
@@ -2149,9 +2185,9 @@
       "source_file": "includes/classes/Auth.php",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "classes_auth_auth",
-      "target": "classes_auth_auth_login",
-      "confidence_score": 1.0
+      "target": "classes_auth_auth_login"
     },
     {
       "relation": "method",
@@ -2159,9 +2195,9 @@
       "source_file": "includes/classes/Auth.php",
       "source_location": "L35",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "classes_auth_auth",
-      "target": "classes_auth_auth_logout",
-      "confidence_score": 1.0
+      "target": "classes_auth_auth_logout"
     },
     {
       "relation": "method",
@@ -2169,9 +2205,9 @@
       "source_file": "includes/classes/Auth.php",
       "source_location": "L47",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "classes_auth_auth",
-      "target": "classes_auth_auth_user",
-      "confidence_score": 1.0
+      "target": "classes_auth_auth_user"
     },
     {
       "relation": "method",
@@ -2179,9 +2215,9 @@
       "source_file": "includes/classes/Auth.php",
       "source_location": "L55",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "classes_auth_auth",
-      "target": "classes_auth_auth_check",
-      "confidence_score": 1.0
+      "target": "classes_auth_auth_check"
     },
     {
       "relation": "calls",
@@ -2354,9 +2390,9 @@
       "source_file": "admin/UserController.php",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_usercontroller_php",
-      "target": "admin_usercontroller_usercontroller",
-      "confidence_score": 1.0
+      "target": "admin_usercontroller_usercontroller"
     },
     {
       "relation": "method",
@@ -2364,9 +2400,9 @@
       "source_file": "admin/UserController.php",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_usercontroller_usercontroller",
-      "target": "admin_usercontroller_usercontroller_index",
-      "confidence_score": 1.0
+      "target": "admin_usercontroller_usercontroller_index"
     },
     {
       "relation": "method",
@@ -2374,9 +2410,9 @@
       "source_file": "admin/UserController.php",
       "source_location": "L40",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_usercontroller_usercontroller",
-      "target": "admin_usercontroller_usercontroller_show",
-      "confidence_score": 1.0
+      "target": "admin_usercontroller_usercontroller_show"
     },
     {
       "relation": "method",
@@ -2384,9 +2420,9 @@
       "source_file": "admin/UserController.php",
       "source_location": "L52",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_usercontroller_usercontroller",
-      "target": "admin_usercontroller_usercontroller_update",
-      "confidence_score": 1.0
+      "target": "admin_usercontroller_usercontroller_update"
     },
     {
       "relation": "method",
@@ -2394,9 +2430,9 @@
       "source_file": "admin/UserController.php",
       "source_location": "L71",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_usercontroller_usercontroller",
-      "target": "admin_usercontroller_usercontroller_destroy",
-      "confidence_score": 1.0
+      "target": "admin_usercontroller_usercontroller_destroy"
     },
     {
       "relation": "method",
@@ -2404,9 +2440,9 @@
       "source_file": "admin/UserController.php",
       "source_location": "L90",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_usercontroller_usercontroller",
-      "target": "admin_usercontroller_usercontroller_suspend",
-      "confidence_score": 1.0
+      "target": "admin_usercontroller_usercontroller_suspend"
     },
     {
       "relation": "method",
@@ -2414,9 +2450,9 @@
       "source_file": "admin/UserController.php",
       "source_location": "L101",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_usercontroller_usercontroller",
-      "target": "admin_usercontroller_usercontroller_activate",
-      "confidence_score": 1.0
+      "target": "admin_usercontroller_usercontroller_activate"
     },
     {
       "relation": "method",
@@ -2424,9 +2460,9 @@
       "source_file": "admin/UserController.php",
       "source_location": "L112",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_usercontroller_usercontroller",
-      "target": "admin_usercontroller_usercontroller_verify",
-      "confidence_score": 1.0
+      "target": "admin_usercontroller_usercontroller_verify"
     },
     {
       "relation": "method",
@@ -2434,9 +2470,9 @@
       "source_file": "admin/UserController.php",
       "source_location": "L123",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_usercontroller_usercontroller",
-      "target": "admin_usercontroller_usercontroller_jobs",
-      "confidence_score": 1.0
+      "target": "admin_usercontroller_usercontroller_jobs"
     },
     {
       "relation": "method",
@@ -2444,9 +2480,9 @@
       "source_file": "admin/UserController.php",
       "source_location": "L138",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_usercontroller_usercontroller",
-      "target": "admin_usercontroller_usercontroller_payments",
-      "confidence_score": 1.0
+      "target": "admin_usercontroller_usercontroller_payments"
     },
     {
       "relation": "calls",
@@ -2455,9 +2491,9 @@
       "source_file": "admin/UserController.php",
       "source_location": "L93",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_usercontroller_usercontroller_suspend",
-      "target": "admin_usercontroller_usercontroller_update",
-      "confidence_score": 1.0
+      "target": "admin_usercontroller_usercontroller_update"
     },
     {
       "relation": "calls",
@@ -2466,9 +2502,9 @@
       "source_file": "admin/UserController.php",
       "source_location": "L104",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_usercontroller_usercontroller_activate",
-      "target": "admin_usercontroller_usercontroller_update",
-      "confidence_score": 1.0
+      "target": "admin_usercontroller_usercontroller_update"
     },
     {
       "relation": "calls",
@@ -2477,9 +2513,9 @@
       "source_file": "admin/UserController.php",
       "source_location": "L115",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_usercontroller_usercontroller_verify",
-      "target": "admin_usercontroller_usercontroller_update",
-      "confidence_score": 1.0
+      "target": "admin_usercontroller_usercontroller_update"
     },
     {
       "relation": "contains",
@@ -2487,9 +2523,9 @@
       "source_file": "admin/DashboardController.php",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_dashboardcontroller_php",
-      "target": "admin_dashboardcontroller_dashboardcontroller",
-      "confidence_score": 1.0
+      "target": "admin_dashboardcontroller_dashboardcontroller"
     },
     {
       "relation": "method",
@@ -2497,9 +2533,9 @@
       "source_file": "admin/DashboardController.php",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_dashboardcontroller_dashboardcontroller",
-      "target": "admin_dashboardcontroller_dashboardcontroller_stats",
-      "confidence_score": 1.0
+      "target": "admin_dashboardcontroller_dashboardcontroller_stats"
     },
     {
       "relation": "method",
@@ -2507,9 +2543,9 @@
       "source_file": "admin/DashboardController.php",
       "source_location": "L42",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_dashboardcontroller_dashboardcontroller",
-      "target": "admin_dashboardcontroller_dashboardcontroller_revenuechart",
-      "confidence_score": 1.0
+      "target": "admin_dashboardcontroller_dashboardcontroller_revenuechart"
     },
     {
       "relation": "method",
@@ -2517,9 +2553,9 @@
       "source_file": "admin/DashboardController.php",
       "source_location": "L59",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_dashboardcontroller_dashboardcontroller",
-      "target": "admin_dashboardcontroller_dashboardcontroller_recentactivity",
-      "confidence_score": 1.0
+      "target": "admin_dashboardcontroller_dashboardcontroller_recentactivity"
     },
     {
       "relation": "contains",
@@ -2527,9 +2563,9 @@
       "source_file": "admin/AuthController.php",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_authcontroller_php",
-      "target": "admin_authcontroller_authcontroller",
-      "confidence_score": 1.0
+      "target": "admin_authcontroller_authcontroller"
     },
     {
       "relation": "method",
@@ -2537,9 +2573,9 @@
       "source_file": "admin/AuthController.php",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_authcontroller_authcontroller",
-      "target": "admin_authcontroller_authcontroller_login",
-      "confidence_score": 1.0
+      "target": "admin_authcontroller_authcontroller_login"
     },
     {
       "relation": "method",
@@ -2547,9 +2583,9 @@
       "source_file": "admin/AuthController.php",
       "source_location": "L49",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_authcontroller_authcontroller",
-      "target": "admin_authcontroller_authcontroller_logout",
-      "confidence_score": 1.0
+      "target": "admin_authcontroller_authcontroller_logout"
     },
     {
       "relation": "method",
@@ -2557,9 +2593,9 @@
       "source_file": "admin/AuthController.php",
       "source_location": "L59",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_authcontroller_authcontroller",
-      "target": "admin_authcontroller_authcontroller_me",
-      "confidence_score": 1.0
+      "target": "admin_authcontroller_authcontroller_me"
     },
     {
       "relation": "method",
@@ -2567,9 +2603,9 @@
       "source_file": "admin/AuthController.php",
       "source_location": "L67",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_authcontroller_authcontroller",
-      "target": "admin_authcontroller_authcontroller_formatuser",
-      "confidence_score": 1.0
+      "target": "admin_authcontroller_authcontroller_formatuser"
     },
     {
       "relation": "calls",
@@ -2578,9 +2614,9 @@
       "source_file": "admin/AuthController.php",
       "source_location": "L45",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_authcontroller_authcontroller_login",
-      "target": "admin_authcontroller_authcontroller_formatuser",
-      "confidence_score": 1.0
+      "target": "admin_authcontroller_authcontroller_formatuser"
     },
     {
       "relation": "calls",
@@ -2589,9 +2625,9 @@
       "source_file": "admin/AuthController.php",
       "source_location": "L63",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_authcontroller_authcontroller_me",
-      "target": "admin_authcontroller_authcontroller_formatuser",
-      "confidence_score": 1.0
+      "target": "admin_authcontroller_authcontroller_formatuser"
     },
     {
       "relation": "contains",
@@ -2599,9 +2635,9 @@
       "source_file": "admin/ReportController.php",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_reportcontroller_php",
-      "target": "admin_reportcontroller_reportcontroller",
-      "confidence_score": 1.0
+      "target": "admin_reportcontroller_reportcontroller"
     },
     {
       "relation": "method",
@@ -2609,9 +2645,9 @@
       "source_file": "admin/ReportController.php",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_reportcontroller_reportcontroller",
-      "target": "admin_reportcontroller_reportcontroller_overview",
-      "confidence_score": 1.0
+      "target": "admin_reportcontroller_reportcontroller_overview"
     },
     {
       "relation": "method",
@@ -2619,9 +2655,9 @@
       "source_file": "admin/ReportController.php",
       "source_location": "L48",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_reportcontroller_reportcontroller",
-      "target": "admin_reportcontroller_reportcontroller_users",
-      "confidence_score": 1.0
+      "target": "admin_reportcontroller_reportcontroller_users"
     },
     {
       "relation": "method",
@@ -2629,9 +2665,9 @@
       "source_file": "admin/ReportController.php",
       "source_location": "L80",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_reportcontroller_reportcontroller",
-      "target": "admin_reportcontroller_reportcontroller_jobs",
-      "confidence_score": 1.0
+      "target": "admin_reportcontroller_reportcontroller_jobs"
     },
     {
       "relation": "method",
@@ -2639,9 +2675,9 @@
       "source_file": "admin/ReportController.php",
       "source_location": "L105",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_reportcontroller_reportcontroller",
-      "target": "admin_reportcontroller_reportcontroller_revenue",
-      "confidence_score": 1.0
+      "target": "admin_reportcontroller_reportcontroller_revenue"
     },
     {
       "relation": "method",
@@ -2649,9 +2685,9 @@
       "source_file": "admin/ReportController.php",
       "source_location": "L130",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_reportcontroller_reportcontroller",
-      "target": "admin_reportcontroller_reportcontroller_export",
-      "confidence_score": 1.0
+      "target": "admin_reportcontroller_reportcontroller_export"
     },
     {
       "relation": "contains",
@@ -2659,9 +2695,9 @@
       "source_file": "admin/2024_01_01_create_tables.php",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_2024_01_01_create_tables_php",
-      "target": "admin_2024_01_01_create_tables_up",
-      "confidence_score": 1.0
+      "target": "admin_2024_01_01_create_tables_up"
     },
     {
       "relation": "contains",
@@ -2669,9 +2705,9 @@
       "source_file": "admin/2024_01_01_create_tables.php",
       "source_location": "L68",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_2024_01_01_create_tables_php",
-      "target": "admin_2024_01_01_create_tables_down",
-      "confidence_score": 1.0
+      "target": "admin_2024_01_01_create_tables_down"
     },
     {
       "relation": "contains",
@@ -2679,9 +2715,9 @@
       "source_file": "admin/JobController.php",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_jobcontroller_php",
-      "target": "admin_jobcontroller_jobcontroller",
-      "confidence_score": 1.0
+      "target": "admin_jobcontroller_jobcontroller"
     },
     {
       "relation": "method",
@@ -2689,9 +2725,9 @@
       "source_file": "admin/JobController.php",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_jobcontroller_jobcontroller",
-      "target": "admin_jobcontroller_jobcontroller_index",
-      "confidence_score": 1.0
+      "target": "admin_jobcontroller_jobcontroller_index"
     },
     {
       "relation": "method",
@@ -2699,9 +2735,9 @@
       "source_file": "admin/JobController.php",
       "source_location": "L44",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_jobcontroller_jobcontroller",
-      "target": "admin_jobcontroller_jobcontroller_show",
-      "confidence_score": 1.0
+      "target": "admin_jobcontroller_jobcontroller_show"
     },
     {
       "relation": "method",
@@ -2709,9 +2745,9 @@
       "source_file": "admin/JobController.php",
       "source_location": "L57",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_jobcontroller_jobcontroller",
-      "target": "admin_jobcontroller_jobcontroller_approve",
-      "confidence_score": 1.0
+      "target": "admin_jobcontroller_jobcontroller_approve"
     },
     {
       "relation": "method",
@@ -2719,9 +2755,9 @@
       "source_file": "admin/JobController.php",
       "source_location": "L68",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_jobcontroller_jobcontroller",
-      "target": "admin_jobcontroller_jobcontroller_reject",
-      "confidence_score": 1.0
+      "target": "admin_jobcontroller_jobcontroller_reject"
     },
     {
       "relation": "method",
@@ -2729,9 +2765,9 @@
       "source_file": "admin/JobController.php",
       "source_location": "L79",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_jobcontroller_jobcontroller",
-      "target": "admin_jobcontroller_jobcontroller_close",
-      "confidence_score": 1.0
+      "target": "admin_jobcontroller_jobcontroller_close"
     },
     {
       "relation": "method",
@@ -2739,9 +2775,9 @@
       "source_file": "admin/JobController.php",
       "source_location": "L90",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_jobcontroller_jobcontroller",
-      "target": "admin_jobcontroller_jobcontroller_flag",
-      "confidence_score": 1.0
+      "target": "admin_jobcontroller_jobcontroller_flag"
     },
     {
       "relation": "method",
@@ -2749,9 +2785,9 @@
       "source_file": "admin/JobController.php",
       "source_location": "L103",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_jobcontroller_jobcontroller",
-      "target": "admin_jobcontroller_jobcontroller_destroy",
-      "confidence_score": 1.0
+      "target": "admin_jobcontroller_jobcontroller_destroy"
     },
     {
       "relation": "contains",
@@ -2759,9 +2795,9 @@
       "source_file": "admin/PaymentController.php",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_paymentcontroller_php",
-      "target": "admin_paymentcontroller_paymentcontroller",
-      "confidence_score": 1.0
+      "target": "admin_paymentcontroller_paymentcontroller"
     },
     {
       "relation": "method",
@@ -2769,9 +2805,9 @@
       "source_file": "admin/PaymentController.php",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_paymentcontroller_paymentcontroller",
-      "target": "admin_paymentcontroller_paymentcontroller_index",
-      "confidence_score": 1.0
+      "target": "admin_paymentcontroller_paymentcontroller_index"
     },
     {
       "relation": "method",
@@ -2779,9 +2815,9 @@
       "source_file": "admin/PaymentController.php",
       "source_location": "L48",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_paymentcontroller_paymentcontroller",
-      "target": "admin_paymentcontroller_paymentcontroller_show",
-      "confidence_score": 1.0
+      "target": "admin_paymentcontroller_paymentcontroller_show"
     },
     {
       "relation": "method",
@@ -2789,9 +2825,9 @@
       "source_file": "admin/PaymentController.php",
       "source_location": "L62",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_paymentcontroller_paymentcontroller",
-      "target": "admin_paymentcontroller_paymentcontroller_refund",
-      "confidence_score": 1.0
+      "target": "admin_paymentcontroller_paymentcontroller_refund"
     },
     {
       "relation": "method",
@@ -2799,9 +2835,9 @@
       "source_file": "admin/PaymentController.php",
       "source_location": "L91",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_paymentcontroller_paymentcontroller",
-      "target": "admin_paymentcontroller_paymentcontroller_resolvedispute",
-      "confidence_score": 1.0
+      "target": "admin_paymentcontroller_paymentcontroller_resolvedispute"
     },
     {
       "relation": "method",
@@ -2809,9 +2845,9 @@
       "source_file": "admin/PaymentController.php",
       "source_location": "L113",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_paymentcontroller_paymentcontroller",
-      "target": "admin_paymentcontroller_paymentcontroller_summary",
-      "confidence_score": 1.0
+      "target": "admin_paymentcontroller_paymentcontroller_summary"
     },
     {
       "relation": "contains",
@@ -2819,9 +2855,9 @@
       "source_file": "admin/api.js",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_js",
-      "target": "admin_api_apiservice",
-      "confidence_score": 1.0
+      "target": "admin_api_apiservice"
     },
     {
       "relation": "contains",
@@ -2829,9 +2865,9 @@
       "source_file": "admin/api.js",
       "source_location": "L48",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_js",
-      "target": "admin_api_api",
-      "confidence_score": 1.0
+      "target": "admin_api_api"
     },
     {
       "relation": "contains",
@@ -2839,9 +2875,9 @@
       "source_file": "admin/api.js",
       "source_location": "L51",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_js",
-      "target": "admin_api_login",
-      "confidence_score": 1.0
+      "target": "admin_api_login"
     },
     {
       "relation": "contains",
@@ -2849,9 +2885,9 @@
       "source_file": "admin/api.js",
       "source_location": "L52",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_js",
-      "target": "admin_api_logout",
-      "confidence_score": 1.0
+      "target": "admin_api_logout"
     },
     {
       "relation": "contains",
@@ -2859,9 +2895,9 @@
       "source_file": "admin/api.js",
       "source_location": "L53",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_js",
-      "target": "admin_api_getme",
-      "confidence_score": 1.0
+      "target": "admin_api_getme"
     },
     {
       "relation": "contains",
@@ -2869,9 +2905,9 @@
       "source_file": "admin/api.js",
       "source_location": "L56",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_js",
-      "target": "admin_api_getdashboardstats",
-      "confidence_score": 1.0
+      "target": "admin_api_getdashboardstats"
     },
     {
       "relation": "contains",
@@ -2879,9 +2915,9 @@
       "source_file": "admin/api.js",
       "source_location": "L57",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_js",
-      "target": "admin_api_getrevenuechart",
-      "confidence_score": 1.0
+      "target": "admin_api_getrevenuechart"
     },
     {
       "relation": "contains",
@@ -2889,9 +2925,9 @@
       "source_file": "admin/api.js",
       "source_location": "L58",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_js",
-      "target": "admin_api_getrecentactivity",
-      "confidence_score": 1.0
+      "target": "admin_api_getrecentactivity"
     },
     {
       "relation": "contains",
@@ -2899,9 +2935,9 @@
       "source_file": "admin/api.js",
       "source_location": "L61",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_js",
-      "target": "admin_api_getusers",
-      "confidence_score": 1.0
+      "target": "admin_api_getusers"
     },
     {
       "relation": "contains",
@@ -2909,9 +2945,9 @@
       "source_file": "admin/api.js",
       "source_location": "L62",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_js",
-      "target": "admin_api_getuser",
-      "confidence_score": 1.0
+      "target": "admin_api_getuser"
     },
     {
       "relation": "contains",
@@ -2919,9 +2955,9 @@
       "source_file": "admin/api.js",
       "source_location": "L63",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_js",
-      "target": "admin_api_updateuser",
-      "confidence_score": 1.0
+      "target": "admin_api_updateuser"
     },
     {
       "relation": "contains",
@@ -2929,9 +2965,9 @@
       "source_file": "admin/api.js",
       "source_location": "L64",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_js",
-      "target": "admin_api_deleteuser",
-      "confidence_score": 1.0
+      "target": "admin_api_deleteuser"
     },
     {
       "relation": "contains",
@@ -2939,9 +2975,9 @@
       "source_file": "admin/api.js",
       "source_location": "L65",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_js",
-      "target": "admin_api_suspenduser",
-      "confidence_score": 1.0
+      "target": "admin_api_suspenduser"
     },
     {
       "relation": "contains",
@@ -2949,9 +2985,9 @@
       "source_file": "admin/api.js",
       "source_location": "L66",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_js",
-      "target": "admin_api_activateuser",
-      "confidence_score": 1.0
+      "target": "admin_api_activateuser"
     },
     {
       "relation": "contains",
@@ -2959,9 +2995,9 @@
       "source_file": "admin/api.js",
       "source_location": "L67",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_js",
-      "target": "admin_api_verifyuser",
-      "confidence_score": 1.0
+      "target": "admin_api_verifyuser"
     },
     {
       "relation": "contains",
@@ -2969,9 +3005,9 @@
       "source_file": "admin/api.js",
       "source_location": "L68",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_js",
-      "target": "admin_api_getuserjobs",
-      "confidence_score": 1.0
+      "target": "admin_api_getuserjobs"
     },
     {
       "relation": "contains",
@@ -2979,9 +3015,9 @@
       "source_file": "admin/api.js",
       "source_location": "L69",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_js",
-      "target": "admin_api_getuserpayments",
-      "confidence_score": 1.0
+      "target": "admin_api_getuserpayments"
     },
     {
       "relation": "contains",
@@ -2989,9 +3025,9 @@
       "source_file": "admin/api.js",
       "source_location": "L72",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_js",
-      "target": "admin_api_getjobs",
-      "confidence_score": 1.0
+      "target": "admin_api_getjobs"
     },
     {
       "relation": "contains",
@@ -2999,9 +3035,9 @@
       "source_file": "admin/api.js",
       "source_location": "L73",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_js",
-      "target": "admin_api_getjob",
-      "confidence_score": 1.0
+      "target": "admin_api_getjob"
     },
     {
       "relation": "contains",
@@ -3009,9 +3045,9 @@
       "source_file": "admin/api.js",
       "source_location": "L74",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_js",
-      "target": "admin_api_approvejob",
-      "confidence_score": 1.0
+      "target": "admin_api_approvejob"
     },
     {
       "relation": "contains",
@@ -3019,9 +3055,9 @@
       "source_file": "admin/api.js",
       "source_location": "L75",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_js",
-      "target": "admin_api_rejectjob",
-      "confidence_score": 1.0
+      "target": "admin_api_rejectjob"
     },
     {
       "relation": "contains",
@@ -3029,9 +3065,9 @@
       "source_file": "admin/api.js",
       "source_location": "L76",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_js",
-      "target": "admin_api_closejob",
-      "confidence_score": 1.0
+      "target": "admin_api_closejob"
     },
     {
       "relation": "contains",
@@ -3039,9 +3075,9 @@
       "source_file": "admin/api.js",
       "source_location": "L77",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_js",
-      "target": "admin_api_flagjob",
-      "confidence_score": 1.0
+      "target": "admin_api_flagjob"
     },
     {
       "relation": "contains",
@@ -3049,9 +3085,9 @@
       "source_file": "admin/api.js",
       "source_location": "L78",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_js",
-      "target": "admin_api_deletejob",
-      "confidence_score": 1.0
+      "target": "admin_api_deletejob"
     },
     {
       "relation": "contains",
@@ -3059,9 +3095,9 @@
       "source_file": "admin/api.js",
       "source_location": "L81",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_js",
-      "target": "admin_api_getpayments",
-      "confidence_score": 1.0
+      "target": "admin_api_getpayments"
     },
     {
       "relation": "contains",
@@ -3069,9 +3105,9 @@
       "source_file": "admin/api.js",
       "source_location": "L82",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_js",
-      "target": "admin_api_getpayment",
-      "confidence_score": 1.0
+      "target": "admin_api_getpayment"
     },
     {
       "relation": "contains",
@@ -3079,9 +3115,9 @@
       "source_file": "admin/api.js",
       "source_location": "L83",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_js",
-      "target": "admin_api_refundpayment",
-      "confidence_score": 1.0
+      "target": "admin_api_refundpayment"
     },
     {
       "relation": "contains",
@@ -3089,9 +3125,9 @@
       "source_file": "admin/api.js",
       "source_location": "L84",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_js",
-      "target": "admin_api_resolvedispute",
-      "confidence_score": 1.0
+      "target": "admin_api_resolvedispute"
     },
     {
       "relation": "contains",
@@ -3099,9 +3135,9 @@
       "source_file": "admin/api.js",
       "source_location": "L85",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_js",
-      "target": "admin_api_getpaymentsummary",
-      "confidence_score": 1.0
+      "target": "admin_api_getpaymentsummary"
     },
     {
       "relation": "contains",
@@ -3109,9 +3145,9 @@
       "source_file": "admin/api.js",
       "source_location": "L88",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_js",
-      "target": "admin_api_getreportoverview",
-      "confidence_score": 1.0
+      "target": "admin_api_getreportoverview"
     },
     {
       "relation": "contains",
@@ -3119,9 +3155,9 @@
       "source_file": "admin/api.js",
       "source_location": "L89",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_js",
-      "target": "admin_api_getuserreport",
-      "confidence_score": 1.0
+      "target": "admin_api_getuserreport"
     },
     {
       "relation": "contains",
@@ -3129,9 +3165,9 @@
       "source_file": "admin/api.js",
       "source_location": "L90",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_js",
-      "target": "admin_api_getjobreport",
-      "confidence_score": 1.0
+      "target": "admin_api_getjobreport"
     },
     {
       "relation": "contains",
@@ -3139,9 +3175,9 @@
       "source_file": "admin/api.js",
       "source_location": "L91",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_js",
-      "target": "admin_api_getrevenuereport",
-      "confidence_score": 1.0
+      "target": "admin_api_getrevenuereport"
     },
     {
       "relation": "contains",
@@ -3149,9 +3185,9 @@
       "source_file": "admin/api.js",
       "source_location": "L92",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_js",
-      "target": "admin_api_exportreport",
-      "confidence_score": 1.0
+      "target": "admin_api_exportreport"
     },
     {
       "relation": "method",
@@ -3159,9 +3195,9 @@
       "source_file": "admin/api.js",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_apiservice",
-      "target": "admin_api_apiservice_constructor",
-      "confidence_score": 1.0
+      "target": "admin_api_apiservice_constructor"
     },
     {
       "relation": "method",
@@ -3169,9 +3205,9 @@
       "source_file": "admin/api.js",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_apiservice",
-      "target": "admin_api_apiservice_gettoken",
-      "confidence_score": 1.0
+      "target": "admin_api_apiservice_gettoken"
     },
     {
       "relation": "method",
@@ -3179,9 +3215,9 @@
       "source_file": "admin/api.js",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_apiservice",
-      "target": "admin_api_apiservice_request",
-      "confidence_score": 1.0
+      "target": "admin_api_apiservice_request"
     },
     {
       "relation": "method",
@@ -3189,9 +3225,9 @@
       "source_file": "admin/api.js",
       "source_location": "L41",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_apiservice",
-      "target": "admin_api_apiservice_get",
-      "confidence_score": 1.0
+      "target": "admin_api_apiservice_get"
     },
     {
       "relation": "method",
@@ -3199,9 +3235,9 @@
       "source_file": "admin/api.js",
       "source_location": "L42",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_apiservice",
-      "target": "admin_api_apiservice_post",
-      "confidence_score": 1.0
+      "target": "admin_api_apiservice_post"
     },
     {
       "relation": "method",
@@ -3209,9 +3245,9 @@
       "source_file": "admin/api.js",
       "source_location": "L43",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_apiservice",
-      "target": "admin_api_apiservice_put",
-      "confidence_score": 1.0
+      "target": "admin_api_apiservice_put"
     },
     {
       "relation": "method",
@@ -3219,9 +3255,9 @@
       "source_file": "admin/api.js",
       "source_location": "L44",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_apiservice",
-      "target": "admin_api_apiservice_patch",
-      "confidence_score": 1.0
+      "target": "admin_api_apiservice_patch"
     },
     {
       "relation": "method",
@@ -3229,9 +3265,9 @@
       "source_file": "admin/api.js",
       "source_location": "L45",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_apiservice",
-      "target": "admin_api_apiservice_delete",
-      "confidence_score": 1.0
+      "target": "admin_api_apiservice_delete"
     },
     {
       "relation": "calls",
@@ -3240,9 +3276,9 @@
       "source_file": "admin/api.js",
       "source_location": "L22",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_apiservice_request",
-      "target": "admin_api_apiservice_gettoken",
-      "confidence_score": 1.0
+      "target": "admin_api_apiservice_gettoken"
     },
     {
       "relation": "calls",
@@ -3251,9 +3287,9 @@
       "source_file": "admin/api.js",
       "source_location": "L41",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_apiservice_get",
-      "target": "admin_api_apiservice_request",
-      "confidence_score": 1.0
+      "target": "admin_api_apiservice_request"
     },
     {
       "relation": "calls",
@@ -3262,9 +3298,9 @@
       "source_file": "admin/api.js",
       "source_location": "L42",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_apiservice_post",
-      "target": "admin_api_apiservice_request",
-      "confidence_score": 1.0
+      "target": "admin_api_apiservice_request"
     },
     {
       "relation": "calls",
@@ -3273,9 +3309,9 @@
       "source_file": "admin/api.js",
       "source_location": "L43",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_apiservice_put",
-      "target": "admin_api_apiservice_request",
-      "confidence_score": 1.0
+      "target": "admin_api_apiservice_request"
     },
     {
       "relation": "calls",
@@ -3284,9 +3320,9 @@
       "source_file": "admin/api.js",
       "source_location": "L44",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_apiservice_patch",
-      "target": "admin_api_apiservice_request",
-      "confidence_score": 1.0
+      "target": "admin_api_apiservice_request"
     },
     {
       "relation": "calls",
@@ -3295,9 +3331,9 @@
       "source_file": "admin/api.js",
       "source_location": "L45",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_apiservice_delete",
-      "target": "admin_api_apiservice_request",
-      "confidence_score": 1.0
+      "target": "admin_api_apiservice_request"
     },
     {
       "relation": "calls",
@@ -3306,9 +3342,9 @@
       "source_file": "admin/api.js",
       "source_location": "L53",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_getme",
-      "target": "admin_api_apiservice_get",
-      "confidence_score": 1.0
+      "target": "admin_api_apiservice_get"
     },
     {
       "relation": "calls",
@@ -3317,9 +3353,9 @@
       "source_file": "admin/api.js",
       "source_location": "L56",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_getdashboardstats",
-      "target": "admin_api_apiservice_get",
-      "confidence_score": 1.0
+      "target": "admin_api_apiservice_get"
     },
     {
       "relation": "calls",
@@ -3328,9 +3364,9 @@
       "source_file": "admin/api.js",
       "source_location": "L57",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_getrevenuechart",
-      "target": "admin_api_apiservice_get",
-      "confidence_score": 1.0
+      "target": "admin_api_apiservice_get"
     },
     {
       "relation": "calls",
@@ -3339,9 +3375,9 @@
       "source_file": "admin/api.js",
       "source_location": "L58",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_getrecentactivity",
-      "target": "admin_api_apiservice_get",
-      "confidence_score": 1.0
+      "target": "admin_api_apiservice_get"
     },
     {
       "relation": "calls",
@@ -3350,9 +3386,9 @@
       "source_file": "admin/api.js",
       "source_location": "L61",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_getusers",
-      "target": "admin_api_apiservice_get",
-      "confidence_score": 1.0
+      "target": "admin_api_apiservice_get"
     },
     {
       "relation": "calls",
@@ -3361,9 +3397,9 @@
       "source_file": "admin/api.js",
       "source_location": "L62",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_getuser",
-      "target": "admin_api_apiservice_get",
-      "confidence_score": 1.0
+      "target": "admin_api_apiservice_get"
     },
     {
       "relation": "calls",
@@ -3372,9 +3408,9 @@
       "source_file": "admin/api.js",
       "source_location": "L68",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_getuserjobs",
-      "target": "admin_api_apiservice_get",
-      "confidence_score": 1.0
+      "target": "admin_api_apiservice_get"
     },
     {
       "relation": "calls",
@@ -3383,9 +3419,9 @@
       "source_file": "admin/api.js",
       "source_location": "L69",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_getuserpayments",
-      "target": "admin_api_apiservice_get",
-      "confidence_score": 1.0
+      "target": "admin_api_apiservice_get"
     },
     {
       "relation": "calls",
@@ -3394,9 +3430,9 @@
       "source_file": "admin/api.js",
       "source_location": "L72",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_getjobs",
-      "target": "admin_api_apiservice_get",
-      "confidence_score": 1.0
+      "target": "admin_api_apiservice_get"
     },
     {
       "relation": "calls",
@@ -3405,9 +3441,9 @@
       "source_file": "admin/api.js",
       "source_location": "L73",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_getjob",
-      "target": "admin_api_apiservice_get",
-      "confidence_score": 1.0
+      "target": "admin_api_apiservice_get"
     },
     {
       "relation": "calls",
@@ -3416,9 +3452,9 @@
       "source_file": "admin/api.js",
       "source_location": "L81",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_getpayments",
-      "target": "admin_api_apiservice_get",
-      "confidence_score": 1.0
+      "target": "admin_api_apiservice_get"
     },
     {
       "relation": "calls",
@@ -3427,9 +3463,9 @@
       "source_file": "admin/api.js",
       "source_location": "L82",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_getpayment",
-      "target": "admin_api_apiservice_get",
-      "confidence_score": 1.0
+      "target": "admin_api_apiservice_get"
     },
     {
       "relation": "calls",
@@ -3438,9 +3474,9 @@
       "source_file": "admin/api.js",
       "source_location": "L85",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_getpaymentsummary",
-      "target": "admin_api_apiservice_get",
-      "confidence_score": 1.0
+      "target": "admin_api_apiservice_get"
     },
     {
       "relation": "calls",
@@ -3449,9 +3485,9 @@
       "source_file": "admin/api.js",
       "source_location": "L88",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_getreportoverview",
-      "target": "admin_api_apiservice_get",
-      "confidence_score": 1.0
+      "target": "admin_api_apiservice_get"
     },
     {
       "relation": "calls",
@@ -3460,9 +3496,9 @@
       "source_file": "admin/api.js",
       "source_location": "L89",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_getuserreport",
-      "target": "admin_api_apiservice_get",
-      "confidence_score": 1.0
+      "target": "admin_api_apiservice_get"
     },
     {
       "relation": "calls",
@@ -3471,9 +3507,9 @@
       "source_file": "admin/api.js",
       "source_location": "L90",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_getjobreport",
-      "target": "admin_api_apiservice_get",
-      "confidence_score": 1.0
+      "target": "admin_api_apiservice_get"
     },
     {
       "relation": "calls",
@@ -3482,9 +3518,9 @@
       "source_file": "admin/api.js",
       "source_location": "L91",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_getrevenuereport",
-      "target": "admin_api_apiservice_get",
-      "confidence_score": 1.0
+      "target": "admin_api_apiservice_get"
     },
     {
       "relation": "calls",
@@ -3493,9 +3529,9 @@
       "source_file": "admin/api.js",
       "source_location": "L92",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_exportreport",
-      "target": "admin_api_apiservice_get",
-      "confidence_score": 1.0
+      "target": "admin_api_apiservice_get"
     },
     {
       "relation": "calls",
@@ -3504,9 +3540,9 @@
       "source_file": "admin/api.js",
       "source_location": "L51",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_login",
-      "target": "admin_api_apiservice_post",
-      "confidence_score": 1.0
+      "target": "admin_api_apiservice_post"
     },
     {
       "relation": "calls",
@@ -3515,9 +3551,9 @@
       "source_file": "admin/api.js",
       "source_location": "L52",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_logout",
-      "target": "admin_api_apiservice_post",
-      "confidence_score": 1.0
+      "target": "admin_api_apiservice_post"
     },
     {
       "relation": "calls",
@@ -3526,9 +3562,9 @@
       "source_file": "admin/api.js",
       "source_location": "L63",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_updateuser",
-      "target": "admin_api_apiservice_put",
-      "confidence_score": 1.0
+      "target": "admin_api_apiservice_put"
     },
     {
       "relation": "calls",
@@ -3537,9 +3573,9 @@
       "source_file": "admin/api.js",
       "source_location": "L65",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_suspenduser",
-      "target": "admin_api_apiservice_patch",
-      "confidence_score": 1.0
+      "target": "admin_api_apiservice_patch"
     },
     {
       "relation": "calls",
@@ -3548,9 +3584,9 @@
       "source_file": "admin/api.js",
       "source_location": "L66",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_activateuser",
-      "target": "admin_api_apiservice_patch",
-      "confidence_score": 1.0
+      "target": "admin_api_apiservice_patch"
     },
     {
       "relation": "calls",
@@ -3559,9 +3595,9 @@
       "source_file": "admin/api.js",
       "source_location": "L67",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_verifyuser",
-      "target": "admin_api_apiservice_patch",
-      "confidence_score": 1.0
+      "target": "admin_api_apiservice_patch"
     },
     {
       "relation": "calls",
@@ -3570,9 +3606,9 @@
       "source_file": "admin/api.js",
       "source_location": "L74",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_approvejob",
-      "target": "admin_api_apiservice_patch",
-      "confidence_score": 1.0
+      "target": "admin_api_apiservice_patch"
     },
     {
       "relation": "calls",
@@ -3581,9 +3617,9 @@
       "source_file": "admin/api.js",
       "source_location": "L75",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_rejectjob",
-      "target": "admin_api_apiservice_patch",
-      "confidence_score": 1.0
+      "target": "admin_api_apiservice_patch"
     },
     {
       "relation": "calls",
@@ -3592,9 +3628,9 @@
       "source_file": "admin/api.js",
       "source_location": "L76",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_closejob",
-      "target": "admin_api_apiservice_patch",
-      "confidence_score": 1.0
+      "target": "admin_api_apiservice_patch"
     },
     {
       "relation": "calls",
@@ -3603,9 +3639,9 @@
       "source_file": "admin/api.js",
       "source_location": "L77",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_flagjob",
-      "target": "admin_api_apiservice_patch",
-      "confidence_score": 1.0
+      "target": "admin_api_apiservice_patch"
     },
     {
       "relation": "calls",
@@ -3614,9 +3650,9 @@
       "source_file": "admin/api.js",
       "source_location": "L83",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_refundpayment",
-      "target": "admin_api_apiservice_patch",
-      "confidence_score": 1.0
+      "target": "admin_api_apiservice_patch"
     },
     {
       "relation": "calls",
@@ -3625,9 +3661,9 @@
       "source_file": "admin/api.js",
       "source_location": "L84",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_resolvedispute",
-      "target": "admin_api_apiservice_patch",
-      "confidence_score": 1.0
+      "target": "admin_api_apiservice_patch"
     },
     {
       "relation": "calls",
@@ -3636,9 +3672,9 @@
       "source_file": "admin/api.js",
       "source_location": "L64",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_deleteuser",
-      "target": "admin_api_apiservice_delete",
-      "confidence_score": 1.0
+      "target": "admin_api_apiservice_delete"
     },
     {
       "relation": "calls",
@@ -3647,9 +3683,9 @@
       "source_file": "admin/api.js",
       "source_location": "L78",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_api_deletejob",
-      "target": "admin_api_apiservice_delete",
-      "confidence_score": 1.0
+      "target": "admin_api_apiservice_delete"
     },
     {
       "relation": "contains",
@@ -3657,9 +3693,9 @@
       "source_file": "actions/upload_doc.php",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "actions_upload_doc_php",
-      "target": "actions_upload_doc_json_response",
-      "confidence_score": 1.0
+      "target": "actions_upload_doc_json_response"
     },
     {
       "relation": "contains",
@@ -3667,9 +3703,9 @@
       "source_file": "assets/js/main.js",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "assets_js_main_js",
-      "target": "js_main_toggle",
-      "confidence_score": 1.0
+      "target": "js_main_toggle"
     },
     {
       "relation": "contains",
@@ -3677,9 +3713,9 @@
       "source_file": "assets/js/main.js",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "assets_js_main_js",
-      "target": "js_main_menu",
-      "confidence_score": 1.0
+      "target": "js_main_menu"
     },
     {
       "relation": "contains",
@@ -3687,9 +3723,9 @@
       "source_file": "assets/js/main.js",
       "source_location": "L17",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "assets_js_main_js",
-      "target": "js_main_navbar",
-      "confidence_score": 1.0
+      "target": "js_main_navbar"
     },
     {
       "relation": "contains",
@@ -3697,9 +3733,9 @@
       "source_file": "assets/js/main.js",
       "source_location": "L31",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "assets_js_main_js",
-      "target": "js_main_observeroptions",
-      "confidence_score": 1.0
+      "target": "js_main_observeroptions"
     },
     {
       "relation": "contains",
@@ -3707,9 +3743,9 @@
       "source_file": "assets/js/main.js",
       "source_location": "L36",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "assets_js_main_js",
-      "target": "js_main_observer",
-      "confidence_score": 1.0
+      "target": "js_main_observer"
     },
     {
       "relation": "contains",
@@ -3717,9 +3753,9 @@
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "freelancer_includes_footer_test_js",
-      "target": "includes_footer_test_clients",
-      "confidence_score": 1.0
+      "target": "includes_footer_test_clients"
     },
     {
       "relation": "contains",
@@ -3727,9 +3763,9 @@
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L18",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "freelancer_includes_footer_test_js",
-      "target": "includes_footer_test_spentbadge",
-      "confidence_score": 1.0
+      "target": "includes_footer_test_spentbadge"
     },
     {
       "relation": "contains",
@@ -3737,9 +3773,9 @@
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L25",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "freelancer_includes_footer_test_js",
-      "target": "includes_footer_test_jobrowhtml",
-      "confidence_score": 1.0
+      "target": "includes_footer_test_jobrowhtml"
     },
     {
       "relation": "contains",
@@ -3747,9 +3783,9 @@
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L68",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "freelancer_includes_footer_test_js",
-      "target": "includes_footer_test_renderjobs",
-      "confidence_score": 1.0
+      "target": "includes_footer_test_renderjobs"
     },
     {
       "relation": "contains",
@@ -3757,9 +3793,9 @@
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L77",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "freelancer_includes_footer_test_js",
-      "target": "includes_footer_test_modals",
-      "confidence_score": 1.0
+      "target": "includes_footer_test_modals"
     },
     {
       "relation": "contains",
@@ -3767,9 +3803,9 @@
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L317",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "freelancer_includes_footer_test_js",
-      "target": "includes_footer_test_togglepwvis",
-      "confidence_score": 1.0
+      "target": "includes_footer_test_togglepwvis"
     },
     {
       "relation": "contains",
@@ -3777,9 +3813,9 @@
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L324",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "freelancer_includes_footer_test_js",
-      "target": "includes_footer_test_checkpwstrength",
-      "confidence_score": 1.0
+      "target": "includes_footer_test_checkpwstrength"
     },
     {
       "relation": "contains",
@@ -3787,9 +3823,9 @@
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L352",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "freelancer_includes_footer_test_js",
-      "target": "includes_footer_test_checkpwmatch",
-      "confidence_score": 1.0
+      "target": "includes_footer_test_checkpwmatch"
     },
     {
       "relation": "contains",
@@ -3797,9 +3833,9 @@
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L367",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "freelancer_includes_footer_test_js",
-      "target": "includes_footer_test_checkandapply",
-      "confidence_score": 1.0
+      "target": "includes_footer_test_checkandapply"
     },
     {
       "relation": "contains",
@@ -3807,9 +3843,9 @@
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L386",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "freelancer_includes_footer_test_js",
-      "target": "includes_footer_test_submitproposal",
-      "confidence_score": 1.0
+      "target": "includes_footer_test_submitproposal"
     },
     {
       "relation": "contains",
@@ -3817,9 +3853,9 @@
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L436",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "freelancer_includes_footer_test_js",
-      "target": "includes_footer_test_submitpasswordreset",
-      "confidence_score": 1.0
+      "target": "includes_footer_test_submitpasswordreset"
     },
     {
       "relation": "contains",
@@ -3827,9 +3863,9 @@
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L464",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "freelancer_includes_footer_test_js",
-      "target": "includes_footer_test_openmodal",
-      "confidence_score": 1.0
+      "target": "includes_footer_test_openmodal"
     },
     {
       "relation": "contains",
@@ -3837,9 +3873,9 @@
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L465",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "freelancer_includes_footer_test_js",
-      "target": "includes_footer_test_closemodal",
-      "confidence_score": 1.0
+      "target": "includes_footer_test_closemodal"
     },
     {
       "relation": "contains",
@@ -3847,9 +3883,9 @@
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L468",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "freelancer_includes_footer_test_js",
-      "target": "includes_footer_test_toast",
-      "confidence_score": 1.0
+      "target": "includes_footer_test_toast"
     },
     {
       "relation": "contains",
@@ -3857,9 +3893,9 @@
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L469",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "freelancer_includes_footer_test_js",
-      "target": "includes_footer_test_togglesidebar",
-      "confidence_score": 1.0
+      "target": "includes_footer_test_togglesidebar"
     },
     {
       "relation": "contains",
@@ -3867,9 +3903,9 @@
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L475",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "freelancer_includes_footer_test_js",
-      "target": "includes_footer_test_showpage",
-      "confidence_score": 1.0
+      "target": "includes_footer_test_showpage"
     },
     {
       "relation": "contains",
@@ -3877,9 +3913,9 @@
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L493",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "freelancer_includes_footer_test_js",
-      "target": "includes_footer_test_earnings_info",
-      "confidence_score": 1.0
+      "target": "includes_footer_test_earnings_info"
     },
     {
       "relation": "contains",
@@ -3887,9 +3923,9 @@
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L514",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "freelancer_includes_footer_test_js",
-      "target": "includes_footer_test_showearningsinfo",
-      "confidence_score": 1.0
+      "target": "includes_footer_test_showearningsinfo"
     },
     {
       "relation": "contains",
@@ -3897,9 +3933,9 @@
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L534",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "freelancer_includes_footer_test_js",
-      "target": "includes_footer_test_freelancerstate",
-      "confidence_score": 1.0
+      "target": "includes_footer_test_freelancerstate"
     },
     {
       "relation": "contains",
@@ -3907,9 +3943,9 @@
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L542",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "freelancer_includes_footer_test_js",
-      "target": "includes_footer_test_selectedpkg",
-      "confidence_score": 1.0
+      "target": "includes_footer_test_selectedpkg"
     },
     {
       "relation": "contains",
@@ -3917,9 +3953,9 @@
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L544",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "freelancer_includes_footer_test_js",
-      "target": "includes_footer_test_selectconnectpkg",
-      "confidence_score": 1.0
+      "target": "includes_footer_test_selectconnectpkg"
     },
     {
       "relation": "contains",
@@ -3927,9 +3963,9 @@
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L573",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "freelancer_includes_footer_test_js",
-      "target": "includes_footer_test_initiatepaystackpayment",
-      "confidence_score": 1.0
+      "target": "includes_footer_test_initiatepaystackpayment"
     },
     {
       "relation": "contains",
@@ -3937,9 +3973,9 @@
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L606",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "freelancer_includes_footer_test_js",
-      "target": "includes_footer_test_onpaystacksuccess",
-      "confidence_score": 1.0
+      "target": "includes_footer_test_onpaystacksuccess"
     },
     {
       "relation": "contains",
@@ -3947,9 +3983,9 @@
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L661",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "freelancer_includes_footer_test_js",
-      "target": "includes_footer_test_updateapplymodalconnects",
-      "confidence_score": 1.0
+      "target": "includes_footer_test_updateapplymodalconnects"
     },
     {
       "relation": "contains",
@@ -3957,9 +3993,9 @@
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L678",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "freelancer_includes_footer_test_js",
-      "target": "includes_footer_test_skill_tree",
-      "confidence_score": 1.0
+      "target": "includes_footer_test_skill_tree"
     },
     {
       "relation": "contains",
@@ -3967,9 +4003,9 @@
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L806",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "freelancer_includes_footer_test_js",
-      "target": "includes_footer_test_selectedskills",
-      "confidence_score": 1.0
+      "target": "includes_footer_test_selectedskills"
     },
     {
       "relation": "contains",
@@ -3977,9 +4013,9 @@
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L809",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "freelancer_includes_footer_test_js",
-      "target": "includes_footer_test_openskillselector",
-      "confidence_score": 1.0
+      "target": "includes_footer_test_openskillselector"
     },
     {
       "relation": "contains",
@@ -3987,9 +4023,9 @@
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L819",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "freelancer_includes_footer_test_js",
-      "target": "includes_footer_test_closeskillselector",
-      "confidence_score": 1.0
+      "target": "includes_footer_test_closeskillselector"
     },
     {
       "relation": "contains",
@@ -3997,9 +4033,9 @@
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L824",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "freelancer_includes_footer_test_js",
-      "target": "includes_footer_test_rendercatcol",
-      "confidence_score": 1.0
+      "target": "includes_footer_test_rendercatcol"
     },
     {
       "relation": "contains",
@@ -4007,9 +4043,9 @@
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L836",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "freelancer_includes_footer_test_js",
-      "target": "includes_footer_test_renderspeccol",
-      "confidence_score": 1.0
+      "target": "includes_footer_test_renderspeccol"
     },
     {
       "relation": "contains",
@@ -4017,9 +4053,9 @@
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L855",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "freelancer_includes_footer_test_js",
-      "target": "includes_footer_test_toggleskill",
-      "confidence_score": 1.0
+      "target": "includes_footer_test_toggleskill"
     },
     {
       "relation": "contains",
@@ -4027,9 +4063,9 @@
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L873",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "freelancer_includes_footer_test_js",
-      "target": "includes_footer_test_el",
-      "confidence_score": 1.0
+      "target": "includes_footer_test_el"
     },
     {
       "relation": "contains",
@@ -4037,9 +4073,9 @@
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L874",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "freelancer_includes_footer_test_js",
-      "target": "includes_footer_test_arr",
-      "confidence_score": 1.0
+      "target": "includes_footer_test_arr"
     },
     {
       "relation": "calls",
@@ -4048,9 +4084,9 @@
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L59",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "includes_footer_test_jobrowhtml",
-      "target": "includes_footer_test_spentbadge",
-      "confidence_score": 1.0
+      "target": "includes_footer_test_spentbadge"
     },
     {
       "relation": "calls",
@@ -4059,9 +4095,9 @@
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L349",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "includes_footer_test_checkpwstrength",
-      "target": "includes_footer_test_checkpwmatch",
-      "confidence_score": 1.0
+      "target": "includes_footer_test_checkpwmatch"
     },
     {
       "relation": "calls",
@@ -4070,9 +4106,9 @@
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L369",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "includes_footer_test_checkandapply",
-      "target": "includes_footer_test_toast",
-      "confidence_score": 1.0
+      "target": "includes_footer_test_toast"
     },
     {
       "relation": "calls",
@@ -4081,9 +4117,9 @@
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L371",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "includes_footer_test_checkandapply",
-      "target": "includes_footer_test_openmodal",
-      "confidence_score": 1.0
+      "target": "includes_footer_test_openmodal"
     },
     {
       "relation": "calls",
@@ -4092,9 +4128,9 @@
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L393",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "includes_footer_test_submitproposal",
-      "target": "includes_footer_test_toast",
-      "confidence_score": 1.0
+      "target": "includes_footer_test_toast"
     },
     {
       "relation": "calls",
@@ -4103,9 +4139,9 @@
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L422",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "includes_footer_test_submitproposal",
-      "target": "includes_footer_test_closemodal",
-      "confidence_score": 1.0
+      "target": "includes_footer_test_closemodal"
     },
     {
       "relation": "calls",
@@ -4114,9 +4150,9 @@
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L441",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "includes_footer_test_submitpasswordreset",
-      "target": "includes_footer_test_toast",
-      "confidence_score": 1.0
+      "target": "includes_footer_test_toast"
     },
     {
       "relation": "calls",
@@ -4125,9 +4161,9 @@
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L464",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "includes_footer_test_openmodal",
-      "target": "includes_footer_test_toast",
-      "confidence_score": 1.0
+      "target": "includes_footer_test_toast"
     },
     {
       "relation": "calls",
@@ -4136,9 +4172,9 @@
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L599",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "includes_footer_test_initiatepaystackpayment",
-      "target": "includes_footer_test_toast",
-      "confidence_score": 1.0
+      "target": "includes_footer_test_toast"
     },
     {
       "relation": "calls",
@@ -4147,9 +4183,9 @@
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L657",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "includes_footer_test_onpaystacksuccess",
-      "target": "includes_footer_test_toast",
-      "confidence_score": 1.0
+      "target": "includes_footer_test_toast"
     },
     {
       "relation": "calls",
@@ -4158,9 +4194,9 @@
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L860",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "includes_footer_test_toggleskill",
-      "target": "includes_footer_test_toast",
-      "confidence_score": 1.0
+      "target": "includes_footer_test_toast"
     },
     {
       "relation": "calls",
@@ -4169,9 +4205,9 @@
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L596",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "includes_footer_test_initiatepaystackpayment",
-      "target": "includes_footer_test_onpaystacksuccess",
-      "confidence_score": 1.0
+      "target": "includes_footer_test_onpaystacksuccess"
     },
     {
       "relation": "calls",
@@ -4180,9 +4216,9 @@
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L813",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "includes_footer_test_openskillselector",
-      "target": "includes_footer_test_rendercatcol",
-      "confidence_score": 1.0
+      "target": "includes_footer_test_rendercatcol"
     },
     {
       "relation": "calls",
@@ -4191,9 +4227,9 @@
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L833",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "includes_footer_test_rendercatcol",
-      "target": "includes_footer_test_renderspeccol",
-      "confidence_score": 1.0
+      "target": "includes_footer_test_renderspeccol"
     },
     {
       "relation": "calls",
@@ -4202,9 +4238,9 @@
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L865",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "includes_footer_test_toggleskill",
-      "target": "includes_footer_test_rendercatcol",
-      "confidence_score": 1.0
+      "target": "includes_footer_test_rendercatcol"
     },
     {
       "relation": "calls",
@@ -4213,9 +4249,9 @@
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L864",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "includes_footer_test_toggleskill",
-      "target": "includes_footer_test_renderspeccol",
-      "confidence_score": 1.0
+      "target": "includes_footer_test_renderspeccol"
     },
     {
       "relation": "contains",
@@ -4223,9 +4259,9 @@
       "source_file": ".agents/workflows/graphify.md",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "agents_workflows_graphify_md",
-      "target": "workflows_graphify_workflow_graphify",
-      "confidence_score": 1.0
+      "target": "workflows_graphify_workflow_graphify"
     },
     {
       "relation": "contains",
@@ -4233,9 +4269,9 @@
       "source_file": ".agents/rules/graphify.md",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "agents_rules_graphify_md",
-      "target": "rules_graphify_graphify",
-      "confidence_score": 1.0
+      "target": "rules_graphify_graphify"
     },
     {
       "relation": "contains",
@@ -4243,9 +4279,9 @@
       "source_file": "admin/README.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_readme_md",
-      "target": "admin_readme_upadmin_upwork_style_admin_panel",
-      "confidence_score": 1.0
+      "target": "admin_readme_upadmin_upwork_style_admin_panel"
     },
     {
       "relation": "contains",
@@ -4253,9 +4289,9 @@
       "source_file": "admin/README.md",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_readme_upadmin_upwork_style_admin_panel",
-      "target": "admin_readme_project_structure",
-      "confidence_score": 1.0
+      "target": "admin_readme_project_structure"
     },
     {
       "relation": "contains",
@@ -4263,9 +4299,9 @@
       "source_file": "admin/README.md",
       "source_location": "L41",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_readme_upadmin_upwork_style_admin_panel",
-      "target": "admin_readme_backend_setup_laravel",
-      "confidence_score": 1.0
+      "target": "admin_readme_backend_setup_laravel"
     },
     {
       "relation": "contains",
@@ -4273,9 +4309,9 @@
       "source_file": "admin/README.md",
       "source_location": "L113",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_readme_upadmin_upwork_style_admin_panel",
-      "target": "admin_readme_frontend_setup",
-      "confidence_score": 1.0
+      "target": "admin_readme_frontend_setup"
     },
     {
       "relation": "contains",
@@ -4283,9 +4319,9 @@
       "source_file": "admin/README.md",
       "source_location": "L147",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_readme_upadmin_upwork_style_admin_panel",
-      "target": "admin_readme_api_reference",
-      "confidence_score": 1.0
+      "target": "admin_readme_api_reference"
     },
     {
       "relation": "contains",
@@ -4293,9 +4329,9 @@
       "source_file": "admin/README.md",
       "source_location": "L202",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_readme_upadmin_upwork_style_admin_panel",
-      "target": "admin_readme_admin_panel_features",
-      "confidence_score": 1.0
+      "target": "admin_readme_admin_panel_features"
     },
     {
       "relation": "contains",
@@ -4303,9 +4339,9 @@
       "source_file": "admin/README.md",
       "source_location": "L213",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_readme_upadmin_upwork_style_admin_panel",
-      "target": "admin_readme_security_notes",
-      "confidence_score": 1.0
+      "target": "admin_readme_security_notes"
     },
     {
       "relation": "contains",
@@ -4313,9 +4349,9 @@
       "source_file": "admin/README.md",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_readme_project_structure",
-      "target": "admin_readme_codeblock_1",
-      "confidence_score": 1.0
+      "target": "admin_readme_codeblock_1"
     },
     {
       "relation": "contains",
@@ -4323,9 +4359,9 @@
       "source_file": "admin/README.md",
       "source_location": "L43",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_readme_backend_setup_laravel",
-      "target": "admin_readme_1_install_in_your_existing_laravel_project",
-      "confidence_score": 1.0
+      "target": "admin_readme_1_install_in_your_existing_laravel_project"
     },
     {
       "relation": "contains",
@@ -4333,9 +4369,9 @@
       "source_file": "admin/README.md",
       "source_location": "L63",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_readme_backend_setup_laravel",
-      "target": "admin_readme_2_register_middleware_in_app_http_kernel_php",
-      "confidence_score": 1.0
+      "target": "admin_readme_2_register_middleware_in_app_http_kernel_php"
     },
     {
       "relation": "contains",
@@ -4343,9 +4379,9 @@
       "source_file": "admin/README.md",
       "source_location": "L72",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_readme_backend_setup_laravel",
-      "target": "admin_readme_3_install_laravel_sanctum_if_not_already",
-      "confidence_score": 1.0
+      "target": "admin_readme_3_install_laravel_sanctum_if_not_already"
     },
     {
       "relation": "contains",
@@ -4353,9 +4389,9 @@
       "source_file": "admin/README.md",
       "source_location": "L80",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_readme_backend_setup_laravel",
-      "target": "admin_readme_4_run_migrations",
-      "confidence_score": 1.0
+      "target": "admin_readme_4_run_migrations"
     },
     {
       "relation": "contains",
@@ -4363,9 +4399,9 @@
       "source_file": "admin/README.md",
       "source_location": "L86",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_readme_backend_setup_laravel",
-      "target": "admin_readme_5_create_your_first_admin_user",
-      "confidence_score": 1.0
+      "target": "admin_readme_5_create_your_first_admin_user"
     },
     {
       "relation": "contains",
@@ -4373,9 +4409,9 @@
       "source_file": "admin/README.md",
       "source_location": "L101",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_readme_backend_setup_laravel",
-      "target": "admin_readme_6_add_cors_headers_if_frontend_is_on_a_different_domain",
-      "confidence_score": 1.0
+      "target": "admin_readme_6_add_cors_headers_if_frontend_is_on_a_different_domain"
     },
     {
       "relation": "contains",
@@ -4383,9 +4419,9 @@
       "source_file": "admin/README.md",
       "source_location": "L47",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_readme_1_install_in_your_existing_laravel_project",
-      "target": "admin_readme_codeblock_2",
-      "confidence_score": 1.0
+      "target": "admin_readme_codeblock_2"
     },
     {
       "relation": "contains",
@@ -4393,9 +4429,9 @@
       "source_file": "admin/README.md",
       "source_location": "L65",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_readme_2_register_middleware_in_app_http_kernel_php",
-      "target": "admin_readme_codeblock_3",
-      "confidence_score": 1.0
+      "target": "admin_readme_codeblock_3"
     },
     {
       "relation": "contains",
@@ -4403,9 +4439,9 @@
       "source_file": "admin/README.md",
       "source_location": "L74",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_readme_3_install_laravel_sanctum_if_not_already",
-      "target": "admin_readme_codeblock_4",
-      "confidence_score": 1.0
+      "target": "admin_readme_codeblock_4"
     },
     {
       "relation": "contains",
@@ -4413,9 +4449,9 @@
       "source_file": "admin/README.md",
       "source_location": "L82",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_readme_4_run_migrations",
-      "target": "admin_readme_codeblock_5",
-      "confidence_score": 1.0
+      "target": "admin_readme_codeblock_5"
     },
     {
       "relation": "contains",
@@ -4423,9 +4459,9 @@
       "source_file": "admin/README.md",
       "source_location": "L88",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_readme_5_create_your_first_admin_user",
-      "target": "admin_readme_codeblock_6",
-      "confidence_score": 1.0
+      "target": "admin_readme_codeblock_6"
     },
     {
       "relation": "contains",
@@ -4433,9 +4469,9 @@
       "source_file": "admin/README.md",
       "source_location": "L91",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_readme_5_create_your_first_admin_user",
-      "target": "admin_readme_codeblock_7",
-      "confidence_score": 1.0
+      "target": "admin_readme_codeblock_7"
     },
     {
       "relation": "contains",
@@ -4443,9 +4479,9 @@
       "source_file": "admin/README.md",
       "source_location": "L104",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_readme_6_add_cors_headers_if_frontend_is_on_a_different_domain",
-      "target": "admin_readme_codeblock_8",
-      "confidence_score": 1.0
+      "target": "admin_readme_codeblock_8"
     },
     {
       "relation": "contains",
@@ -4453,9 +4489,9 @@
       "source_file": "admin/README.md",
       "source_location": "L115",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_readme_frontend_setup",
-      "target": "admin_readme_option_a_drop_in_html_simplest",
-      "confidence_score": 1.0
+      "target": "admin_readme_option_a_drop_in_html_simplest"
     },
     {
       "relation": "contains",
@@ -4463,9 +4499,9 @@
       "source_file": "admin/README.md",
       "source_location": "L128",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_readme_frontend_setup",
-      "target": "admin_readme_option_b_inject_api_url_via_server",
-      "confidence_score": 1.0
+      "target": "admin_readme_option_b_inject_api_url_via_server"
     },
     {
       "relation": "contains",
@@ -4473,9 +4509,9 @@
       "source_file": "admin/README.md",
       "source_location": "L135",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_readme_frontend_setup",
-      "target": "admin_readme_option_c_react_vue_integration",
-      "confidence_score": 1.0
+      "target": "admin_readme_option_c_react_vue_integration"
     },
     {
       "relation": "contains",
@@ -4483,9 +4519,9 @@
       "source_file": "admin/README.md",
       "source_location": "L119",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_readme_option_a_drop_in_html_simplest",
-      "target": "admin_readme_codeblock_9",
-      "confidence_score": 1.0
+      "target": "admin_readme_codeblock_9"
     },
     {
       "relation": "contains",
@@ -4493,9 +4529,9 @@
       "source_file": "admin/README.md",
       "source_location": "L123",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_readme_option_a_drop_in_html_simplest",
-      "target": "admin_readme_codeblock_10",
-      "confidence_score": 1.0
+      "target": "admin_readme_codeblock_10"
     },
     {
       "relation": "contains",
@@ -4503,9 +4539,9 @@
       "source_file": "admin/README.md",
       "source_location": "L131",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_readme_option_b_inject_api_url_via_server",
-      "target": "admin_readme_codeblock_11",
-      "confidence_score": 1.0
+      "target": "admin_readme_codeblock_11"
     },
     {
       "relation": "contains",
@@ -4513,9 +4549,9 @@
       "source_file": "admin/README.md",
       "source_location": "L138",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_readme_option_c_react_vue_integration",
-      "target": "admin_readme_codeblock_12",
-      "confidence_score": 1.0
+      "target": "admin_readme_codeblock_12"
     },
     {
       "relation": "contains",
@@ -4523,9 +4559,9 @@
       "source_file": "admin/README.md",
       "source_location": "L149",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_readme_api_reference",
-      "target": "admin_readme_authentication",
-      "confidence_score": 1.0
+      "target": "admin_readme_authentication"
     },
     {
       "relation": "contains",
@@ -4533,9 +4569,9 @@
       "source_file": "admin/README.md",
       "source_location": "L156",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_readme_api_reference",
-      "target": "admin_readme_dashboard",
-      "confidence_score": 1.0
+      "target": "admin_readme_dashboard"
     },
     {
       "relation": "contains",
@@ -4543,9 +4579,9 @@
       "source_file": "admin/README.md",
       "source_location": "L163",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_readme_api_reference",
-      "target": "admin_readme_users",
-      "confidence_score": 1.0
+      "target": "admin_readme_users"
     },
     {
       "relation": "contains",
@@ -4553,9 +4589,9 @@
       "source_file": "admin/README.md",
       "source_location": "L174",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_readme_api_reference",
-      "target": "admin_readme_jobs",
-      "confidence_score": 1.0
+      "target": "admin_readme_jobs"
     },
     {
       "relation": "contains",
@@ -4563,9 +4599,9 @@
       "source_file": "admin/README.md",
       "source_location": "L183",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_readme_api_reference",
-      "target": "admin_readme_payments",
-      "confidence_score": 1.0
+      "target": "admin_readme_payments"
     },
     {
       "relation": "contains",
@@ -4573,11 +4609,11 @@
       "source_file": "admin/README.md",
       "source_location": "L191",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_readme_api_reference",
-      "target": "admin_readme_reports",
-      "confidence_score": 1.0
+      "target": "admin_readme_reports"
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "266bbf2ef638d48e72fbf8c453473f5dd4457948"
+  "built_at_commit": "93da1f9ac0662548a4edfda5eb818c19d7594a58"
 }

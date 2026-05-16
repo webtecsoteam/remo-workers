@@ -65,6 +65,7 @@ ul, ol { list-style: none; }
 .section-subtitle { font-size: 1.125rem; color: var(--text-secondary); max-width: 600px; margin: 0 auto; }
 
 /* Cards */
+.modal { background: white; width: 800px; max-width: 95%; border-radius: 15px; position: relative; padding: 0; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.2); animation: modalIn .3s ease-out }
 .card { background: var(--bg-card); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); padding: 2rem; transition: all var(--transition-base); position: relative; overflow: hidden; }
 .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--gradient-primary); opacity: 0; transition: opacity var(--transition-base); }
 .card:hover { transform: translateY(-4px); border-color: rgba(108,92,231,0.3); box-shadow: 0 8px 32px rgba(0,0,0,0.5); }

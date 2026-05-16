@@ -12,7 +12,7 @@
   <div class="tab-bar">
     <div class="tab on" onclick="setTab(this)">Best Matches</div>
     <div class="tab" onclick="setTab(this)">Most Recent</div>
-    <div class="tab" onclick="setTab(this)">Saved Jobs</div>
+    <div class="tab" onclick="setTab(this)">Saved Jobs (<?php echo count($savedJobs); ?>)</div>
   </div>
 
   <div id="findwork-job-list">

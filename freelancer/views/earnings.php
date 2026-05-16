@@ -5,17 +5,17 @@
   <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:16px;margin-bottom:20px">
     <div class="stat-c">
       <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Available Now</div>
-      <div style="font-size:24px;font-weight:800;color:var(--g)">$<?php echo number_format($user['balance']); ?></div>
+      <div style="font-size:24px;font-weight:800;color:var(--g)">$<?php echo number_format((float)($user['balance'] ?? 0), 2); ?></div>
       <button class="btn btn-g btn-sm" style="margin-top:10px;width:100%;justify-content:center" onclick="openModal('withdraw')">Get Paid</button>
     </div>
     <div class="stat-c">
       <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Pending</div>
-      <div style="font-size:24px;font-weight:800">$1,240</div>
+      <div style="font-size:24px;font-weight:800">$<?php echo number_format((float)($fStats['pending_earnings'] ?? 0), 2); ?></div>
       <div style="font-size:11px;color:var(--muted);margin-top:4px">In security period</div>
     </div>
     <div class="stat-c">
       <div style="font-size:12px;color:var(--muted);margin-bottom:6px">In Review</div>
-      <div style="font-size:24px;font-weight:800">$450</div>
+      <div style="font-size:24px;font-weight:800">$0.00</div>
       <div style="font-size:11px;color:var(--muted);margin-top:4px">Client reviewing work</div>
     </div>
   </div>

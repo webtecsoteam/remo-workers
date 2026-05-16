@@ -8,13 +8,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
     // Simple auth using Auth class if available
-    if (class_exists('Auth')) {
-        $user = Auth::attempt($email, $password);
-    } else {
-        $stmt = $pdo->prepare('SELECT * FROM users WHERE email = :e');
-        $stmt->execute(['e' => $email]);
-        $row = $stmt->fetch();
-        $user = ($row && password_verify($password, $row['password'])) ? $row : null;
+    try {
+        if (class_exists('Auth')) {
+            $user = Auth::login($email, $password);
+        } else {
+            $db = getDB();
+            $stmt = $db->prepare('SELECT * FROM users WHERE email = :e');
+            $stmt->execute(['e' => $email]);
+            $row = $stmt->fetch();
+            $user = ($row && password_verify($password, $row['password'])) ? $row : null;
+        }
+    } catch (Exception $e) {
+        $error = $e->getMessage();
+        $user = null;
     }
     if ($user) {
         $_SESSION['user_id'] = $user['id'];
@@ -30,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <title>Freelancer Login</title>
-    <link rel="stylesheet" href="<?=baseUrl('css/style.css')?>">
+    <link rel="stylesheet" href="<?=baseUrl('assets/css/style.css')?>">
     <style>
         .login-card{max-width:380px;margin:80px auto;padding:30px;background:#fff;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.08);}
     </style>
