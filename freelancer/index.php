@@ -81,6 +81,20 @@ try {
     $monthlyStmt->execute([$user['id']]);
     $fStats['monthly_earnings'] = (float)$monthlyStmt->fetchColumn() ?: 0;
 
+    $completedStmt = $db->prepare("SELECT COUNT(*) FROM contracts WHERE freelancer_id = ? AND status = 'completed'");
+    $completedStmt->execute([$user['id']]);
+    $fStats['completed_contracts'] = (int)$completedStmt->fetchColumn() ?: 0;
+
+    // Calculate JSS (Simple logic for now: if no completed jobs, show N/A)
+    if ($fStats['completed_contracts'] === 0) {
+        $fStats['jss'] = 'N/A';
+        $fStats['is_top_rated'] = false;
+    } else {
+        // Dummy calculation for now, but could be based on ratings table later
+        $fStats['jss'] = '100%'; 
+        $fStats['is_top_rated'] = ($fStats['total_earned'] >= 1000);
+    }
+
     // Transactions (Payments) with virtual type and description
     $transactionsStmt = $db->prepare("
         SELECT p.*, j.title as job_title,
@@ -251,7 +265,7 @@ include __DIR__ . '/includes/header.php';
       </div>
     </div>
     <div class="sb-stats">
-      <div class="sb-stat"><div class="sb-stat-val">96%</div><div class="sb-stat-lbl">Job Success</div></div>
+      <div class="sb-stat"><div class="sb-stat-val"><?php echo $fStats['jss']; ?></div><div class="sb-stat-lbl">Job Success</div></div>
       <div class="sb-stat" onclick="openModal('connects')" style="cursor:pointer">
         <div class="sb-stat-val" id="sb-connects-val"><?php echo $user['connects'] ?? 0; ?></div>
         <div class="sb-stat-lbl">Connects</div>

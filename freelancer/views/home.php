@@ -90,21 +90,30 @@
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px">
         <div>
           <div style="font-size:22px;font-weight:700;margin-bottom:4px">$<?php echo number_format((float)($fStats['monthly_earnings'] ?? 0)); ?> <span style="font-size:13px;font-weight:400;color:var(--muted)"><?php echo date('F Y'); ?></span></div>
-          <div style="font-size:12.5px;color:var(--g);font-weight:600">↑ 12% from last month</div>
+          <?php if (($fStats['monthly_earnings'] ?? 0) > 0): ?>
+            <div style="font-size:12.5px;color:var(--g);font-weight:600">Active earnings this month</div>
+          <?php else: ?>
+            <div style="font-size:12.5px;color:var(--muted);font-weight:600">No earnings yet this month</div>
+          <?php endif; ?>
         </div>
         <button class="btn btn-w btn-sm" onclick="showPage('earnings')">Full Report</button>
       </div>
       <div class="chart-area" style="height:120px;background:linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);border-radius:8px;padding:10px;display:flex;flex-direction:column;justify-content:flex-end">
         <div class="chart-bars">
-          <div class="chart-bar" style="height:42%" onclick="toast('November','$5,900 earned')"></div>
-          <div class="chart-bar" style="height:55%" onclick="toast('December','$7,700 earned')"></div>
-          <div class="chart-bar" style="height:64%" onclick="toast('January','$8,960 earned')"></div>
-          <div class="chart-bar" style="height:72%" onclick="toast('February','$10,080 earned')"></div>
-          <div class="chart-bar" style="height:85%" onclick="toast('March','$12,140 earned')"></div>
-          <div class="chart-bar active" style="height:92%" onclick="toast('April','$13,200 earned')"></div>
+          <?php 
+            // Simple dynamic bars based on last 6 months (mocked as 0 for now)
+            for($i=5; $i>=0; $i--) {
+                $m = date('M', strtotime("-$i months"));
+                echo '<div class="chart-bar" style="height:2%" onclick="toast(\''.$m.'\',\'No earnings\')"></div>';
+            }
+          ?>
         </div>
         <div class="chart-labels">
-          <div class="chart-lbl">Nov</div><div class="chart-lbl">Dec</div><div class="chart-lbl">Jan</div><div class="chart-lbl">Feb</div><div class="chart-lbl">Mar</div><div class="chart-lbl">Apr</div>
+          <?php 
+            for($i=5; $i>=0; $i--) {
+                echo '<div class="chart-lbl">'.date('M', strtotime("-$i months")).'</div>';
+            }
+          ?>
         </div>
       </div>
     </div>

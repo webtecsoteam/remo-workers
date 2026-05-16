@@ -26,15 +26,32 @@
                 <span id="field-location" style="font-size:13.5px;color:var(--muted)"><?php echo htmlspecialchars($user['country'] ?: 'Global'); ?></span>
               </div>
               <div style="display:flex;gap:6px;flex-wrap:wrap">
-                <span class="badge b-green">✦ Top Rated Plus</span>
+                <?php if ($fStats['is_top_rated']): ?>
+                  <span class="badge b-green">✦ Top Rated Plus</span>
+                <?php endif; ?>
                 <span class="badge <?php echo $user['is_verified'] ? 'b-green' : 'b-gray'; ?>">✓ <?php echo $user['is_verified'] ? 'ID Verified' : 'Unverified'; ?></span>
-                <span class="badge b-blue">🟢 Available</span>
-                <span class="badge b-gray">★ 5.0 · 0 reviews</span>
+                
+                <?php
+                  $avail = $user['availability'] ?? 'available';
+                  $availLabel = 'Available';
+                  $availDot = '🟢';
+                  $availClass = 'b-blue';
+                  if ($avail === 'limited') { $availLabel = 'Limited'; $availDot = '🟡'; $availClass = 'b-yellow'; }
+                  if ($avail === 'unavailable') { $availLabel = 'Unavailable'; $availDot = '🔴'; $availClass = 'b-gray'; }
+                ?>
+                <span class="badge <?php echo $availClass; ?>"><?php echo $availDot; ?> <?php echo $availLabel; ?></span>
+                <span class="badge b-gray">★ 0.0 · <?php echo $fStats['completed_contracts']; ?> reviews</span>
               </div>
             </div>
             <div style="display:flex;gap:12px;flex-shrink:0">
               <div style="text-align:center">
-                <div class="jss-ring" style="margin:0 auto 4px"><div class="jss-inner">100%</div></div>
+                <?php 
+                  $jssPerc = ($fStats['jss'] === 'N/A') ? 0 : (int)$fStats['jss'];
+                  $jssBg = "conic-gradient(var(--g) 0% {$jssPerc}%, var(--border) {$jssPerc}%)";
+                ?>
+                <div class="jss-ring" style="margin:0 auto 4px; background:<?php echo $jssBg; ?>; <?php echo ($fStats['jss'] === 'N/A') ? 'border-color:var(--border)' : ''; ?>">
+                  <div class="jss-inner" style="<?php echo ($fStats['jss'] === 'N/A') ? 'color:var(--muted)' : ''; ?>"><?php echo $fStats['jss']; ?></div>
+                </div>
                 <div style="font-size:10px;color:var(--muted)">JSS</div>
               </div>
               <div style="text-align:center">
@@ -113,7 +130,7 @@
             <tr><td style="color:var(--muted);width:120px">Rate</td><td><strong>$<?php echo number_format($user['hourly_rate'] ?: 0, 2); ?>/hr</strong></td></tr>
             <tr><td style="color:var(--muted)">Location</td><td><?php echo htmlspecialchars($user['country'] ?: 'Global'); ?></td></tr>
             <tr><td style="color:var(--muted)">Member since</td><td><?php echo date('F Y', strtotime($user['created_at'])); ?></td></tr>
-            <tr><td style="color:var(--muted)">Total earned</td><td><strong>$<?php echo number_format($user['balance'] ?: 0, 2); ?>+</strong></td></tr>
+            <tr><td style="color:var(--muted)">Total earned</td><td><strong>$<?php echo number_format($fStats['total_earned'], 2); ?>+</strong></td></tr>
           </table>
         </div>
       </div>
