@@ -67,29 +67,28 @@ function selectPayMethod(el){document.querySelectorAll('.pay-method').forEach(x=
 async function handleAddFunds(){
   const input = document.getElementById('add-funds-amount');
   const v = parseFloat(input?.value || 0);
-  if(v < 50){ toast('Minimum $50', 'Please enter at least $50 to add'); return; }
+  if(v < 5){ toast('Minimum ', 'Please enter at least  to add'); return; }
   
   const btn = event.target;
   const originalText = btn.innerText;
   btn.disabled = true;
-  btn.innerText = 'Processing...';
+  btn.innerText = 'Initializing...';
 
   try {
     const formData = new FormData();
     formData.append('amount', v);
-    formData.append('method', 'Visa ••4821'); // Simulated
 
-    const response = await fetch(BASE_URL + '/actions/add_funds.php', {
+    const response = await fetch(BASE_URL + '/actions/paystack_init.php', {
       method: 'POST',
       body: formData
     });
     
     const result = await response.json();
-    if(result.success) {
-      toast('Funds Added!', `$${v.toFixed(2)} added. Balance updated.`);
-      setTimeout(() => location.reload(), 1200);
+    if(result.success && result.authorization_url) {
+      toast('Redirecting...', 'Taking you to Paystack secure payment page');
+      window.location.href = result.authorization_url;
     } else {
-      toast('Error', result.error || 'Failed to add funds');
+      toast('Error', result.error || 'Failed to initialize payment');
       btn.disabled = false;
       btn.innerText = originalText;
     }
@@ -1021,3 +1020,17 @@ setTimeout(()=>toast('Welcome back, NexaFlow!','You have 4 unread messages and 1
 </script>
 </body>
 </html>
+
+// Handle Paystack callback status
+window.addEventListener('DOMContentLoaded', () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('payment') === 'success') {
+    const amount = urlParams.get('amount');
+    toast('Payment Successful! ✓', `$${amount} has been added to your balance.`);
+    // Clean up URL
+    window.history.replaceState({}, document.title, window.location.pathname);
+  } else if (urlParams.get('payment') === 'failed') {
+    toast('Payment Failed', 'There was an issue processing your transaction.');
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+});
