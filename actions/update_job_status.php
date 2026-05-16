@@ -23,7 +23,7 @@ if (!$job_id || !$status) {
 }
 
 // Allowed statuses for toggle
-$allowed = ['open', 'paused'];
+$allowed = ['open', 'paused', 'closed', 'cancelled', 'in_progress'];
 if (!in_array($status, $allowed)) {
     echo json_encode(['success' => false, 'error' => 'Invalid status transition']);
     exit;

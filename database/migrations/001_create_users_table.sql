@@ -24,6 +24,8 @@ CREATE TABLE IF NOT EXISTS jobs (
     title VARCHAR(255) NOT NULL,
     description TEXT NOT NULL,
     category VARCHAR(255) NOT NULL,
+    subcategory VARCHAR(255) NULL,
+    specialty VARCHAR(255) NULL,
     skills_required JSON NULL,
     budget DECIMAL(12, 2) NULL,
     budget_type ENUM('fixed', 'hourly') DEFAULT 'fixed',

@@ -152,7 +152,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;color:var(--dark);background:var
 .pd-row:last-of-type{border-bottom:none;margin-bottom:14px}
 .pd-row span{color:var(--muted)}
 /* Toast */
-.notif-toast{position:fixed;bottom:28px;right:28px;background:white;border-radius:var(--r2);padding:16px 20px;box-shadow:0 12px 40px rgba(0,0,0,.18);display:flex;align-items:center;gap:14px;font-size:13px;z-index:8000;transform:translateY(80px);opacity:0;transition:all .35s;border:1px solid var(--border);max-width:calc(100% - 40px)}
+.notif-toast{position:fixed;bottom:28px;right:28px;background:white;border-radius:var(--r2);padding:16px 20px;box-shadow:0 12px 40px rgba(0,0,0,.18);display:flex;align-items:center;gap:14px;font-size:13px;z-index:10000;transform:translateY(80px);opacity:0;transition:all .35s;border:1px solid var(--border);max-width:calc(100% - 40px)}
 @media(max-width:768px){ .notif-toast{right:20px;left:20px;bottom:20px;max-width:none} }
 .notif-toast.show{transform:translateY(0);opacity:1}
 .nt-ico{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}

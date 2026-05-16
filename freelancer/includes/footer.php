@@ -1,7 +1,7 @@
 <script>
   const JOBS = <?php echo json_encode($allJobs ?? [], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?: '[]'; ?>;
   const SAVED_IDS = <?php echo json_encode(array_column($savedJobs ?? [], 'id'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?: '[]'; ?>;
-  const PROPOSALS = <?php echo json_encode($submittedProposals ?? [], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?: '[]'; ?>;
+  let PROPOSALS = <?php echo json_encode($submittedProposals ?? [], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?: '[]'; ?>;
   const CONTRACTS = <?php echo json_encode($allContracts ?? [], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?: '[]'; ?>;
   const USER_CONNECTS = <?php echo $user['connects'] ?? 0; ?>;
 
@@ -241,10 +241,13 @@
   function renderProposals(filter = 'Active') {
     const list = document.getElementById('proposals-list');
     if (!list) return;
+    
+    const title = document.getElementById('proposals-list-title');
+    if (title) title.textContent = filter + ' Proposals';
 
     let filtered = [...PROPOSALS];
     if (filter === 'Active') {
-      filtered = PROPOSALS.filter(p => p.status === 'accepted' || p.status === 'interviewing');
+      filtered = PROPOSALS.filter(p => p.status === 'pending' || p.status === 'accepted' || p.status === 'interviewing');
     } else if (filter === 'Submitted') {
       filtered = PROPOSALS.filter(p => p.status === 'pending');
     } else if (filter === 'Archived') {
@@ -488,6 +491,18 @@
     .then(data => {
       console.log('Response data:', data);
       if (data.success) {
+        // Add new proposal to local list so it shows up immediately
+        const job = JOBS.find(j => j.id == jobId);
+        PROPOSALS.unshift({
+          id: data.id,
+          job_id: jobId,
+          job_title: job ? job.title : 'Job Post',
+          bid_amount: rate,
+          estimated_days: days,
+          status: 'pending',
+          created_at: new Date().toISOString()
+        });
+        
         toast('Success', data.message);
         closeModal();
         showPage('proposals');

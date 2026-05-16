@@ -22,7 +22,7 @@ if (!$proposal_id || !$status) {
     exit;
 }
 
-$allowed = ['pending', 'shortlisted', 'archived', 'rejected'];
+$allowed = ['pending', 'shortlisted', 'archived', 'rejected', 'interviewing', 'accepted'];
 if (!in_array($status, $allowed)) {
     echo json_encode(['success' => false, 'error' => 'Invalid status']);
     exit;

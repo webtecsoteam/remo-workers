@@ -483,6 +483,27 @@ function openModal(id){
 
 function viewJobDetails(job) {
   currentJob = job;
+  
+  let actionButtons = '';
+  if (job.status === 'open') {
+    actionButtons = `
+      <button class="btn btn-g" style="flex:1;justify-content:center" onclick="editJob()">Edit Job</button>
+      <button class="btn btn-o" style="flex:1;justify-content:center" onclick="showPage('proposals',document.querySelector('[onclick*=proposals]'));closeModal()">View Proposals (${job.proposal_count})</button>
+      <button class="btn btn-w" style="flex:1;justify-content:center;color:#ef4444;border-color:#fecaca" onclick="toggleJobStatus(${job.id}, 'cancelled')">Cancel Job</button>
+    `;
+  } else if (job.status === 'in_progress') {
+    actionButtons = `
+      <button class="btn btn-o" style="flex:1;justify-content:center" onclick="toggleJobStatus(${job.id}, 'closed')">Mark Complete</button>
+      <button class="btn btn-w" style="flex:1;justify-content:center" onclick="toggleJobStatus(${job.id}, 'paused')">Pause</button>
+      <button class="btn btn-w" style="flex:1;justify-content:center;color:#ef4444;border-color:#fecaca" onclick="toggleJobStatus(${job.id}, 'cancelled')">Cancel Job</button>
+    `;
+  } else if (job.status === 'paused') {
+    actionButtons = `
+      <button class="btn btn-g" style="flex:1;justify-content:center" onclick="toggleJobStatus(${job.id}, 'open')">Resume</button>
+      <button class="btn btn-w" style="flex:1;justify-content:center;color:#ef4444;border-color:#fecaca" onclick="toggleJobStatus(${job.id}, 'cancelled')">Cancel</button>
+    `;
+  }
+
   MODALS['view-job'] = {
     t: job.title,
     b: `
@@ -504,9 +525,7 @@ function viewJobDetails(job) {
       </div>
       <div style="font-size:13px;color:#374151;line-height:1.7;margin-bottom:14px">${job.description}</div>
       <div style="display:flex;gap:8px;margin-top:16px">
-        <button class="btn btn-w" style="flex:1;justify-content:center" onclick="toggleJobStatus(${job.id}, '${job.status === 'paused' ? 'open' : 'paused'}')">${job.status === 'paused' ? 'Resume Job' : 'Pause Job'}</button>
-        <button class="btn btn-o" style="flex:1;justify-content:center" onclick="showPage('proposals',document.querySelector('[onclick*=proposals]'));closeModal()">View Proposals (${job.proposal_count})</button>
-        <button class="btn btn-g" style="flex:1;justify-content:center" onclick="editJob()">Edit Job</button>
+        ${actionButtons}
       </div>
     `
   };
@@ -927,6 +946,123 @@ async function updateProposalStatus(propId, newStatus) {
       setTimeout(() => location.reload(), 1000);
     } else {
       toast('Error', result.error || 'Failed to update proposal');
+    }
+  } catch(err) {
+    toast('Error', 'An unexpected error occurred.');
+  }
+}
+
+async function completeJob(propId) {
+  if(!confirm('Are you sure you want to mark this job as completed? This will close the job and complete the contract.')) return;
+  
+  toast('Processing...', 'Marking job as completed');
+  const formData = new FormData();
+  formData.append('proposal_id', propId);
+
+  try {
+    const res = await fetch(BASE_URL + '/actions/complete_job.php', {
+      method: 'POST',
+      body: formData
+    });
+    const result = await res.json();
+    if(result.success) {
+      toast('Success! 🎉', result.message);
+      setTimeout(() => location.reload(), 1500);
+    } else {
+      toast('Error', result.error || 'Failed to complete job');
+    }
+  } catch(err) {
+    toast('Error', 'An unexpected error occurred.');
+  }
+}
+
+async function cancelHiring(propId) {
+  const reason = prompt('Please enter the reason for cancellation:');
+  if(reason === null) return; // Cancelled prompt
+  
+  toast('Processing...', 'Cancelling hiring');
+  const formData = new FormData();
+  formData.append('proposal_id', propId);
+  formData.append('reason', reason);
+
+  try {
+    const res = await fetch(BASE_URL + '/actions/cancel_hiring.php', {
+      method: 'POST',
+      body: formData
+    });
+    const result = await res.json();
+    if(result.success) {
+      toast('Cancelled', result.message);
+      setTimeout(() => location.reload(), 1500);
+    } else {
+      toast('Error', result.error || 'Failed to cancel hiring');
+    }
+  } catch(err) {
+    toast('Error', 'An unexpected error occurred.');
+  }
+}
+
+function manageContract(contract) {
+  MODALS['manage-contract'] = {
+    t: 'Manage Contract',
+    b: `
+      <div style="display:flex;gap:12px;align-items:center;background:var(--uw-bg);border-radius:12px;padding:16px;margin-bottom:20px;border:1.5px solid var(--uw-border)">
+        <div class="av" style="background:var(--uw-green-light);color:var(--uw-green);width:48px;height:48px;font-size:16px">${contract.freelancer_name.substring(0,2).toUpperCase()}</div>
+        <div style="flex:1">
+          <div style="font-weight:700;font-size:15px;margin-bottom:2px">${contract.freelancer_name}</div>
+          <div style="font-size:12px;color:var(--uw-gray)">${contract.job_title}</div>
+        </div>
+      </div>
+      
+      <div style="display:grid;gap:12px">
+        <button class="btn btn-w" style="justify-content:center;padding:12px" onclick="closeModal();showChatWithFreelancer(${contract.freelancer_id}, '${contract.freelancer_name.replace(/'/g, "\\'")}')">
+          💬 Message Freelancer
+        </button>
+        
+        ${contract.status === 'active' ? `
+          <button class="btn btn-w" style="justify-content:center;padding:12px;color:#b45309;border-color:#fde68a" onclick="closeModal();updateContractStatus(${contract.id}, 'paused')">
+            ⏸ Pause Contract
+          </button>
+        ` : ''}
+        
+        ${contract.status === 'paused' ? `
+          <button class="btn btn-g" style="justify-content:center;padding:12px" onclick="closeModal();updateContractStatus(${contract.id}, 'active')">
+            ▶ Resume Contract
+          </button>
+        ` : ''}
+        
+        <button class="btn btn-o" style="justify-content:center;padding:12px" onclick="closeModal();completeJob(${contract.proposal_id})">
+          ✅ Mark Job as Completed
+        </button>
+        
+        <button class="btn btn-w" style="justify-content:center;padding:12px;color:#ef4444;border-color:#fecaca" onclick="closeModal();cancelHiring(${contract.proposal_id})">
+          ❌ Cancel Hiring
+        </button>
+      </div>
+    `
+  };
+  openModal('manage-contract');
+}
+
+async function updateContractStatus(contractId, newStatus) {
+  const actionText = newStatus === 'paused' ? 'pausing' : 'resuming';
+  toast('Processing...', `Contract is ${actionText}`);
+  
+  const formData = new FormData();
+  formData.append('contract_id', contractId);
+  formData.append('status', newStatus);
+
+  try {
+    const res = await fetch(BASE_URL + '/actions/update_contract_status.php', {
+      method: 'POST',
+      body: formData
+    });
+    const result = await res.json();
+    if(result.success) {
+      toast('Success! 🎉', result.message);
+      setTimeout(() => location.reload(), 1500);
+    } else {
+      toast('Error', result.error || 'Failed to update contract status');
     }
   } catch(err) {
     toast('Error', 'An unexpected error occurred.');
