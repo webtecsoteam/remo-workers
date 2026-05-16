@@ -21,9 +21,13 @@ $budget = (float)($_POST['budget'] ?? 0);
 $budget_type = $_POST['budget_type'] ?? 'fixed';
 $skills = $_POST['skills'] ?? '';
 
-if (empty($title) || empty($description) || empty($category) || empty($subcategory)) {
-    echo json_encode(['success' => false, 'error' => 'Title, description, category and subcategory are required']);
+if (empty($title) || empty($description) || empty($category)) {
+    echo json_encode(['success' => false, 'error' => 'Title, description, and category are required']);
     exit;
+}
+
+if (empty($subcategory)) {
+    $subcategory = 'General';
 }
 
 try {

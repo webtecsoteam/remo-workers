@@ -412,20 +412,37 @@ button{font-family:inherit;cursor:pointer}
 .toast strong{display:block;margin-bottom:2px;color:#6ee564}
 
 /* ── MODAL ── */
+body.modal-open{
+  position:fixed;
+  width:100%;
+  left:0;right:0;
+  overflow:hidden;
+}
 .overlay{
-  position:fixed;inset:0;background:rgba(0,20,0,.48);
+  position:fixed;inset:0;
   z-index:10000;display:flex;align-items:center;justify-content:center;
   padding:20px;opacity:0;pointer-events:none;
-  transition:opacity .2s;backdrop-filter:blur(4px);
+  transition:opacity .2s;
+  background:transparent;
 }
-.overlay.open{opacity:1;pointer-events:all}
+.overlay-backdrop{
+  position:absolute;inset:0;
+  background:rgba(0,20,0,.48);
+  backdrop-filter:blur(4px);
+  pointer-events:none;
+}
+.overlay.open{opacity:1;pointer-events:none}
+.overlay.open .overlay-backdrop{pointer-events:auto}
+.overlay.open .modal{pointer-events:auto}
 .modal{
   background:white;border-radius:12px;
   max-width:600px;width:100%;max-height:86vh;
-  overflow-y:auto;
+  overflow:hidden;
+  display:flex;flex-direction:column;
   transform:translateY(16px);
   transition:transform .2s;
   box-shadow:0 24px 64px rgba(0,0,0,.18);
+  touch-action:manipulation;
 }
 .overlay.open .modal{transform:translateY(0)}
 .mh{
@@ -434,11 +451,28 @@ button{font-family:inherit;cursor:pointer}
   position:sticky;top:0;background:white;z-index:10;
 }
 .mh h2{font-size:16px;font-weight:700;color:var(--uw-black)}
-.mc{padding:22px 24px}
+.mc{
+  padding:22px 24px;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  flex:1;
+  min-height:0;
+}
+.pj-modal-footer{
+  position:sticky;bottom:0;
+  background:white;
+  padding:12px 0 4px;
+  margin-top:8px;
+  border-top:1px solid var(--uw-border);
+  z-index:3;
+}
 .mclose{
   width:32px;height:32px;border:1.5px solid var(--uw-border);
   border-radius:50%;display:flex;align-items:center;justify-content:center;
   cursor:pointer;font-size:16px;color:var(--uw-gray);background:white;
+  padding:0;font-family:inherit;line-height:1;
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
 }
 .mclose:hover{background:var(--uw-bg);color:var(--uw-dark)}
 
@@ -642,9 +676,13 @@ button{font-family:inherit;cursor:pointer}
   /* Hide "+ Post a Job" text button in topbar on mobile — use FAB instead */
   .topbar .btn-g.btn-sm{display:none}
 
-  /* Modal must sit above FAB; hide FAB while modal is open */
+  /* Modal must sit above FAB + bottom nav; hide chrome while modal is open */
   .overlay.open{z-index:10050}
-  .overlay.open ~ .mob-fab{display:none!important}
+  .overlay.open ~ .mob-fab,
+  .overlay.open ~ .mob-bottom-nav,
+  body.modal-open .mob-fab,
+  body.modal-open .mob-bottom-nav{display:none!important}
+  .overlay-backdrop{backdrop-filter:none;background:rgba(0,20,0,.55)}
 
   /* ── page title / header ── */
   .pg-title{font-size:18px}
@@ -734,17 +772,26 @@ button{font-family:inherit;cursor:pointer}
     border-radius:16px 16px 0 0;
     max-height:92vh;
     width:100%;
-    overflow-y:auto;
-    -webkit-overflow-scrolling:touch;
   }
   .mc{
-    padding:18px 16px 28px;
-    padding-bottom:calc(28px + env(safe-area-inset-bottom));
+    padding:18px 16px 12px;
+    padding-bottom:calc(12px + env(safe-area-inset-bottom));
+  }
+  .pj-modal-footer{
+    padding:14px 0 calc(8px + env(safe-area-inset-bottom));
+    margin:0 -16px;
+    padding-left:16px;
+    padding-right:16px;
   }
   #pj-submit-btn{
     position:relative;
-    z-index:2;
+    z-index:5;
     min-height:48px;
+    touch-action:manipulation;
+    -webkit-tap-highlight-color:rgba(20,168,0,.15);
+  }
+  .mclose,.fg select,.fg input,.fg textarea{
+    touch-action:manipulation;
   }
 
   /* ── toast ── */
@@ -795,7 +842,7 @@ button{font-family:inherit;cursor:pointer}
 
   /* ── touch experience fixes ── */
   * { -webkit-tap-highlight-color: transparent; }
-  .btn, .sb-item, .mob-nav-item, .tab, .stat-c, .job-card, .prop-card, .mob-fab, .mob-menu-btn {
+  .btn, .sb-item, .mob-nav-item, .tab, .stat-c, .job-card, .prop-card, .mob-fab, .mob-menu-btn, .mclose, #pj-submit-btn {
     cursor: pointer !important;
     touch-action: manipulation;
   }

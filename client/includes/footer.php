@@ -225,7 +225,9 @@ const MODALS = {
       <div class="fg"><label>Project Description</label><textarea id="pj-desc" placeholder="Describe the scope, goals, and requirements of your project…" style="min-height:100px"></textarea></div>
       <div class="fg"><label>Required Skills (comma separated)</label><input type="text" id="pj-skills" placeholder="e.g. React, Node.js, TypeScript"></div>
       
-      <button class="btn btn-g" id="pj-submit-btn" style="width:100%;justify-content:center;margin-top:4px;padding:11px" onclick="submitPostJob()">
+    </div>
+    <div class="pj-modal-footer">
+      <button type="button" class="btn btn-g" id="pj-submit-btn" style="width:100%;justify-content:center;padding:11px">
         <span id="pj-btn-text">Post Job →</span>
       </button>
     </div>
@@ -463,6 +465,19 @@ const MODALS = {
 };
 
 let currentJob = null;
+let _modalScrollY = 0;
+
+function lockBodyForModal(){
+  _modalScrollY = window.scrollY || window.pageYOffset || 0;
+  document.body.classList.add('modal-open');
+  document.body.style.top = `-${_modalScrollY}px`;
+}
+
+function unlockBodyForModal(){
+  document.body.classList.remove('modal-open');
+  document.body.style.top = '';
+  window.scrollTo(0, _modalScrollY);
+}
 
 function openModal(id){
   const m = MODALS[id];
@@ -473,15 +488,25 @@ function openModal(id){
   document.getElementById('mh-title').innerText = m.t;
   document.getElementById('mc-body').innerHTML = m.b;
   document.getElementById('overlay').classList.add('open');
-  document.body.style.overflow = 'hidden';
+  lockBodyForModal();
 
-  // Reset post-job if needed
   if(id === 'post-job') {
-    const btn = document.getElementById('pj-submit-btn');
-    const btnText = document.getElementById('pj-btn-text');
-    if(btnText) btnText.innerText = 'Post Job →';
-    if(btn) btn.onclick = submitPostJob;
+    bindPostJobModal();
   }
+}
+
+function bindPostJobModal(){
+  const btn = document.getElementById('pj-submit-btn');
+  const btnText = document.getElementById('pj-btn-text');
+  if(btnText) btnText.innerText = 'Post Job →';
+  if(!btn) return;
+  btn.disabled = false;
+  btn.type = 'button';
+  btn.onclick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    submitPostJob();
+  };
 }
 window.__openModalImpl = openModal;
 window.openModal = openModal;
@@ -714,11 +739,37 @@ async function updateJob(jobId) {
 
 function closeModal(){
   document.getElementById('overlay').classList.remove('open');
-  document.body.style.overflow='';
+  unlockBodyForModal();
 }
 window.__closeModalImpl = closeModal;
 window.closeModal = closeModal;
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+(function initModalOverlay(){
+  const overlay = document.getElementById('overlay');
+  const backdrop = document.getElementById('overlay-backdrop');
+  const panel = document.getElementById('modal-panel');
+  if(!overlay) return;
+
+  if(backdrop){
+    backdrop.addEventListener('click', closeModal);
+  }
+
+  if(panel){
+    panel.addEventListener('click', (e) => {
+      const closeBtn = e.target.closest('.mclose');
+      if(closeBtn){
+        e.preventDefault();
+        closeModal();
+        return;
+      }
+      const submitBtn = e.target.closest('#pj-submit-btn');
+      if(submitBtn && !submitBtn.disabled){
+        e.preventDefault();
+        submitPostJob();
+      }
+    });
+  }
+})();
 
 function filterTalent(query) {
   const q = query.toLowerCase();
@@ -1334,7 +1385,6 @@ function updatePostJobFields(){
     if(el)el.style.display=(k===v)?'block':'none';
   });
 }
-
 function showChatWithFreelancer(id, name) {
   const initials = name.split(' ').map(n=>n[0]).join('').toUpperCase().substring(0,2);
   showPage('messages', document.querySelector('[onclick*=messages]'));
@@ -1374,21 +1424,24 @@ function showChatWithFreelancer(id, name) {
 }
 
 async function submitPostJob(){
-  const title = document.getElementById('pj-title').value.trim();
-  const cat = document.getElementById('pj-cat').value;
-  const subcat = document.getElementById('pj-subcat').value;
-  const spec = document.getElementById('pj-spec').value;
-  const type = document.getElementById('pj-billing-type').value;
-  const budget = document.getElementById('pj-budget').value;
-  const desc = document.getElementById('pj-desc').value.trim();
-  const skills = document.getElementById('pj-skills').value.trim();
+  const title = (document.getElementById('pj-title')||{}).value?.trim() || '';
+  const cat = (document.getElementById('pj-cat')||{}).value || '';
+  const subcat = (document.getElementById('pj-subcat')||{}).value || '';
+  const spec = (document.getElementById('pj-spec')||{}).value || '';
+  const type = (document.getElementById('pj-billing-type')||{}).value || 'fixed';
+  const budget = (document.getElementById('pj-budget')||{}).value || '';
+  const desc = (document.getElementById('pj-desc')||{}).value?.trim() || '';
+  const skills = (document.getElementById('pj-skills')||{}).value?.trim() || '';
+  const subcatWrap = document.getElementById('pj-subcat-wrap');
+  const subcatRequired = subcatWrap && subcatWrap.style.display !== 'none';
 
-  if(!title || !cat || !budget || !desc) {
-    return toast('Error', 'Please fill in job title, category, budget, and description');
+  if(!title || !cat || !budget || !desc || (subcatRequired && !subcat)) {
+    return toast('Error', 'Please fill in job title, category, subcategory, budget, and description');
   }
 
   const btn = document.getElementById('pj-submit-btn');
   const btnText = document.getElementById('pj-btn-text');
+  if(btn && btn.disabled) return;
   if(btn) btn.disabled = true;
   if(btnText) btnText.innerHTML = '<span class="spinner" style="width:16px;height:16px;border-width:2px;margin-right:8px"></span>Posting...';
 
@@ -1422,6 +1475,11 @@ async function submitPostJob(){
     if(btnText) btnText.innerText = 'Post Job →';
   }
 }
+window.updateSubcats = updateSubcats;
+window.updateSpecialties = updateSpecialties;
+window.updatePostJobFields = updatePostJobFields;
+window.submitPostJob = submitPostJob;
+window.bindPostJobModal = bindPostJobModal;
 async function hireFreelancer(proposalId, amount) {
   if (amount > availableBalance) {
     toast('Insufficient Balance', `Your current balance ($${availableBalance.toFixed(2)}) is less than the bid amount ($${amount.toFixed(2)}). Please add funds to your account.`);

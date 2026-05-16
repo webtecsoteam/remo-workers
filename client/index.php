@@ -291,9 +291,10 @@ window.closeModal = function() {
 <div class="toast" id="toast"><strong id="t-title"></strong><span id="t-msg"></span></div>
 
 <!-- MODAL OVERLAY -->
-<div class="overlay" id="overlay" onclick="if(event.target===this)closeModal()">
-  <div class="modal">
-    <div class="mh"><h2 id="mh-title">Detail</h2><div class="mclose" onclick="closeModal()">✕</div></div>
+<div class="overlay" id="overlay" role="presentation">
+  <div class="overlay-backdrop" id="overlay-backdrop" aria-hidden="true"></div>
+  <div class="modal" id="modal-panel" role="dialog" aria-modal="true" aria-labelledby="mh-title">
+    <div class="mh"><h2 id="mh-title">Detail</h2><button type="button" class="mclose" aria-label="Close">✕</button></div>
     <div class="mc" id="mc-body"></div>
   </div>
 </div>
