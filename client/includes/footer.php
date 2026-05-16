@@ -503,6 +503,7 @@ async function loadChat(otherId, name, initials, el) {
     
     if(result.success) {
       renderChatWindow(name, initials, result.messages);
+      startChatPolling(otherId, name, initials);
     } else {
       chatWindow.innerHTML = `<div style="padding:20px;text-align:center;color:red">${result.error}</div>`;
     }
@@ -546,6 +547,22 @@ async function sendMsg() {
   const msg = input.value.trim();
   if(!msg || !activeChatId) return;
 
+  const chatMessagesScroll = document.getElementById('chat-messages-scroll');
+  const tempId = 'temp-' + Date.now();
+  
+  // Append immediately for snappy feel
+  const myMsgHtml = `
+    <div style="display:flex;gap:10px;flex-direction:row-reverse" id="${tempId}">
+      <div class="av" style="width:30px;height:30px;font-size:10px;background:var(--uw-green);color:white;flex-shrink:0">Me</div>
+      <div style="max-width:75%;text-align:right">
+        <div style="background:var(--uw-green);color:white;border-radius:12px 2px 12px 12px;padding:10px 14px;font-size:13px;line-height:1.6;text-align:left">${msg}</div>
+        <div style="font-size:11px;color:var(--uw-gray2);margin-top:4px">Sending...</div>
+      </div>
+    </div>
+  `;
+  chatMessagesScroll.insertAdjacentHTML('beforeend', myMsgHtml);
+  chatMessagesScroll.scrollTop = chatMessagesScroll.scrollHeight;
+
   input.value = '';
   try {
     const formData = new FormData();
@@ -558,14 +575,39 @@ async function sendMsg() {
     });
     const result = await response.json();
     if(result.success) {
-      // Re-load to show my message
-      const chatHeaderName = document.querySelector('#chat-window div[style*="font-weight:700"]');
-      const chatHeaderAv = document.querySelector('#chat-window .av');
-      loadChat(activeChatId, chatHeaderName ? chatHeaderName.innerText : 'User', chatHeaderAv ? chatHeaderAv.innerText : '??');
+      const tempMsg = document.getElementById(tempId);
+      if(tempMsg) {
+        tempMsg.querySelector('div[style*="margin-top:4px"]').innerText = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+      }
+    } else {
+      toast('Error', result.error || 'Failed to send message');
     }
   } catch(err) {
     toast('Error', 'Failed to send message');
   }
+}
+
+// Polling for new messages
+let chatPollInterval = null;
+function startChatPolling(otherId, name, initials) {
+  if(chatPollInterval) clearInterval(chatPollInterval);
+  chatPollInterval = setInterval(async () => {
+    if(activeChatId !== otherId || document.getElementById('page-messages').style.display === 'none') {
+      clearInterval(chatPollInterval);
+      return;
+    }
+    try {
+      const response = await fetch(`${BASE_URL}/actions/get_messages.php?with=${otherId}`);
+      const result = await response.json();
+      if(result.success) {
+        // Only re-render if message count changed
+        const currentCount = document.querySelectorAll('#chat-messages-scroll > div').length;
+        if(result.messages.length > currentCount) {
+          renderChatWindow(name, initials, result.messages);
+        }
+      }
+    } catch(e) {}
+  }, 5000);
 }
 
 function filterConversations(query) {

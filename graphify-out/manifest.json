@@ -159,6 +159,11 @@
     "ast_hash": "6c47a97fc30458f2130e367c60857d61",
     "semantic_hash": ""
   },
+  "/Users/chiraglimbachiya/Sites/upwork/upwork project/actions/get_messages.php": {
+    "mtime": 1778917371.2494693,
+    "ast_hash": "cff6f59e2399c17da2840fcd6e638431",
+    "semantic_hash": ""
+  },
   "/Users/chiraglimbachiya/Sites/upwork/upwork project/actions/submit_verification.php": {
     "mtime": 1778910275.648717,
     "ast_hash": "39eb27fb0d245ff080f9d5bf6657b627",
@@ -167,6 +172,11 @@
   "/Users/chiraglimbachiya/Sites/upwork/upwork project/actions/post_job.php": {
     "mtime": 1778845601.5800173,
     "ast_hash": "b08b9e09332b16918a085e85edb937c2",
+    "semantic_hash": ""
+  },
+  "/Users/chiraglimbachiya/Sites/upwork/upwork project/actions/send_message.php": {
+    "mtime": 1778917380.7009053,
+    "ast_hash": "89cf9369ee67697a7c61beb450944e11",
     "semantic_hash": ""
   },
   "/Users/chiraglimbachiya/Sites/upwork/upwork project/actions/create_service.php": {
@@ -204,9 +214,24 @@
     "ast_hash": "49eb7d214aa0c398822aa43daffa373d",
     "semantic_hash": ""
   },
+  "/Users/chiraglimbachiya/Sites/upwork/upwork project/actions/change_password.php": {
+    "mtime": 1778914623.4149833,
+    "ast_hash": "de8ed582f83b41ed267e61116fbe57da",
+    "semantic_hash": ""
+  },
   "/Users/chiraglimbachiya/Sites/upwork/upwork project/actions/update_skills.php": {
     "mtime": 1778911346.8708482,
     "ast_hash": "662f242bc8608404e4a2910e23ffa1e9",
+    "semantic_hash": ""
+  },
+  "/Users/chiraglimbachiya/Sites/upwork/upwork project/actions/update_availability.php": {
+    "mtime": 1778914841.2221735,
+    "ast_hash": "e8920b4c5eb270077d5aef048537856b",
+    "semantic_hash": ""
+  },
+  "/Users/chiraglimbachiya/Sites/upwork/upwork project/actions/add_funds.php": {
+    "mtime": 1778916847.9241748,
+    "ast_hash": "41e4977cd6ec40b452b16474dd4432cf",
     "semantic_hash": ""
   },
   "/Users/chiraglimbachiya/Sites/upwork/upwork project/assets/js/main.js": {
@@ -215,8 +240,8 @@
     "semantic_hash": ""
   },
   "/Users/chiraglimbachiya/Sites/upwork/upwork project/client/index.php": {
-    "mtime": 1778846683.0746331,
-    "ast_hash": "95ff029ac6bd7f3e6f3e6c3b8594b119",
+    "mtime": 1778917721.550913,
+    "ast_hash": "5424c87bae4c8c7173a6446e5afd3ae1",
     "semantic_hash": ""
   },
   "/Users/chiraglimbachiya/Sites/upwork/upwork project/client/includes/header.php": {
@@ -225,8 +250,8 @@
     "semantic_hash": ""
   },
   "/Users/chiraglimbachiya/Sites/upwork/upwork project/client/includes/footer.php": {
-    "mtime": 1778845641.1372561,
-    "ast_hash": "bcd80e73b0dec9b7a1d8a3c3ab939b7f",
+    "mtime": 1778917962.547967,
+    "ast_hash": "0b08672a2f4d0cfab28431bd3e5f4953",
     "semantic_hash": ""
   },
   "/Users/chiraglimbachiya/Sites/upwork/upwork project/freelancer/login.php": {
@@ -235,8 +260,8 @@
     "semantic_hash": ""
   },
   "/Users/chiraglimbachiya/Sites/upwork/upwork project/freelancer/index.php": {
-    "mtime": 1778911200.677468,
-    "ast_hash": "c65b717b63c9204b2156b2286c0f4e22",
+    "mtime": 1778917404.3481658,
+    "ast_hash": "1d5d2e3d11f9659fb1c94ac04f2df9cc",
     "semantic_hash": ""
   },
   "/Users/chiraglimbachiya/Sites/upwork/upwork project/freelancer/includes/header.php": {
@@ -245,8 +270,8 @@
     "semantic_hash": ""
   },
   "/Users/chiraglimbachiya/Sites/upwork/upwork project/freelancer/includes/footer.php": {
-    "mtime": 1778913243.8985548,
-    "ast_hash": "d4cf99dab0f108a55a1af693651c98cd",
+    "mtime": 1778917555.489481,
+    "ast_hash": "8a32290120bb3e812a51564bde081245",
     "semantic_hash": ""
   },
   "/Users/chiraglimbachiya/Sites/upwork/upwork project/freelancer/includes/footer_test.js": {
@@ -290,8 +315,8 @@
     "semantic_hash": ""
   },
   "/Users/chiraglimbachiya/Sites/upwork/upwork project/freelancer/views/reports.php": {
-    "mtime": 1778850061.7706869,
-    "ast_hash": "8a8b873a4224d3c6f727b3d645e33d71",
+    "mtime": 1778915774.3099349,
+    "ast_hash": "eb18604c7e8db72fb34d3a96856b37d8",
     "semantic_hash": ""
   },
   "/Users/chiraglimbachiya/Sites/upwork/upwork project/freelancer/views/home.php": {
@@ -300,8 +325,8 @@
     "semantic_hash": ""
   },
   "/Users/chiraglimbachiya/Sites/upwork/upwork project/freelancer/views/earnings.php": {
-    "mtime": 1778864244.5960898,
-    "ast_hash": "70bffdfda34c7aa25af47e6d702b42cb",
+    "mtime": 1778913612.1324716,
+    "ast_hash": "d3b809fd607392ffd8fe245fe0f70873",
     "semantic_hash": ""
   },
   "/Users/chiraglimbachiya/Sites/upwork/upwork project/freelancer/views/profile.php": {
@@ -315,8 +340,8 @@
     "semantic_hash": ""
   },
   "/Users/chiraglimbachiya/Sites/upwork/upwork project/freelancer/views/messages.php": {
-    "mtime": 1778854369.3950047,
-    "ast_hash": "2e1e41cb82b8c32fd6d7ff567608cfaa",
+    "mtime": 1778917539.5251367,
+    "ast_hash": "0c50c4baf8b99153f1038f252b2cbc05",
     "semantic_hash": ""
   },
   "/Users/chiraglimbachiya/Sites/upwork/upwork project/freelancer/views/proposals.php": {
@@ -347,6 +372,11 @@
   "/Users/chiraglimbachiya/Sites/upwork/upwork project/uploads/verifications/verify_4_1778840039.png": {
     "mtime": 1778840039.990757,
     "ast_hash": "0415cf40628a1a6712a0485105b691c8",
+    "semantic_hash": ""
+  },
+  "/Users/chiraglimbachiya/Sites/upwork/upwork project/uploads/verifications/verify_8_1778916976.jpg": {
+    "mtime": 1778916976.8533006,
+    "ast_hash": "feb2696762498092f0f5d35785cf58d6",
     "semantic_hash": ""
   },
   "/Users/chiraglimbachiya/Sites/upwork/upwork project/uploads/verifications/verify_7_1778840128.png": {

@@ -572,7 +572,7 @@ $reportStats = $reportStatsStmt->fetch(PDO::FETCH_ASSOC);
                     <?php endif; ?>
                   </td>
                   <td><?php echo $isHired ? 'Active now' : 'Never'; ?></td>
-                  <td><button class="btn btn-w btn-sm" onclick="toast('Message','Opening chat...')">Message</button></td>
+                  <td><button class="btn btn-w btn-sm" onclick="event.stopPropagation();openChatWith(<?php echo $t['id']; ?>, '<?php echo addslashes($t['name']); ?>', '<?php echo $initials; ?>')">Message</button></td>
                 </tr>
               <?php endforeach; ?>
             <?php endif; ?>
@@ -602,7 +602,10 @@ $reportStats = $reportStatsStmt->fetch(PDO::FETCH_ASSOC);
                   <td>★ 5.0 (0)</td>
                   <td>$<?php echo number_format($t['hourly_rate'] ?? 0); ?>/hr</td>
                   <td><?php echo date('M d, Y', strtotime($t['created_at'])); ?></td>
-                  <td><button class="btn btn-g btn-sm" onclick="toast('Invite','Invite sent to <?php echo htmlspecialchars($t['name']); ?>')">Invite</button></td>
+                  <td>
+                    <button class="btn btn-w btn-sm" onclick="event.stopPropagation();openChatWith(<?php echo $t['id']; ?>, '<?php echo addslashes($t['name']); ?>', '<?php echo $initials; ?>')">Message</button>
+                    <button class="btn btn-g btn-sm" onclick="toast('Invite','Invite sent to <?php echo htmlspecialchars($t['name']); ?>')">Invite</button>
+                  </td>
                 </tr>
               <?php endforeach; ?>
             <?php endif; ?>

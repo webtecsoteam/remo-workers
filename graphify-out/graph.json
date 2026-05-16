@@ -4,130 +4,112 @@
   "graph": {},
   "nodes": [
     {
-      "label": "create_service.php",
+      "label": "add_funds.php",
       "file_type": "code",
-      "source_file": "actions/create_service.php",
+      "source_file": "actions/add_funds.php",
       "source_location": "L1",
-      "id": "actions_create_service_php",
-      "community": 57,
-      "norm_label": "create_service.php"
+      "id": "actions_add_funds_php",
+      "community": 63,
+      "norm_label": "add_funds.php"
     },
     {
       "label": "json_response()",
       "file_type": "code",
-      "source_file": "actions/create_service.php",
+      "source_file": "actions/add_funds.php",
       "source_location": "L7",
-      "id": "actions_create_service_json_response",
-      "community": 57,
+      "id": "actions_add_funds_json_response",
+      "community": 63,
       "norm_label": "json_response()"
     },
     {
-      "label": "delete_service.php",
+      "label": "change_password.php",
       "file_type": "code",
-      "source_file": "actions/delete_service.php",
+      "source_file": "actions/change_password.php",
       "source_location": "L1",
-      "id": "actions_delete_service_php",
-      "community": 59,
-      "norm_label": "delete_service.php"
+      "id": "actions_change_password_php",
+      "community": 64,
+      "norm_label": "change_password.php"
     },
     {
       "label": "json_response()",
       "file_type": "code",
-      "source_file": "actions/delete_service.php",
+      "source_file": "actions/change_password.php",
       "source_location": "L7",
-      "id": "actions_delete_service_json_response",
-      "community": 59,
+      "id": "actions_change_password_json_response",
+      "community": 64,
       "norm_label": "json_response()"
     },
     {
-      "label": "submit_verification.php",
+      "label": "get_messages.php",
       "file_type": "code",
-      "source_file": "actions/submit_verification.php",
+      "source_file": "actions/get_messages.php",
       "source_location": "L1",
-      "id": "actions_submit_verification_php",
-      "community": 58,
-      "norm_label": "submit_verification.php"
+      "id": "actions_get_messages_php",
+      "community": 65,
+      "norm_label": "get_messages.php"
     },
     {
       "label": "json_response()",
       "file_type": "code",
-      "source_file": "actions/submit_verification.php",
+      "source_file": "actions/get_messages.php",
       "source_location": "L7",
-      "id": "actions_submit_verification_json_response",
-      "community": 58,
+      "id": "actions_get_messages_json_response",
+      "community": 65,
       "norm_label": "json_response()"
     },
     {
-      "label": "update_profile.php",
+      "label": "send_message.php",
       "file_type": "code",
-      "source_file": "actions/update_profile.php",
+      "source_file": "actions/send_message.php",
       "source_location": "L1",
-      "id": "actions_update_profile_php",
-      "community": 60,
-      "norm_label": "update_profile.php"
+      "id": "actions_send_message_php",
+      "community": 66,
+      "norm_label": "send_message.php"
     },
     {
       "label": "json_response()",
       "file_type": "code",
-      "source_file": "actions/update_profile.php",
-      "source_location": "L6",
-      "id": "actions_update_profile_json_response",
-      "community": 60,
-      "norm_label": "json_response()"
-    },
-    {
-      "label": "update_service.php",
-      "file_type": "code",
-      "source_file": "actions/update_service.php",
-      "source_location": "L1",
-      "id": "actions_update_service_php",
-      "community": 61,
-      "norm_label": "update_service.php"
-    },
-    {
-      "label": "json_response()",
-      "file_type": "code",
-      "source_file": "actions/update_service.php",
+      "source_file": "actions/send_message.php",
       "source_location": "L7",
-      "id": "actions_update_service_json_response",
-      "community": 61,
+      "id": "actions_send_message_json_response",
+      "community": 66,
       "norm_label": "json_response()"
     },
     {
-      "label": "update_skills.php",
+      "label": "update_availability.php",
       "file_type": "code",
-      "source_file": "actions/update_skills.php",
+      "source_file": "actions/update_availability.php",
       "source_location": "L1",
-      "id": "actions_update_skills_php",
-      "community": 62,
-      "norm_label": "update_skills.php"
+      "id": "actions_update_availability_php",
+      "community": 67,
+      "norm_label": "update_availability.php"
     },
     {
       "label": "json_response()",
       "file_type": "code",
-      "source_file": "actions/update_skills.php",
-      "source_location": "L6",
-      "id": "actions_update_skills_json_response",
-      "community": 62,
-      "norm_label": "json_response()"
-    },
-    {
-      "label": "upload_doc.php",
-      "file_type": "code",
-      "source_file": "actions/upload_doc.php",
-      "source_location": "L1",
-      "id": "actions_upload_doc_php",
-      "community": 11,
-      "norm_label": "upload_doc.php"
-    },
-    {
-      "label": "json_response()",
-      "file_type": "code",
-      "source_file": "actions/upload_doc.php",
+      "source_file": "actions/update_availability.php",
       "source_location": "L7",
-      "id": "actions_upload_doc_json_response",
-      "community": 11,
+      "id": "actions_update_availability_json_response",
+      "community": 67,
       "norm_label": "json_response()"
+    },
+    {
+      "label": "footer.php",
+      "file_type": "code",
+      "source_file": "client/includes/footer.php",
+      "source_location": "L1",
+      "id": "client_includes_footer_php",
+      "community": 37,
+      "norm_label": "footer.php"
+    },
+    {
+      "label": "index.php",
+      "file_type": "code",
+      "source_file": "client/index.php",
+      "source_location": "L1",
+      "id": "client_index_php",
+      "community": 35,
+      "norm_label": "index.php"
     },
     {
       "label": "footer.php",
@@ -148,31 +130,184 @@
       "norm_label": "index.php"
     },
     {
+      "label": "earnings.php",
+      "file_type": "code",
+      "source_file": "freelancer/views/earnings.php",
+      "source_location": "L1",
+      "id": "freelancer_views_earnings_php",
+      "community": 48,
+      "norm_label": "earnings.php"
+    },
+    {
+      "label": "messages.php",
+      "file_type": "code",
+      "source_file": "freelancer/views/messages.php",
+      "source_location": "L1",
+      "id": "freelancer_views_messages_php",
+      "community": 51,
+      "norm_label": "messages.php"
+    },
+    {
+      "label": "reports.php",
+      "file_type": "code",
+      "source_file": "freelancer/views/reports.php",
+      "source_location": "L1",
+      "id": "freelancer_views_reports_php",
+      "community": 46,
+      "norm_label": "reports.php"
+    },
+    {
+      "label": "create_service.php",
+      "file_type": "code",
+      "source_file": "actions/create_service.php",
+      "source_location": "L1",
+      "community": 57,
+      "norm_label": "create_service.php",
+      "id": "actions_create_service_php"
+    },
+    {
+      "label": "json_response()",
+      "file_type": "code",
+      "source_file": "actions/create_service.php",
+      "source_location": "L7",
+      "community": 57,
+      "norm_label": "json_response()",
+      "id": "actions_create_service_json_response"
+    },
+    {
+      "label": "delete_service.php",
+      "file_type": "code",
+      "source_file": "actions/delete_service.php",
+      "source_location": "L1",
+      "community": 59,
+      "norm_label": "delete_service.php",
+      "id": "actions_delete_service_php"
+    },
+    {
+      "label": "json_response()",
+      "file_type": "code",
+      "source_file": "actions/delete_service.php",
+      "source_location": "L7",
+      "community": 59,
+      "norm_label": "json_response()",
+      "id": "actions_delete_service_json_response"
+    },
+    {
+      "label": "submit_verification.php",
+      "file_type": "code",
+      "source_file": "actions/submit_verification.php",
+      "source_location": "L1",
+      "community": 58,
+      "norm_label": "submit_verification.php",
+      "id": "actions_submit_verification_php"
+    },
+    {
+      "label": "json_response()",
+      "file_type": "code",
+      "source_file": "actions/submit_verification.php",
+      "source_location": "L7",
+      "community": 58,
+      "norm_label": "json_response()",
+      "id": "actions_submit_verification_json_response"
+    },
+    {
+      "label": "update_profile.php",
+      "file_type": "code",
+      "source_file": "actions/update_profile.php",
+      "source_location": "L1",
+      "community": 60,
+      "norm_label": "update_profile.php",
+      "id": "actions_update_profile_php"
+    },
+    {
+      "label": "json_response()",
+      "file_type": "code",
+      "source_file": "actions/update_profile.php",
+      "source_location": "L6",
+      "community": 60,
+      "norm_label": "json_response()",
+      "id": "actions_update_profile_json_response"
+    },
+    {
+      "label": "update_service.php",
+      "file_type": "code",
+      "source_file": "actions/update_service.php",
+      "source_location": "L1",
+      "community": 61,
+      "norm_label": "update_service.php",
+      "id": "actions_update_service_php"
+    },
+    {
+      "label": "json_response()",
+      "file_type": "code",
+      "source_file": "actions/update_service.php",
+      "source_location": "L7",
+      "community": 61,
+      "norm_label": "json_response()",
+      "id": "actions_update_service_json_response"
+    },
+    {
+      "label": "update_skills.php",
+      "file_type": "code",
+      "source_file": "actions/update_skills.php",
+      "source_location": "L1",
+      "community": 62,
+      "norm_label": "update_skills.php",
+      "id": "actions_update_skills_php"
+    },
+    {
+      "label": "json_response()",
+      "file_type": "code",
+      "source_file": "actions/update_skills.php",
+      "source_location": "L6",
+      "community": 62,
+      "norm_label": "json_response()",
+      "id": "actions_update_skills_json_response"
+    },
+    {
+      "label": "upload_doc.php",
+      "file_type": "code",
+      "source_file": "actions/upload_doc.php",
+      "source_location": "L1",
+      "community": 11,
+      "norm_label": "upload_doc.php",
+      "id": "actions_upload_doc_php"
+    },
+    {
+      "label": "json_response()",
+      "file_type": "code",
+      "source_file": "actions/upload_doc.php",
+      "source_location": "L7",
+      "community": 11,
+      "norm_label": "json_response()",
+      "id": "actions_upload_doc_json_response"
+    },
+    {
       "label": "catalog.php",
       "file_type": "code",
       "source_file": "freelancer/views/catalog.php",
       "source_location": "L1",
-      "id": "freelancer_views_catalog_php",
       "community": 44,
-      "norm_label": "catalog.php"
+      "norm_label": "catalog.php",
+      "id": "freelancer_views_catalog_php"
     },
     {
       "label": "profile.php",
       "file_type": "code",
       "source_file": "freelancer/views/profile.php",
       "source_location": "L1",
-      "id": "freelancer_views_profile_php",
       "community": 49,
-      "norm_label": "profile.php"
+      "norm_label": "profile.php",
+      "id": "freelancer_views_profile_php"
     },
     {
       "label": "verification.php",
       "file_type": "code",
       "source_file": "freelancer/views/verification.php",
       "source_location": "L1",
-      "id": "freelancer_views_verification_php",
       "community": 43,
-      "norm_label": "verification.php"
+      "norm_label": "verification.php",
+      "id": "freelancer_views_verification_php"
     },
     {
       "label": "log-work.php",
@@ -220,15 +355,6 @@
       "id": "freelancer_views_contracts_php"
     },
     {
-      "label": "earnings.php",
-      "file_type": "code",
-      "source_file": "freelancer/views/earnings.php",
-      "source_location": "L1",
-      "community": 48,
-      "norm_label": "earnings.php",
-      "id": "freelancer_views_earnings_php"
-    },
-    {
       "label": "find-work.php",
       "file_type": "code",
       "source_file": "freelancer/views/find-work.php",
@@ -245,15 +371,6 @@
       "community": 47,
       "norm_label": "home.php",
       "id": "freelancer_views_home_php"
-    },
-    {
-      "label": "messages.php",
-      "file_type": "code",
-      "source_file": "freelancer/views/messages.php",
-      "source_location": "L1",
-      "community": 51,
-      "norm_label": "messages.php",
-      "id": "freelancer_views_messages_php"
     },
     {
       "label": "proposals.php",
@@ -1462,15 +1579,6 @@
       "id": "js_main_observer"
     },
     {
-      "label": "index.php",
-      "file_type": "code",
-      "source_file": "client/index.php",
-      "source_location": "L1",
-      "community": 35,
-      "norm_label": "index.php",
-      "id": "client_index_php"
-    },
-    {
       "label": "header.php",
       "file_type": "code",
       "source_file": "client/includes/header.php",
@@ -1478,15 +1586,6 @@
       "community": 36,
       "norm_label": "header.php",
       "id": "client_includes_header_php"
-    },
-    {
-      "label": "footer.php",
-      "file_type": "code",
-      "source_file": "client/includes/footer.php",
-      "source_location": "L1",
-      "community": 37,
-      "norm_label": "footer.php",
-      "id": "client_includes_footer_php"
     },
     {
       "label": "header.php",
@@ -1811,15 +1910,6 @@
       "community": 42,
       "norm_label": "submit_proposal.php",
       "id": "freelancer_actions_submit_proposal_php"
-    },
-    {
-      "label": "reports.php",
-      "file_type": "code",
-      "source_file": "freelancer/views/reports.php",
-      "source_location": "L1",
-      "community": 46,
-      "norm_label": "reports.php",
-      "id": "freelancer_views_reports_php"
     },
     {
       "label": "graphify.md",
@@ -2177,6 +2267,56 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "actions/add_funds.php",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "actions_add_funds_php",
+      "target": "actions_add_funds_json_response",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "actions/change_password.php",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "actions_change_password_php",
+      "target": "actions_change_password_json_response",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "actions/get_messages.php",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "actions_get_messages_php",
+      "target": "actions_get_messages_json_response",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "actions/send_message.php",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "actions_send_message_php",
+      "target": "actions_send_message_json_response",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "actions/update_availability.php",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "actions_update_availability_php",
+      "target": "actions_update_availability_json_response",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "actions/create_service.php",
       "source_location": "L6",
       "weight": 1.0,
@@ -2190,9 +2330,9 @@
       "source_file": "actions/delete_service.php",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "actions_delete_service_php",
-      "target": "actions_delete_service_json_response",
-      "confidence_score": 1.0
+      "target": "actions_delete_service_json_response"
     },
     {
       "relation": "contains",
@@ -2210,9 +2350,9 @@
       "source_file": "actions/update_profile.php",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "actions_update_profile_php",
-      "target": "actions_update_profile_json_response",
-      "confidence_score": 1.0
+      "target": "actions_update_profile_json_response"
     },
     {
       "relation": "contains",
@@ -2220,9 +2360,9 @@
       "source_file": "actions/update_service.php",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "actions_update_service_php",
-      "target": "actions_update_service_json_response",
-      "confidence_score": 1.0
+      "target": "actions_update_service_json_response"
     },
     {
       "relation": "contains",
@@ -2230,9 +2370,9 @@
       "source_file": "actions/update_skills.php",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "actions_update_skills_php",
-      "target": "actions_update_skills_json_response",
-      "confidence_score": 1.0
+      "target": "actions_update_skills_json_response"
     },
     {
       "relation": "contains",
@@ -4783,5 +4923,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "0a0f2e5ba8af82f8656a090f439821e3a6997be7"
+  "built_at_commit": "df330586f49e16ab4f8c288f33dafce2c68dbc84"
 }

@@ -1246,6 +1246,22 @@
     const msg = input.value.trim();
     if(!msg || !activeChatId) return;
 
+    const chatMessagesScroll = document.getElementById('chat-messages-scroll');
+    const tempId = 'temp-' + Date.now();
+    
+    // Append immediately for snappy feel
+    const myMsgHtml = `
+      <div style="display:flex;gap:10px;flex-direction:row-reverse" id="${tempId}">
+        <div class="av" style="width:30px;height:30px;font-size:10px;background:var(--g);color:white;flex-shrink:0">Me</div>
+        <div style="max-width:75%;text-align:right">
+          <div style="background:var(--g);color:white;border-radius:12px;padding:10px 15px;font-size:13.5px;box-shadow:0 1px 2px rgba(0,0,0,.05);text-align:left">${msg}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px">Sending...</div>
+        </div>
+      </div>
+    `;
+    chatMessagesScroll.insertAdjacentHTML('beforeend', myMsgHtml);
+    chatMessagesScroll.scrollTop = chatMessagesScroll.scrollHeight;
+
     input.value = '';
     try {
       const formData = new FormData();
@@ -1258,14 +1274,99 @@
       });
       const result = await response.json();
       if(result.success) {
-        // Re-load to show my message
-        const chatHeader = document.querySelector('#chat-window div[style*="font-weight:700"]');
-        const chatAv = document.querySelector('#chat-window .av');
-        loadChat(activeChatId, chatHeader ? chatHeader.innerText : 'User', chatAv ? chatAv.innerText : '??');
+        const tempMsg = document.getElementById(tempId);
+        if(tempMsg) {
+          tempMsg.querySelector('div[style*="margin-top:4px"]').innerText = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+        }
       }
     } catch(err) {
       toast('Error', 'Failed to send message');
     }
+  }
+
+  // Polling for new messages
+  let chatPollInterval = null;
+  function startChatPolling(otherId, name, initials) {
+    if(chatPollInterval) clearInterval(chatPollInterval);
+    chatPollInterval = setInterval(async () => {
+      if(activeChatId !== otherId || document.getElementById('page-messages').style.display === 'none') {
+        clearInterval(chatPollInterval);
+        return;
+      }
+      try {
+        const response = await fetch(`${BASE_URL}/actions/get_messages.php?with=${otherId}`);
+        const result = await response.json();
+        if(result.success) {
+          const currentCount = document.querySelectorAll('#chat-messages-scroll > div').length;
+          if(result.messages.length > currentCount) {
+            renderChatWindow(name, initials, result.messages);
+          }
+        }
+      } catch(e) {}
+    }, 5000);
+  }
+
+  async function loadChat(otherId, name, initials, el) {
+    activeChatId = otherId;
+    
+    // Highlight sidebar
+    if(el) {
+      document.querySelectorAll('.msg-item').forEach(i => {
+        i.style.background = 'transparent';
+        i.classList.remove('active');
+      });
+      el.style.background = 'var(--gl)';
+      el.classList.add('active');
+      const dot = el.querySelector('span[style*="background:var(--g)"]');
+      if(dot) dot.remove();
+    }
+
+    const chatWindow = document.getElementById('chat-window');
+    chatWindow.innerHTML = `<div style="flex:1;display:flex;align-items:center;justify-content:center"><span class="spinner"></span></div>`;
+
+    try {
+      const response = await fetch(`${BASE_URL}/actions/get_messages.php?with=${otherId}`);
+      const result = await response.json();
+      
+      if(result.success) {
+        renderChatWindow(name, initials, result.messages);
+        startChatPolling(otherId, name, initials);
+      } else {
+        chatWindow.innerHTML = `<div style="padding:20px;text-align:center;color:red">${result.error}</div>`;
+      }
+    } catch (err) {
+      chatWindow.innerHTML = `<div style="padding:20px;text-align:center;color:red">Failed to load messages</div>`;
+    }
+  }
+
+  function renderChatWindow(name, initials, messages) {
+    const chatWindow = document.getElementById('chat-window');
+    const msgHtml = messages.map(m => {
+      const isMe = (m.sender_id != activeChatId);
+      return `
+        <div style="display:flex;gap:10px;${isMe ? 'flex-direction:row-reverse' : ''}">
+          <div class="av" style="width:30px;height:30px;font-size:10px;background:${isMe ? 'var(--g)' : 'white'};color:${isMe ? 'white' : 'var(--muted)'};border:${isMe ? 'none' : '1px solid var(--border)'};flex-shrink:0">${isMe ? 'Me' : initials}</div>
+          <div style="max-width:75%;${isMe ? 'text-align:right' : ''}">
+            <div style="background:${isMe ? 'var(--g)' : 'white'};color:${isMe ? 'white' : 'var(--forest)'};border-radius:12px;padding:10px 15px;font-size:13.5px;box-shadow:0 1px 2px rgba(0,0,0,.05);text-align:left">${m.message}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px">${new Date(m.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    chatWindow.innerHTML = `
+      <div style="padding:15px;background:white;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px">
+        <div class="av" style="width:32px;height:32px;background:var(--gl);color:var(--forest)">${initials}</div>
+        <div style="font-weight:700;font-size:14px">${name}</div>
+      </div>
+      <div style="flex:1;padding:20px;display:flex;flex-direction:column;gap:15px;overflow-y:auto" id="chat-messages-scroll">${msgHtml}</div>
+      <div style="padding:15px;background:white;border-top:1px solid var(--border);display:flex;gap:10px">
+        <input id="chat-input" type="text" placeholder="Write a message..." style="flex:1;padding:10px;border:1px solid var(--border);border-radius:8px" onkeydown="if(event.key==='Enter')sendMsg()">
+        <button class="btn btn-g" onclick="sendMsg()">Send</button>
+      </div>
+    `;
+    const scroll = document.getElementById('chat-messages-scroll');
+    if(scroll) scroll.scrollTop = scroll.scrollHeight;
   }
 
   function filterConversations(query) {
