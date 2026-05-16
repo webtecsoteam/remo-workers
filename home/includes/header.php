@@ -102,22 +102,22 @@
     <div class="mm-body">
         <div class="mm-section">
             <h4>For Clients</h4>
-            <a onclick="openModal('talent-marketplace')">Talent Marketplace</a>
-            <a onclick="openModal('project-catalog-modal')">Project Catalog</a>
-            <a onclick="openModal('talent-scout')">Talent Scout</a>
-            <a onclick="openModal('enterprise')">Enterprise</a>
+            <a onclick="openModal('talent-marketplace');toggleMobileMenu()">Talent Marketplace</a>
+            <a onclick="openModal('project-catalog-modal');toggleMobileMenu()">Project Catalog</a>
+            <a onclick="openModal('talent-scout');toggleMobileMenu()">Talent Scout</a>
+            <a onclick="openModal('enterprise');toggleMobileMenu()">Enterprise</a>
         </div>
         <div class="mm-section">
             <h4>For Freelancers</h4>
-            <a onclick="openModal('browse-jobs')">Browse Jobs</a>
-            <a onclick="openModal('sell-services')">Sell Services</a>
-            <a onclick="openModal('certifications')">Skill Assessments</a>
+            <a onclick="openModal('browse-jobs');toggleMobileMenu()">Browse Jobs</a>
+            <a onclick="openModal('sell-services');toggleMobileMenu()">Sell Services</a>
+            <a onclick="openModal('certifications');toggleMobileMenu()">Skill Assessments</a>
         </div>
         <div class="mm-section">
             <h4>Company</h4>
-            <a onclick="openModal('trust-safety')">Trust & Safety</a>
-            <a onclick="openModal('blog-all')">Blog & Resources</a>
-            <a onclick="openModal('pricing')">Pricing</a>
+            <a onclick="openModal('trust-safety');toggleMobileMenu()">Trust & Safety</a>
+            <a onclick="openModal('blog-all');toggleMobileMenu()">Blog & Resources</a>
+            <a onclick="openModal('pricing');toggleMobileMenu()">Pricing</a>
         </div>
         <div class="mm-actions">
             <?php if ($user): ?>
