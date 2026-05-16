@@ -51,9 +51,9 @@
     {
       "label": "header.php",
       "file_type": "code",
-      "source_file": "/Users/chiraglimbachiya/Sites/upwork/upwork project/home/includes/header.php",
+      "source_file": "home/includes/header.php",
       "source_location": "L1",
-      "id": "users_chiraglimbachiya_sites_upwork_upwork_project_home_includes_header_php",
+      "id": "home_includes_header_php",
       "community": 29,
       "norm_label": "header.php"
     },
@@ -330,18 +330,18 @@
     {
       "label": "login.php",
       "file_type": "code",
-      "source_file": "/Users/chiraglimbachiya/Sites/upwork/upwork project/admin/login.php",
+      "source_file": "admin/login.php",
       "source_location": "L1",
-      "id": "users_chiraglimbachiya_sites_upwork_upwork_project_admin_login_php",
+      "id": "admin_login_php",
       "community": 35,
       "norm_label": "login.php"
     },
     {
       "label": "index.php",
       "file_type": "code",
-      "source_file": "/Users/chiraglimbachiya/Sites/upwork/upwork project/admin/index.php",
+      "source_file": "admin/index.php",
       "source_location": "L1",
-      "id": "users_chiraglimbachiya_sites_upwork_upwork_project_admin_index_php",
+      "id": "admin_index_php",
       "community": 36,
       "norm_label": "index.php"
     },
@@ -1093,13 +1093,49 @@
       "norm_label": "check_db.php"
     },
     {
+      "label": "fix_job_status.php",
+      "file_type": "code",
+      "source_file": "scratch/fix_job_status.php",
+      "source_location": "L1",
+      "id": "scratch_fix_job_status_php",
+      "community": 40,
+      "norm_label": "fix_job_status.php"
+    },
+    {
+      "label": "fix_jobs_table.php",
+      "file_type": "code",
+      "source_file": "scratch/fix_jobs_table.php",
+      "source_location": "L1",
+      "id": "scratch_fix_jobs_table_php",
+      "community": 41,
+      "norm_label": "fix_jobs_table.php"
+    },
+    {
       "label": "run_migration.php",
       "file_type": "code",
       "source_file": "/Users/chiraglimbachiya/Sites/upwork/upwork project/scratch/run_migration.php",
       "source_location": "L1",
       "id": "users_chiraglimbachiya_sites_upwork_upwork_project_scratch_run_migration_php",
-      "community": 40,
+      "community": 42,
       "norm_label": "run_migration.php"
+    },
+    {
+      "label": "create_milestones_table.php",
+      "file_type": "code",
+      "source_file": "scratch/create_milestones_table.php",
+      "source_location": "L1",
+      "id": "scratch_create_milestones_table_php",
+      "community": 43,
+      "norm_label": "create_milestones_table.php"
+    },
+    {
+      "label": "fix_proposal_status.php",
+      "file_type": "code",
+      "source_file": "scratch/fix_proposal_status.php",
+      "source_location": "L1",
+      "id": "scratch_fix_proposal_status_php",
+      "community": 44,
+      "norm_label": "fix_proposal_status.php"
     },
     {
       "label": "upload_doc.php",
@@ -1179,7 +1215,7 @@
       "source_file": "/Users/chiraglimbachiya/Sites/upwork/upwork project/actions/post_job.php",
       "source_location": "L1",
       "id": "users_chiraglimbachiya_sites_upwork_upwork_project_actions_post_job_php",
-      "community": 41,
+      "community": 45,
       "norm_label": "post_job.php"
     },
     {
@@ -1224,7 +1260,7 @@
       "source_file": "/Users/chiraglimbachiya/Sites/upwork/upwork project/actions/login.php",
       "source_location": "L1",
       "id": "users_chiraglimbachiya_sites_upwork_upwork_project_actions_login_php",
-      "community": 42,
+      "community": 46,
       "norm_label": "login.php"
     },
     {
@@ -1233,8 +1269,17 @@
       "source_file": "/Users/chiraglimbachiya/Sites/upwork/upwork project/actions/edit_job.php",
       "source_location": "L1",
       "id": "users_chiraglimbachiya_sites_upwork_upwork_project_actions_edit_job_php",
-      "community": 43,
+      "community": 47,
       "norm_label": "edit_job.php"
+    },
+    {
+      "label": "update_contract_status.php",
+      "file_type": "code",
+      "source_file": "actions/update_contract_status.php",
+      "source_location": "L1",
+      "id": "actions_update_contract_status_php",
+      "community": 48,
+      "norm_label": "update_contract_status.php"
     },
     {
       "label": "register.php",
@@ -1242,16 +1287,16 @@
       "source_file": "/Users/chiraglimbachiya/Sites/upwork/upwork project/actions/register.php",
       "source_location": "L1",
       "id": "users_chiraglimbachiya_sites_upwork_upwork_project_actions_register_php",
-      "community": 44,
+      "community": 49,
       "norm_label": "register.php"
     },
     {
       "label": "hire_freelancer.php",
       "file_type": "code",
-      "source_file": "/Users/chiraglimbachiya/Sites/upwork/upwork project/actions/hire_freelancer.php",
+      "source_file": "actions/hire_freelancer.php",
       "source_location": "L1",
-      "id": "users_chiraglimbachiya_sites_upwork_upwork_project_actions_hire_freelancer_php",
-      "community": 45,
+      "id": "actions_hire_freelancer_php",
+      "community": 50,
       "norm_label": "hire_freelancer.php"
     },
     {
@@ -1291,12 +1336,30 @@
       "norm_label": "json_response()"
     },
     {
+      "label": "cancel_hiring.php",
+      "file_type": "code",
+      "source_file": "actions/cancel_hiring.php",
+      "source_location": "L1",
+      "id": "actions_cancel_hiring_php",
+      "community": 51,
+      "norm_label": "cancel_hiring.php"
+    },
+    {
+      "label": "complete_job.php",
+      "file_type": "code",
+      "source_file": "actions/complete_job.php",
+      "source_location": "L1",
+      "id": "actions_complete_job_php",
+      "community": 52,
+      "norm_label": "complete_job.php"
+    },
+    {
       "label": "update_job_status.php",
       "file_type": "code",
-      "source_file": "/Users/chiraglimbachiya/Sites/upwork/upwork project/actions/update_job_status.php",
+      "source_file": "actions/update_job_status.php",
       "source_location": "L1",
-      "id": "users_chiraglimbachiya_sites_upwork_upwork_project_actions_update_job_status_php",
-      "community": 46,
+      "id": "actions_update_job_status_php",
+      "community": 53,
       "norm_label": "update_job_status.php"
     },
     {
@@ -1305,7 +1368,7 @@
       "source_file": "/Users/chiraglimbachiya/Sites/upwork/upwork project/actions/submit_proposal.php",
       "source_location": "L1",
       "id": "users_chiraglimbachiya_sites_upwork_upwork_project_actions_submit_proposal_php",
-      "community": 47,
+      "community": 54,
       "norm_label": "submit_proposal.php"
     },
     {
@@ -1365,10 +1428,10 @@
     {
       "label": "update_proposal_status.php",
       "file_type": "code",
-      "source_file": "/Users/chiraglimbachiya/Sites/upwork/upwork project/actions/update_proposal_status.php",
+      "source_file": "actions/update_proposal_status.php",
       "source_location": "L1",
-      "id": "users_chiraglimbachiya_sites_upwork_upwork_project_actions_update_proposal_status_php",
-      "community": 48,
+      "id": "actions_update_proposal_status_php",
+      "community": 55,
       "norm_label": "update_proposal_status.php"
     },
     {
@@ -1428,29 +1491,38 @@
     {
       "label": "index.php",
       "file_type": "code",
-      "source_file": "/Users/chiraglimbachiya/Sites/upwork/upwork project/client/index.php",
+      "source_file": "client/index.php",
       "source_location": "L1",
-      "id": "users_chiraglimbachiya_sites_upwork_upwork_project_client_index_php",
-      "community": 49,
+      "id": "client_index_php",
+      "community": 56,
       "norm_label": "index.php"
     },
     {
       "label": "header.php",
       "file_type": "code",
-      "source_file": "/Users/chiraglimbachiya/Sites/upwork/upwork project/client/includes/header.php",
+      "source_file": "client/includes/header.php",
       "source_location": "L1",
-      "id": "users_chiraglimbachiya_sites_upwork_upwork_project_client_includes_header_php",
-      "community": 50,
+      "id": "client_includes_header_php",
+      "community": 57,
       "norm_label": "header.php"
     },
     {
       "label": "footer.php",
       "file_type": "code",
-      "source_file": "/Users/chiraglimbachiya/Sites/upwork/upwork project/client/includes/footer.php",
+      "source_file": "client/includes/footer.php",
       "source_location": "L1",
-      "id": "users_chiraglimbachiya_sites_upwork_upwork_project_client_includes_footer_php",
-      "community": 51,
+      "id": "client_includes_footer_php",
+      "community": 58,
       "norm_label": "footer.php"
+    },
+    {
+      "label": "release-milestone.php",
+      "file_type": "code",
+      "source_file": "client/api/release-milestone.php",
+      "source_location": "L1",
+      "id": "client_api_release_milestone_php",
+      "community": 59,
+      "norm_label": "release-milestone.php"
     },
     {
       "label": "update-profile.php",
@@ -1458,7 +1530,7 @@
       "source_file": "/Users/chiraglimbachiya/Sites/upwork/upwork project/client/api/update-profile.php",
       "source_location": "L1",
       "id": "users_chiraglimbachiya_sites_upwork_upwork_project_client_api_update_profile_php",
-      "community": 52,
+      "community": 60,
       "norm_label": "update-profile.php"
     },
     {
@@ -1467,7 +1539,7 @@
       "source_file": "/Users/chiraglimbachiya/Sites/upwork/upwork project/client/api/process-work.php",
       "source_location": "L1",
       "id": "users_chiraglimbachiya_sites_upwork_upwork_project_client_api_process_work_php",
-      "community": 53,
+      "community": 61,
       "norm_label": "process-work.php"
     },
     {
@@ -1476,34 +1548,34 @@
       "source_file": "/Users/chiraglimbachiya/Sites/upwork/upwork project/freelancer/login.php",
       "source_location": "L1",
       "id": "users_chiraglimbachiya_sites_upwork_upwork_project_freelancer_login_php",
-      "community": 54,
+      "community": 62,
       "norm_label": "login.php"
     },
     {
       "label": "index.php",
       "file_type": "code",
-      "source_file": "/Users/chiraglimbachiya/Sites/upwork/upwork project/freelancer/index.php",
+      "source_file": "freelancer/index.php",
       "source_location": "L1",
-      "id": "users_chiraglimbachiya_sites_upwork_upwork_project_freelancer_index_php",
-      "community": 55,
+      "id": "freelancer_index_php",
+      "community": 63,
       "norm_label": "index.php"
     },
     {
       "label": "header.php",
       "file_type": "code",
-      "source_file": "/Users/chiraglimbachiya/Sites/upwork/upwork project/freelancer/includes/header.php",
+      "source_file": "freelancer/includes/header.php",
       "source_location": "L1",
-      "id": "users_chiraglimbachiya_sites_upwork_upwork_project_freelancer_includes_header_php",
-      "community": 56,
+      "id": "freelancer_includes_header_php",
+      "community": 64,
       "norm_label": "header.php"
     },
     {
       "label": "footer.php",
       "file_type": "code",
-      "source_file": "/Users/chiraglimbachiya/Sites/upwork/upwork project/freelancer/includes/footer.php",
+      "source_file": "freelancer/includes/footer.php",
       "source_location": "L1",
-      "id": "users_chiraglimbachiya_sites_upwork_upwork_project_freelancer_includes_footer_php",
-      "community": 57,
+      "id": "freelancer_includes_footer_php",
+      "community": 65,
       "norm_label": "footer.php"
     },
     {
@@ -1818,7 +1890,7 @@
       "source_file": "/Users/chiraglimbachiya/Sites/upwork/upwork project/freelancer/actions/submit_proposal.php",
       "source_location": "L1",
       "id": "users_chiraglimbachiya_sites_upwork_upwork_project_freelancer_actions_submit_proposal_php",
-      "community": 58,
+      "community": 66,
       "norm_label": "submit_proposal.php"
     },
     {
@@ -1827,7 +1899,7 @@
       "source_file": "/Users/chiraglimbachiya/Sites/upwork/upwork project/freelancer/api/update-contract.php",
       "source_location": "L1",
       "id": "users_chiraglimbachiya_sites_upwork_upwork_project_freelancer_api_update_contract_php",
-      "community": 59,
+      "community": 67,
       "norm_label": "update-contract.php"
     },
     {
@@ -1836,7 +1908,7 @@
       "source_file": "/Users/chiraglimbachiya/Sites/upwork/upwork project/freelancer/api/toggle-save.php",
       "source_location": "L1",
       "id": "users_chiraglimbachiya_sites_upwork_upwork_project_freelancer_api_toggle_save_php",
-      "community": 60,
+      "community": 68,
       "norm_label": "toggle-save.php"
     },
     {
@@ -1845,17 +1917,26 @@
       "source_file": "/Users/chiraglimbachiya/Sites/upwork/upwork project/freelancer/api/log-work.php",
       "source_location": "L1",
       "id": "users_chiraglimbachiya_sites_upwork_upwork_project_freelancer_api_log_work_php",
-      "community": 61,
+      "community": 69,
       "norm_label": "log-work.php"
     },
     {
       "label": "submit-proposal.php",
       "file_type": "code",
-      "source_file": "/Users/chiraglimbachiya/Sites/upwork/upwork project/freelancer/api/submit-proposal.php",
+      "source_file": "freelancer/api/submit-proposal.php",
       "source_location": "L1",
-      "id": "users_chiraglimbachiya_sites_upwork_upwork_project_freelancer_api_submit_proposal_php",
-      "community": 62,
+      "id": "freelancer_api_submit_proposal_php",
+      "community": 70,
       "norm_label": "submit-proposal.php"
+    },
+    {
+      "label": "request-milestone.php",
+      "file_type": "code",
+      "source_file": "freelancer/api/request-milestone.php",
+      "source_location": "L1",
+      "id": "freelancer_api_request_milestone_php",
+      "community": 71,
+      "norm_label": "request-milestone.php"
     },
     {
       "label": "verification.php",
@@ -1863,7 +1944,7 @@
       "source_file": "/Users/chiraglimbachiya/Sites/upwork/upwork project/freelancer/views/verification.php",
       "source_location": "L1",
       "id": "users_chiraglimbachiya_sites_upwork_upwork_project_freelancer_views_verification_php",
-      "community": 63,
+      "community": 72,
       "norm_label": "verification.php"
     },
     {
@@ -1872,7 +1953,7 @@
       "source_file": "/Users/chiraglimbachiya/Sites/upwork/upwork project/freelancer/views/catalog.php",
       "source_location": "L1",
       "id": "users_chiraglimbachiya_sites_upwork_upwork_project_freelancer_views_catalog_php",
-      "community": 64,
+      "community": 73,
       "norm_label": "catalog.php"
     },
     {
@@ -1881,7 +1962,7 @@
       "source_file": "/Users/chiraglimbachiya/Sites/upwork/upwork project/freelancer/views/find-work.php",
       "source_location": "L1",
       "id": "users_chiraglimbachiya_sites_upwork_upwork_project_freelancer_views_find_work_php",
-      "community": 65,
+      "community": 74,
       "norm_label": "find-work.php"
     },
     {
@@ -1890,16 +1971,16 @@
       "source_file": "/Users/chiraglimbachiya/Sites/upwork/upwork project/freelancer/views/reports.php",
       "source_location": "L1",
       "id": "users_chiraglimbachiya_sites_upwork_upwork_project_freelancer_views_reports_php",
-      "community": 66,
+      "community": 75,
       "norm_label": "reports.php"
     },
     {
       "label": "home.php",
       "file_type": "code",
-      "source_file": "/Users/chiraglimbachiya/Sites/upwork/upwork project/freelancer/views/home.php",
+      "source_file": "freelancer/views/home.php",
       "source_location": "L1",
-      "id": "users_chiraglimbachiya_sites_upwork_upwork_project_freelancer_views_home_php",
-      "community": 67,
+      "id": "freelancer_views_home_php",
+      "community": 76,
       "norm_label": "home.php"
     },
     {
@@ -1908,16 +1989,16 @@
       "source_file": "/Users/chiraglimbachiya/Sites/upwork/upwork project/freelancer/views/earnings.php",
       "source_location": "L1",
       "id": "users_chiraglimbachiya_sites_upwork_upwork_project_freelancer_views_earnings_php",
-      "community": 68,
+      "community": 77,
       "norm_label": "earnings.php"
     },
     {
       "label": "profile.php",
       "file_type": "code",
-      "source_file": "/Users/chiraglimbachiya/Sites/upwork/upwork project/freelancer/views/profile.php",
+      "source_file": "freelancer/views/profile.php",
       "source_location": "L1",
-      "id": "users_chiraglimbachiya_sites_upwork_upwork_project_freelancer_views_profile_php",
-      "community": 69,
+      "id": "freelancer_views_profile_php",
+      "community": 78,
       "norm_label": "profile.php"
     },
     {
@@ -1926,7 +2007,7 @@
       "source_file": "/Users/chiraglimbachiya/Sites/upwork/upwork project/freelancer/views/contracts.php",
       "source_location": "L1",
       "id": "users_chiraglimbachiya_sites_upwork_upwork_project_freelancer_views_contracts_php",
-      "community": 70,
+      "community": 79,
       "norm_label": "contracts.php"
     },
     {
@@ -1935,16 +2016,16 @@
       "source_file": "/Users/chiraglimbachiya/Sites/upwork/upwork project/freelancer/views/messages.php",
       "source_location": "L1",
       "id": "users_chiraglimbachiya_sites_upwork_upwork_project_freelancer_views_messages_php",
-      "community": 71,
+      "community": 80,
       "norm_label": "messages.php"
     },
     {
       "label": "proposals.php",
       "file_type": "code",
-      "source_file": "/Users/chiraglimbachiya/Sites/upwork/upwork project/freelancer/views/proposals.php",
+      "source_file": "freelancer/views/proposals.php",
       "source_location": "L1",
-      "id": "users_chiraglimbachiya_sites_upwork_upwork_project_freelancer_views_proposals_php",
-      "community": 72,
+      "id": "freelancer_views_proposals_php",
+      "community": 81,
       "norm_label": "proposals.php"
     },
     {
@@ -2379,8 +2460,8 @@
       "source_file": "includes/classes/Auth.php",
       "source_location": "L4",
       "weight": 1.0,
-      "_src": "classes_auth_auth_register",
-      "_tgt": "includes_config_getdb",
+      "_src": "includes_config_getdb",
+      "_tgt": "classes_auth_auth_register",
       "context": "call",
       "source": "includes_config_getdb",
       "target": "classes_auth_auth_register"
@@ -2392,8 +2473,8 @@
       "source_file": "includes/classes/Auth.php",
       "source_location": "L12",
       "weight": 1.0,
-      "_src": "classes_auth_auth_login",
-      "_tgt": "includes_config_getdb",
+      "_src": "includes_config_getdb",
+      "_tgt": "classes_auth_auth_login",
       "context": "call",
       "source": "includes_config_getdb",
       "target": "classes_auth_auth_login"
@@ -2405,8 +2486,8 @@
       "source_file": "includes/classes/Auth.php",
       "source_location": "L49",
       "weight": 1.0,
-      "_src": "classes_auth_auth_user",
-      "_tgt": "includes_config_getdb",
+      "_src": "includes_config_getdb",
+      "_tgt": "classes_auth_auth_user",
       "context": "call",
       "source": "includes_config_getdb",
       "target": "classes_auth_auth_user"
@@ -2490,8 +2571,8 @@
       "source_file": "admin/UserController.php",
       "source_location": "L13",
       "weight": 1.0,
-      "_src": "admin_usercontroller_usercontroller_index",
-      "_tgt": "classes_auth_auth_user",
+      "_src": "classes_auth_auth_user",
+      "_tgt": "admin_usercontroller_usercontroller_index",
       "context": "call",
       "source": "classes_auth_auth_user",
       "target": "admin_usercontroller_usercontroller_index"
@@ -2503,8 +2584,8 @@
       "source_file": "admin/UserController.php",
       "source_location": "L42",
       "weight": 1.0,
-      "_src": "admin_usercontroller_usercontroller_show",
-      "_tgt": "classes_auth_auth_user",
+      "_src": "classes_auth_auth_user",
+      "_tgt": "admin_usercontroller_usercontroller_show",
       "context": "call",
       "source": "classes_auth_auth_user",
       "target": "admin_usercontroller_usercontroller_show"
@@ -2516,8 +2597,8 @@
       "source_file": "admin/UserController.php",
       "source_location": "L54",
       "weight": 1.0,
-      "_src": "admin_usercontroller_usercontroller_update",
-      "_tgt": "classes_auth_auth_user",
+      "_src": "classes_auth_auth_user",
+      "_tgt": "admin_usercontroller_usercontroller_update",
       "context": "call",
       "source": "classes_auth_auth_user",
       "target": "admin_usercontroller_usercontroller_update"
@@ -2529,8 +2610,8 @@
       "source_file": "admin/UserController.php",
       "source_location": "L73",
       "weight": 1.0,
-      "_src": "admin_usercontroller_usercontroller_destroy",
-      "_tgt": "classes_auth_auth_user",
+      "_src": "classes_auth_auth_user",
+      "_tgt": "admin_usercontroller_usercontroller_destroy",
       "context": "call",
       "source": "classes_auth_auth_user",
       "target": "admin_usercontroller_usercontroller_destroy"
@@ -2542,8 +2623,8 @@
       "source_file": "admin/UserController.php",
       "source_location": "L92",
       "weight": 1.0,
-      "_src": "admin_usercontroller_usercontroller_suspend",
-      "_tgt": "classes_auth_auth_user",
+      "_src": "classes_auth_auth_user",
+      "_tgt": "admin_usercontroller_usercontroller_suspend",
       "context": "call",
       "source": "classes_auth_auth_user",
       "target": "admin_usercontroller_usercontroller_suspend"
@@ -2555,8 +2636,8 @@
       "source_file": "admin/UserController.php",
       "source_location": "L103",
       "weight": 1.0,
-      "_src": "admin_usercontroller_usercontroller_activate",
-      "_tgt": "classes_auth_auth_user",
+      "_src": "classes_auth_auth_user",
+      "_tgt": "admin_usercontroller_usercontroller_activate",
       "context": "call",
       "source": "classes_auth_auth_user",
       "target": "admin_usercontroller_usercontroller_activate"
@@ -2568,8 +2649,8 @@
       "source_file": "admin/UserController.php",
       "source_location": "L114",
       "weight": 1.0,
-      "_src": "admin_usercontroller_usercontroller_verify",
-      "_tgt": "classes_auth_auth_user",
+      "_src": "classes_auth_auth_user",
+      "_tgt": "admin_usercontroller_usercontroller_verify",
       "context": "call",
       "source": "classes_auth_auth_user",
       "target": "admin_usercontroller_usercontroller_verify"
@@ -2581,8 +2662,8 @@
       "source_file": "admin/UserController.php",
       "source_location": "L125",
       "weight": 1.0,
-      "_src": "admin_usercontroller_usercontroller_jobs",
-      "_tgt": "classes_auth_auth_user",
+      "_src": "classes_auth_auth_user",
+      "_tgt": "admin_usercontroller_usercontroller_jobs",
       "context": "call",
       "source": "classes_auth_auth_user",
       "target": "admin_usercontroller_usercontroller_jobs"
@@ -2594,8 +2675,8 @@
       "source_file": "admin/UserController.php",
       "source_location": "L140",
       "weight": 1.0,
-      "_src": "admin_usercontroller_usercontroller_payments",
-      "_tgt": "classes_auth_auth_user",
+      "_src": "classes_auth_auth_user",
+      "_tgt": "admin_usercontroller_usercontroller_payments",
       "context": "call",
       "source": "classes_auth_auth_user",
       "target": "admin_usercontroller_usercontroller_payments"
@@ -2607,8 +2688,8 @@
       "source_file": "admin/DashboardController.php",
       "source_location": "L16",
       "weight": 1.0,
-      "_src": "admin_dashboardcontroller_dashboardcontroller_stats",
-      "_tgt": "classes_auth_auth_user",
+      "_src": "classes_auth_auth_user",
+      "_tgt": "admin_dashboardcontroller_dashboardcontroller_stats",
       "context": "call",
       "source": "classes_auth_auth_user",
       "target": "admin_dashboardcontroller_dashboardcontroller_stats"
@@ -2620,8 +2701,8 @@
       "source_file": "admin/DashboardController.php",
       "source_location": "L61",
       "weight": 1.0,
-      "_src": "admin_dashboardcontroller_dashboardcontroller_recentactivity",
-      "_tgt": "classes_auth_auth_user",
+      "_src": "classes_auth_auth_user",
+      "_tgt": "admin_dashboardcontroller_dashboardcontroller_recentactivity",
       "context": "call",
       "source": "classes_auth_auth_user",
       "target": "admin_dashboardcontroller_dashboardcontroller_recentactivity"
@@ -2633,8 +2714,8 @@
       "source_file": "admin/AuthController.php",
       "source_location": "L21",
       "weight": 1.0,
-      "_src": "admin_authcontroller_authcontroller_login",
-      "_tgt": "classes_auth_auth_user",
+      "_src": "classes_auth_auth_user",
+      "_tgt": "admin_authcontroller_authcontroller_login",
       "context": "call",
       "source": "classes_auth_auth_user",
       "target": "admin_authcontroller_authcontroller_login"
@@ -2646,8 +2727,8 @@
       "source_file": "admin/ReportController.php",
       "source_location": "L24",
       "weight": 1.0,
-      "_src": "admin_reportcontroller_reportcontroller_overview",
-      "_tgt": "classes_auth_auth_user",
+      "_src": "classes_auth_auth_user",
+      "_tgt": "admin_reportcontroller_reportcontroller_overview",
       "context": "call",
       "source": "classes_auth_auth_user",
       "target": "admin_reportcontroller_reportcontroller_overview"
@@ -2659,8 +2740,8 @@
       "source_file": "admin/ReportController.php",
       "source_location": "L52",
       "weight": 1.0,
-      "_src": "admin_reportcontroller_reportcontroller_users",
-      "_tgt": "classes_auth_auth_user",
+      "_src": "classes_auth_auth_user",
+      "_tgt": "admin_reportcontroller_reportcontroller_users",
       "context": "call",
       "source": "classes_auth_auth_user",
       "target": "admin_reportcontroller_reportcontroller_users"
@@ -2672,8 +2753,8 @@
       "source_file": "admin/ReportController.php",
       "source_location": "L143",
       "weight": 1.0,
-      "_src": "admin_reportcontroller_reportcontroller_export",
-      "_tgt": "classes_auth_auth_user",
+      "_src": "classes_auth_auth_user",
+      "_tgt": "admin_reportcontroller_reportcontroller_export",
       "context": "call",
       "source": "classes_auth_auth_user",
       "target": "admin_reportcontroller_reportcontroller_export"

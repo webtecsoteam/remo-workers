@@ -172,13 +172,18 @@
     const cleanFilter = filter.split('(')[0].trim();
     
     if (cleanFilter === 'Active') {
-      filtered = CONTRACTS.filter(c => c.status === 'active');
+      filtered = CONTRACTS.filter(c => (c.status || '').toLowerCase() === 'active');
     } else if (cleanFilter === 'Completed') {
-      filtered = CONTRACTS.filter(c => c.status === 'completed');
+      filtered = CONTRACTS.filter(c => (c.status || '').toLowerCase() === 'completed');
     } else if (cleanFilter === 'Paused') {
-      filtered = CONTRACTS.filter(c => c.status === 'paused');
+      filtered = CONTRACTS.filter(c => (c.status || '').toLowerCase() === 'paused');
+    } else if (cleanFilter === 'Cancelled') {
+      filtered = CONTRACTS.filter(c => (c.status || '').toLowerCase() === 'cancelled');
+    } else if (cleanFilter === 'All') {
+      filtered = [...CONTRACTS];
     }
 
+    const isMob = window.innerWidth <= 900;
     if (filtered.length === 0) {
       list.innerHTML = `<div style="text-align:center;padding:60px;color:var(--muted)">No ${cleanFilter.toLowerCase()} contracts found.</div>`;
       return;
@@ -189,7 +194,6 @@
       const typeColor = c.contract_type === 'hourly' ? '#e0f2fe' : '#f3e8ff';
       const typeText = c.contract_type === 'hourly' ? '#0369a1' : '#7e22ce';
       
-      // Dynamic Progress Calculation
       let progressPercent = 0;
       if (c.status === 'completed') {
         progressPercent = 100;
@@ -199,42 +203,56 @@
         if (budget > 0) {
           progressPercent = Math.min(100, Math.round((earned / budget) * 100));
         } else {
-          progressPercent = c.contract_type === 'hourly' ? 65 : 10; // Default fallback
+          progressPercent = c.contract_type === 'hourly' ? 65 : 10;
         }
       }
       
+      const contractId = c.id || c.contract_id;
+      if (isMob) {
+        return `
+          <div class="card" style="padding:16px;margin:10px;border-radius:12px;margin-bottom:12px" onclick="openModal('contract-detail', ${contractId})">
+            <div style="display:flex;justify-content:space-between;margin-bottom:12px">
+              <div style="display:flex;align-items:center;gap:10px">
+                <div style="width:34px;height:34px;border-radius:50%;background:#e0f2fe;color:#0369a1;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px">${(c.client_name || 'C').charAt(0)}</div>
+                <div>
+                  <div style="font-weight:700;font-size:14px">${c.client_name}</div>
+                  <div style="font-size:11px;color:var(--muted2)">Started ${new Date(c.created_at).toLocaleDateString()}</div>
+                </div>
+              </div>
+              <span style="background:${typeColor};color:${typeText};padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;align-self:start">${typeLabel}</span>
+            </div>
+            <div style="font-weight:700;font-size:15px;margin-bottom:12px;color:var(--dark)">${c.job_title}</div>
+            <div style="display:flex;justify-content:space-between;align-items:flex-end">
+              <div style="flex:1;padding-right:20px">
+                <div style="font-size:10px;color:#999;margin-bottom:4px">Progress: ${progressPercent}%</div>
+                <div style="width:100%;height:5px;background:#f3f4f6;border-radius:3px">
+                  <div style="width:${progressPercent}%;height:100%;background:#14a800;border-radius:3px"></div>
+                </div>
+              </div>
+              <div style="text-align:right">
+                <div style="font-weight:700;font-size:16px">$${parseFloat(c.total_earned || 0).toLocaleString()}</div>
+                <div style="font-size:10px;color:var(--muted2)">Earned</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
       return `
-        <div class="contract-list-item" style="padding:18px 20px;border-bottom:1px solid #eee;cursor:pointer" onclick="openModal('contract-detail', ${c.id})">
-          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;justify-content:space-between">
-            <div style="display:flex;align-items:center;gap:12px">
-              <div style="width:36px;height:36px;border-radius:50%;background:#e0f2fe;color:#0369a1;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px">${(c.client_name || 'C').charAt(0)}</div>
-              <div>
-                <div style="font-weight:700;color:#333">${c.client_name}</div>
-                <div style="font-size:11px;color:#999">★ 5.0 · Verified</div>
-              </div>
-            </div>
-            <span style="background:${typeColor};color:${typeText};padding:4px 10px;border-radius:4px;font-size:11px;font-weight:700">${typeLabel}</span>
+        <div class="contract-list-item" style="display:grid;grid-template-columns:1.2fr 1.2fr 0.6fr 0.8fr 1fr 0.6fr 0.8fr;padding:16px 20px;border-bottom:1px solid #eee;align-items:center;font-size:13.5px;cursor:pointer" onclick="openModal('contract-detail', ${contractId})">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="width:30px;height:30px;border-radius:50%;background:#e0f2fe;color:#0369a1;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px">${(c.client_name || 'C').charAt(0)}</div>
+            <div style="font-weight:600;color:#333">${c.client_name}</div>
           </div>
-
-          <div style="margin-bottom:14px">
-            <div style="color:#333;font-weight:700;font-size:15px;margin-bottom:4px">${c.job_title}</div>
-            <div style="font-size:12px;color:#666">Started ${new Date(c.created_at).toLocaleDateString('en-US', {month:'short', day:'numeric'})}</div>
+          <div style="font-weight:600;color:#333;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-right:10px">${c.job_title}</div>
+          <div><span style="background:${typeColor};color:${typeText};padding:3px 8px;border-radius:4px;font-size:11px;font-weight:700">${typeLabel}</span></div>
+          <div style="font-weight:700;color:#333">$${parseFloat(c.total_earned || 0).toLocaleString()}</div>
+          <div style="padding-right:20px">
+            <div style="font-size:10px;color:#999;margin-bottom:4px">${c.status === 'completed' ? '100%' : progressPercent + '%'}</div>
+            <div style="width:100%;height:5px;background:#f3f4f6;border-radius:3px"><div style="width:${progressPercent}%;height:100%;background:#14a800;border-radius:3px"></div></div>
           </div>
-
-          <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:20px">
-            <div style="flex:1">
-              <div style="font-size:11px;color:#999;margin-bottom:6px">${c.status === 'completed' ? '100% Completed' : progressPercent + '% of budget earned'}</div>
-              <div style="width:100%;height:6px;background:#f3f4f6;border-radius:3px">
-                <div style="width:${progressPercent}%;height:100%;background:#14a800;border-radius:3px"></div>
-              </div>
-            </div>
-            <div style="text-align:right">
-              <div style="font-weight:700;color:#333;font-size:16px">$${parseFloat(c.total_earned || 0).toLocaleString()}</div>
-              <div style="font-size:11px;color:#999">Earned</div>
-            </div>
-          </div>
-        </div>
-      `;
+          <div style="color:#666;font-size:12px">${new Date(c.created_at).toLocaleDateString('en-US', {month:'short', day:'numeric'})}</div>
+          <div><button class="btn btn-w btn-sm" style="padding:4px 10px;font-size:11px">Manage</button></div>
+        </div>`;
     }).join('');
   }
 
@@ -254,6 +272,7 @@
       filtered = PROPOSALS.filter(p => p.status === 'rejected' || p.status === 'withdrawn');
     }
 
+    const isMob = window.innerWidth <= 900;
     if (filtered.length === 0) {
       list.innerHTML = `<div style="text-align:center;padding:60px;color:var(--muted)">
         <div style="font-size:40px;margin-bottom:15px">📄</div>
@@ -264,6 +283,20 @@
 
     list.innerHTML = filtered.map(p => {
       const statusClass = p.status === 'accepted' ? 'b-green' : (p.status === 'rejected' ? 'b-red' : 'b-purple');
+      if (isMob) {
+        return `
+          <div class="card" style="padding:16px;margin:10px;border-radius:12px;margin-bottom:10px" onclick="toast('Details','Viewing ${p.job_title}')">
+            <div style="font-weight:700;font-size:15px;margin-bottom:6px;color:var(--dark)">${p.job_title}</div>
+            <div style="font-size:12px;color:var(--muted);margin-bottom:12px">Submitted ${new Date(p.created_at).toLocaleDateString()}</div>
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div>
+                <div style="font-weight:700;font-size:15px;color:var(--dark)">$${parseFloat(p.bid_amount).toLocaleString()}</div>
+                <div style="font-size:10px;color:var(--muted2)">Proposed Bid</div>
+              </div>
+              <span class="badge ${statusClass}" style="padding:6px 12px;border-radius:6px;text-transform:capitalize">${p.status}</span>
+            </div>
+          </div>`;
+      }
       return `
         <div class="contract-row" style="padding:22px;border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;align-items:center;gap:15px;justify-content:space-between">
           <div style="flex:1;min-width:260px">
@@ -284,6 +317,7 @@
           </div>
         </div>`;
     }).join('');
+
   }
 
   function renderJobs(filter = 'Best Matches') {
@@ -435,7 +469,25 @@
 
         <div style="margin-bottom:20px">
           <label style="display:block;font-weight:700;margin-bottom:8px;font-size:14px">Your Proposed Rate ($)</label>
-          <input type="number" id="prop-rate" value="${job.budget || 0}" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-size:14px">
+          <input type="number" id="prop-rate" value="${job.budget || 0}" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-size:14px" oninput="updateMilestoneTotal()">
+        </div>
+
+        <div id="milestones-section" style="margin-bottom:25px;border:1px solid var(--border);padding:15px;border-radius:12px;background:#fafafa">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px">
+            <label style="font-weight:700;font-size:14px">Milestones</label>
+            <button class="btn btn-w btn-sm" onclick="addMilestoneRow()" style="font-size:12px;padding:4px 10px">+ Add Milestone</button>
+          </div>
+          <div id="milestones-list-container">
+            <div class="milestone-row" style="display:grid;grid-template-columns:1fr 100px 30px;gap:10px;margin-bottom:10px">
+              <input type="text" placeholder="Description (e.g. Initial Draft)" class="ms-desc" style="padding:8px;border:1px solid var(--border);border-radius:6px;font-size:13px">
+              <input type="number" placeholder="Amount" class="ms-amount" value="${job.budget || 0}" style="padding:8px;border:1px solid var(--border);border-radius:6px;font-size:13px" oninput="updateMilestoneTotal()">
+              <button onclick="this.parentElement.remove();updateMilestoneTotal()" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:16px">×</button>
+            </div>
+          </div>
+          <div style="font-size:12px;color:var(--muted2);margin-top:10px;display:flex;justify-content:space-between">
+            <span>Total Milestone Amount: <strong id="ms-total-display">$${job.budget || 0}</strong></span>
+            <span id="ms-warning" style="color:#ef4444;display:none">Doesn't match proposed rate!</span>
+          </div>
         </div>
 
         <div style="margin-bottom:20px">
@@ -462,6 +514,35 @@
     document.getElementById('overlay').classList.add('open');
   }
 
+  window.addMilestoneRow = function() {
+    const container = document.getElementById('milestones-list-container');
+    const row = document.createElement('div');
+    row.className = 'milestone-row';
+    row.style.cssText = 'display:grid;grid-template-columns:1fr 100px 30px;gap:10px;margin-bottom:10px';
+    row.innerHTML = `
+      <input type="text" placeholder="Description" class="ms-desc" style="padding:8px;border:1px solid var(--border);border-radius:6px;font-size:13px">
+      <input type="number" placeholder="Amount" class="ms-amount" style="padding:8px;border:1px solid var(--border);border-radius:6px;font-size:13px" oninput="updateMilestoneTotal()">
+      <button onclick="this.parentElement.remove();updateMilestoneTotal()" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:16px">×</button>
+    `;
+    container.appendChild(row);
+  }
+
+  window.updateMilestoneTotal = function() {
+    const amounts = document.querySelectorAll('.ms-amount');
+    let total = 0;
+    amounts.forEach(a => total += parseFloat(a.value || 0));
+    document.getElementById('ms-total-display').textContent = '$' + total.toLocaleString();
+    
+    const rate = parseFloat(document.getElementById('prop-rate').value || 0);
+    const warning = document.getElementById('ms-warning');
+    if (Math.abs(total - rate) > 0.01) {
+      warning.style.display = 'inline';
+    } else {
+      warning.style.display = 'none';
+    }
+  }
+
+
   window.submitProposalForm = function(jobId) {
     const rate = document.getElementById('prop-rate').value;
     const days = document.getElementById('prop-days').value;
@@ -470,12 +551,34 @@
 
     if (!letter) return toast('Error', 'Please write a cover letter');
 
+    // Collect milestones
+    const milestones = [];
+    const rows = document.querySelectorAll('.milestone-row');
+    let msTotal = 0;
+    rows.forEach(row => {
+      const desc = row.querySelector('.ms-desc').value.trim();
+      const amt = parseFloat(row.querySelector('.ms-amount').value || 0);
+      if (desc && amt > 0) {
+        milestones.push({ description: desc, amount: amt });
+        msTotal += amt;
+      }
+    });
+
+    if (milestones.length === 0) {
+      return toast('Error', 'Please add at least one milestone');
+    }
+
+    if (Math.abs(msTotal - parseFloat(rate)) > 0.01) {
+      return toast('Error', 'Milestone total ($' + msTotal.toFixed(2) + ') must match your proposed rate ($' + parseFloat(rate).toFixed(2) + ')');
+    }
+
     const payload = {
         job_id: jobId,
         bid_amount: rate,
         estimated_days: days,
         cover_letter: letter,
-        attachments: attach
+        attachments: attach,
+        milestones: milestones
     };
     console.log('Submitting proposal:', payload);
 
@@ -484,6 +587,7 @@
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     })
+
     .then(res => {
       console.log('Response status:', res.status);
       return res.json();
@@ -574,69 +678,104 @@
     document.getElementById('overlay').classList.remove('open');
     document.body.style.overflow = '';
   }
-  window.openModal = function(type, id) {
+  window.openModal = function(type, data) {
     const modal = document.getElementById('modal');
     const mc = document.getElementById('mc-body');
     const overlay = document.getElementById('overlay');
     
     if (type === 'contract-detail') {
-      const c = CONTRACTS.find(x => x.id == id);
+      const c = CONTRACTS.find(ct => ct.id == data);
       if (!c) return;
-      document.getElementById('mh-title').innerText = `Contract — ${c.client_name}`;
+      window.currentContractId = c.id;
+
+      document.getElementById('mh-title').innerText = c.job_title;
       modal.style.maxWidth = '750px';
       mc.innerHTML = `
         <div style="padding:25px">
-          <!-- Stats Grid -->
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:30px">
-            <div style="border:1px solid #eee;padding:15px;border-radius:12px">
-              <div style="font-size:12px;color:#999;margin-bottom:4px">Type</div>
-              <div style="font-weight:700;font-size:16px">${c.contract_type === 'hourly' ? 'Hourly · $90/hr' : 'Fixed Price'}</div>
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px">
+            <div>
+              <div style="font-size:13px;color:#999;margin-bottom:4px">Client</div>
+              <div style="font-weight:700;font-size:18px">${c.client_name}</div>
             </div>
-            <div style="border:1px solid #eee;padding:15px;border-radius:12px">
-              <div style="font-size:12px;color:#999;margin-bottom:4px">Hours This Week</div>
-              <div style="font-weight:700;font-size:16px">8.5 hrs</div>
-            </div>
-            <div style="border:1px solid #eee;padding:15px;border-radius:12px">
-              <div style="font-size:12px;color:#999;margin-bottom:4px">Total Earned</div>
-              <div style="font-weight:700;font-size:16px">$${parseFloat(c.total_earned || 0).toLocaleString()}</div>
-            </div>
-            <div style="border:1px solid #eee;padding:15px;border-radius:12px">
-              <div style="font-size:12px;color:#999;margin-bottom:4px">Weekly Limit</div>
-              <div style="font-weight:700;font-size:16px">No limit</div>
+            <div style="text-align:right">
+              <div style="font-size:13px;color:#999;margin-bottom:4px">Total Budget</div>
+              <div style="font-weight:700;font-size:18px">$${parseFloat(c.amount).toLocaleString()}</div>
             </div>
           </div>
 
-          <!-- Log Time Section -->
-          <div style="margin-bottom:30px">
-            <h3 style="font-size:16px;margin-bottom:15px">Log Time / Submit Work</h3>
+          <!-- Stats Grid -->
+          <div style="display:grid;grid-template-columns:repeat(4, 1fr);gap:15px;margin-bottom:30px">
+            <div style="border:1px solid #eee;padding:15px;border-radius:12px">
+              <div style="font-size:12px;color:#999;margin-bottom:4px">Type</div>
+              <div style="font-weight:700;font-size:14px">${c.contract_type === 'hourly' ? 'Hourly' : 'Fixed Price'}</div>
+            </div>
+            <div style="border:1px solid #eee;padding:15px;border-radius:12px">
+              <div style="font-size:12px;color:#999;margin-bottom:4px">Total Earned</div>
+              <div style="font-weight:700;font-size:14px;color:#14a800">$${parseFloat(c.total_earned || 0).toLocaleString()}</div>
+            </div>
+            <div style="border:1px solid #eee;padding:15px;border-radius:12px">
+              <div style="font-size:12px;color:#999;margin-bottom:4px">Pending</div>
+              <div style="font-weight:700;font-size:14px">$${parseFloat(c.pending_earned || 0).toLocaleString()}</div>
+            </div>
+            <div style="border:1px solid #eee;padding:15px;border-radius:12px">
+              <div style="font-size:12px;color:#999;margin-bottom:4px">Status</div>
+              <div style="font-weight:700;font-size:14px">${c.status.charAt(0).toUpperCase() + c.status.slice(1)}</div>
+            </div>
+          </div>
+
+          <!-- Milestones Section (for Fixed Price) -->
+          <div id="milestones-section-detail" style="margin-bottom:30px; display: ${c.contract_type === 'fixed' ? 'block' : 'none'}">
+            <h3 style="font-size:16px;margin-bottom:15px;font-weight:700">Contract Milestones</h3>
+            <div id="milestone-list-detail">
+              ${(c.milestones || []).map((ms, i) => `
+                <div style="padding:15px; border:1px solid #eee; border-radius:10px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center">
+                  <div>
+                    <div style="font-size:14px; font-weight:600">${ms.description}</div>
+                    <div style="font-size:12px; color:#999">$${parseFloat(ms.amount).toLocaleString()} · ${ms.status.charAt(0).toUpperCase() + ms.status.slice(1)}</div>
+                  </div>
+                  <div>
+                    ${ms.status === 'pending' ? `
+                      <button class="btn btn-g btn-sm" onclick="requestMilestone(${ms.id}, this)">Request Completion</button>
+                    ` : (ms.status === 'requested' ? `
+                      <span class="badge" style="background:#fef3c7; color:#b45309; padding:4px 8px; border-radius:4px; font-size:11px">Requested</span>
+                    ` : `
+                      <span class="badge" style="background:#d1fae5; color:#065f46; padding:4px 8px; border-radius:4px; font-size:11px">Paid</span>
+                    `)}
+                  </div>
+                </div>
+              `).join('')}
+              ${(!c.milestones || c.milestones.length === 0) ? '<div style="color:#999; font-size:14px">No milestones defined.</div>' : ''}
+            </div>
+          </div>
+
+          <!-- Log Time Section (for Hourly) -->
+          <div id="hourly-log-section" style="margin-bottom:30px; display: ${c.contract_type === 'hourly' ? 'block' : 'none'}">
+            <h3 style="font-size:16px;margin-bottom:15px;font-weight:700">Log Time</h3>
             <div style="display:grid;grid-template-columns:1fr 1.5fr;gap:20px;margin-bottom:15px">
               <div>
-                <label style="display:block;font-size:13px;font-weight:600;margin-bottom:8px">${c.contract_type === 'hourly' ? 'Hours to Log' : 'Amount to Request ($)'}</label>
-                <input type="number" id="work-amount" value="${c.contract_type === 'hourly' ? '' : c.amount}" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:8px">
+                <label style="display:block;font-size:13px;font-weight:600;margin-bottom:8px">Hours to Log</label>
+                <input type="number" id="work-amount" value="" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px">
               </div>
               <div>
-                <label style="display:block;font-size:13px;font-weight:600;margin-bottom:8px">Work Description / Details</label>
-                <input type="text" id="work-desc" placeholder="e.g. Mobile responsive screens" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:8px">
+                <label style="display:block;font-size:13px;font-weight:600;margin-bottom:8px">Work Description</label>
+                <input type="text" id="work-desc" placeholder="e.g. Mobile responsive screens" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px">
               </div>
             </div>
-            <div style="margin-bottom:15px">
-                <label style="display:block;font-size:13px;font-weight:600;margin-bottom:8px">Attachments (Links or details)</label>
-                <textarea id="work-attach" placeholder="Paste links to files or project details here..." style="width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;height:80px"></textarea>
-            </div>
-            <button class="btn btn-g" id="btn-log-work" style="padding:12px 30px;border-radius:10px;font-weight:700;width:100%" onclick="logWork(${c.id})">${c.contract_type === 'hourly' ? 'Log Hours' : 'Submit Work for Payment'}</button>
+            <button class="btn btn-g" style="width:100%;padding:12px" onclick="logWork(currentContractId)">Log Hours</button>
           </div>
 
           <!-- Footer Buttons -->
           <div style="display:flex;gap:15px;border-top:1px solid #eee;padding-top:25px">
             <button class="btn" style="flex:1;justify-content:center;border:1px solid #ddd;background:white;color:#333;font-weight:600;padding:12px;border-radius:8px" onclick="showPage('messages');closeModal()">Message Client</button>
-            <button class="btn" style="flex:1;justify-content:center;border:1px solid #14a800;background:white;color:#14a800;font-weight:600;padding:12px;border-radius:8px" onclick="toast('Video Call', 'Starting call...')">📹 Video Call</button>
-            <button class="btn" id="btn-pause-contract" style="flex:1;justify-content:center;background:#f3f4f6;color:#333;font-weight:600;padding:12px;border-radius:8px" onclick="updateContractStatus(${c.id}, 'paused')">${c.status === 'paused' ? 'Resume Contract' : 'Pause Contract'}</button>
+            <button class="btn" id="btn-pause-contract" style="flex:1;justify-content:center;background:#f3f4f6;color:#333;font-weight:600;padding:12px;border-radius:8px" onclick="toast('Pause','Feature coming soon')">Pause Contract</button>
+            <button class="btn btn-w" style="flex:1;justify-content:center;padding:12px" onclick="closeModal()">Close</button>
           </div>
         </div>
       `;
       overlay.classList.add('open');
       document.body.style.overflow = 'hidden';
-    } else if (type === 'edit-profile') {
+    }
+ else if (type === 'edit-profile') {
       document.getElementById('mh-title').innerText = 'Edit Profile';
       modal.style.maxWidth = '700px';
       mc.innerHTML = `
@@ -1452,7 +1591,46 @@
     const hash = window.location.hash.replace('#', '');
     showPage(hash || 'home');
   });
+async function requestMilestone(milestoneId, btn) {
+    if (!confirm('Are you sure you want to request completion for this milestone?')) return;
+    
+    const originalText = btn.innerText;
+    btn.disabled = true;
+    btn.innerText = 'Requesting...';
+
+    try {
+        const res = await fetch(BASE_URL + 'freelancer/api/request-milestone.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ milestone_id: milestoneId })
+        });
+        const data = await res.json();
+        if (data.success) {
+            toast('Success', 'Request sent to client');
+            // Update UI locally
+            btn.parentElement.innerHTML = '<span class="badge" style="background:#fef3c7; color:#b45309; padding:4px 8px; border-radius:4px; font-size:11px">Requested</span>';
+            
+            // Also update the global CONTRACTS object so if they reopen modal it stays
+            CONTRACTS.forEach(c => {
+                if (c.milestones) {
+                    c.milestones.forEach(m => {
+                        if (m.id == milestoneId) m.status = 'requested';
+                    });
+                }
+            });
+        } else {
+            toast('Error', data.message);
+            btn.disabled = false;
+            btn.innerText = originalText;
+        }
+    } catch (err) {
+        toast('Error', 'Request failed');
+        btn.disabled = false;
+        btn.innerText = originalText;
+    }
+}
 </script>
+
 
 <!-- Skill Selector Overlay -->
 <div id="skill-overlay" style="display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.45);align-items:center;justify-content:center">

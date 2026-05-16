@@ -1,5 +1,5 @@
 <script>
-let availableBalance = 1250.00;
+let availableBalance = <?php echo (float)($user['balance'] ?? 0); ?>;
 let selectedCVType = null;
 let selectedCVFile = null;
 
@@ -218,7 +218,7 @@ const MODALS = {
         </select>
       </div>
 
-      <div class="fg"><label>Billing Type</label><select id="pj-billing-type" onchange="updatePostJobFields()"><option value="fixed">Fixed Price</option><option value="hourly">Hourly Rate</option></select></div>
+      <div class="fg"><label>Billing Type</label><select id="pj-billing-type" onchange="updatePostJobFields()"><option value="fixed">Fixed Price</option><option value="hourly">Hourly Rate</option><option value="monthly">Monthly Rate</option></select></div>
       
       <div class="fg"><label>Budget ($)</label><input type="number" id="pj-budget" placeholder="e.g. 5000"></div>
 
@@ -509,7 +509,7 @@ function viewJobDetails(job) {
     b: `
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
         <span class="badge b-${job.status === 'open' ? 'green' : (job.status === 'paused' ? 'yellow' : 'gray')}">${job.status.charAt(0).toUpperCase() + job.status.slice(1)}</span>
-        <span class="badge b-blue">${job.budget_type === 'fixed' ? 'Fixed Price' : 'Hourly'}</span>
+        <span class="badge b-blue">${job.budget_type === 'fixed' ? 'Fixed Price' : (job.budget_type === 'hourly' ? 'Hourly' : 'Monthly')}</span>
         <span class="badge b-gray">${job.category}</span>
         <span class="badge b-purple" style="font-size:11px">${job.subcategory || 'General'}</span>
       </div>
@@ -531,6 +531,84 @@ function viewJobDetails(job) {
   };
   openModal('view-job');
 }
+function viewProposalDetails(p) {
+  let milestoneHtml = '';
+  if (p.milestones && p.milestones.length > 0) {
+    milestoneHtml = `
+      <div style="margin-top:20px; background:#f9fafb; padding:16px; border-radius:12px; border:1.5px solid var(--uw-border)">
+        <h4 style="margin:0 0 12px 0; font-size:14px; text-transform:uppercase; color:var(--uw-gray); letter-spacing:0.05em">Proposed Milestones</h4>
+        <div style="display:grid; gap:10px">
+          ${p.milestones.map((ms, i) => `
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:13.5px">
+              <div style="display:flex; gap:10px; align-items:center">
+                <span style="width:20px; height:20px; background:var(--uw-green-light); color:var(--uw-green); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700">${i+1}</span>
+                <span style="color:var(--uw-black)">${ms.description}</span>
+              </div>
+              <span style="font-weight:700">$${new Intl.NumberFormat().format(ms.amount)}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  let actionButtons = '';
+  if (p.status === 'accepted') {
+    actionButtons = `
+      <button class="btn btn-w" style="flex:1;justify-content:center;padding:12px" onclick="closeModal();showChatWithFreelancer(${p.freelancer_id}, '${p.freelancer_name.replace(/'/g, "\\'")}')">💬 Message</button>
+    `;
+
+  } else {
+    actionButtons = `
+      <button class="btn btn-w" style="flex:1;justify-content:center;padding:12px" onclick="closeModal();showChatWithFreelancer(${p.freelancer_id}, '${p.freelancer_name.replace(/'/g, "\\'")}')">💬 Message</button>
+      <button class="btn btn-o" style="flex:1;justify-content:center;padding:12px" onclick="closeModal();updateProposalStatus(${p.id}, '${p.status==='shortlisted'?'pending':'shortlisted'}')">${p.status==='shortlisted'?'Unshortlist':'Shortlist'}</button>
+      <button class="btn btn-g" style="flex:1.5;justify-content:center;padding:12px" onclick="closeModal();hireFreelancer(${p.id}, ${p.bid_amount})">Hire Freelancer →</button>
+    `;
+  }
+
+  MODALS['view-proposal'] = {
+    t: 'Proposal: ' + p.job_title,
+    b: `
+      <div style="display:flex; gap:16px; align-items:center; margin-bottom:20px">
+        <div class="av" style="background:var(--uw-green-light);color:var(--uw-green);width:56px;height:56px;font-size:18px">${p.freelancer_name.substring(0,2).toUpperCase()}</div>
+        <div style="flex:1">
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px">
+            <h3 style="margin:0; font-size:18px">${p.freelancer_name}</h3>
+            <span class="badge b-${p.status==='shortlisted'?'blue':(p.status==='archived'?'gray':'green')}" style="font-size:10px">${p.status.charAt(0).toUpperCase() + p.status.slice(1)}</span>
+          </div>
+          <div style="font-size:13px; color:var(--uw-gray)">Freelancer · 0 reviews · ★ 0.0 · $0/hr</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:24px; font-weight:800; color:var(--uw-black)">$${new Intl.NumberFormat().format(p.bid_amount)}</div>
+          <div style="font-size:12px; color:var(--uw-gray)">Proposed Budget</div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:20px">
+        <h4 style="font-size:14px; margin:0 0 8px 0; color:var(--uw-black)">Cover Letter</h4>
+        <div style="font-size:14.5px; color:#374151; line-height:1.7; white-space:pre-wrap">${p.cover_letter}</div>
+      </div>
+
+      ${p.attachments ? `
+        <div style="margin-bottom:20px">
+          <h4 style="font-size:14px; margin:0 0 8px 0; color:var(--uw-black)">Attachments</h4>
+          <div style="padding:10px; background:var(--uw-bg); border-radius:8px; border:1px solid var(--uw-border); display:inline-flex; align-items:center; gap:8px">
+            <span style="font-size:16px">🔗</span>
+            <a href="${p.attachments}" target="_blank" style="font-size:13px; color:var(--uw-green); font-weight:600; text-decoration:none">${p.attachments}</a>
+          </div>
+        </div>
+      ` : ''}
+
+      ${milestoneHtml}
+
+      <div style="display:flex; gap:12px; margin-top:25px; border-top:1px solid var(--uw-border); padding-top:20px">
+        ${actionButtons}
+      </div>
+    `
+  };
+  openModal('view-proposal');
+}
+
 
 async function toggleJobStatus(jobId, newStatus) {
   toast('Updating...', 'Changing job status');
@@ -1013,6 +1091,31 @@ function manageContract(contract) {
           <div style="font-size:12px;color:var(--uw-gray)">${contract.job_title}</div>
         </div>
       </div>
+
+      <!-- Milestones Section -->
+      <div style="margin-bottom:25px">
+        <h4 style="margin:0 0 12px 0; font-size:14px; color:var(--uw-black)">Milestones</h4>
+        <div style="display:grid; gap:10px">
+          ${(contract.milestones || []).map((ms, i) => `
+            <div style="padding:12px; border:1px solid var(--uw-border); border-radius:10px; display:flex; justify-content:space-between; align-items:center; background:white">
+              <div>
+                <div style="font-size:13px; font-weight:600">${ms.description}</div>
+                <div style="font-size:11px; color:var(--uw-gray)">$${parseFloat(ms.amount).toLocaleString()} · ${ms.status.charAt(0).toUpperCase() + ms.status.slice(1)}</div>
+              </div>
+              <div>
+                ${ms.status === 'requested' ? `
+                  <button class="btn btn-g btn-sm" onclick="releaseMilestone(${ms.id}, this)">Approve & Pay</button>
+                ` : (ms.status === 'paid' ? `
+                  <span class="badge b-green" style="font-size:10px">Paid</span>
+                ` : `
+                  <span class="badge b-gray" style="font-size:10px">Pending</span>
+                `)}
+              </div>
+            </div>
+          `).join('')}
+          ${(!contract.milestones || contract.milestones.length === 0) ? '<div style="color:var(--uw-gray); font-size:13px; text-align:center; padding:10px; border:1.5px dashed var(--uw-border); border-radius:10px">No milestones defined.</div>' : ''}
+        </div>
+      </div>
       
       <div style="display:grid;gap:12px">
         <button class="btn btn-w" style="justify-content:center;padding:12px" onclick="closeModal();showChatWithFreelancer(${contract.freelancer_id}, '${contract.freelancer_name.replace(/'/g, "\\'")}')">
@@ -1043,6 +1146,37 @@ function manageContract(contract) {
   };
   openModal('manage-contract');
 }
+
+async function releaseMilestone(milestoneId, btn) {
+  if(!confirm('Are you sure you want to approve this milestone and release payment?')) return;
+  
+  const originalText = btn.innerText;
+  btn.disabled = true;
+  btn.innerText = 'Processing...';
+
+  try {
+    const res = await fetch(BASE_URL + 'client/api/release-milestone.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ milestone_id: milestoneId })
+    });
+    const data = await res.json();
+    if(data.success) {
+      toast('Success! 🎉', 'Payment released successfully');
+      btn.parentElement.innerHTML = '<span class="badge b-green" style="font-size:10px">Paid</span>';
+      // We might want to reload or update global state too
+    } else {
+      toast('Error', data.message);
+      btn.disabled = false;
+      btn.innerText = originalText;
+    }
+  } catch(err) {
+    toast('Error', 'Communication failed');
+    btn.disabled = false;
+    btn.innerText = originalText;
+  }
+}
+
 
 async function updateContractStatus(contractId, newStatus) {
   const actionText = newStatus === 'paused' ? 'pausing' : 'resuming';
@@ -1281,7 +1415,12 @@ async function submitPostJob(){
     if(btnText) btnText.innerText = 'Post Job →';
   }
 }
-async function hireFreelancer(proposalId) {
+async function hireFreelancer(proposalId, amount) {
+  if (amount > availableBalance) {
+    toast('Insufficient Balance', `Your current balance ($${availableBalance.toFixed(2)}) is less than the bid amount ($${amount.toFixed(2)}). Please add funds to your account.`);
+    return;
+  }
+  
   if(!confirm('Are you sure you want to hire this freelancer?')) return;
   
   toast('Processing...', 'Setting up your contract');

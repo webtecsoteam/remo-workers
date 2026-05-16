@@ -92,6 +92,23 @@ $proposalsStmt = $db->prepare("SELECT p.*, j.title as job_title, u.name as freel
 $proposalsStmt->execute([$user['id']]);
 $allProposals = $proposalsStmt->fetchAll(PDO::FETCH_ASSOC);
 
+// Fetch milestones for these proposals
+if (!empty($allProposals)) {
+    $proposalIds = array_column($allProposals, 'id');
+    $placeholders = implode(',', array_fill(0, count($proposalIds), '?'));
+    $mStmt = $db->prepare("SELECT proposal_id, milestones.* FROM milestones WHERE proposal_id IN ($placeholders) ORDER BY id ASC");
+    $mStmt->execute($proposalIds);
+    $allMilestones = $mStmt->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_ASSOC);
+
+    
+    foreach ($allProposals as &$p) {
+        $p['milestones'] = $allMilestones[$p['id']] ?? [];
+    }
+    unset($p);
+}
+
+
+
 $proposalCounts = [
     'pending' => 0,
     'shortlisted' => 0,
@@ -111,6 +128,23 @@ $allContractsStmt = $db->prepare("SELECT c.*, j.title as job_title, u.name as fr
                                   WHERE c.client_id = ? ORDER BY c.created_at DESC");
 $allContractsStmt->execute([$user['id']]);
 $allContracts = $allContractsStmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Fetch milestones for these contracts
+if (!empty($allContracts)) {
+    $contractIds = array_column($allContracts, 'id');
+    $placeholders = implode(',', array_fill(0, count($contractIds), '?'));
+    $mStmt = $db->prepare("SELECT contract_id, milestones.* FROM milestones WHERE contract_id IN ($placeholders) ORDER BY id ASC");
+    $mStmt->execute($contractIds);
+    $allMilestones = $mStmt->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_ASSOC);
+
+    
+    foreach ($allContracts as &$c) {
+        $c['milestones'] = $allMilestones[$c['id']] ?? [];
+    }
+    unset($c);
+}
+
+
 
 $contractCounts = ['active' => 0, 'completed' => 0, 'paused' => 0, 'cancelled' => 0];
 foreach ($allContracts as $ac) {
@@ -172,6 +206,20 @@ $pendingWorkStmt = $db->prepare("
 ");
 $pendingWorkStmt->execute([$user['id']]);
 $pendingWorkLogs = $pendingWorkStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+
+// Pending Milestones for Review
+$pendingMilestonesStmt = $db->prepare("
+    SELECT m.*, c.job_id, j.title as job_title, u.name as freelancer_name
+    FROM milestones m
+    JOIN contracts c ON m.contract_id = c.id
+    JOIN jobs j ON c.job_id = j.id
+    JOIN users u ON c.freelancer_id = u.id
+    WHERE c.client_id = ? AND m.status = 'requested'
+    ORDER BY m.updated_at DESC
+");
+$pendingMilestonesStmt->execute([$user['id']]);
+$pendingMilestones = $pendingMilestonesStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+
 
 // All Freelancers
 $allFreelancersStmt = $db->prepare("SELECT * FROM users WHERE role = 'freelancer' AND status = 'active' ORDER BY created_at DESC");
@@ -260,7 +308,8 @@ $reportStats = $reportStatsStmt->fetch(PDO::FETCH_ASSOC);
     <div class="sb-item" onclick="showPage('jobs',this)"><span class="ico">📋</span>My Jobs</div>
     <div class="sb-item" onclick="showPage('proposals',this)"><span class="ico">📩</span>Proposals</div>
     <div class="sb-item" onclick="showPage('contracts',this)"><span class="ico">🤝</span>Contracts</div>
-    <div class="sb-item" onclick="showPage('review',this)"><span class="ico">📝</span>Review Work <?php if(count($pendingWorkLogs) > 0): ?><span class="sb-badge"><?php echo count($pendingWorkLogs); ?></span><?php endif; ?></div>
+    <div class="sb-item" onclick="showPage('review',this)"><span class="ico">📝</span>Review Work <?php if((count($pendingWorkLogs) + count($pendingMilestones)) > 0): ?><span class="sb-badge"><?php echo (count($pendingWorkLogs) + count($pendingMilestones)); ?></span><?php endif; ?></div>
+
     <div class="sb-item" onclick="showPage('talent',this)"><span class="ico">👥</span>Talent</div>
     <div class="sb-section">Tools</div>
     <div class="sb-item" onclick="showPage('messages',this)"><span class="ico">💬</span>Messages<?php if($unreadMessagesCount > 0): ?><span class="sb-badge"><?php echo $unreadMessagesCount; ?></span><?php endif; ?></div>
@@ -460,29 +509,65 @@ $reportStats = $reportStatsStmt->fetch(PDO::FETCH_ASSOC);
         <div class="tab" data-tab-status="closed" onclick="setTab(this)">Completed (<?php echo $jobCounts['closed']; ?>)</div>
         <div class="tab" data-tab-status="cancelled" onclick="setTab(this)">Cancelled (<?php echo $jobCounts['cancelled']; ?>)</div>
       </div>
-      <div class="card" style="margin-bottom:0;overflow:auto">
-        <table class="tbl">
-          <thead><tr><th>Job Title</th><th class="hide-mob">Category</th><th class="hide-mob">Subcategory</th><th>Budget</th><th>Proposals</th><th class="hide-mob">Posted</th><th>Status</th><th>Action</th></tr></thead>
-          <tbody>
-            <?php if (empty($allJobs)): ?>
-                <tr><td colspan="8" style="text-align:center;padding:20px;color:var(--uw-gray)">No job posts found.</td></tr>
-            <?php else: ?>
-                <?php foreach ($allJobs as $aj): ?>
-                <tr data-status="<?php echo $aj['status']; ?>" <?php echo $aj['status'] !== 'open' ? 'style="display:none"' : ''; ?>>
-                  <td class="cl" onclick="toast('Job Details','Viewing <?php echo htmlspecialchars($aj['title']); ?>')"><?php echo htmlspecialchars($aj['title']); ?></td>
-                  <td class="hide-mob"><span class="badge b-gray"><?php echo htmlspecialchars($aj['category']); ?></span></td>
-                  <td class="hide-mob"><span class="badge b-blue" style="font-size:11px"><?php echo htmlspecialchars($aj['subcategory'] ?? 'General'); ?></span></td>
-                  <td>$<?php echo number_format($aj['budget']); ?></td>
-                  <td><strong style="color:var(--uw-green)"><?php echo $aj['proposal_count']; ?></strong></td>
-                  <td class="hide-mob"><?php echo date('M j', strtotime($aj['created_at'])); ?></td>
-                  <td><span class="badge b-<?php echo ($aj['status'] === 'open' ? 'green' : ($aj['status'] === 'paused' ? 'yellow' : 'gray')); ?>"><?php echo ucfirst($aj['status']); ?></span></td>
-                  <td><button class="btn btn-w btn-sm" onclick="viewJobDetails(<?php echo htmlspecialchars(json_encode($aj)); ?>)">Manage</button></td>
-                </tr>
-                <?php endforeach; ?>
-            <?php endif; ?>
-          </tbody>
-        </table>
+      <div class="desk-only">
+        <div class="card" style="margin-bottom:0;overflow:auto">
+          <table class="tbl">
+            <thead><tr><th>Job Title</th><th class="hide-mob">Category</th><th class="hide-mob">Subcategory</th><th>Budget</th><th>Type</th><th>Proposals</th><th class="hide-mob">Posted</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody>
+              <?php if (empty($allJobs)): ?>
+                  <tr><td colspan="9" style="text-align:center;padding:20px;color:var(--uw-gray)">No job posts found.</td></tr>
+              <?php else: ?>
+                  <?php foreach ($allJobs as $aj): ?>
+                  <tr data-status="<?php echo $aj['status']; ?>" <?php echo $aj['status'] !== 'open' ? 'style="display:none"' : ''; ?>>
+                    <td class="cl" onclick="toast('Job Details','Viewing <?php echo htmlspecialchars($aj['title']); ?>')"><?php echo htmlspecialchars($aj['title']); ?></td>
+                    <td class="hide-mob"><span class="badge b-gray"><?php echo htmlspecialchars($aj['category']); ?></span></td>
+                    <td class="hide-mob"><span class="badge b-blue" style="font-size:11px"><?php echo htmlspecialchars($aj['subcategory'] ?? 'General'); ?></span></td>
+                    <td>$<?php echo number_format($aj['budget']); ?></td>
+                    <td><span class="badge b-blue" style="font-size:10px"><?php echo ucfirst($aj['budget_type']); ?></span></td>
+                    <td><strong style="color:var(--uw-green)"><?php echo $aj['proposal_count']; ?></strong></td>
+                    <td class="hide-mob"><?php echo date('M j', strtotime($aj['created_at'])); ?></td>
+                    <td><span class="badge b-<?php echo ($aj['status'] === 'open' ? 'green' : ($aj['status'] === 'paused' ? 'yellow' : 'gray')); ?>"><?php echo ($aj['status'] === 'in_progress' ? 'Active' : ucfirst($aj['status'])); ?></span></td>
+
+                    <td><button class="btn btn-w btn-sm" onclick="viewJobDetails(<?php echo htmlspecialchars(json_encode($aj)); ?>)">Manage</button></td>
+                  </tr>
+                  <?php endforeach; ?>
+              <?php endif; ?>
+            </tbody>
+          </table>
+        </div>
       </div>
+
+      <!-- Mobile Card View -->
+      <div class="mob-only">
+        <?php if (empty($allJobs)): ?>
+            <div class="card" style="padding:20px;text-align:center;color:var(--uw-gray)">No job posts found.</div>
+        <?php else: ?>
+            <?php foreach ($allJobs as $aj): ?>
+            <div class="job-card" data-status="<?php echo $aj['status']; ?>" <?php echo $aj['status'] !== 'open' ? 'style="display:none"' : ''; ?> onclick="viewJobDetails(<?php echo htmlspecialchars(json_encode($aj)); ?>)">
+              <div style="flex:1">
+                <h4 style="color:var(--uw-green);margin-bottom:8px"><?php echo htmlspecialchars($aj['title']); ?></h4>
+
+                <div class="job-meta">
+                  <span class="jm g">$<?php echo number_format($aj['budget']); ?></span>
+                  <span class="jm"><?php echo ucfirst($aj['budget_type']); ?></span>
+                  <span class="jm"><strong style="color:var(--uw-green)"><?php echo $aj['proposal_count']; ?></strong> Proposals</span>
+                  <span class="badge b-<?php echo ($aj['status'] === 'open' ? 'green' : ($aj['status'] === 'paused' ? 'yellow' : 'gray')); ?>" style="font-size:10px"><?php echo ($aj['status'] === 'in_progress' ? 'Active' : ucfirst($aj['status'])); ?></span>
+                </div>
+
+                <div style="font-size:11.5px;color:var(--uw-gray);margin-top:10px;line-height:1.4">
+                  <strong><?php echo htmlspecialchars($aj['category']); ?></strong> 
+                  <?php if(!empty($aj['subcategory'])): ?> • <?php echo htmlspecialchars($aj['subcategory']); ?><?php endif; ?>
+                  <br>Posted <?php echo date('M j, Y', strtotime($aj['created_at'])); ?>
+                </div>
+              </div>
+              <div style="align-self:center;flex-shrink:0">
+                <button class="btn btn-w btn-sm" onclick="event.stopPropagation();viewJobDetails(<?php echo htmlspecialchars(json_encode($aj)); ?>)">Manage</button>
+              </div>
+            </div>
+            <?php endforeach; ?>
+        <?php endif; ?>
+      </div>
+
     </div>
 
     <!-- ══ PROPOSALS PAGE ══ -->
@@ -505,7 +590,7 @@ $reportStats = $reportStatsStmt->fetch(PDO::FETCH_ASSOC);
           <div class="card" style="padding:40px;text-align:center;color:var(--uw-gray)">No pending proposals found.</div>
       <?php else: ?>
           <?php foreach ($allProposals as $p): ?>
-          <div class="prop-card" data-status="<?php echo $p['status']; ?>" onclick="toast('Proposal','Viewing proposal details')">
+          <div class="prop-card" data-status="<?php echo $p['status']; ?>" onclick="viewProposalDetails(<?php echo htmlspecialchars(json_encode($p)); ?>)">
             <div class="prop-top">
               <div class="av" style="background:var(--uw-green-light);color:var(--uw-green);width:42px;height:42px;font-size:13px"><?php echo strtoupper(substr($p['freelancer_name'], 0, 2)); ?></div>
               <div class="prop-info">
@@ -517,16 +602,27 @@ $reportStats = $reportStatsStmt->fetch(PDO::FETCH_ASSOC);
               </div>
               <div style="margin-left:auto;text-align:right;flex-shrink:0">
                 <div class="prop-rate">$<?php echo number_format($p['bid_amount']); ?></div>
-                <div style="font-size:11px;color:var(--uw-gray);margin-top:2px">For: <?php echo htmlspecialchars($p['job_title']); ?></div>
+                <div class="prop-job-target" style="font-size:11px;color:var(--uw-gray);margin-top:2px">For: <?php echo htmlspecialchars($p['job_title']); ?></div>
+                <?php if (!empty($p['milestones'])): ?>
+                  <div style="margin-top:8px">
+                    <span class="badge b-purple" style="font-size:9px;padding:3px 8px;border-radius:12px;background:rgba(124, 58, 237, 0.1);color:#7c3aed;border:none">
+                      ⛓️ <?php echo count($p['milestones']); ?> Milestones
+                    </span>
+                  </div>
+                <?php endif; ?>
               </div>
+
             </div>
             <div class="prop-body">"<?php echo htmlspecialchars(substr($p['cover_letter'], 0, 200)); ?>..."</div>
+            
+
+
             <div class="prop-foot">
               <div style="font-size:11.5px;color:var(--uw-gray)">Submitted <?php echo date('M j', strtotime($p['created_at'])); ?></div>
               <div class="prop-actions">
                 <?php if ($p['status'] === 'accepted'): ?>
                   <button class="btn btn-w btn-sm" onclick="event.stopPropagation();showChatWithFreelancer(<?php echo $p['freelancer_id']; ?>, '<?php echo addslashes($p['freelancer_name']); ?>')">💬 Message</button>
-                  <button class="btn btn-o btn-sm" onclick="event.stopPropagation();completeJob(<?php echo $p['id']; ?>)">Mark Complete</button>
+
                   <button class="btn btn-w btn-sm" style="color:#ef4444" onclick="event.stopPropagation();cancelHiring(<?php echo $p['id']; ?>)">Cancel</button>
                 <?php else: ?>
                   <button class="btn btn-w btn-sm" onclick="event.stopPropagation();updateProposalStatus(<?php echo $p['id']; ?>, 'archived')"><?php echo $p['status']==='archived'?'Unarchive':'Archive'; ?></button>
@@ -557,28 +653,62 @@ $reportStats = $reportStatsStmt->fetch(PDO::FETCH_ASSOC);
         <div class="tab" data-tab-status="cancelled" onclick="setTab(this)">Cancelled (<?php echo $contractCounts['cancelled']; ?>)</div>
       </div>
 
-      <div class="card" style="margin-bottom:0;overflow:auto">
-        <table class="tbl">
-          <thead><tr><th>Freelancer</th><th>Job Title</th><th class="hide-mob">Type</th><th>Budget</th><th class="hide-mob">Start Date</th><th>Status</th><th>Action</th></tr></thead>
-          <tbody>
-            <?php if (empty($allContracts)): ?>
-                <tr><td colspan="7" style="text-align:center;padding:20px;color:var(--uw-gray)">No contracts found.</td></tr>
-            <?php else: ?>
-                <?php foreach ($allContracts as $ac): ?>
-                <tr data-status="<?php echo $ac['status']; ?>" <?php echo $ac['status'] !== 'active' ? 'style="display:none"' : ''; ?>>
-                  <td class="cl" style="color:var(--uw-green);font-weight:600;cursor:pointer" onclick="event.stopPropagation();showChatWithFreelancer(<?php echo $ac['freelancer_id']; ?>, '<?php echo addslashes($ac['freelancer_name']); ?>')"><?php echo htmlspecialchars($ac['freelancer_name']); ?></td>
-                  <td><?php echo htmlspecialchars($ac['job_title']); ?></td>
-                  <td class="hide-mob"><?php echo ucfirst($ac['contract_type']); ?></td>
-                  <td>$<?php echo number_format($ac['amount']); ?></td>
-                  <td class="hide-mob"><?php echo date('M j, Y', strtotime($ac['start_date'])); ?></td>
-                  <td><span class="badge b-<?php echo ($ac['status'] === 'active' ? 'green' : 'gray'); ?>"><?php echo ucfirst($ac['status']); ?></span></td>
-                  <td><button class="btn btn-w btn-sm" onclick="event.stopPropagation();manageContract(<?php echo htmlspecialchars(json_encode($ac)); ?>)">Manage</button></td>
-                </tr>
-                <?php endforeach; ?>
-            <?php endif; ?>
-          </tbody>
-        </table>
+      <div class="desk-only">
+        <div class="card" style="margin-bottom:0;overflow:auto">
+          <table class="tbl">
+            <thead><tr><th>Freelancer</th><th>Job Title</th><th class="hide-mob">Type</th><th>Budget</th><th class="hide-mob">Start Date</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody>
+              <?php if (empty($allContracts)): ?>
+                  <tr><td colspan="7" style="text-align:center;padding:20px;color:var(--uw-gray)">No contracts found.</td></tr>
+              <?php else: ?>
+                  <?php foreach ($allContracts as $ac): ?>
+                  <tr data-status="<?php echo $ac['status']; ?>" <?php echo $ac['status'] !== 'active' ? 'style="display:none"' : ''; ?>>
+                    <td class="cl" style="color:var(--uw-green);font-weight:600;cursor:pointer" onclick="event.stopPropagation();showChatWithFreelancer(<?php echo $ac['freelancer_id']; ?>, '<?php echo addslashes($ac['freelancer_name']); ?>')"><?php echo htmlspecialchars($ac['freelancer_name']); ?></td>
+                    <td><?php echo htmlspecialchars($ac['job_title']); ?></td>
+                    <td class="hide-mob"><?php echo ucfirst($ac['contract_type']); ?></td>
+                    <td>$<?php echo number_format($ac['amount']); ?></td>
+                    <td class="hide-mob"><?php echo date('M j, Y', strtotime($ac['start_date'])); ?></td>
+                    <td><span class="badge b-<?php echo ($ac['status'] === 'active' ? 'green' : 'gray'); ?>"><?php echo ucfirst($ac['status']); ?></span></td>
+                    <td><button class="btn btn-w btn-sm" onclick="event.stopPropagation();manageContract(<?php echo htmlspecialchars(json_encode($ac)); ?>)">Manage</button></td>
+                  </tr>
+                  <?php endforeach; ?>
+              <?php endif; ?>
+            </tbody>
+          </table>
+        </div>
       </div>
+
+      <!-- Mobile Card View -->
+      <div class="mob-only">
+        <?php if (empty($allContracts)): ?>
+            <div class="card" style="padding:20px;text-align:center;color:var(--uw-gray)">No contracts found.</div>
+        <?php else: ?>
+            <?php foreach ($allContracts as $ac): ?>
+            <div class="prop-card" data-status="<?php echo $ac['status']; ?>" <?php echo $ac['status'] !== 'active' ? 'style="display:none"' : ''; ?> onclick="manageContract(<?php echo htmlspecialchars(json_encode($ac)); ?>)">
+              <div class="prop-top" style="margin-bottom:8px">
+                <div class="av" style="background:var(--uw-green-light);color:var(--uw-green);width:40px;height:40px;font-size:14px"><?php echo strtoupper(substr($ac['freelancer_name'], 0, 2)); ?></div>
+                <div class="prop-info">
+                  <h4 style="margin-bottom:2px"><?php echo htmlspecialchars($ac['freelancer_name']); ?></h4>
+                  <div style="font-size:12px;color:var(--uw-gray)"><?php echo ucfirst($ac['contract_type']); ?> Contract</div>
+                </div>
+                <div style="margin-left:auto;text-align:right">
+                  <div class="prop-rate">$<?php echo number_format($ac['amount']); ?></div>
+                  <span class="badge b-<?php echo ($ac['status'] === 'active' ? 'green' : 'gray'); ?>" style="font-size:9px"><?php echo ucfirst($ac['status']); ?></span>
+                </div>
+              </div>
+              <div style="font-size:13.5px;font-weight:600;margin-bottom:10px;color:var(--uw-dark)"><?php echo htmlspecialchars($ac['job_title']); ?></div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding-top:10px;border-top:1px solid var(--uw-border)">
+                <div style="font-size:11px;color:var(--uw-gray)">Started <?php echo date('M j, Y', strtotime($ac['start_date'])); ?></div>
+                <div style="display:flex;gap:8px">
+                  <button class="btn btn-w btn-sm" onclick="event.stopPropagation();showChatWithFreelancer(<?php echo $ac['freelancer_id']; ?>, '<?php echo addslashes($ac['freelancer_name']); ?>')">💬</button>
+                  <button class="btn btn-g btn-sm" onclick="event.stopPropagation();manageContract(<?php echo htmlspecialchars(json_encode($ac)); ?>)">Manage</button>
+                </div>
+              </div>
+            </div>
+            <?php endforeach; ?>
+        <?php endif; ?>
+      </div>
+
     </div>
 
     <!-- ══ REVIEW WORK PAGE ══ -->
@@ -590,7 +720,7 @@ $reportStats = $reportStatsStmt->fetch(PDO::FETCH_ASSOC);
         </div>
       </div>
 
-      <?php if(empty($pendingWorkLogs)): ?>
+      <?php if(empty($pendingWorkLogs) && empty($pendingMilestones)): ?>
         <div style="text-align:center;padding:80px 40px;background:white;border-radius:16px;border:1px solid var(--uw-border);box-shadow:var(--sh)">
           <div style="font-size:56px;margin-bottom:20px">✨</div>
           <div style="font-weight:700;font-size:20px;margin-bottom:8px;color:var(--uw-black)">No pending reviews</div>
@@ -598,6 +728,36 @@ $reportStats = $reportStatsStmt->fetch(PDO::FETCH_ASSOC);
         </div>
       <?php else: ?>
         <div style="display:grid;gap:20px">
+          <!-- Milestones to Review -->
+          <?php foreach($pendingMilestones as $pm): ?>
+            <div class="card" style="padding:28px;border-radius:16px;box-shadow:var(--sh);border:1px solid var(--uw-border); border-left: 5px solid var(--uw-green)">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:24px">
+                <div style="flex:1;min-width:300px">
+                  <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+                    <div style="font-weight:700;font-size:18px;color:var(--uw-black)"><?php echo htmlspecialchars($pm['description']); ?></div>
+                    <span class="badge b-green" style="font-size:10px;letter-spacing:0.02em">MILESTONE</span>
+                  </div>
+                  <div style="font-size:13px;color:var(--uw-gray);margin-bottom:10px">
+                    Project: <strong><?php echo htmlspecialchars($pm['job_title']); ?></strong>
+                  </div>
+                  <div style="font-size:13px;color:var(--uw-gray);margin-bottom:20px;display:flex;align-items:center;gap:8px">
+                    <div class="sb-av" style="width:24px;height:24px;font-size:10px"><?php echo strtoupper(substr($pm['freelancer_name'],0,1)); ?></div>
+                    <span>By <strong><?php echo htmlspecialchars($pm['freelancer_name']); ?></strong> · Requested <?php echo date('M d, Y', strtotime($pm['updated_at'])); ?></span>
+                  </div>
+                </div>
+                <div style="text-align:right;min-width:200px;border-left:1px solid var(--uw-border);padding-left:24px">
+                  <div style="font-size:11px;color:var(--uw-gray);text-transform:uppercase;margin-bottom:8px;font-weight:700;letter-spacing:0.05em">Milestone Amount</div>
+                  <div style="font-size:32px;font-weight:800;color:var(--uw-black);margin-bottom:24px">$<?php echo number_format($pm['amount'], 2); ?></div>
+                  <div style="display:flex;flex-direction:column;gap:10px">
+                    <button class="btn btn-g" onclick="releaseMilestone(<?php echo $pm['id']; ?>, this)" style="width:100%;justify-content:center;padding:12px">Approve & Release</button>
+                    <button class="btn btn-w" onclick="toast('Reject','Coming soon')" style="width:100%;justify-content:center;padding:12px;border-color:#ddd">Reject Submission</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <?php endforeach; ?>
+
+          <!-- Work Logs to Review -->
           <?php foreach($pendingWorkLogs as $wl): ?>
             <div class="card" style="padding:28px;border-radius:16px;box-shadow:var(--sh);border:1px solid var(--uw-border)">
               <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:24px">
@@ -634,6 +794,7 @@ $reportStats = $reportStatsStmt->fetch(PDO::FETCH_ASSOC);
         </div>
       <?php endif; ?>
     </div>
+
 
     <!-- ══ SETTINGS PAGE ══ -->
     <div class="page" id="page-settings">
@@ -935,30 +1096,66 @@ $reportStats = $reportStatsStmt->fetch(PDO::FETCH_ASSOC);
 
       <div class="card">
         <div class="card-head"><h3>Transaction History</h3></div>
-        <table class="tbl">
-          <thead><tr><th>Date</th><th>Description</th><th>Freelancer / Source</th><th>Type</th><th>Amount</th><th>Status</th></tr></thead>
-          <tbody>
+        
+        <div class="desk-only">
+          <table class="tbl">
+            <thead><tr><th>Date</th><th>Description</th><th>Freelancer / Source</th><th>Type</th><th>Amount</th><th>Status</th></tr></thead>
+            <tbody>
+              <?php if(empty($clientTransactions)): ?>
+                  <tr><td colspan="6" style="text-align:center;padding:20px;color:var(--uw-gray)">No transactions found.</td></tr>
+              <?php else: ?>
+                  <?php foreach($clientTransactions as $ct): 
+                      $isDeposit = ($ct['payee_id'] == $user['id']);
+                  ?>
+                  <tr>
+                    <td><?php echo date('M j, Y', strtotime($ct['created_at'])); ?></td>
+                    <td><?php echo $isDeposit ? 'Add Funds (Deposit)' : 'Payment for contract'; ?></td>
+                    <td><?php echo $ct['freelancer_name'] ?: ($isDeposit ? 'Self (Deposit)' : 'System'); ?></td>
+                    <td><span class="badge <?php echo $isDeposit ? 'b-blue' : 'b-purple'; ?>"><?php echo $isDeposit ? 'Deposit' : 'Fixed'; ?></span></td>
+                    <td style="font-weight:700;color:<?php echo $isDeposit ? 'var(--uw-green)' : '#dc2626'; ?>">
+                      <?php echo $isDeposit ? '+' : '−'; ?>$<?php echo number_format($ct['amount'], 2); ?>
+                    </td>
+                    <td><span class="badge b-green"><?php echo ucfirst($ct['status']); ?></span></td>
+                  </tr>
+                  <?php endforeach; ?>
+              <?php endif; ?>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="mob-only">
+          <div style="padding:0 20px">
             <?php if(empty($clientTransactions)): ?>
-                <tr><td colspan="6" style="text-align:center;padding:20px;color:var(--uw-gray)">No transactions found.</td></tr>
+                <div style="text-align:center;padding:20px;color:var(--uw-gray)">No transactions found.</div>
             <?php else: ?>
                 <?php foreach($clientTransactions as $ct): 
                     $isDeposit = ($ct['payee_id'] == $user['id']);
                 ?>
-                <tr>
-                  <td><?php echo date('M j, Y', strtotime($ct['created_at'])); ?></td>
-                  <td><?php echo $isDeposit ? 'Add Funds (Deposit)' : 'Payment for contract'; ?></td>
-                  <td><?php echo $ct['freelancer_name'] ?: ($isDeposit ? 'Self (Deposit)' : 'System'); ?></td>
-                  <td><span class="badge <?php echo $isDeposit ? 'b-blue' : 'b-purple'; ?>"><?php echo $isDeposit ? 'Deposit' : 'Fixed'; ?></span></td>
-                  <td style="font-weight:700;color:<?php echo $isDeposit ? 'var(--uw-green)' : '#dc2626'; ?>">
-                    <?php echo $isDeposit ? '+' : '−'; ?>$<?php echo number_format($ct['amount'], 2); ?>
-                  </td>
-                  <td><span class="badge b-green"><?php echo ucfirst($ct['status']); ?></span></td>
-                </tr>
+                <div style="padding:15px 0;border-bottom:1px solid var(--uw-border);display:flex;justify-content:space-between;align-items:flex-start">
+                  <div style="flex:1;min-width:0">
+                    <div style="font-weight:700;font-size:14px;color:var(--uw-black);margin-bottom:2px"><?php echo $isDeposit ? 'Add Funds (Deposit)' : 'Payment for contract'; ?></div>
+                    <div style="font-size:11.5px;color:var(--uw-gray);margin-bottom:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+                      <?php echo $ct['freelancer_name'] ?: ($isDeposit ? 'Self (Deposit)' : 'System'); ?>
+                    </div>
+                    <div style="display:flex;gap:8px;align-items:center">
+                      <span class="badge <?php echo $isDeposit ? 'b-blue' : 'b-purple'; ?>" style="font-size:9px;padding:1px 6px"><?php echo $isDeposit ? 'Deposit' : 'Fixed'; ?></span>
+                      <span style="font-size:11px;color:var(--uw-gray2)"><?php echo date('M j, Y', strtotime($ct['created_at'])); ?></span>
+                    </div>
+                  </div>
+                  <div style="text-align:right;flex-shrink:0">
+                    <div style="font-weight:700;font-size:15px;color:<?php echo $isDeposit ? 'var(--uw-green)' : '#dc2626'; ?>;margin-bottom:4px">
+                      <?php echo $isDeposit ? '+' : '−'; ?>$<?php echo number_format($ct['amount'], 2); ?>
+                    </div>
+                    <span class="badge b-green" style="font-size:9px;padding:2px 6px"><?php echo ucfirst($ct['status']); ?></span>
+                  </div>
+                </div>
                 <?php endforeach; ?>
             <?php endif; ?>
-          </tbody>
-        </table>
+          </div>
+        </div>
+
       </div>
+
     </div>
 
     <!-- ══ REPORTS PAGE ══ -->

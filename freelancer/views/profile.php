@@ -126,12 +126,24 @@
       <div class="card" style="margin-bottom:14px">
         <div class="card-head"><h3>Profile Info</h3></div>
         <div class="card-body">
-          <table class="tbl" style="font-size:13px">
-            <tr><td style="color:var(--muted);width:120px">Rate</td><td><strong>$<?php echo number_format($user['hourly_rate'] ?: 0, 2); ?>/hr</strong></td></tr>
-            <tr><td style="color:var(--muted)">Location</td><td><?php echo htmlspecialchars($user['country'] ?: 'Global'); ?></td></tr>
-            <tr><td style="color:var(--muted)">Member since</td><td><?php echo date('F Y', strtotime($user['created_at'])); ?></td></tr>
-            <tr><td style="color:var(--muted)">Total earned</td><td><strong>$<?php echo number_format($fStats['total_earned'], 2); ?>+</strong></td></tr>
-          </table>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;justify-content:space-between;font-size:13px">
+              <span style="color:var(--muted)">Rate</span>
+              <strong style="color:var(--dark)">$<?php echo number_format($user['hourly_rate'] ?: 0, 2); ?>/hr</strong>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:13px">
+              <span style="color:var(--muted)">Location</span>
+              <span style="color:var(--dark);font-weight:600"><?php echo htmlspecialchars($user['country'] ?: 'Global'); ?></span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:13px">
+              <span style="color:var(--muted)">Member since</span>
+              <span style="color:var(--dark);font-weight:600"><?php echo date('F Y', strtotime($user['created_at'])); ?></span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:13px">
+              <span style="color:var(--muted)">Total earned</span>
+              <strong style="color:var(--g)">$<?php echo number_format($fStats['total_earned'], 2); ?>+</strong>
+            </div>
+          </div>
         </div>
       </div>
 

@@ -33,11 +33,13 @@ if ($jobId <= 0 || $bidAmount <= 0 || empty($coverLetter)) {
 
 $db = getDB();
 try {
+    $db->beginTransaction();
+
     $stmt = $db->prepare("
         INSERT INTO proposals (job_id, freelancer_id, bid_amount, cover_letter, estimated_days, attachments, status) 
         VALUES (?, ?, ?, ?, ?, ?, 'pending')
     ");
-    $success = $stmt->execute([
+    $stmt->execute([
         $jobId, 
         (int)$user['id'], 
         $bidAmount, 
@@ -46,12 +48,26 @@ try {
         $attachments
     ]);
 
+    $proposalId = $db->lastInsertId();
+
+    // Insert Milestones
+    if (isset($data['milestones']) && is_array($data['milestones'])) {
+        $mStmt = $db->prepare("INSERT INTO milestones (proposal_id, description, amount, status) VALUES (?, ?, ?, 'pending')");
+        foreach ($data['milestones'] as $ms) {
+            $mStmt->execute([$proposalId, $ms['description'], $ms['amount']]);
+        }
+    }
+
+    $db->commit();
     ob_end_clean();
-    echo json_encode(['success' => true, 'message' => 'Proposal submitted!', 'id' => $db->lastInsertId()]);
+    echo json_encode(['success' => true, 'message' => 'Proposal submitted!', 'id' => $proposalId]);
 } catch (PDOException $e) {
+    if ($db->inTransaction()) $db->rollBack();
     ob_end_clean();
     echo json_encode(['success' => false, 'message' => 'DB Error: ' . $e->getMessage()]);
 } catch (Exception $e) {
+    if ($db->inTransaction()) $db->rollBack();
     ob_end_clean();
     echo json_encode(['success' => false, 'message' => 'Error: ' . $e->getMessage()]);
 }
+

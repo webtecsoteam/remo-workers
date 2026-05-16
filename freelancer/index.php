@@ -50,13 +50,30 @@ try {
         (SELECT SUM(amount) FROM payments WHERE job_id = c.job_id AND payee_id = c.freelancer_id AND status = 'completed') as total_earned,
         (SELECT SUM(amount) FROM payments WHERE job_id = c.job_id AND payee_id = c.freelancer_id AND status = 'pending') as pending_earned
         FROM contracts c 
-        JOIN jobs j ON c.job_id = j.id 
-        JOIN users u ON j.client_id = u.id 
+        LEFT JOIN jobs j ON c.job_id = j.id 
+        LEFT JOIN users u ON j.client_id = u.id 
         WHERE c.freelancer_id = ?
+        ORDER BY c.id DESC
     ");
     $allContractsStmt->execute([$user['id']]);
-    $allContracts = $allContractsStmt->fetchAll() ?: [];
+    $allContracts = $allContractsStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+
+    // Fetch milestones for contracts
+    if (!empty($allContracts)) {
+        $contractIds = array_column($allContracts, 'id');
+        $placeholders = implode(',', array_fill(0, count($contractIds), '?'));
+        $mStmt = $db->prepare("SELECT contract_id, milestones.* FROM milestones WHERE contract_id IN ($placeholders) ORDER BY id ASC");
+        $mStmt->execute($contractIds);
+        $allMilestones = $mStmt->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_ASSOC);
+        
+        foreach ($allContracts as &$c) {
+            $c['milestones'] = $allMilestones[$c['id']] ?? [];
+        }
+        unset($c);
+    }
+
     $activeContracts = array_filter($allContracts, fn($c) => $c['status'] === 'active');
+
 
     // Stats
     $totalEarnedStmt = $db->prepare("SELECT SUM(amount) FROM payments WHERE payee_id = ? AND status = 'completed'");
@@ -129,7 +146,7 @@ try {
     $ledgerStmt = $db->prepare("
         SELECT p.*, j.title as job_title, u.name as client_name,
         'payment' as ledger_type,
-        CASE WHEN p.job_id IS NULL THEN 'bonus' ELSE 'hourly' END as p_type
+        COALESCE(p.type, CASE WHEN p.job_id IS NULL THEN 'bonus' ELSE 'hourly' END) as p_type
         FROM payments p
         LEFT JOIN jobs j ON p.job_id = j.id
         LEFT JOIN users u ON p.payer_id = u.id

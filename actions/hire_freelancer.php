@@ -40,6 +40,10 @@ try {
         $proposal['bid_amount'],
         $proposal['budget_type']
     ]);
+    $contractId = $db->lastInsertId();
+
+    // 2.1 Link milestones to the contract
+    $db->prepare("UPDATE milestones SET contract_id = ? WHERE proposal_id = ?")->execute([$contractId, $proposalId]);
 
     // 3. Update proposal status
     $db->prepare("UPDATE proposals SET status = 'accepted' WHERE id = ?")->execute([$proposalId]);
@@ -48,6 +52,7 @@ try {
     $db->prepare("UPDATE jobs SET status = 'in_progress' WHERE id = ?")->execute([$proposal['job_id']]);
 
     $db->commit();
+
     echo json_encode(['success' => true, 'message' => 'Freelancer hired successfully!']);
 
 } catch (Exception $e) {

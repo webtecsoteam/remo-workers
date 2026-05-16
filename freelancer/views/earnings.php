@@ -66,31 +66,57 @@
   </div>
   <div class="card">
     <div class="card-body" style="padding:0">
-      <table class="tbl">
-        <thead><tr><th>Date</th><th>Description</th><th>Gross</th><th class="hide-mob">Fee</th><th>Net</th><th class="hide-mob">Status</th></tr></thead>
-        <tbody>
-          <?php if(empty($transactions)): ?>
-            <tr><td colspan="6" style="text-align:center;padding:40px;color:var(--muted)">No transactions found yet.</td></tr>
-          <?php else: ?>
-            <?php foreach($transactions as $t): ?>
-              <tr>
-                <td><?php echo date('M j, Y', strtotime($t['created_at'])); ?></td>
-                <td><?php echo htmlspecialchars($t['description']); ?></td>
-                <td>$<?php echo number_format($t['amount'], 2); ?></td>
-                <td class="hide-mob" style="color:#ef4444">-$<?php echo number_format($t['platform_fee'], 2); ?></td>
-                <td style="font-weight:700;color:var(--g)">$<?php echo number_format($t['amount'] - $t['platform_fee'], 2); ?></td>
-                <td class="hide-mob">
-                  <span class="badge <?php 
-                    echo $t['status'] === 'completed' ? 'b-green' : ($t['status'] === 'pending' ? 'b-blue' : 'b-gray'); 
-                  ?>">
-                    <?php echo ucfirst($t['status']); ?>
-                  </span>
-                </td>
-              </tr>
-            <?php endforeach; ?>
-          <?php endif; ?>
-        </tbody>
-      </table>
+      <!-- Desktop View -->
+      <div class="desk-only">
+        <table class="tbl">
+          <thead><tr><th>Date</th><th>Description</th><th>Gross</th><th class="hide-mob">Fee</th><th>Net</th><th class="hide-mob">Status</th></tr></thead>
+          <tbody>
+            <?php if(empty($transactions)): ?>
+              <tr><td colspan="6" style="text-align:center;padding:40px;color:var(--muted)">No transactions found yet.</td></tr>
+            <?php else: ?>
+              <?php foreach($transactions as $t): ?>
+                <tr>
+                  <td><?php echo date('M j, Y', strtotime($t['created_at'])); ?></td>
+                  <td><?php echo htmlspecialchars($t['description']); ?></td>
+                  <td>$<?php echo number_format($t['amount'], 2); ?></td>
+                  <td style="color:#ef4444">-$<?php echo number_format($t['platform_fee'], 2); ?></td>
+                  <td style="font-weight:700;color:var(--g)">$<?php echo number_format($t['amount'] - $t['platform_fee'], 2); ?></td>
+                  <td>
+                    <span class="badge <?php 
+                      echo $t['status'] === 'completed' ? 'b-green' : ($t['status'] === 'pending' ? 'b-blue' : 'b-gray'); 
+                    ?>">
+                      <?php echo ucfirst($t['status']); ?>
+                    </span>
+                  </td>
+                </tr>
+              <?php endforeach; ?>
+            <?php endif; ?>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Mobile View -->
+      <div class="mob-only">
+        <?php if(empty($transactions)): ?>
+          <div style="text-align:center;padding:40px;color:var(--muted)">No transactions found yet.</div>
+        <?php else: ?>
+          <?php foreach($transactions as $t): ?>
+            <div style="padding:16px;border-bottom:1px solid #eee">
+              <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+                <div style="font-weight:700;font-size:14px;color:var(--dark)"><?php echo htmlspecialchars($t['description']); ?></div>
+                <span class="badge <?php echo $t['status'] === 'completed' ? 'b-green' : 'b-blue'; ?>" style="font-size:10px"><?php echo ucfirst($t['status']); ?></span>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:flex-end">
+                <div style="font-size:12px;color:var(--muted)"><?php echo date('M j, Y', strtotime($t['created_at'])); ?></div>
+                <div style="text-align:right">
+                  <div style="font-weight:700;font-size:15px;color:var(--g)">$<?php echo number_format($t['amount'] - $t['platform_fee'], 2); ?></div>
+                  <div style="font-size:10px;color:var(--muted2)">Net Amount</div>
+                </div>
+              </div>
+            </div>
+          <?php endforeach; ?>
+        <?php endif; ?>
+      </div>
     </div>
   </div>
 </div>

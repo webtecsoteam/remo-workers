@@ -57,8 +57,14 @@ try {
             'Upwork Balance'
         ]);
 
-        // Optional: Update contract total_earned cache if exists, 
-        // but our queries usually sum it live.
+        // Update balances
+        // Deduct from client
+        $dStmt = $db->prepare("UPDATE users SET balance = balance - ? WHERE id = ?");
+        $dStmt->execute([$log['amount'], $log['client_id']]);
+
+        // Add to freelancer
+        $fStmt = $db->prepare("UPDATE users SET balance = balance + ? WHERE id = ?");
+        $fStmt->execute([$log['amount'], $log['freelancer_id']]);
     }
 
     $db->commit();
