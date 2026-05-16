@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/classes/Auth.php';
 
+ensureFreelancerSchema();
 $db = getDB();
 
 // Fetch real user from DB
@@ -17,7 +18,16 @@ if (!$user) {
 // Initial jobs fetch
 $allJobs = [];
 try {
-    $allJobsStmt = $db->query("SELECT j.*, u.name as client_name FROM jobs j JOIN users u ON j.client_id = u.id WHERE j.status = 'open' ORDER BY j.created_at DESC");
+    $allJobsStmt = $db->query("
+        SELECT j.*, u.name as client_name, u.country as client_country, u.is_verified as client_verified,
+        COALESCE((SELECT SUM(amount) FROM payments WHERE payer_id = j.client_id AND status = 'completed'), 0) as client_total_spent,
+        COALESCE((SELECT COUNT(*) FROM contracts WHERE client_id = j.client_id), 0) as client_hires,
+        COALESCE((SELECT COUNT(*) FROM proposals WHERE job_id = j.id), 0) as proposal_count
+        FROM jobs j
+        JOIN users u ON j.client_id = u.id
+        WHERE j.status = 'open'
+        ORDER BY j.created_at DESC
+    ");
     if ($allJobsStmt) {
         $allJobs = $allJobsStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
     }
@@ -41,6 +51,11 @@ $savedJobs = [];
 $totalProposals = 0;
 $totalContracts = 0;
 $unreadMessages = 0;
+$fullLedger = [];
+$bonusPayments = [];
+$earningsByClient = [];
+$weeklyEarnings = [];
+$conversations = [];
 
 // Fetch data with safety fallbacks
 try {
@@ -146,7 +161,7 @@ try {
     $ledgerStmt = $db->prepare("
         SELECT p.*, j.title as job_title, u.name as client_name,
         'payment' as ledger_type,
-        COALESCE(p.type, CASE WHEN p.job_id IS NULL THEN 'bonus' ELSE 'hourly' END) as p_type
+        CASE WHEN p.job_id IS NULL THEN 'bonus' ELSE 'hourly' END as p_type
         FROM payments p
         LEFT JOIN jobs j ON p.job_id = j.id
         LEFT JOIN users u ON p.payer_id = u.id

@@ -466,7 +466,10 @@ let currentJob = null;
 
 function openModal(id){
   const m = MODALS[id];
-  if(!m) return;
+  if(!m) {
+    toast('Unavailable', 'This action is not available yet.');
+    return;
+  }
   document.getElementById('mh-title').innerText = m.t;
   document.getElementById('mc-body').innerHTML = m.b;
   document.getElementById('overlay').classList.add('open');
@@ -480,6 +483,8 @@ function openModal(id){
     if(btn) btn.onclick = submitPostJob;
   }
 }
+window.__openModalImpl = openModal;
+window.openModal = openModal;
 
 function viewJobDetails(job) {
   currentJob = job;
@@ -674,8 +679,8 @@ async function updateJob(jobId) {
   const desc = document.getElementById('pj-desc').value.trim();
   const skills = document.getElementById('pj-skills').value.trim();
 
-  if(!title || !cat || !subcat || !budget || !desc) {
-    return toast('Error', 'Please fill in all required fields');
+  if(!title || !cat || !budget || !desc) {
+    return toast('Error', 'Please fill in job title, category, budget, and description');
   }
 
   toast('Saving...', 'Updating your job post');
@@ -683,7 +688,7 @@ async function updateJob(jobId) {
   formData.append('job_id', jobId);
   formData.append('title', title);
   formData.append('category', cat);
-  formData.append('subcategory', subcat);
+  formData.append('subcategory', subcat || 'General');
   formData.append('specialty', spec);
   formData.append('budget_type', type);
   formData.append('budget', budget);
@@ -711,6 +716,8 @@ function closeModal(){
   document.getElementById('overlay').classList.remove('open');
   document.body.style.overflow='';
 }
+window.__closeModalImpl = closeModal;
+window.closeModal = closeModal;
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
 
 function filterTalent(query) {
@@ -1376,8 +1383,8 @@ async function submitPostJob(){
   const desc = document.getElementById('pj-desc').value.trim();
   const skills = document.getElementById('pj-skills').value.trim();
 
-  if(!title || !cat || !subcat || !budget || !desc) {
-    return toast('Error', 'Please fill in all required fields including category and subcategory');
+  if(!title || !cat || !budget || !desc) {
+    return toast('Error', 'Please fill in job title, category, budget, and description');
   }
 
   const btn = document.getElementById('pj-submit-btn');
@@ -1388,7 +1395,7 @@ async function submitPostJob(){
   const formData = new FormData();
   formData.append('title', title);
   formData.append('category', cat);
-  formData.append('subcategory', subcat);
+  formData.append('subcategory', subcat || 'General');
   formData.append('specialty', spec);
   formData.append('budget_type', type);
   formData.append('budget', budget);
@@ -1554,7 +1561,16 @@ async function submitClientFinalVerification() {
 
 window.addEventListener('DOMContentLoaded', () => {
   const hash = window.location.hash.replace('#', '');
-  showPage(hash || 'home');
+  if (hash === 'post-job') {
+    openModal('post-job');
+    showPage('jobs');
+  } else {
+    showPage(hash || 'home');
+  }
+  if (window.__pendingModalId) {
+    openModal(window.__pendingModalId);
+    window.__pendingModalId = null;
+  }
 });
 
 setTimeout(()=>toast('Welcome back, NexaFlow!','You have 4 unread messages and 12 new proposals'),1000);

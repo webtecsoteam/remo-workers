@@ -22,21 +22,21 @@
     <div class="stat-c" style="padding:15px">
       <div style="font-size:11px;color:var(--muted);text-transform:uppercase;font-weight:700">Net Earnings</div>
       <div style="font-size:18px;font-weight:800;color:var(--dark)">$<?php 
-        $net = array_sum(array_map(fn($l) => $l['status']==='completed' ? ($l['amount'] - $l['platform_fee']) : 0, $fullLedger));
+        $net = array_sum(array_map(fn($l) => $l['status']==='completed' ? ($l['amount'] - $l['platform_fee']) : 0, $fullLedger ?? []));
         echo number_format($net, 2);
       ?></div>
     </div>
     <div class="stat-c" style="padding:15px">
       <div style="font-size:11px;color:var(--muted);text-transform:uppercase;font-weight:700">Fees Paid</div>
       <div style="font-size:18px;font-weight:800;color:#ef4444">-$<?php 
-        $fees = array_sum(array_map(fn($l) => $l['status']==='completed' ? $l['platform_fee'] : 0, $fullLedger));
+        $fees = array_sum(array_map(fn($l) => $l['status']==='completed' ? $l['platform_fee'] : 0, $fullLedger ?? []));
         echo number_format($fees, 2);
       ?></div>
     </div>
     <div class="stat-c" style="padding:15px">
       <div style="font-size:11px;color:var(--muted);text-transform:uppercase;font-weight:700">Bonuses</div>
       <div style="font-size:18px;font-weight:800;color:#8b5cf6">$<?php 
-        $bonuses = array_sum(array_map(fn($b) => $b['amount'], $bonusPayments));
+        $bonuses = array_sum(array_map(fn($b) => $b['amount'], $bonusPayments ?? []));
         echo number_format($bonuses, 2);
       ?></div>
     </div>

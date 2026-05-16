@@ -6,15 +6,30 @@
     <div style="font-size:13px;color:var(--muted)">Here's your work overview</div>
   </div>
 
+  <?php if (!Auth::isEmailVerified($user)): ?>
+    <div class="mob-section">
+      <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:16px 20px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:15px">
+          <div style="font-size:24px">✉️</div>
+          <div>
+            <div style="font-weight:700;font-size:14.5px;color:#1e40af">Verify your email</div>
+            <div style="font-size:12.5px;color:#1d4ed8">Required before applying to jobs.</div>
+          </div>
+        </div>
+        <button class="btn" style="background:#2563eb;color:white;border:none;flex-shrink:0" onclick="requestEmailVerification()">Verify Email →</button>
+      </div>
+    </div>
+  <?php endif; ?>
+
   <?php if (!($user['is_verified'] ?? false)): ?>
-    <!-- Verification Banner -->
+    <!-- Identity verification -->
     <div class="mob-section">
       <div style="background:#fff8e6;border:1px solid #ffeeba;border-radius:12px;padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap">
         <div style="display:flex;align-items:center;gap:15px">
           <div style="font-size:24px">🪪</div>
           <div>
             <div style="font-weight:700;font-size:14.5px;color:#854d0e">Verify your identity</div>
-            <div style="font-size:12.5px;color:#92400e">Unlock full platform features and build trust with clients.</div>
+            <div style="font-size:12.5px;color:#92400e">Identity verification is required before applying to jobs.</div>
           </div>
         </div>
         <button class="btn" style="background:#f59e0b;color:white;border:none;flex-shrink:0" onclick="showPage('verification')">Verify Now →</button>

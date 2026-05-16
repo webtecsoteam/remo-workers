@@ -97,6 +97,22 @@ function getDB() {
     return $pdo;
 }
 
+/** Ensure freelancer-related user columns exist (safe to call repeatedly). */
+function ensureFreelancerSchema() {
+    static $done = false;
+    if ($done) return;
+    $db = getDB();
+    $alters = [
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS connects INT NOT NULL DEFAULT 0",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified_at TIMESTAMP NULL",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verification_token VARCHAR(64) NULL",
+    ];
+    foreach ($alters as $sql) {
+        try { $db->exec($sql); } catch (PDOException $e) { /* column may already exist */ }
+    }
+    $done = true;
+}
+
 // Helper: Get base URL
 function baseUrl($path = '') {
     return rtrim(APP_URL, '/') . '/' . ltrim($path, '/');

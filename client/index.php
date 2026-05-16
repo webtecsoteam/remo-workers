@@ -268,10 +268,22 @@ $reportStats = $reportStatsStmt->fetch(PDO::FETCH_ASSOC);
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Upwork – Client Dashboard</title>
+<title>RemoWorkers – Client Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Neue+Haas+Grotesk+Display+Pro:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="<?php echo baseUrl("client/css/style.css"); ?>">
 <script>const BASE_URL = '<?php echo baseUrl(); ?>';</script>
+<script>
+window.openModal = function(id) {
+  if (window.__openModalImpl) return window.__openModalImpl(id);
+  window.__pendingModalId = id;
+};
+window.closeModal = function() {
+  if (window.__closeModalImpl) return window.__closeModalImpl();
+  var ov = document.getElementById('overlay');
+  if (ov) ov.classList.remove('open');
+  document.body.style.overflow = '';
+};
+</script>
 </head>
 <body>
 
@@ -290,11 +302,11 @@ $reportStats = $reportStatsStmt->fetch(PDO::FETCH_ASSOC);
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeMobSidebar()"></div>
 
 <!-- MOBILE FAB -->
-<button class="mob-fab" id="mob-fab" style="display:none" onclick="openModal('post-job')" aria-label="Post a job">+</button>
+<button type="button" class="mob-fab" id="mob-fab" onclick="openModal('post-job')" aria-label="Post a job">+</button>
 
 <!-- ══ SIDEBAR ══ -->
 <aside class="sidebar">
-  <a class="sb-logo" href="<?php echo baseUrl(); ?>"><div class="sb-wordmark">up<em>work</em></div></a>
+  <a class="sb-logo" href="<?php echo baseUrl(); ?>"><div class="sb-wordmark">Remo<em>Workers</em></div></a>
   <div class="sb-user">
     <div class="sb-av"><?php echo strtoupper(substr($user['name'], 0, 1)); ?></div>
     <div>

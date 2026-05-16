@@ -102,6 +102,11 @@
     <div class="mm-body">
         <div class="mm-section">
             <h4>For Clients</h4>
+            <?php if (!empty($user) && $user['role'] === 'client'): ?>
+            <a href="<?php echo baseUrl('client'); ?>#post-job" onclick="toggleMobileMenu()">Post a Job</a>
+            <?php else: ?>
+            <a onclick="openModal('post-job');toggleMobileMenu()">Post a Job</a>
+            <?php endif; ?>
             <a onclick="openModal('talent-marketplace');toggleMobileMenu()">Talent Marketplace</a>
             <a onclick="openModal('project-catalog-modal');toggleMobileMenu()">Project Catalog</a>
             <a onclick="openModal('talent-scout');toggleMobileMenu()">Talent Scout</a>

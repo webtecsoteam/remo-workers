@@ -508,6 +508,9 @@ button{font-family:inherit;cursor:pointer}
 .report-metric .rm-val{font-size:26px;font-weight:700;color:var(--uw-black);margin:4px 0}
 .report-metric .rm-lbl{font-size:11.5px;color:var(--uw-gray);font-weight:600;text-transform:uppercase;letter-spacing:.05em}
 
+/* ── MOBILE FAB (post job) ── */
+.mob-fab{display:none}
+
 /* ── MOBILE HAMBURGER ── */
 .mob-menu-btn{
   display:none;
@@ -639,6 +642,10 @@ button{font-family:inherit;cursor:pointer}
   /* Hide "+ Post a Job" text button in topbar on mobile — use FAB instead */
   .topbar .btn-g.btn-sm{display:none}
 
+  /* Modal must sit above FAB; hide FAB while modal is open */
+  .overlay.open{z-index:10050}
+  .overlay.open ~ .mob-fab{display:none!important}
+
   /* ── page title / header ── */
   .pg-title{font-size:18px}
   .pg-header{
@@ -647,7 +654,13 @@ button{font-family:inherit;cursor:pointer}
     gap:12px;
     margin-bottom:16px;
   }
-  .pg-header .btn{width:100%;justify-content:center}
+  .pg-header .btn{
+    width:100%;
+    justify-content:center;
+    position:relative;
+    z-index:2;
+    min-height:48px;
+  }
 
   /* ── stat cards: 2 columns ── */
   .stat-row{grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px}
@@ -721,6 +734,17 @@ button{font-family:inherit;cursor:pointer}
     border-radius:16px 16px 0 0;
     max-height:92vh;
     width:100%;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+  .mc{
+    padding:18px 16px 28px;
+    padding-bottom:calc(28px + env(safe-area-inset-bottom));
+  }
+  #pj-submit-btn{
+    position:relative;
+    z-index:2;
+    min-height:48px;
   }
 
   /* ── toast ── */

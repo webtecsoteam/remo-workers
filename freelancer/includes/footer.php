@@ -1,5 +1,5 @@
 <script>
-  // Core Navigation
+  // Core Navigation (replaces header stub with full version including deferred renders)
   window.showPage = function(id) {
     if (!id) id = 'home';
     
@@ -58,6 +58,10 @@
   let PROPOSALS = <?php echo json_encode($submittedProposals ?? [], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?: '[]'; ?>;
   const CONTRACTS = <?php echo json_encode($allContracts ?? [], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?: '[]'; ?>;
   const USER_CONNECTS = <?php echo (int)($user['connects'] ?? 0); ?>;
+  const CONNECTS_PER_APPLICATION = <?php echo Auth::CONNECTS_PER_APPLICATION; ?>;
+  const USER_EMAIL_VERIFIED = <?php echo Auth::isEmailVerified($user) ? 'true' : 'false'; ?>;
+  const USER_ID_VERIFIED = <?php echo Auth::isIdentityVerified($user) ? 'true' : 'false'; ?>;
+  let userConnectsBalance = USER_CONNECTS;
   // Global showPage for legacy onclicks (redundant now but keeping it for safety at end of script if needed)
   window.showPage = window.showPage;
 
@@ -358,24 +362,23 @@
             </div>
             <div style="font-size:13.5px;color:var(--muted);margin-bottom:12px">${(j.description || '').substring(0, 160)}...</div>
             
-            <div style="display:flex;align-items:center;gap:15px;font-size:12px;color:var(--muted2);margin-bottom:12px">
-              <span style="display:flex;align-items:center;gap:4px">Payment verified</span>
-              <span style="display:flex;align-items:center;gap:4px">★ 4.9 client · 18 hires</span>
-              <span>${j.location || 'London, UK'}</span>
-              <span style="background:#fefce8;color:#854d0e;padding:2px 8px;border-radius:6px;font-weight:600">💰 $89K+ spent</span>
+            <div style="display:flex;align-items:center;gap:15px;font-size:12px;color:var(--muted2);margin-bottom:12px;flex-wrap:wrap">
+              ${isClientVerified(j) ? '<span style="display:flex;align-items:center;gap:4px">Payment verified</span>' : ''}
+              <span style="display:flex;align-items:center;gap:4px">★ ${clientHiresLabel(j)}</span>
+              <span>${clientLocation(j)}</span>
+              <span style="background:#fefce8;color:#854d0e;padding:2px 8px;border-radius:6px;font-weight:600">💰 ${formatClientSpent(j.client_total_spent)} spent</span>
             </div>
 
-            <div style="display:flex;gap:10px">
-              <span style="background:#ede9fe;color:#5b21b6;font-size:11.5px;padding:3px 10px;border-radius:6px;font-weight:600">${j.budget_type === 'fixed' ? 'Fixed Price' : 'Hourly'}: $${j.budget}</span>
-              <span style="background:#f3f4f6;color:var(--dark3);font-size:11.5px;padding:3px 10px;border-radius:6px;font-weight:600">14 days</span>
-              <span style="background:#f3f4f6;color:var(--dark3);font-size:11.5px;padding:3px 10px;border-radius:6px;font-weight:600">3 proposals</span>
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+              <span style="background:#ede9fe;color:#5b21b6;font-size:11.5px;padding:3px 10px;border-radius:6px;font-weight:600">${j.budget_type === 'fixed' ? 'Fixed Price' : 'Hourly'}: $${parseFloat(j.budget || 0).toLocaleString()}</span>
+              <span style="background:#f3f4f6;color:var(--dark3);font-size:11.5px;padding:3px 10px;border-radius:6px;font-weight:600">${parseInt(j.proposal_count, 10) || 0} proposal${(parseInt(j.proposal_count, 10) || 0) === 1 ? '' : 's'}</span>
             </div>
           </div>
 
           <div style="text-align:right;border-left:1px solid var(--border);padding-left:20px">
             <button class="btn btn-g" style="width:100%;margin-bottom:12px" onclick="event.stopPropagation();openApplyModal(${j.id})">Apply Now</button>
             <div style="color:var(--muted2);font-size:12px;margin-bottom:4px;display:flex;align-items:center;justify-content:flex-end;gap:4px">
-              <span style="color:#f59e0b">⚡</span> 4 Connects
+              <span style="color:#f59e0b">⚡</span> ${CONNECTS_PER_APPLICATION} Connects
             </div>
             <div style="color:var(--muted2);font-size:11px">Posted ${timeAgo(j.created_at)}</div>
             <button class="save-btn ${isSaved?'active':''}" style="margin-top:15px;background:none;border:none;font-size:20px;color:var(--muted2);cursor:pointer" onclick="event.stopPropagation();toggleSaveJob(${j.id}, this)">
@@ -395,6 +398,80 @@
     return Math.floor(seconds / 86400) + "d ago";
   }
 
+  function formatClientSpent(amount) {
+    const n = parseFloat(amount) || 0;
+    return '$' + n.toLocaleString('en-US', { maximumFractionDigits: 0, minimumFractionDigits: 0 });
+  }
+
+  function clientLocation(job) {
+    return job.client_country || job.location || 'Remote';
+  }
+
+  function clientHiresLabel(job) {
+    const hires = parseInt(job.client_hires, 10) || 0;
+    return hires === 1 ? '1 hire' : hires + ' hires';
+  }
+
+  function isClientVerified(job) {
+    return job.client_verified == 1 || job.client_verified === true || job.client_verified === '1';
+  }
+
+  function updateConnectsDisplay(balance) {
+    userConnectsBalance = balance;
+    const el = document.getElementById('sb-connects-val');
+    if (el) el.textContent = balance;
+    document.querySelectorAll('#nav-connects').forEach(function(nav) {
+      nav.innerHTML = '<span class="sb-ico">🔗</span>Connects (' + balance + ')';
+    });
+  }
+
+  function getApplyBlockReason() {
+    if (!USER_EMAIL_VERIFIED) {
+      return {
+        title: 'Verify your email',
+        message: 'You must verify your email address before applying to jobs.',
+        action: function() { requestEmailVerification(); }
+      };
+    }
+    if (!USER_ID_VERIFIED) {
+      return {
+        title: 'Verify your identity',
+        message: 'Complete identity verification before applying to jobs.',
+        action: function() { showPage('verification'); }
+      };
+    }
+    if (userConnectsBalance < CONNECTS_PER_APPLICATION) {
+      return {
+        title: 'Not enough Connects',
+        message: 'Each application costs ' + CONNECTS_PER_APPLICATION + ' Connects. You have ' + userConnectsBalance + '.',
+        action: function() { openModal('connects'); }
+      };
+    }
+    return null;
+  }
+
+  window.requestEmailVerification = function() {
+    fetch(BASE_URL + 'verify-email', {
+      method: 'POST',
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+      if (data.success && data.verify_url) {
+        toast('Verify your email', 'Opening verification link…');
+        window.open(data.verify_url, '_blank');
+      } else if (data.already) {
+        toast('Email verified', data.message);
+        location.reload();
+      } else {
+        toast('Error', data.error || data.message || 'Could not send verification link.');
+      }
+    })
+    .catch(function() {
+      toast('Error', 'Could not request verification link.');
+    });
+  };
+
   window.openJobDetail = function(id) {
     const job = JOBS.find(j => j.id == id);
     if (!job) return;
@@ -411,7 +488,7 @@
           
           <div style="display:flex;flex-wrap:wrap;gap:20px;color:var(--muted2);font-size:13.5px">
             <span style="color:var(--g);font-weight:600">Posted ${timeAgo(job.created_at)}</span>
-            <span>📍 ${job.location || 'London, UK'}</span>
+            <span>📍 ${clientLocation(job)}</span>
           </div>
         </div>
 
@@ -431,11 +508,11 @@
             <div style="background:#f8fafc;padding:20px;border-radius:12px;border:1px solid #e2e8f0">
               <div style="display:flex;justify-content:space-between;margin-bottom:12px">
                 <span style="font-weight:600;color:var(--dark)">Connects Required</span>
-                <span style="font-weight:700">4 Connects</span>
+                <span style="font-weight:700">${CONNECTS_PER_APPLICATION} Connects</span>
               </div>
               <div style="display:flex;justify-content:space-between">
                 <span style="font-weight:600;color:var(--dark)">Your Connects</span>
-                <span style="color:var(--g);font-weight:700">50 Connects</span>
+                <span style="color:var(--g);font-weight:700">${userConnectsBalance} Connects</span>
               </div>
             </div>
           </div>
@@ -446,10 +523,11 @@
 
             <div style="margin-bottom:25px">
               <h4 style="font-size:14px;margin-bottom:15px;font-weight:700">About the Client</h4>
-              <div style="font-size:13px;color:var(--muted2);margin-bottom:10px">Payment verified ✅</div>
-              <div style="font-size:13px;color:var(--muted2);margin-bottom:10px">★ 4.9 of 18 reviews</div>
-              <div style="font-size:13px;color:var(--muted2);margin-bottom:10px">United Kingdom</div>
-              <div style="font-size:13px;color:var(--muted2)">$89K+ total spent</div>
+              ${isClientVerified(job) ? '<div style="font-size:13px;color:var(--muted2);margin-bottom:10px">Payment verified ✅</div>' : ''}
+              <div style="font-size:13px;color:var(--muted2);margin-bottom:10px;font-weight:600">${job.client_name || 'Client'}</div>
+              <div style="font-size:13px;color:var(--muted2);margin-bottom:10px">★ ${clientHiresLabel(job)}</div>
+              <div style="font-size:13px;color:var(--muted2);margin-bottom:10px">${clientLocation(job)}</div>
+              <div style="font-size:13px;color:var(--muted2)">${formatClientSpent(job.client_total_spent)} total spent</div>
             </div>
 
             <div style="border-top:1px solid var(--border);padding-top:20px">
@@ -466,12 +544,19 @@
   window.openApplyModal = function(id) {
     const job = JOBS.find(j => j.id == id);
     if (!job) return;
+
+    const block = getApplyBlockReason();
+    if (block) {
+      toast(block.title, block.message);
+      if (block.action) block.action();
+      return;
+    }
     
     document.getElementById('mh-title').textContent = 'Submit Proposal — ' + job.title;
     document.getElementById('mc-body').innerHTML = `
       <div style="padding:25px">
         <div style="background:#f0f7ef;color:#14a800;padding:12px 18px;border-radius:8px;font-size:13.5px;margin-bottom:25px;border:1px solid #d4e8d4">
-          Fixed Price · $${job.budget || 0} · 6 Connects required · You have ${USER_CONNECTS}
+          Fixed Price · $${job.budget || 0} · ${CONNECTS_PER_APPLICATION} Connects required · You have ${userConnectsBalance}
         </div>
 
         <div style="margin-bottom:20px">
@@ -602,6 +687,9 @@
     .then(data => {
       console.log('Response data:', data);
       if (data.success) {
+        if (typeof data.new_connects === 'number') {
+          updateConnectsDisplay(data.new_connects);
+        }
         // Add new proposal to local list so it shows up immediately
         const job = JOBS.find(j => j.id == jobId);
         PROPOSALS.unshift({
@@ -618,7 +706,9 @@
         closeModal();
         showPage('proposals');
       } else {
-        toast('Error', data.message);
+        toast('Error', data.message || data.error);
+        if (data.code === 'email_unverified') requestEmailVerification();
+        if (data.code === 'identity_unverified') showPage('verification');
       }
     })
     .catch(err => {
@@ -1589,6 +1679,10 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('verified') === 'email') {
+      toast('Email verified', 'You can now apply to jobs after identity verification.');
+    }
     const hash = window.location.hash.replace('#', '');
     showPage(hash || 'home');
   });
