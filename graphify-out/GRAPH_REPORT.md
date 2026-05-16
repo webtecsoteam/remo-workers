@@ -1,18 +1,13 @@
-# Graph Report - upwork project  (2026-05-16)
+# Graph Report - upwork-project  (2026-05-16)
 
 ## Corpus Check
-- 79 files · ~204,211 words
+- 72 files · ~54,447 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 254 nodes · 258 edges · 71 communities (65 shown, 6 thin omitted)
+- 255 nodes · 257 edges · 12 communities detected
 - Extraction: 93% EXTRACTED · 7% INFERRED · 0% AMBIGUOUS · INFERRED: 18 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
-
-## Graph Freshness
-- Built from commit: `3fd4c9c8`
-- Run `git rev-parse HEAD` and compare to check if the graph is stale.
-- Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
 - [[_COMMUNITY_Community 0|Community 0]]
@@ -25,8 +20,8 @@
 - [[_COMMUNITY_Community 7|Community 7]]
 - [[_COMMUNITY_Community 8|Community 8]]
 - [[_COMMUNITY_Community 9|Community 9]]
-- [[_COMMUNITY_Community 12|Community 12]]
-- [[_COMMUNITY_Community 13|Community 13]]
+- [[_COMMUNITY_Community 22|Community 22]]
+- [[_COMMUNITY_Community 23|Community 23]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `UserController` - 10 edges
@@ -43,7 +38,7 @@
 ## Surprising Connections (you probably didn't know these)
 - None detected - all connections are within the same source files.
 
-## Communities (71 total, 6 thin omitted)
+## Communities
 
 ### Community 0 - "Community 0"
 Cohesion: 0.09
@@ -65,14 +60,49 @@ Nodes (20): Admin Panel Features, API Reference, Authentication, code:block1 (up
 Cohesion: 0.14
 Nodes (14): 1. Install in your existing Laravel project, 2. Register middleware in `app/Http/Kernel.php`, 3. Install Laravel Sanctum (if not already), 4. Run migrations, 5. Create your first admin user, 6. Add CORS headers (if frontend is on a different domain), Backend Setup (Laravel), code:bash (# Copy controllers) (+6 more)
 
+### Community 5 - "Community 5"
+Cohesion: 0.17
+Nodes (2): Auth, getDB()
+
+### Community 6 - "Community 6"
+Cohesion: 0.22
+Nodes (1): JobController
+
+### Community 7 - "Community 7"
+Cohesion: 0.29
+Nodes (1): PaymentController
+
+### Community 8 - "Community 8"
+Cohesion: 0.47
+Nodes (1): AuthController
+
 ### Community 9 - "Community 9"
 Cohesion: 0.33
 Nodes (5): menu, navbar, observer, observerOptions, toggle
 
+### Community 22 - "Community 22"
+Cohesion: 1.0
+Nodes (1): Workflow: graphify
+
+### Community 23 - "Community 23"
+Cohesion: 1.0
+Nodes (1): graphify
+
 ## Knowledge Gaps
 - **37 isolated node(s):** `api`, `toggle`, `menu`, `navbar`, `observerOptions` (+32 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **6 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **Thin community `Community 5`** (13 nodes): `Auth`, `.check()`, `.login()`, `.logout()`, `.register()`, `Auth.php`, `baseUrl()`, `env()`, `getDB()`, `isRoute()`, `loadEnv()`, `redirect()`, `config.php`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 6`** (9 nodes): `JobController`, `.approve()`, `.close()`, `.destroy()`, `.flag()`, `.index()`, `.reject()`, `.show()`, `JobController.php`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 7`** (7 nodes): `PaymentController`, `.index()`, `.refund()`, `.resolveDispute()`, `.show()`, `.summary()`, `PaymentController.php`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 8`** (6 nodes): `AuthController`, `.formatUser()`, `.login()`, `.logout()`, `.me()`, `AuthController.php`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 22`** (2 nodes): `graphify.md`, `Workflow: graphify`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 23`** (2 nodes): `graphify.md`, `graphify`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_

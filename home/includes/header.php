@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Remoworkers – Where Great Work Gets Done</title>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="<?php echo baseUrl("home/css/style.css"); ?>">
+<link rel="stylesheet" href="<?php echo baseUrl("home/css/style.css?v=1.0.1"); ?>">
 <script>const APP_URL = '<?php echo baseUrl(); ?>';</script>
 </head>
 <body>
