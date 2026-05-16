@@ -1,3 +1,6 @@
+<!-- TOAST -->
+<div class="toast" id="toast"><strong id="t-title"></strong><span id="t-msg"></span></div>
+
 <script>
 let availableBalance = <?php echo (float)($user['balance'] ?? 0); ?>;
 let selectedCVType = null;
@@ -66,7 +69,8 @@ function confirmFundMilestone(amount, name, milestone){
 function selectPayMethod(el){document.querySelectorAll('.pay-method').forEach(x=>x.classList.remove('selected'));el.classList.add('selected');}
 async function handleAddFunds(){
   const input = document.getElementById('add-funds-amount');
-  const v = parseFloat(input?.value || 0);
+    const val = input ? input.value : 0;
+    const v = parseFloat(val || 0);
   if(v < 50){ toast('Minimum $50', 'Please enter at least $50 to add'); return; }
   
   const btn = event.target;
@@ -79,7 +83,7 @@ async function handleAddFunds(){
     formData.append('amount', v);
     formData.append('method', 'Visa ••4821'); // Simulated
 
-    const response = await fetch(BASE_URL + '/actions/add_funds.php', {
+    const response = await fetch(BASE_URL + 'actions/add_funds.php', {
       method: 'POST',
       body: formData
     });
@@ -504,13 +508,27 @@ function bindPostJobModal(){
   if(!btn) return;
   btn.disabled = false;
   btn.type = 'button';
+  
+  // Use a cleaner event listener approach
   const onSubmit = (e) => {
     e.preventDefault();
-    e.stopPropagation();
     if(btn.disabled) return;
     submitPostJob();
   };
-  btn.onclick = onSubmit;
+
+  btn.removeEventListener('click', btn._postJobHandler);
+  btn._postJobHandler = onSubmit;
+  btn.addEventListener('click', onSubmit);
+  
+  // Also bind to enter key on inputs
+  const formInputs = document.querySelectorAll('#pj-form input, #pj-form select, #pj-form textarea');
+  formInputs.forEach(input => {
+    input.onkeydown = (e) => {
+      if(e.key === 'Enter' && e.ctrlKey) {
+        onSubmit(e);
+      }
+    };
+  });
 }
 window.__openModalImpl = openModal;
 window.openModal = openModal;
@@ -543,7 +561,7 @@ function viewJobDetails(job) {
     b: `
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
         <span class="badge b-${job.status === 'open' ? 'green' : (job.status === 'paused' ? 'yellow' : 'gray')}">${job.status.charAt(0).toUpperCase() + job.status.slice(1)}</span>
-        <span class="badge b-blue">${job.budget_type === 'fixed' ? 'Fixed Price' : (job.budget_type === 'hourly' ? 'Hourly' : 'Monthly')}</span>
+        <span class="badge b-blue">${job.budget_type === 'fixed' ? 'Fixed-price' : 'Hourly'}</span>
         <span class="badge b-gray">${job.category}</span>
         <span class="badge b-purple" style="font-size:11px">${job.subcategory || 'General'}</span>
       </div>
@@ -651,7 +669,7 @@ async function toggleJobStatus(jobId, newStatus) {
   formData.append('status', newStatus);
 
   try {
-    const res = await fetch(BASE_URL + '/actions/update_job_status.php', {
+    const res = await fetch(BASE_URL + 'actions/update_job_status.php', {
       method: 'POST',
       body: formData
     });
@@ -725,7 +743,7 @@ async function updateJob(jobId) {
   formData.append('skills', skills);
 
   try {
-    const res = await fetch(BASE_URL + '/actions/edit_job.php', {
+    const res = await fetch(BASE_URL + 'actions/edit_job.php', {
       method: 'POST',
       body: formData
     });
@@ -790,13 +808,19 @@ function filterTalent(query) {
 }
 
 let tt;
-function toast(title,msg){
-  const el=document.getElementById('toast');
-  document.getElementById('t-title').textContent=title;
-  document.getElementById('t-msg').textContent=msg?(' — '+msg):'';
+function toast(title, msg) {
+  const el = document.getElementById('toast');
+  const titleEl = document.getElementById('t-title');
+  const msgEl = document.getElementById('t-msg');
+  if (!el || !titleEl || !msgEl) {
+    console.warn('Toast elements missing from DOM:', { el, titleEl, msgEl });
+    return;
+  }
+  titleEl.textContent = title;
+  msgEl.textContent = msg ? (' — ' + msg) : '';
   el.classList.add('show');
   clearTimeout(tt);
-  tt=setTimeout(()=>el.classList.remove('show'),3500);
+  tt = setTimeout(() => el.classList.remove('show'), 3500);
 }
 
 let activeChatId = null;
@@ -1081,7 +1105,7 @@ async function updateProposalStatus(propId, newStatus) {
   formData.append('status', newStatus);
 
   try {
-    const res = await fetch(BASE_URL + '/actions/update_proposal_status.php', {
+    const res = await fetch(BASE_URL + 'actions/update_proposal_status.php', {
       method: 'POST',
       body: formData
     });
@@ -1105,7 +1129,7 @@ async function completeJob(propId) {
   formData.append('proposal_id', propId);
 
   try {
-    const res = await fetch(BASE_URL + '/actions/complete_job.php', {
+    const res = await fetch(BASE_URL + 'actions/complete_job.php', {
       method: 'POST',
       body: formData
     });
@@ -1131,7 +1155,7 @@ async function cancelHiring(propId) {
   formData.append('reason', reason);
 
   try {
-    const res = await fetch(BASE_URL + '/actions/cancel_hiring.php', {
+    const res = await fetch(BASE_URL + 'actions/cancel_hiring.php', {
       method: 'POST',
       body: formData
     });
@@ -1254,7 +1278,7 @@ async function updateContractStatus(contractId, newStatus) {
   formData.append('status', newStatus);
 
   try {
-    const res = await fetch(BASE_URL + '/actions/update_contract_status.php', {
+    const res = await fetch(BASE_URL + 'actions/update_contract_status.php', {
       method: 'POST',
       body: formData
     });
@@ -1433,14 +1457,29 @@ function showChatWithFreelancer(id, name) {
 }
 
 async function submitPostJob(){
-  const title = (document.getElementById('pj-title')||{}).value?.trim() || '';
-  const cat = (document.getElementById('pj-cat')||{}).value || '';
-  const subcat = (document.getElementById('pj-subcat')||{}).value || '';
-  const spec = (document.getElementById('pj-spec')||{}).value || '';
-  const type = (document.getElementById('pj-billing-type')||{}).value || 'fixed';
-  const budget = (document.getElementById('pj-budget')||{}).value || '';
-  const desc = (document.getElementById('pj-desc')||{}).value?.trim() || '';
-  const skills = (document.getElementById('pj-skills')||{}).value?.trim() || '';
+  const titleEl = document.getElementById('pj-title');
+  const title = (titleEl && titleEl.value) ? titleEl.value.trim() : '';
+  
+  const catEl = document.getElementById('pj-cat');
+  const cat = (catEl && catEl.value) ? catEl.value : '';
+  
+  const subcatEl = document.getElementById('pj-subcat');
+  const subcat = (subcatEl && subcatEl.value) ? subcatEl.value : '';
+  
+  const specEl = document.getElementById('pj-spec');
+  const spec = (specEl && specEl.value) ? specEl.value : '';
+  
+  const typeEl = document.getElementById('pj-billing-type');
+  const type = (typeEl && typeEl.value) ? typeEl.value : 'fixed';
+  
+  const budgetEl = document.getElementById('pj-budget');
+  const budget = (budgetEl && budgetEl.value) ? budgetEl.value : '';
+  
+  const descEl = document.getElementById('pj-desc');
+  const desc = (descEl && descEl.value) ? descEl.value.trim() : '';
+  
+  const skillsEl = document.getElementById('pj-skills');
+  const skills = (skillsEl && skillsEl.value) ? skillsEl.value.trim() : '';
   const subcatWrap = document.getElementById('pj-subcat-wrap');
   const subcatRequired = subcatWrap && subcatWrap.style.display !== 'none';
 
@@ -1465,7 +1504,7 @@ async function submitPostJob(){
   formData.append('skills', skills);
 
   try {
-    const res = await fetch(BASE_URL + '/actions/post_job.php', {
+    const res = await fetch(BASE_URL + 'actions/post_job.php', {
       method: 'POST',
       body: formData
     });
@@ -1503,7 +1542,7 @@ async function hireFreelancer(proposalId, amount) {
   formData.append('proposal_id', proposalId);
 
   try {
-    const res = await fetch(BASE_URL + '/actions/hire_freelancer.php', {
+    const res = await fetch(BASE_URL + 'actions/hire_freelancer.php', {
       method: 'POST',
       body: formData
     });
@@ -1604,7 +1643,7 @@ async function submitClientFinalVerification() {
   formData.append('document', selectedCVFile);
 
   try {
-    const response = await fetch(BASE_URL + '/upload-doc', {
+    const response = await fetch(BASE_URL + 'upload-doc', {
       method: 'POST',
       body: formData
     });

@@ -57,6 +57,13 @@ $conversationsStmt = $db->prepare("
 ");
 $conversationsStmt->execute([$user['id'], $user['id'], $user['id']]);
 $conversations = $conversationsStmt->fetchAll(PDO::FETCH_ASSOC);
+$recentMessages = array_slice($conversations, 0, 5);
+// Map other_name to sender_name for consistency in the dashboard view
+foreach($recentMessages as &$rm) {
+    $rm['sender_name'] = $rm['other_name'];
+}
+unset($rm);
+
 
 $unreadCount = $db->prepare("SELECT COUNT(*) FROM messages WHERE receiver_id = ? AND is_read = 0");
 $unreadCount->execute([$user['id']]);
@@ -267,7 +274,7 @@ $reportStats = $reportStatsStmt->fetch(PDO::FETCH_ASSOC);
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>RemoWorkers – Client Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Neue+Haas+Grotesk+Display+Pro:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="<?php echo baseUrl("client/css/style.css"); ?>">
@@ -289,8 +296,7 @@ window.closeModal = function() {
 </head>
 <body>
 
-<!-- TOAST -->
-<div class="toast" id="toast"><strong id="t-title"></strong><span id="t-msg"></span></div>
+
 
 <!-- MODAL OVERLAY -->
 <div class="overlay" id="overlay" role="presentation">
@@ -464,8 +470,8 @@ window.closeModal = function() {
               <h4><?php echo htmlspecialchars($j['title']); ?></h4>
               <p><?php echo htmlspecialchars(substr($j['description'], 0, 150)); ?>...</p>
               <div class="job-meta">
-                <span class="jm g">$<?php echo number_format($j['budget']); ?></span>
-                <span class="jm"><?php echo ucfirst($j['budget_type']); ?> price</span>
+                <span class="jm g">$<?php echo number_format($j['budget']); ?><?php echo $j['budget_type'] === 'hourly' ? '/hr' : ''; ?></span>
+                <span class="jm"><?php echo $j['budget_type'] === 'fixed' ? 'Fixed-price' : 'Hourly'; ?></span>
                 <span class="jm"><?php echo $j['category']; ?></span>
                 <span class="jm"><?php echo $j['proposal_count']; ?> proposals</span>
               </div>
@@ -538,7 +544,7 @@ window.closeModal = function() {
                     <td class="hide-mob"><span class="badge b-gray"><?php echo htmlspecialchars($aj['category']); ?></span></td>
                     <td class="hide-mob"><span class="badge b-blue" style="font-size:11px"><?php echo htmlspecialchars($aj['subcategory'] ?? 'General'); ?></span></td>
                     <td>$<?php echo number_format($aj['budget']); ?></td>
-                    <td><span class="badge b-blue" style="font-size:10px"><?php echo ucfirst($aj['budget_type']); ?></span></td>
+                    <td><span class="badge b-blue" style="font-size:10px"><?php echo $aj['budget_type'] === 'fixed' ? 'Fixed-price' : 'Hourly'; ?></span></td>
                     <td><strong style="color:var(--uw-green)"><?php echo $aj['proposal_count']; ?></strong></td>
                     <td class="hide-mob"><?php echo date('M j', strtotime($aj['created_at'])); ?></td>
                     <td><span class="badge b-<?php echo ($aj['status'] === 'open' ? 'green' : ($aj['status'] === 'paused' ? 'yellow' : 'gray')); ?>"><?php echo ($aj['status'] === 'in_progress' ? 'Active' : ucfirst($aj['status'])); ?></span></td>
@@ -564,7 +570,7 @@ window.closeModal = function() {
 
                 <div class="job-meta">
                   <span class="jm g">$<?php echo number_format($aj['budget']); ?></span>
-                  <span class="jm"><?php echo ucfirst($aj['budget_type']); ?></span>
+                  <span class="jm"><?php echo $aj['budget_type'] === 'fixed' ? 'Fixed-price' : 'Hourly'; ?></span>
                   <span class="jm"><strong style="color:var(--uw-green)"><?php echo $aj['proposal_count']; ?></strong> Proposals</span>
                   <span class="badge b-<?php echo ($aj['status'] === 'open' ? 'green' : ($aj['status'] === 'paused' ? 'yellow' : 'gray')); ?>" style="font-size:10px"><?php echo ($aj['status'] === 'in_progress' ? 'Active' : ucfirst($aj['status'])); ?></span>
                 </div>
