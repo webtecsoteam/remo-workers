@@ -7,6 +7,8 @@
   const USER_CONNECTS = <?php echo $user['connects'] ?? 0; ?>;
 
   function showPage(id) {
+    if (!id) id = 'home';
+    
     // Hide all pages
     const pages = document.querySelectorAll('.page');
     pages.forEach(p => p.classList.remove('active'));
@@ -16,6 +18,8 @@
     if (pg) {
       pg.classList.add('active');
       window.scrollTo(0, 0);
+      // Update hash without triggering hashchange again
+      history.pushState(null, null, '#' + id);
     }
     
     // Update sidebar active state
@@ -44,6 +48,7 @@
     if (id === 'proposals') renderProposals();
     if (id === 'contracts') renderContracts();
     if (id === 'reports') renderReports();
+    if (id === 'profile') renderSuggestedSkills();
   }
 
   function renderContracts(filter = 'Active') {
@@ -506,6 +511,47 @@
       `;
       overlay.classList.add('open');
       document.body.style.overflow = 'hidden';
+    } else if (type === 'edit-profile') {
+      document.getElementById('mh-title').innerText = 'Edit Profile';
+      modal.style.maxWidth = '700px';
+      mc.innerHTML = `
+        <div style="padding:25px">
+          <div class="g2">
+            <div class="fg"><label>Full Name</label><input type="text" id="edit-name" value="<?php echo addslashes($user['name']); ?>"></div>
+            <div class="fg"><label>Title / Headline</label><input type="text" id="edit-title" value="<?php echo addslashes($user['title'] ?? ''); ?>" placeholder="e.g. Senior UI/UX Designer"></div>
+          </div>
+          <div class="g2">
+            <div class="fg"><label>Hourly Rate ($/hr)</label><input type="number" id="edit-rate" value="<?php echo $user['hourly_rate'] ?? 0; ?>"></div>
+            <div class="fg"><label>Country / Location</label><input type="text" id="edit-location" value="<?php echo addslashes($user['country'] ?? ''); ?>" placeholder="e.g. Berlin, Germany"></div>
+          </div>
+          <div class="fg"><label>Bio / Overview</label><textarea id="edit-bio" style="min-height:130px"><?php echo addslashes($user['bio'] ?? ''); ?></textarea></div>
+          <div style="display:flex;gap:12px;margin-top:10px">
+            <button class="btn btn-w" style="flex:1;justify-content:center" onclick="closeModal()">Cancel</button>
+            <button class="btn btn-g" style="flex:2;justify-content:center" onclick="saveProfile()">Save Changes →</button>
+          </div>
+        </div>
+      `;
+      overlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    } else if (type === 'edit-service') {
+      const s = id; // Here 'id' is the service object passed from catalog.php
+      document.getElementById('mh-title').innerText = 'Edit Service';
+      modal.style.maxWidth = '600px';
+      mc.innerHTML = `
+        <div style="padding:25px">
+          <input type="hidden" id="edit-svc-id" value="${s.id}">
+          <div class="fg"><label>Service Title</label><input type="text" id="edit-svc-title" value="${s.title.replace(/"/g, '&quot;')}" placeholder="e.g. I will design a modern logo"></div>
+          <div class="fg"><label>Description</label><textarea id="edit-svc-desc" placeholder="Describe your service...">${s.description}</textarea></div>
+          <div class="g2">
+            <div class="fg"><label>Price ($)</label><input type="number" id="edit-svc-price" value="${s.price}"></div>
+            <div class="fg"><label>Delivery Days</label><input type="number" id="edit-svc-days" value="${s.delivery_days}"></div>
+          </div>
+          <div class="fg"><label>Service Image (Optional)</label><input type="file" id="edit-svc-image" accept="image/*"></div>
+          <button class="btn btn-g" style="width:100%;padding:14px;border-radius:10px;font-weight:700;margin-top:10px" onclick="saveEditedService()">Save Changes →</button>
+        </div>
+      `;
+      overlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
     } else if (type === 'create-service') {
       document.getElementById('mh-title').innerText = 'Create New Service';
       modal.style.maxWidth = '600px';
@@ -517,7 +563,7 @@
             <div class="fg"><label>Price ($)</label><input type="number" id="svc-price" value="50"></div>
             <div class="fg"><label>Delivery Days</label><input type="number" id="svc-days" value="3"></div>
           </div>
-          <div class="fg"><label>Image URL (Optional)</label><input type="text" id="svc-image" placeholder="https://example.com/image.jpg"></div>
+          <div class="fg"><label>Service Image (Optional)</label><input type="file" id="svc-image" accept="image/*"></div>
           <button class="btn btn-g" style="width:100%;padding:14px;border-radius:10px;font-weight:700;margin-top:10px" onclick="submitNewService()">Create Project →</button>
         </div>
       `;
@@ -529,12 +575,75 @@
     }
   }
 
+  window.editService = function(serviceObj) {
+    openModal('edit-service', serviceObj);
+  }
+
+  window.saveEditedService = function() {
+    const id = document.getElementById('edit-svc-id').value;
+    const title = document.getElementById('edit-svc-title').value;
+    const desc = document.getElementById('edit-svc-desc').value;
+    const price = document.getElementById('edit-svc-price').value;
+    const days = document.getElementById('edit-svc-days').value;
+    const imageInput = document.getElementById('edit-svc-image');
+
+    if (!title || !desc || !price) return toast('Required', 'Please fill all fields');
+
+    const fd = new FormData();
+    fd.append('id', id);
+    fd.append('title', title);
+    fd.append('description', desc);
+    fd.append('price', price);
+    fd.append('delivery_days', days);
+    if (imageInput.files[0]) {
+      fd.append('image', imageInput.files[0]);
+    }
+
+    fetch(BASE_URL + 'actions/update_service.php', {
+      method: 'POST',
+      body: fd
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        toast('Success', 'Project updated successfully!');
+        closeModal();
+        location.reload();
+      } else {
+        toast('Error', data.error);
+      }
+    })
+    .catch(err => toast('Error', 'Failed to update service'));
+  }
+
+  window.deleteService = function(id) {
+    if (!confirm('Are you sure you want to delete this service?')) return;
+
+    const fd = new FormData();
+    fd.append('id', id);
+
+    fetch(BASE_URL + 'actions/delete_service.php', {
+      method: 'POST',
+      body: fd
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        toast('Deleted', 'Project removed from catalog');
+        location.reload();
+      } else {
+        toast('Error', data.error);
+      }
+    })
+    .catch(err => toast('Error', 'Failed to delete service'));
+  }
+
   window.submitNewService = function() {
     const title = document.getElementById('svc-title').value;
     const desc = document.getElementById('svc-desc').value;
     const price = document.getElementById('svc-price').value;
     const days = document.getElementById('svc-days').value;
-    const image = document.getElementById('svc-image').value;
+    const imageInput = document.getElementById('svc-image');
 
     if (!title || !desc || !price) return toast('Required', 'Please fill all fields');
 
@@ -543,7 +652,9 @@
     fd.append('description', desc);
     fd.append('price', price);
     fd.append('delivery_days', days);
-    fd.append('image_url', image);
+    if (imageInput.files[0]) {
+      fd.append('image', imageInput.files[0]);
+    }
 
     fetch(BASE_URL + 'actions/create_service.php', {
       method: 'POST',
@@ -560,6 +671,51 @@
       }
     })
     .catch(err => toast('Error', 'Failed to create service'));
+  }
+
+  window.saveProfile = function() {
+    const name = document.getElementById('edit-name').value;
+    const title = document.getElementById('edit-title').value;
+    const rate = document.getElementById('edit-rate').value;
+    const loc = document.getElementById('edit-location').value;
+    const bio = document.getElementById('edit-bio').value;
+
+    const fd = new FormData();
+    fd.append('name', name);
+    fd.append('title', title);
+    fd.append('hourly_rate', rate);
+    fd.append('country', loc);
+    fd.append('bio', bio);
+
+    fetch(BASE_URL + 'actions/update_profile.php', {
+      method: 'POST',
+      body: fd
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        toast('Success', 'Profile updated successfully!');
+        closeModal();
+        // Update UI manually to avoid reload
+        document.querySelector('#page-profile #field-title').textContent = title || 'Professional Specialist';
+        document.querySelector('#page-profile #field-rate').textContent = '$' + parseFloat(rate).toFixed(2) + '/hr';
+        document.querySelector('#page-profile #field-location').textContent = loc || 'Global';
+        document.querySelector('#page-profile .sb-name')?.forEach(el => el.textContent = name); // Update sidebar if visible
+        // Update sidebar user section too
+        const sbName = document.querySelector('.sb-name');
+        if(sbName) sbName.textContent = name;
+        const sbAv = document.querySelector('.sb-av');
+        if(sbAv) sbAv.textContent = name.substring(0,2).toUpperCase();
+        
+        // Also update the bio in the overview section
+        const bioEl = document.querySelector('#page-profile .card-body div[style*="line-height: 1.7"]');
+        if(bioEl) bioEl.innerHTML = bio.replace(/\n/g, '<br>');
+
+      } else {
+        toast('Error', data.error);
+      }
+    })
+    .catch(err => toast('Error', 'Update failed'));
   }
 
   window.logWork = function(contractId) {
@@ -607,11 +763,276 @@
     }
   }
 
+  // ════════════════════════════════════════════════════════════
+  //  SKILL SELECTOR — full Upwork 2025 categories/subcategories
+  // ════════════════════════════════════════════════════════════
+  const SKILL_TREE = {
+    'Accounting & Consulting': { icon: '📊', subs: { 'Personal & Professional Coaching': ['Career Coaching','Personal Coaching'], 'Accounting & Bookkeeping': ['Accounting','Bookkeeping'], 'Financial Planning': ['Financial Analysis & Modeling','Financial Management/CFO'], 'Recruiting & Human Resources': ['HR Administration','Recruiting & Talent Sourcing','Training & Development'], 'Management Consulting & Analysis': ['Business Analysis & Strategy','Instructional Design','Management Consulting'], 'Other - Accounting & Consulting': ['Tax Preparation'], } },
+    'Admin Support': { icon: '🗂️', subs: { 'Data Entry & Transcription Services': ['Data Entry','Manual Transcription'], 'Virtual Assistance': ['Executive Virtual Assistance','Legal Virtual Assistance','Medical Virtual Assistance','Ecommerce Management','Personal Virtual Assistance','General Virtual Assistance'], 'Project Management': ['Business Project Management','Supply Chain & Logistics Project Management','Construction & Engineering Project Management','Development & IT Project Management','Healthcare Project Management','Digital Project Management'], 'Market Research & Product Reviews': ['Web & Software Product Research','Market Research','General Research Services','Product Reviews','Qualitative Research','Quantitative Research'], } },
+    'Customer Service': { icon: '🎧', subs: { 'Community Management & Tagging': ['Community Management','Content Moderation','Visual Tagging & Processing'], 'Customer Service & Tech Support': ['Customer Onboarding','Email, Phone & Chat Support','Customer Success','IT Support','Tech Support'], } },
+    'Data Science & Analytics': { icon: '📈', subs: { 'Data Analysis & Testing': ['Data Analytics','Data Visualization','Experimentation & Testing'], 'Data Extraction/ETL': ['Data Extraction','Data Processing'], 'Data Mining & Management': ['Data Engineering','Data Mining'], 'AI & Machine Learning': ['Generative AI Modeling','AI Data Annotation & Labeling','Deep Learning','Knowledge Representation','Machine Learning'], } },
+    'Design & Creative': { icon: '🎨', subs: { 'Art & Illustration': ['Portraits & Caricatures','Cartoons & Comics','Fine Art','Illustration','Pattern Design'], 'Audio & Music Production': ['AI Speech & Audio Generation','Audio Editing','Audio Production','Songwriting & Music Composition','Music Production'], 'Branding & Logo Design': ['Brand Identity Design','Logo Design'], 'NFT, AR/VR & Game Art': ['NFT Art','Game Art','AR/VR Design'], 'Graphic, Editorial & Presentation Design': ['AI Image Generation & Editing','Art Direction','Creative Direction','Editorial Design','Graphic Design','Image Editing','Packaging Design','Presentation Design'], 'Performing Arts': ['Acting','Music Performance','Singing','Voice Talent'], 'Photography': ['Local Photography','Product Photography'], 'Product Design': ['Fashion Design','Jewelry Design','Product & Industrial Design'], 'Video & Animation': ['AI Video Generation & Editing','Motion Graphics','3D Animation','2D Animation','Video Editing','Videography','Video Production','Visual Effects'], } },
+    'Engineering & Architecture': { icon: '🏗️', subs: { 'Building & Landscape Architecture': ['Architectural Design','Landscape Architecture'], 'Chemical Engineering': ['Chemical & Process Engineering'], 'Civil & Structural Engineering': ['Building Information Modeling','Civil Engineering','Structural Engineering'], 'Electrical & Electronic Engineering': ['Electrical Engineering','Electronic Engineering'], 'Interior & Trade Show Design': ['Trade Show Design','Interior Design'], 'Energy & Mechanical Engineering': ['Energy Engineering','Mechanical Engineering'], 'Physical Sciences': ['Biology','Chemistry','Mathematics','Physics','STEM Tutoring'], '3D Modeling & CAD': ['CAD','3D Modeling & Rendering'], 'Contract Manufacturing': ['Logistics & Supply Chain Management','Sourcing & Procurement'], } },
+    'IT & Networking': { icon: '🖧', subs: { 'Database Management & Administration': ['Database Administration'], 'ERP/CRM Software': ['Business Applications Development','Systems Engineering'], 'Information Security & Compliance': ['IT Compliance','Information Security','Network Security'], 'Network & System Administration': ['Network Administration','Systems Administration'], 'DevOps & Solution Architecture': ['Cloud Engineering','DevOps Engineering','Solution Architecture'], } },
+    'Legal': { icon: '⚖️', subs: { 'Corporate & Contract Law': ['Business & Corporate Law','Intellectual Property Law','Paralegal Services'], 'International & Immigration Law': ['Immigration Law','International Law'], 'Finance & Tax Law': ['Securities & Finance Law','Tax Law'], 'Public Law': ['Labor & Employment Law','Regulatory Law'], } },
+    'Sales & Marketing': { icon: '📣', subs: { 'Digital Marketing': ['Display Advertising','Campaign Management','Email Marketing','Marketing Automation','Search Engine Marketing','SEO','Social Media Marketing'], 'Lead Generation & Telemarketing': ['Sales & Business Development','Lead Generation','Telemarketing'], 'Marketing, PR & Brand Strategy': ['Brand Strategy','Content Strategy','Marketing Strategy','Public Relations','Social Media Strategy'], } },
+    'Translation': { icon: '🌐', subs: { 'Language Tutoring & Interpretation': ['Live Interpretation','Sign Language Interpretation','Language Tutoring'], 'Translation & Localization Services': ['Language Localization','Legal Document Translation','Medical Document Translation','Technical Document Translation','General Translation Services'], } },
+    'Web, Mobile & Software Dev': { icon: '💻', subs: { 'Blockchain, NFT & Cryptocurrency': ['Blockchain & NFT Development','Crypto Coins & Tokens','Crypto Wallet Development'], 'AI Apps & Integration': ['AI Chatbot Development','AI Integration'], 'Desktop Application Development': ['Desktop Software Development'], 'Ecommerce Development': ['Ecommerce Website Development'], 'Game Design & Development': ['Video Game Development'], 'Mobile Development': ['Mobile App Development','Mobile Game Development'], 'Other - Software Development': ['AR/VR Development','Database Development','Emerging Tech','Firmware Development','Coding Tutoring'], 'Product Management & Scrum': ['Product Management','Scrum Leadership'], 'QA Testing': ['Automation Testing','Manual Testing'], 'Scripts & Utilities': ['Scripting & Automation'], 'Web & Mobile Design': ['Mobile Design','Prototyping','UX/UI Design','Web Design'], 'Web Development': ['Back-End Development','CMS Development','Front-End Development','Full Stack Development'], } },
+    'Writing': { icon: '✍️', subs: { 'Sales & Marketing Copywriting': ['Ad & Email Copywriting','Marketing Copywriting','Sales Copywriting'], 'Content Writing': ['Web & UX Writing','Article & Blog Writing','AI Content Writing','Creative Writing','Ghostwriting','Scriptwriting','Writing Tutoring'], 'Editing & Proofreading Services': ['Proofreading','Copy Editing'], 'Professional & Business Writing': ['Academic & Research Writing','Legal Writing','Medical Writing','Resume & Cover Letter Writing','Business & Proposal Writing','Grant Writing','Technical Writing'], } },
+  };
+
+  const MAX_SKILLS = 15;
+  let selectedSkills = new Set(<?php echo json_encode($userSkills ?? []); ?>);
+  let activeCat = null, activeSub = null;
+
+  window.openSkillSelector = function() {
+    document.getElementById('skill-overlay').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    document.getElementById('skill-search').value = '';
+    renderCatCol();
+    renderSelectedPreview();
+    const firstCat = Object.keys(SKILL_TREE)[0];
+    selectCat(firstCat);
+  }
+
+  window.closeSkillSelector = function() {
+    document.getElementById('skill-overlay').style.display = 'none';
+    document.body.style.overflow = '';
+  }
+
+  function renderCatCol(filter) {
+    const col = document.getElementById('cat-col');
+    col.innerHTML = Object.entries(SKILL_TREE).map(([cat, data]) => {
+      if (filter && !cat.toLowerCase().includes(filter)) return '';
+      const count = countSelected(cat);
+      return `<div class="cat-item${activeCat===cat?' active':''}" onclick="selectCat('${cat.replace(/'/g,"\\\\'")}')">
+        <span class="cat-icon">${data.icon}</span>${cat}${count?` <span style="background:var(--g);color:white;font-size:10px;padding:1px 6px;border-radius:8px;margin-left:4px">${count}</span>`:''}
+      </div>`;
+    }).join('');
+  }
+
+  function countSelected(cat) {
+    let n = 0;
+    Object.values(SKILL_TREE[cat].subs).forEach(specs => specs.forEach(s => { if(selectedSkills.has(s)) n++; }));
+    return n;
+  }
+
+  window.selectCat = function(cat) {
+    activeCat = cat; activeSub = null;
+    renderCatCol();
+    const subs = SKILL_TREE[cat].subs;
+    const col = document.getElementById('subcat-col');
+    col.innerHTML = Object.keys(subs).map(sub => {
+      const c = subs[sub].filter(s=>selectedSkills.has(s)).length;
+      return `<div class="subcat-item${activeSub===sub?' active':''}" onclick="selectSub('${sub.replace(/'/g,"\\\\'")}')">
+        ${sub}${c?` <span style="background:var(--g);color:white;font-size:10px;padding:1px 5px;border-radius:8px;margin-left:4px">${c}</span>`:''}
+      </div>`;
+    }).join('');
+    document.getElementById('skill-col').innerHTML = '<div style="padding:20px;font-size:12.5px;color:var(--muted);text-align:center">← Select a subcategory</div>';
+  }
+
+  window.selectSub = function(sub) {
+    activeSub = sub;
+    const subs = SKILL_TREE[activeCat].subs;
+    const col = document.getElementById('subcat-col');
+    col.innerHTML = Object.keys(subs).map(s => {
+      const c = subs[s].filter(x=>selectedSkills.has(x)).length;
+      return `<div class="subcat-item${activeSub===s?' active':''}" onclick="selectSub('${s.replace(/'/g,"\\\\'")}')">
+        ${s}${c?` <span style="background:var(--g);color:white;font-size:10px;padding:1px 5px;border-radius:8px;margin-left:4px">${c}</span>`:''}
+      </div>`;
+    }).join('');
+    renderSpecCol(sub);
+  }
+
+  function renderSpecCol(sub) {
+    const specs = SKILL_TREE[activeCat].subs[sub] || [];
+    const col = document.getElementById('skill-col');
+    const canAdd = selectedSkills.size < MAX_SKILLS;
+    col.innerHTML = `
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--muted);letter-spacing:.06em;margin-bottom:10px">${activeCat} › ${sub}</div>
+      ${specs.map(spec => {
+        const sel = selectedSkills.has(spec);
+        const disabled = !sel && !canAdd;
+        const action = disabled ? `toast('Limit','You can select up to ${MAX_SKILLS} skills')` : `toggleSkill('${spec.replace(/'/g,"\\\\'")}')`;
+        return `<div class="spec-item${sel?' selected':''}" onclick="${action}" style="${disabled?'opacity:.45;cursor:not-allowed':''}">
+          <span>${spec}</span>
+          <span class="spec-check">${sel?'✓':''}</span>
+        </div>`;
+      }).join('')}`;
+  }
+
+  window.toggleSkill = function(spec) {
+    if (selectedSkills.has(spec)) {
+      selectedSkills.delete(spec);
+    } else {
+      if (selectedSkills.size >= MAX_SKILLS) {
+        toast('Limit reached', `You can add up to ${MAX_SKILLS} skills`); return;
+      }
+      selectedSkills.add(spec);
+    }
+    if (activeSub) renderSpecCol(activeSub);
+    renderCatCol();
+    if (activeCat) selectCat(activeCat);
+    if (activeSub) renderSpecCol(activeSub);
+    renderSelectedPreview();
+  }
+
+  function renderSelectedPreview() {
+    const el = document.getElementById('selected-preview');
+    const arr = [...selectedSkills];
+    el.innerHTML = arr.length
+      ? arr.map(s=>`<span style="display:inline-flex;align-items:center;gap:4px;background:#e8f5e3;color:#14a800;border:1px solid #c3e6c3;border-radius:5px;padding:2px 8px;font-size:11.5px;font-weight:500">
+          ${s} <span style="cursor:pointer;color:#6b7c6b;font-size:13px" onclick="toggleSkill('${s.replace(/'/g,"\\\\'")}')">×</span>
+        </span>`).join('')
+      : '<span style="font-size:12.5px;color:var(--muted)">No skills selected yet</span>';
+    el.innerHTML += `<span style="font-size:11.5px;color:var(--muted);white-space:nowrap;margin-left:auto;align-self:center">${arr.length}/${MAX_SKILLS}</span>`;
+  }
+
+  window.saveSkills = function() {
+    const skills = [...selectedSkills];
+    const fd = new FormData();
+    fd.append('skills', JSON.stringify(skills));
+
+    fetch(BASE_URL + 'actions/update_skills.php', {
+      method: 'POST',
+      body: fd
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        toast('Success', 'Skills updated successfully!');
+        closeSkillSelector();
+        
+        // Update the skills display on the profile page manually
+        const display = document.getElementById('profile-skills-display');
+        const empty = document.getElementById('profile-skills-empty');
+        const badge = document.getElementById('skill-count-badge');
+        
+        if (display) {
+          display.innerHTML = skills.map(s => 
+            `<span class="skill-tag">${s} <span class="skill-remove" onclick="removeSkill('${s.replace(/'/g,"\\\\'")}')">×</span></span>`
+          ).join('');
+          display.style.display = skills.length ? 'flex' : 'none';
+        }
+        if (empty) empty.style.display = skills.length ? 'none' : 'block';
+        if (badge) badge.textContent = skills.length + ' / ' + MAX_SKILLS;
+
+      } else {
+        toast('Error', data.error);
+      }
+    })
+    .catch(err => toast('Error', 'Update failed'));
+  }
+
+  window.removeSkill = function(skill) {
+    selectedSkills.delete(skill);
+    window.saveSkills();
+  }
+
+  window.quickAddSkill = function(val) {
+    const skill = (val || '').trim();
+    if (!skill) return;
+    if (selectedSkills.has(skill)) { toast('Already added', `"${skill}" is already in your skills`); return; }
+    if (selectedSkills.size >= MAX_SKILLS) { toast('Limit reached', `You can add up to ${MAX_SKILLS} skills`); return; }
+    selectedSkills.add(skill);
+    window.saveSkills();
+  }
+
+  window.filterSkills = function(q) {
+    const query = q.toLowerCase().trim();
+    if (!query) {
+      renderCatCol();
+      if (activeCat) selectCat(activeCat);
+      return;
+    }
+    const catCol = document.getElementById('cat-col');
+    const subCol = document.getElementById('subcat-col');
+    const skillCol = document.getElementById('skill-col');
+    let results = [];
+    Object.entries(SKILL_TREE).forEach(([cat, data]) => {
+      Object.entries(data.subs).forEach(([sub, specs]) => {
+        specs.forEach(spec => {
+          if (spec.toLowerCase().includes(query) || sub.toLowerCase().includes(query) || cat.toLowerCase().includes(query)) {
+            results.push({cat, sub, spec});
+          }
+        });
+      });
+    });
+    catCol.innerHTML = '<div style="padding:10px 16px;font-size:11.5px;color:var(--muted)">Search results</div>';
+    subCol.innerHTML = '';
+    skillCol.innerHTML = results.length
+      ? results.map(({cat, sub, spec}) => {
+          const sel = selectedSkills.has(spec);
+          return `<div class="spec-item${sel?' selected':''}" onclick="toggleSkill('${spec.replace(/'/g,"\\\\'")}')">
+            <div><div style="font-size:13px">${spec}</div><div style="font-size:11px;color:var(--muted)">${cat} › ${sub}</div></div>
+            <span class="spec-check">${sel?'✓':''}</span>
+          </div>`;
+        }).join('')
+      : '<div style="padding:20px;font-size:13px;color:var(--muted);text-align:center">No matching skills found</div>';
+  }
+
+  const SUGGESTED_FOR_DESIGNER = [
+    'UX/UI Design','Wireframing','Adobe XD','Sketch','User Testing',
+    'Information Architecture','Accessibility Design','Design Thinking',
+    'Usability Testing','Interaction Design','Visual Design','Typography',
+    'Color Theory','Responsive Design','Design Research'
+  ];
+
+  window.renderSuggestedSkills = function() {
+    const el = document.getElementById('suggested-skills-row');
+    if (!el) return;
+    const shown = SUGGESTED_FOR_DESIGNER.filter(s => !selectedSkills.has(s)).slice(0, 8);
+    el.innerHTML = shown.map(s =>
+      `<button onclick="quickAddSkill('${s.replace(/'/g,"\\\\'")}')"
+        style="display:inline-flex;align-items:center;gap:4px;background:white;border:1.5px dashed var(--border);color:var(--dark3);border-radius:6px;padding:3px 10px;font-size:12.5px;font-weight:500;cursor:pointer;transition:all .15s;font-family:inherit"
+        onmouseover="this.style.borderColor='var(--g)';this.style.color='var(--g)'"
+        onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--dark3)'">
+        + ${s}
+      </button>`
+    ).join('');
+  }
+
   // Initialize
   document.addEventListener('DOMContentLoaded', () => {
-    showPage('home');
+    const hash = window.location.hash.replace('#', '');
+    showPage(hash || 'home');
+  });
+
+  window.addEventListener('hashchange', () => {
+    const hash = window.location.hash.replace('#', '');
+    showPage(hash || 'home');
   });
 })();
 </script>
+
+<!-- Skill Selector Overlay -->
+<div id="skill-overlay" style="display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.45);align-items:center;justify-content:center">
+  <div style="background:white;border-radius:14px;width:min(820px,96vw);max-height:88vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.22);overflow:hidden">
+    <div style="padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+      <div>
+        <div style="font-size:16px;font-weight:700">Add Skills</div>
+        <div style="font-size:12.5px;color:var(--muted);margin-top:2px">Browse by category · up to 15 skills</div>
+      </div>
+      <button onclick="closeSkillSelector()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;line-height:1;padding:4px">×</button>
+    </div>
+    <div style="padding:12px 22px;border-bottom:1px solid var(--border);flex-shrink:0">
+      <input id="skill-search" type="text" placeholder="Search skills (e.g. Python, Logo Design, SEO…)"
+        style="width:100%;padding:9px 13px;border:1.5px solid var(--border);border-radius:8px;font-size:13.5px;font-family:inherit;outline:none"
+        oninput="filterSkills(this.value)">
+    </div>
+    <div style="display:grid;grid-template-columns:190px 210px 1fr;flex:1;overflow:hidden;min-height:0">
+      <div id="cat-col" style="border-right:1px solid var(--border);overflow-y:auto;padding:8px 0"></div>
+      <div id="subcat-col" style="border-right:1px solid var(--border);overflow-y:auto;padding:8px 0"></div>
+      <div id="skill-col" style="overflow-y:auto;padding:12px 16px"></div>
+    </div>
+    <div style="padding:14px 22px;border-top:1px solid var(--border);flex-shrink:0;background:var(--off)">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <div style="font-size:12px;color:var(--muted);font-weight:600;white-space:nowrap">Selected:</div>
+        <div id="selected-preview" style="display:flex;flex-wrap:wrap;gap:5px;flex:1"></div>
+        <button onclick="saveSkills()" class="btn btn-g" style="padding:9px 20px;white-space:nowrap">Save Skills</button>
+      </div>
+    </div>
+  </div>
+</div>
 </body>
 </html>

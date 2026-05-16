@@ -1,16 +1,16 @@
 # Graph Report - upwork project  (2026-05-16)
 
 ## Corpus Check
-- 62 files · ~155,250 words
+- 64 files · ~157,038 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 229 nodes · 247 edges · 57 communities (51 shown, 6 thin omitted)
+- 233 nodes · 249 edges · 59 communities (53 shown, 6 thin omitted)
 - Extraction: 93% EXTRACTED · 7% INFERRED · 0% AMBIGUOUS · INFERRED: 18 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `93da1f9a`
+- Built from commit: `12352038`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -43,7 +43,7 @@
 ## Surprising Connections (you probably didn't know these)
 - None detected - all connections are within the same source files.
 
-## Communities (57 total, 6 thin omitted)
+## Communities (59 total, 6 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.09
@@ -82,7 +82,7 @@ _Questions this graph is uniquely positioned to answer:_
 - **Why does `Backend Setup (Laravel)` connect `Community 4` to `Community 3`?**
   _High betweenness centrality (0.013) - this node is a cross-community bridge._
 - **Why does `getDB()` connect `Community 5` to `Community 2`?**
-  _High betweenness centrality (0.010) - this node is a cross-community bridge._
+  _High betweenness centrality (0.009) - this node is a cross-community bridge._
 - **What connects `api`, `toggle`, `menu` to the rest of the system?**
   _37 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**

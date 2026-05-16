@@ -186,6 +186,7 @@ include __DIR__ . '/includes/header.php';
     <div id="nav-catalog" class="sb-item" onclick="showPage('catalog')"><span class="sb-ico">📦</span>My Services</div>
     
     <div class="sb-section">Settings</div>
+    <div id="nav-profile" class="sb-item" onclick="showPage('profile')"><span class="sb-ico">👤</span>My Profile</div>
     <div id="nav-verification" class="sb-item" onclick="showPage('verification')">
       <span class="sb-ico">🛡️</span>ID Verification
       <?php if (!($user['is_verified'] ?? false)): ?>
