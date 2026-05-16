@@ -182,7 +182,7 @@ function insertQuickReply(initials, text){
 
 const MODALS = {
   'post-job':{t:'Post a New Job',b:`
-    <div id="pj-form">
+    <div class="pj-modal-scroll"><div id="pj-form">
       <div class="fg"><label>Job Title</label><input type="text" id="pj-title" placeholder="e.g. Senior React Developer for Analytics Dashboard"></div>
 
       <div class="fg">
@@ -225,7 +225,7 @@ const MODALS = {
       <div class="fg"><label>Project Description</label><textarea id="pj-desc" placeholder="Describe the scope, goals, and requirements of your project…" style="min-height:100px"></textarea></div>
       <div class="fg"><label>Required Skills (comma separated)</label><input type="text" id="pj-skills" placeholder="e.g. React, Node.js, TypeScript"></div>
       
-    </div>
+    </div></div>
     <div class="pj-modal-footer">
       <button type="button" class="btn btn-g" id="pj-submit-btn" style="width:100%;justify-content:center;padding:11px">
         <span id="pj-btn-text">Post Job →</span>
@@ -485,8 +485,10 @@ function openModal(id){
     toast('Unavailable', 'This action is not available yet.');
     return;
   }
+  const mc = document.getElementById('mc-body');
   document.getElementById('mh-title').innerText = m.t;
-  document.getElementById('mc-body').innerHTML = m.b;
+  mc.innerHTML = m.b;
+  mc.classList.toggle('pj-modal-mc', id === 'post-job');
   document.getElementById('overlay').classList.add('open');
   lockBodyForModal();
 
@@ -502,11 +504,13 @@ function bindPostJobModal(){
   if(!btn) return;
   btn.disabled = false;
   btn.type = 'button';
-  btn.onclick = (e) => {
+  const onSubmit = (e) => {
     e.preventDefault();
     e.stopPropagation();
+    if(btn.disabled) return;
     submitPostJob();
   };
+  btn.onclick = onSubmit;
 }
 window.__openModalImpl = openModal;
 window.openModal = openModal;
@@ -739,6 +743,8 @@ async function updateJob(jobId) {
 
 function closeModal(){
   document.getElementById('overlay').classList.remove('open');
+  const mc = document.getElementById('mc-body');
+  if(mc) mc.classList.remove('pj-modal-mc');
   unlockBodyForModal();
 }
 window.__closeModalImpl = closeModal;
@@ -756,20 +762,23 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
 
   if(panel){
     panel.addEventListener('click', (e) => {
-      const closeBtn = e.target.closest('.mclose');
-      if(closeBtn){
+      if(e.target.closest('.mclose')){
         e.preventDefault();
         closeModal();
-        return;
-      }
-      const submitBtn = e.target.closest('#pj-submit-btn');
-      if(submitBtn && !submitBtn.disabled){
-        e.preventDefault();
-        submitPostJob();
       }
     });
   }
 })();
+
+function initMobFab(){
+  const fab = document.getElementById('mob-fab');
+  if(!fab || fab.dataset.bound === '1') return;
+  fab.dataset.bound = '1';
+  fab.addEventListener('click', (e) => {
+    e.preventDefault();
+    openModal('post-job');
+  });
+}
 
 function filterTalent(query) {
   const q = query.toLowerCase();
@@ -1618,6 +1627,7 @@ async function submitClientFinalVerification() {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
+  initMobFab();
   const hash = window.location.hash.replace('#', '');
   if (hash === 'post-job') {
     openModal('post-job');

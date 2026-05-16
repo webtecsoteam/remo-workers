@@ -281,6 +281,8 @@ window.closeModal = function() {
   if (window.__closeModalImpl) return window.__closeModalImpl();
   var ov = document.getElementById('overlay');
   if (ov) ov.classList.remove('open');
+  document.body.classList.remove('modal-open');
+  document.body.style.top = '';
   document.body.style.overflow = '';
 };
 </script>
@@ -303,7 +305,7 @@ window.closeModal = function() {
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeMobSidebar()"></div>
 
 <!-- MOBILE FAB -->
-<button type="button" class="mob-fab" id="mob-fab" onclick="openModal('post-job')" aria-label="Post a job">+</button>
+<button type="button" class="mob-fab" id="mob-fab" aria-label="Post a job">+</button>
 
 <!-- ══ SIDEBAR ══ -->
 <aside class="sidebar">

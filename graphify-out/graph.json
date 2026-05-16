@@ -4,13 +4,13 @@
   "graph": {},
   "nodes": [
     {
-      "label": "verify_email.php",
+      "label": "post_job.php",
       "file_type": "code",
-      "source_file": "actions/verify_email.php",
+      "source_file": "actions/post_job.php",
       "source_location": "L1",
-      "id": "actions_verify_email_php",
-      "community": 82,
-      "norm_label": "verify_email.php"
+      "id": "actions_post_job_php",
+      "community": 45,
+      "norm_label": "post_job.php"
     },
     {
       "label": "footer.php",
@@ -31,283 +31,292 @@
       "norm_label": "index.php"
     },
     {
+      "label": "verify_email.php",
+      "file_type": "code",
+      "source_file": "actions/verify_email.php",
+      "source_location": "L1",
+      "community": 82,
+      "norm_label": "verify_email.php",
+      "id": "actions_verify_email_php"
+    },
+    {
       "label": "submit_proposal.php",
       "file_type": "code",
       "source_file": "freelancer/actions/submit_proposal.php",
       "source_location": "L1",
-      "id": "freelancer_actions_submit_proposal_php",
       "community": 83,
-      "norm_label": "submit_proposal.php"
+      "norm_label": "submit_proposal.php",
+      "id": "freelancer_actions_submit_proposal_php"
     },
     {
       "label": "submit-proposal.php",
       "file_type": "code",
       "source_file": "freelancer/api/submit-proposal.php",
       "source_location": "L1",
-      "id": "freelancer_api_submit_proposal_php",
       "community": 70,
-      "norm_label": "submit-proposal.php"
+      "norm_label": "submit-proposal.php",
+      "id": "freelancer_api_submit_proposal_php"
     },
     {
       "label": "footer.php",
       "file_type": "code",
       "source_file": "freelancer/includes/footer.php",
       "source_location": "L1",
-      "id": "freelancer_includes_footer_php",
       "community": 65,
-      "norm_label": "footer.php"
+      "norm_label": "footer.php",
+      "id": "freelancer_includes_footer_php"
     },
     {
       "label": "header.php",
       "file_type": "code",
       "source_file": "freelancer/includes/header.php",
       "source_location": "L1",
-      "id": "freelancer_includes_header_php",
       "community": 64,
-      "norm_label": "header.php"
+      "norm_label": "header.php",
+      "id": "freelancer_includes_header_php"
     },
     {
       "label": "index.php",
       "file_type": "code",
       "source_file": "freelancer/index.php",
       "source_location": "L1",
-      "id": "freelancer_index_php",
       "community": 63,
-      "norm_label": "index.php"
+      "norm_label": "index.php",
+      "id": "freelancer_index_php"
     },
     {
       "label": "home.php",
       "file_type": "code",
       "source_file": "freelancer/views/home.php",
       "source_location": "L1",
-      "id": "freelancer_views_home_php",
       "community": 76,
-      "norm_label": "home.php"
+      "norm_label": "home.php",
+      "id": "freelancer_views_home_php"
     },
     {
       "label": "reports.php",
       "file_type": "code",
       "source_file": "freelancer/views/reports.php",
       "source_location": "L1",
-      "id": "freelancer_views_reports_php",
       "community": 84,
-      "norm_label": "reports.php"
+      "norm_label": "reports.php",
+      "id": "freelancer_views_reports_php"
     },
     {
       "label": "verification.php",
       "file_type": "code",
       "source_file": "freelancer/views/verification.php",
       "source_location": "L1",
-      "id": "freelancer_views_verification_php",
       "community": 85,
-      "norm_label": "verification.php"
+      "norm_label": "verification.php",
+      "id": "freelancer_views_verification_php"
     },
     {
       "label": "header.php",
       "file_type": "code",
       "source_file": "home/includes/header.php",
       "source_location": "L1",
-      "id": "home_includes_header_php",
       "community": 29,
-      "norm_label": "header.php"
+      "norm_label": "header.php",
+      "id": "home_includes_header_php"
     },
     {
       "label": "Auth.php",
       "file_type": "code",
       "source_file": "includes/classes/Auth.php",
       "source_location": "L1",
-      "id": "includes_classes_auth_php",
       "community": 5,
-      "norm_label": "auth.php"
+      "norm_label": "auth.php",
+      "id": "includes_classes_auth_php"
     },
     {
       "label": "Auth",
       "file_type": "code",
       "source_file": "includes/classes/Auth.php",
       "source_location": "L2",
-      "id": "classes_auth_auth",
       "community": 5,
-      "norm_label": "auth"
+      "norm_label": "auth",
+      "id": "classes_auth_auth"
     },
     {
       "label": ".register()",
       "file_type": "code",
       "source_file": "includes/classes/Auth.php",
       "source_location": "L6",
-      "id": "classes_auth_auth_register",
       "community": 5,
-      "norm_label": ".register()"
+      "norm_label": ".register()",
+      "id": "classes_auth_auth_register"
     },
     {
       "label": ".login()",
       "file_type": "code",
       "source_file": "includes/classes/Auth.php",
       "source_location": "L20",
-      "id": "classes_auth_auth_login",
       "community": 5,
-      "norm_label": ".login()"
+      "norm_label": ".login()",
+      "id": "classes_auth_auth_login"
     },
     {
       "label": ".logout()",
       "file_type": "code",
       "source_file": "includes/classes/Auth.php",
       "source_location": "L43",
-      "id": "classes_auth_auth_logout",
       "community": 5,
-      "norm_label": ".logout()"
+      "norm_label": ".logout()",
+      "id": "classes_auth_auth_logout"
     },
     {
       "label": ".user()",
       "file_type": "code",
       "source_file": "includes/classes/Auth.php",
       "source_location": "L55",
-      "id": "classes_auth_auth_user",
       "community": 2,
-      "norm_label": ".user()"
+      "norm_label": ".user()",
+      "id": "classes_auth_auth_user"
     },
     {
       "label": ".check()",
       "file_type": "code",
       "source_file": "includes/classes/Auth.php",
       "source_location": "L64",
-      "id": "classes_auth_auth_check",
       "community": 5,
-      "norm_label": ".check()"
+      "norm_label": ".check()",
+      "id": "classes_auth_auth_check"
     },
     {
       "label": ".isEmailVerified()",
       "file_type": "code",
       "source_file": "includes/classes/Auth.php",
       "source_location": "L68",
-      "id": "classes_auth_auth_isemailverified",
       "community": 5,
-      "norm_label": ".isemailverified()"
+      "norm_label": ".isemailverified()",
+      "id": "classes_auth_auth_isemailverified"
     },
     {
       "label": ".isIdentityVerified()",
       "file_type": "code",
       "source_file": "includes/classes/Auth.php",
       "source_location": "L74",
-      "id": "classes_auth_auth_isidentityverified",
       "community": 5,
-      "norm_label": ".isidentityverified()"
+      "norm_label": ".isidentityverified()",
+      "id": "classes_auth_auth_isidentityverified"
     },
     {
       "label": ".canApplyToJobs()",
       "file_type": "code",
       "source_file": "includes/classes/Auth.php",
       "source_location": "L80",
-      "id": "classes_auth_auth_canapplytojobs",
       "community": 5,
-      "norm_label": ".canapplytojobs()"
+      "norm_label": ".canapplytojobs()",
+      "id": "classes_auth_auth_canapplytojobs"
     },
     {
       "label": ".verifyEmailByToken()",
       "file_type": "code",
       "source_file": "includes/classes/Auth.php",
       "source_location": "L86",
-      "id": "classes_auth_auth_verifyemailbytoken",
       "community": 5,
-      "norm_label": ".verifyemailbytoken()"
+      "norm_label": ".verifyemailbytoken()",
+      "id": "classes_auth_auth_verifyemailbytoken"
     },
     {
       "label": ".resendEmailVerification()",
       "file_type": "code",
       "source_file": "includes/classes/Auth.php",
       "source_location": "L103",
-      "id": "classes_auth_auth_resendemailverification",
       "community": 5,
-      "norm_label": ".resendemailverification()"
+      "norm_label": ".resendemailverification()",
+      "id": "classes_auth_auth_resendemailverification"
     },
     {
       "label": ".emailVerificationUrl()",
       "file_type": "code",
       "source_file": "includes/classes/Auth.php",
       "source_location": "L113",
-      "id": "classes_auth_auth_emailverificationurl",
       "community": 5,
-      "norm_label": ".emailverificationurl()"
+      "norm_label": ".emailverificationurl()",
+      "id": "classes_auth_auth_emailverificationurl"
     },
     {
       "label": "config.php",
       "file_type": "code",
       "source_file": "includes/config.php",
       "source_location": "L1",
-      "id": "includes_config_php",
       "community": 5,
-      "norm_label": "config.php"
+      "norm_label": "config.php",
+      "id": "includes_config_php"
     },
     {
       "label": "loadEnv()",
       "file_type": "code",
       "source_file": "includes/config.php",
       "source_location": "L10",
-      "id": "includes_config_loadenv",
       "community": 5,
-      "norm_label": "loadenv()"
+      "norm_label": "loadenv()",
+      "id": "includes_config_loadenv"
     },
     {
       "label": "env()",
       "file_type": "code",
       "source_file": "includes/config.php",
       "source_location": "L41",
-      "id": "includes_config_env",
       "community": 5,
-      "norm_label": "env()"
+      "norm_label": "env()",
+      "id": "includes_config_env"
     },
     {
       "label": "getDB()",
       "file_type": "code",
       "source_file": "includes/config.php",
       "source_location": "L80",
-      "id": "includes_config_getdb",
       "community": 5,
-      "norm_label": "getdb()"
+      "norm_label": "getdb()",
+      "id": "includes_config_getdb"
     },
     {
       "label": "ensureFreelancerSchema()",
       "file_type": "code",
       "source_file": "includes/config.php",
       "source_location": "L101",
-      "id": "includes_config_ensurefreelancerschema",
       "community": 5,
-      "norm_label": "ensurefreelancerschema()"
+      "norm_label": "ensurefreelancerschema()",
+      "id": "includes_config_ensurefreelancerschema"
     },
     {
       "label": "baseUrl()",
       "file_type": "code",
       "source_file": "includes/config.php",
       "source_location": "L117",
-      "id": "includes_config_baseurl",
       "community": 5,
-      "norm_label": "baseurl()"
+      "norm_label": "baseurl()",
+      "id": "includes_config_baseurl"
     },
     {
       "label": "redirect()",
       "file_type": "code",
       "source_file": "includes/config.php",
       "source_location": "L122",
-      "id": "includes_config_redirect",
       "community": 5,
-      "norm_label": "redirect()"
+      "norm_label": "redirect()",
+      "id": "includes_config_redirect"
     },
     {
       "label": "isRoute()",
       "file_type": "code",
       "source_file": "includes/config.php",
       "source_location": "L128",
-      "id": "includes_config_isroute",
       "community": 5,
-      "norm_label": "isroute()"
+      "norm_label": "isroute()",
+      "id": "includes_config_isroute"
     },
     {
       "label": "index.php",
       "file_type": "code",
       "source_file": "index.php",
       "source_location": "L1",
-      "id": "index_php",
       "community": 86,
-      "norm_label": "index.php"
+      "norm_label": "index.php",
+      "id": "index_php"
     },
     {
       "label": "index.php",
@@ -1388,15 +1397,6 @@
       "community": 14,
       "norm_label": "json_response()",
       "id": "actions_submit_verification_json_response"
-    },
-    {
-      "label": "post_job.php",
-      "file_type": "code",
-      "source_file": "actions/post_job.php",
-      "source_location": "L1",
-      "community": 45,
-      "norm_label": "post_job.php",
-      "id": "users_chiraglimbachiya_sites_upwork_upwork_project_actions_post_job_php"
     },
     {
       "label": "send_message.php",
@@ -2564,9 +2564,9 @@
       "source_file": "includes/classes/Auth.php",
       "source_location": "L68",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "classes_auth_auth",
-      "target": "classes_auth_auth_isemailverified",
-      "confidence_score": 1.0
+      "target": "classes_auth_auth_isemailverified"
     },
     {
       "relation": "method",
@@ -2574,9 +2574,9 @@
       "source_file": "includes/classes/Auth.php",
       "source_location": "L74",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "classes_auth_auth",
-      "target": "classes_auth_auth_isidentityverified",
-      "confidence_score": 1.0
+      "target": "classes_auth_auth_isidentityverified"
     },
     {
       "relation": "method",
@@ -2584,9 +2584,9 @@
       "source_file": "includes/classes/Auth.php",
       "source_location": "L80",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "classes_auth_auth",
-      "target": "classes_auth_auth_canapplytojobs",
-      "confidence_score": 1.0
+      "target": "classes_auth_auth_canapplytojobs"
     },
     {
       "relation": "method",
@@ -2594,9 +2594,9 @@
       "source_file": "includes/classes/Auth.php",
       "source_location": "L86",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "classes_auth_auth",
-      "target": "classes_auth_auth_verifyemailbytoken",
-      "confidence_score": 1.0
+      "target": "classes_auth_auth_verifyemailbytoken"
     },
     {
       "relation": "method",
@@ -2604,9 +2604,9 @@
       "source_file": "includes/classes/Auth.php",
       "source_location": "L103",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "classes_auth_auth",
-      "target": "classes_auth_auth_resendemailverification",
-      "confidence_score": 1.0
+      "target": "classes_auth_auth_resendemailverification"
     },
     {
       "relation": "method",
@@ -2614,9 +2614,9 @@
       "source_file": "includes/classes/Auth.php",
       "source_location": "L113",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "classes_auth_auth",
-      "target": "classes_auth_auth_emailverificationurl",
-      "confidence_score": 1.0
+      "target": "classes_auth_auth_emailverificationurl"
     },
     {
       "relation": "calls",
@@ -2899,9 +2899,9 @@
       "source_file": "includes/config.php",
       "source_location": "L10",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "includes_config_php",
-      "target": "includes_config_loadenv",
-      "confidence_score": 1.0
+      "target": "includes_config_loadenv"
     },
     {
       "relation": "contains",
@@ -2909,9 +2909,9 @@
       "source_file": "includes/config.php",
       "source_location": "L41",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "includes_config_php",
-      "target": "includes_config_env",
-      "confidence_score": 1.0
+      "target": "includes_config_env"
     },
     {
       "relation": "contains",
@@ -2919,9 +2919,9 @@
       "source_file": "includes/config.php",
       "source_location": "L80",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "includes_config_php",
-      "target": "includes_config_getdb",
-      "confidence_score": 1.0
+      "target": "includes_config_getdb"
     },
     {
       "relation": "contains",
@@ -2929,9 +2929,9 @@
       "source_file": "includes/config.php",
       "source_location": "L101",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "includes_config_php",
-      "target": "includes_config_ensurefreelancerschema",
-      "confidence_score": 1.0
+      "target": "includes_config_ensurefreelancerschema"
     },
     {
       "relation": "contains",
@@ -2939,9 +2939,9 @@
       "source_file": "includes/config.php",
       "source_location": "L117",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "includes_config_php",
-      "target": "includes_config_baseurl",
-      "confidence_score": 1.0
+      "target": "includes_config_baseurl"
     },
     {
       "relation": "contains",
@@ -2949,9 +2949,9 @@
       "source_file": "includes/config.php",
       "source_location": "L122",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "includes_config_php",
-      "target": "includes_config_redirect",
-      "confidence_score": 1.0
+      "target": "includes_config_redirect"
     },
     {
       "relation": "contains",
@@ -2959,9 +2959,9 @@
       "source_file": "includes/config.php",
       "source_location": "L128",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "includes_config_php",
-      "target": "includes_config_isroute",
-      "confidence_score": 1.0
+      "target": "includes_config_isroute"
     },
     {
       "relation": "contains",
@@ -2990,9 +2990,9 @@
       "source_file": "includes/config.php",
       "source_location": "L104",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "includes_config_ensurefreelancerschema",
-      "target": "includes_config_getdb",
-      "confidence_score": 1.0
+      "target": "includes_config_getdb"
     },
     {
       "relation": "contains",
@@ -5360,5 +5360,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "a6299b3e4fd1371ea8b5906289060b655776528c"
+  "built_at_commit": "1e486a258ff8a7ec362d388b32200816a37e001c"
 }
