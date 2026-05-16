@@ -141,6 +141,23 @@ $escrowStmt = $db->prepare("SELECT SUM(amount) FROM payments WHERE payer_id = ? 
 $escrowStmt->execute([$user['id']]);
 $escrowAmount = $escrowStmt->fetchColumn() ?: 0;
 
+// Monthly spend for chart (last 7 months including current)
+$monthlySpendData = [];
+$maxSpend = 1; // Avoid division by zero
+for ($i = 6; $i >= 0; $i--) {
+    $monthDate = date('Y-m-d', strtotime("-$i months"));
+    $monthLabel = date('M', strtotime($monthDate));
+    $stmt = $db->prepare("SELECT SUM(amount) FROM payments WHERE payer_id = ? AND status = 'completed' AND MONTH(created_at) = MONTH(?) AND YEAR(created_at) = YEAR(?)");
+    $stmt->execute([$user['id'], $monthDate, $monthDate]);
+    $amt = (float)$stmt->fetchColumn() ?: 0;
+    $monthlySpendData[] = ['label' => $monthLabel, 'amount' => $amt];
+    if ($amt > $maxSpend) $maxSpend = $amt;
+}
+
+// Avg Rating Given (Placeholder logic as reviews table doesn't exist yet)
+$stats['avg_rating'] = "0.0"; 
+$stats['review_count'] = 0;
+
 // 11. Pending Work Logs for Review
 $pendingWorkStmt = $db->prepare("
     SELECT wl.*, c.job_id, j.title as job_title, u.name as freelancer_name, c.contract_type
@@ -310,8 +327,8 @@ $reportStats = $reportStatsStmt->fetch(PDO::FETCH_ASSOC);
         </div>
         <div class="stat-c" onclick="toast('Satisfaction','Based on completed contract reviews')">
           <div class="stat-label">Avg Rating Given<div class="stat-icon">⭐</div></div>
-          <div class="stat-val">4.9</div>
-          <div class="stat-sub">From your reviews</div>
+          <div class="stat-val"><?php echo $stats['avg_rating']; ?></div>
+          <div class="stat-sub">From <?php echo $stats['review_count']; ?> reviews</div>
         </div>
       </div>
 
@@ -403,22 +420,21 @@ $reportStats = $reportStatsStmt->fetch(PDO::FETCH_ASSOC);
         </div>
         <div class="card-body">
           <div style="font-size:24px;font-weight:700;color:var(--uw-black);margin-bottom:6px">
-            $4,820 <span style="font-size:13px;font-weight:400;color:var(--uw-gray)">May 2026</span>
+            $<?php echo number_format($stats['total_spent']); ?> <span style="font-size:13px;font-weight:400;color:var(--uw-gray)"><?php echo date('M Y'); ?></span>
           </div>
           <div class="chart-area">
             <div class="chart-bars">
-              <div class="chart-bar" style="height:45%" onclick="toast('November','$2,100 spent')"></div>
-              <div class="chart-bar" style="height:60%" onclick="toast('December','$2,800 spent')"></div>
-              <div class="chart-bar" style="height:52%" onclick="toast('January','$2,400 spent')"></div>
-              <div class="chart-bar" style="height:70%" onclick="toast('February','$3,250 spent')"></div>
-              <div class="chart-bar" style="height:75%" onclick="toast('March','$3,500 spent')"></div>
-              <div class="chart-bar" style="height:88%" onclick="toast('April','$4,100 spent')"></div>
-              <div class="chart-bar active" style="height:100%" onclick="toast('May (current)','$4,820 spent so far')"></div>
+              <?php foreach ($monthlySpendData as $index => $data): 
+                $height = ($data['amount'] / $maxSpend) * 100;
+                $active = ($index === count($monthlySpendData) - 1) ? 'active' : '';
+              ?>
+                <div class="chart-bar <?php echo $active; ?>" style="height:<?php echo max(5, $height); ?>%" onclick="toast('<?php echo $data['label']; ?>','$<?php echo number_format($data['amount']); ?> spent')"></div>
+              <?php endforeach; ?>
             </div>
             <div class="chart-labels">
-              <div class="chart-lbl">Nov</div><div class="chart-lbl">Dec</div><div class="chart-lbl">Jan</div>
-              <div class="chart-lbl">Feb</div><div class="chart-lbl">Mar</div><div class="chart-lbl">Apr</div>
-              <div class="chart-lbl">May</div>
+              <?php foreach ($monthlySpendData as $data): ?>
+                <div class="chart-lbl"><?php echo $data['label']; ?></div>
+              <?php endforeach; ?>
             </div>
           </div>
         </div>
@@ -689,7 +705,7 @@ $reportStats = $reportStatsStmt->fetch(PDO::FETCH_ASSOC);
                     </div>
                   </td>
                   <td><?php echo htmlspecialchars($t['title'] ?? 'Freelancer'); ?></td>
-                  <td>★ 5.0 (0)</td>
+                  <td>★ 0.0 (0)</td>
                   <td>$<?php echo number_format($t['hourly_rate'] ?? 0); ?>/hr</td>
                   <td>
                     <?php if($isHired): ?>
@@ -728,7 +744,7 @@ $reportStats = $reportStatsStmt->fetch(PDO::FETCH_ASSOC);
                     </div>
                   </td>
                   <td class="hide-mob"><?php echo htmlspecialchars($t['title'] ?? 'Freelancer'); ?></td>
-                  <td class="hide-mob">★ 5.0 (0)</td>
+                  <td class="hide-mob">★ 0.0 (0)</td>
                   <td>$<?php echo number_format($t['hourly_rate'] ?? 0); ?>/hr</td>
                   <td class="hide-mob"><?php echo date('M d, Y', strtotime($t['created_at'])); ?></td>
                   <td>
@@ -795,8 +811,8 @@ $reportStats = $reportStatsStmt->fetch(PDO::FETCH_ASSOC);
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px" id="talent-grid">
         <?php foreach($allTalent as $t): 
           $initials = strtoupper(substr($t['name'], 0, 1) . substr(explode(' ', $t['name'])[1] ?? '', 0, 1));
-          $rating = number_format(4.5 + (rand(0, 5) / 10), 1);
-          $reviews = rand(5, 150);
+          $rating = "0.0";
+          $reviews = 0;
         ?>
           <div class="card talent-card" style="margin-bottom:0;transition:transform .2s, border-color .2s;cursor:pointer" onclick="openModal('hire-freelancer-<?php echo $t['id']; ?>')" onmouseover="this.style.borderColor='var(--uw-green)'" onmouseout="this.style.borderColor='var(--uw-border)'">
             <div class="card-body">
