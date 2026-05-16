@@ -15,22 +15,26 @@ $db = getDB();
 $title = $_POST['title'] ?? '';
 $description = $_POST['description'] ?? '';
 $category = $_POST['category'] ?? '';
+$subcategory = $_POST['subcategory'] ?? '';
+$specialty = $_POST['specialty'] ?? '';
 $budget = (float)($_POST['budget'] ?? 0);
 $budget_type = $_POST['budget_type'] ?? 'fixed';
 $skills = $_POST['skills'] ?? '';
 
-if (empty($title) || empty($description) || empty($category)) {
-    echo json_encode(['success' => false, 'error' => 'Title, description and category are required']);
+if (empty($title) || empty($description) || empty($category) || empty($subcategory)) {
+    echo json_encode(['success' => false, 'error' => 'Title, description, category and subcategory are required']);
     exit;
 }
 
 try {
-    $stmt = $db->prepare("INSERT INTO jobs (client_id, title, description, category, skills_required, budget, budget_type, status) VALUES (?, ?, ?, ?, ?, ?, ?, 'open')");
+    $stmt = $db->prepare("INSERT INTO jobs (client_id, title, description, category, subcategory, specialty, skills_required, budget, budget_type, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'open')");
     $stmt->execute([
         $user['id'],
         $title,
         $description,
         $category,
+        $subcategory,
+        $specialty,
         json_encode(explode(',', $skills)),
         $budget,
         $budget_type

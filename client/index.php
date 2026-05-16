@@ -85,10 +85,22 @@ $proposalsStmt = $db->prepare("SELECT p.*, j.title as job_title, u.name as freel
                                FROM proposals p 
                                JOIN jobs j ON p.job_id = j.id 
                                JOIN users u ON p.freelancer_id = u.id 
-                               WHERE j.client_id = ? AND p.status = 'pending' 
+                               WHERE j.client_id = ? 
                                ORDER BY p.created_at DESC");
 $proposalsStmt->execute([$user['id']]);
 $allProposals = $proposalsStmt->fetchAll(PDO::FETCH_ASSOC);
+
+$proposalCounts = [
+    'pending' => 0,
+    'shortlisted' => 0,
+    'archived' => 0,
+    'accepted' => 0
+];
+foreach ($allProposals as $ap) {
+    if (isset($proposalCounts[$ap['status']])) {
+        $proposalCounts[$ap['status']]++;
+    }
+}
 
 // 7. All Contracts for Contracts Page
 $allContractsStmt = $db->prepare("SELECT c.*, j.title as job_title, u.name as freelancer_name FROM contracts c 
@@ -214,8 +226,8 @@ $reportStats = $reportStatsStmt->fetch(PDO::FETCH_ASSOC);
   <nav class="sb-nav">
     <div class="sb-section">Main</div>
     <div class="sb-item" onclick="showPage('home',this)"><span class="ico">🏠</span>Home</div>
-    <div class="sb-item" onclick="showPage('jobs',this)"><span class="ico">📋</span>My Jobs<?php if($jobCounts['open'] > 0): ?><span class="sb-badge g"><?php echo $jobCounts['open']; ?></span><?php endif; ?></div>
-    <div class="sb-item" onclick="showPage('proposals',this)"><span class="ico">📩</span>Proposals<?php if(count($allProposals) > 0): ?><span class="sb-badge"><?php echo count($allProposals); ?></span><?php endif; ?></div>
+    <div class="sb-item" onclick="showPage('jobs',this)"><span class="ico">📋</span>My Jobs</div>
+    <div class="sb-item" onclick="showPage('proposals',this)"><span class="ico">📩</span>Proposals</div>
     <div class="sb-item" onclick="showPage('contracts',this)"><span class="ico">🤝</span>Contracts</div>
     <div class="sb-item" onclick="showPage('talent',this)"><span class="ico">👥</span>Talent</div>
     <div class="sb-section">Tools</div>
@@ -405,32 +417,33 @@ $reportStats = $reportStatsStmt->fetch(PDO::FETCH_ASSOC);
       <div class="pg-header">
         <div>
           <div class="pg-title">My Job Posts</div>
-          <div class="pg-sub"><?php echo $jobCounts['open']; ?> open · <?php echo $jobCounts['paused']; ?> paused · <?php echo $jobCounts['closed']; ?> closed</div>
+          <div class="pg-sub"><?php echo count($allJobs); ?> total posts · <?php echo $jobCounts['open']; ?> open · <?php echo $jobCounts['paused']; ?> paused · <?php echo $jobCounts['closed']; ?> closed</div>
         </div>
         <button class="btn btn-g btn-lg" onclick="openModal('post-job')">+ Post a New Job</button>
       </div>
       <div class="tab-bar">
-        <div class="tab on" onclick="setTab(this)">All</div>
-        <div class="tab" onclick="setTab(this)">Open</div>
-        <div class="tab" onclick="setTab(this)">Paused</div>
-        <div class="tab" onclick="setTab(this)">Closed</div>
+        <div class="tab on" data-tab-status="all" onclick="setTab(this)">All (<?php echo count($allJobs); ?>)</div>
+        <div class="tab" data-tab-status="open" onclick="setTab(this)">Open (<?php echo $jobCounts['open']; ?>)</div>
+        <div class="tab" data-tab-status="paused" onclick="setTab(this)">Paused (<?php echo $jobCounts['paused']; ?>)</div>
+        <div class="tab" data-tab-status="closed" onclick="setTab(this)">Closed (<?php echo $jobCounts['closed']; ?>)</div>
       </div>
       <div class="card" style="margin-bottom:0;overflow:auto">
         <table class="tbl">
-          <thead><tr><th>Job Title</th><th>Type</th><th>Budget</th><th>Proposals</th><th>Posted</th><th>Status</th><th>Action</th></tr></thead>
+          <thead><tr><th>Job Title</th><th>Category</th><th>Subcategory</th><th>Budget</th><th>Proposals</th><th>Posted</th><th>Status</th><th>Action</th></tr></thead>
           <tbody>
             <?php if (empty($allJobs)): ?>
-                <tr><td colspan="7" style="text-align:center;padding:20px;color:var(--uw-gray)">No job posts found.</td></tr>
+                <tr><td colspan="8" style="text-align:center;padding:20px;color:var(--uw-gray)">No job posts found.</td></tr>
             <?php else: ?>
                 <?php foreach ($allJobs as $aj): ?>
-                <tr>
+                <tr data-status="<?php echo $aj['status']; ?>">
                   <td class="cl" onclick="toast('Job Details','Viewing <?php echo htmlspecialchars($aj['title']); ?>')"><?php echo htmlspecialchars($aj['title']); ?></td>
-                  <td><?php echo ucfirst($aj['budget_type']); ?></td>
+                  <td><span class="badge b-gray"><?php echo htmlspecialchars($aj['category']); ?></span></td>
+                  <td><span class="badge b-blue" style="font-size:11px"><?php echo htmlspecialchars($aj['subcategory'] ?? 'General'); ?></span></td>
                   <td>$<?php echo number_format($aj['budget']); ?></td>
                   <td><strong style="color:var(--uw-green)"><?php echo $aj['proposal_count']; ?></strong></td>
                   <td><?php echo date('M j', strtotime($aj['created_at'])); ?></td>
                   <td><span class="badge b-<?php echo ($aj['status'] === 'open' ? 'green' : ($aj['status'] === 'paused' ? 'yellow' : 'gray')); ?>"><?php echo ucfirst($aj['status']); ?></span></td>
-                  <td><button class="btn btn-w btn-sm" onclick="toast('Job','Viewing details')">View</button></td>
+                  <td><button class="btn btn-w btn-sm" onclick="viewJobDetails(<?php echo htmlspecialchars(json_encode($aj)); ?>)">View</button></td>
                 </tr>
                 <?php endforeach; ?>
             <?php endif; ?>
@@ -444,24 +457,28 @@ $reportStats = $reportStatsStmt->fetch(PDO::FETCH_ASSOC);
       <div class="pg-header">
         <div>
           <div class="pg-title">Proposals</div>
-          <div class="pg-sub"><?php echo count($allProposals); ?> new proposals waiting for review</div>
+          <div class="pg-sub"><?php echo $proposalCounts['pending']; ?> pending · <?php echo $proposalCounts['shortlisted']; ?> shortlisted · <?php echo $proposalCounts['archived']; ?> archived</div>
         </div>
       </div>
       <div class="tab-bar">
-        <div class="tab on" onclick="setTab(this)">New (<?php echo count($allProposals); ?>)</div>
-        <div class="tab" onclick="setTab(this)">Shortlisted (0)</div>
-        <div class="tab" onclick="setTab(this)">Archived</div>
+        <div class="tab on" data-tab-status="all" onclick="setTab(this)">All (<?php echo count($allProposals); ?>)</div>
+        <div class="tab" data-tab-status="pending" onclick="setTab(this)">Pending (<?php echo $proposalCounts['pending']; ?>)</div>
+        <div class="tab" data-tab-status="shortlisted" onclick="setTab(this)">Shortlisted (<?php echo $proposalCounts['shortlisted']; ?>)</div>
+        <div class="tab" data-tab-status="archived" onclick="setTab(this)">Archived (<?php echo $proposalCounts['archived']; ?>)</div>
       </div>
 
       <?php if (empty($allProposals)): ?>
           <div class="card" style="padding:40px;text-align:center;color:var(--uw-gray)">No pending proposals found.</div>
       <?php else: ?>
           <?php foreach ($allProposals as $p): ?>
-          <div class="prop-card" onclick="toast('Proposal','Viewing proposal details')">
+          <div class="prop-card" data-status="<?php echo $p['status']; ?>" onclick="toast('Proposal','Viewing proposal details')">
             <div class="prop-top">
               <div class="av" style="background:var(--uw-green-light);color:var(--uw-green);width:42px;height:42px;font-size:13px"><?php echo strtoupper(substr($p['freelancer_name'], 0, 2)); ?></div>
               <div class="prop-info">
-                <h4><?php echo htmlspecialchars($p['freelancer_name']); ?></h4>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <h4 style="margin:0"><?php echo htmlspecialchars($p['freelancer_name']); ?></h4>
+                  <span class="badge b-<?php echo ($p['status']==='shortlisted'?'blue':($p['status']==='archived'?'gray':'green')); ?>" style="font-size:9px;padding:2px 6px"><?php echo ucfirst($p['status']); ?></span>
+                </div>
                 <p>Freelancer · 0 reviews · ★ 0.0 · $0/hr</p>
               </div>
               <div style="margin-left:auto;text-align:right;flex-shrink:0">
@@ -473,9 +490,9 @@ $reportStats = $reportStatsStmt->fetch(PDO::FETCH_ASSOC);
             <div class="prop-foot">
               <div style="font-size:11.5px;color:var(--uw-gray)">Submitted <?php echo date('M j', strtotime($p['created_at'])); ?></div>
               <div class="prop-actions">
-                <button class="btn btn-w btn-sm" onclick="event.stopPropagation();toast('Archived','Proposal archived')">Archive</button>
-                <button class="btn btn-o btn-sm" onclick="event.stopPropagation();toast('Shortlisted!','Freelancer added to your shortlist')">Shortlist</button>
-                <button class="btn btn-w btn-sm" onclick="event.stopPropagation();toast('Message','Chat feature coming soon')">💬 Message</button>
+                <button class="btn btn-w btn-sm" onclick="event.stopPropagation();updateProposalStatus(<?php echo $p['id']; ?>, 'archived')"><?php echo $p['status']==='archived'?'Unarchive':'Archive'; ?></button>
+                <button class="btn btn-o btn-sm" onclick="event.stopPropagation();updateProposalStatus(<?php echo $p['id']; ?>, '<?php echo $p['status']==='shortlisted'?'pending':'shortlisted'; ?>')"><?php echo $p['status']==='shortlisted'?'Unshortlist':'Shortlist'; ?></button>
+                <button class="btn btn-w btn-sm" onclick="event.stopPropagation();showChatWithFreelancer(<?php echo $p['freelancer_id']; ?>, '<?php echo addslashes($p['freelancer_name']); ?>')">💬 Message</button>
                 <button class="btn btn-g btn-sm" onclick="event.stopPropagation();hireFreelancer(<?php echo $p['id']; ?>)">Hire →</button>
               </div>
             </div>

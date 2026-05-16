@@ -189,18 +189,32 @@ const MODALS = {
         <label>Category</label>
         <select id="pj-cat" onchange="updateSubcats()">
           <option value="">— Select a category —</option>
-          <option value="Accounting &amp; Consulting">Accounting &amp; Consulting</option>
+          <option value="Accounting & Consulting">Accounting & Consulting</option>
           <option value="Admin Support">Admin Support</option>
           <option value="Customer Service">Customer Service</option>
-          <option value="Data Science &amp; Analytics">Data Science &amp; Analytics</option>
-          <option value="Design &amp; Creative">Design &amp; Creative</option>
-          <option value="Engineering &amp; Architecture">Engineering &amp; Architecture</option>
-          <option value="IT &amp; Networking">IT &amp; Networking</option>
+          <option value="Data Science & Analytics">Data Science & Analytics</option>
+          <option value="Design & Creative">Design & Creative</option>
+          <option value="Engineering & Architecture">Engineering & Architecture</option>
+          <option value="IT & Networking">IT & Networking</option>
           <option value="Legal">Legal</option>
-          <option value="Sales &amp; Marketing">Sales &amp; Marketing</option>
+          <option value="Sales & Marketing">Sales & Marketing</option>
           <option value="Translation">Translation</option>
-          <option value="Web, Mobile &amp; Software Dev">Web, Mobile &amp; Software Dev</option>
+          <option value="Web, Mobile & Software Dev">Web, Mobile & Software Dev</option>
           <option value="Writing">Writing</option>
+        </select>
+      </div>
+
+      <div class="fg" id="pj-subcat-wrap" style="display:none">
+        <label>Subcategory</label>
+        <select id="pj-subcat" onchange="updateSpecialties()">
+          <option value="">— Select a subcategory —</option>
+        </select>
+      </div>
+
+      <div class="fg" id="pj-spec-wrap" style="display:none">
+        <label>Specialty</label>
+        <select id="pj-spec">
+          <option value="">— Select a specialty —</option>
         </select>
       </div>
 
@@ -216,6 +230,7 @@ const MODALS = {
       </button>
     </div>
   `},
+  'view-job':{t:'',b:''},
   'job-1':{t:'Senior React Developer — Analytics Dashboard',b:`
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
       <span class="badge b-green">Open</span><span class="badge b-blue">Fixed Price</span><span class="badge b-gray">Remote</span>
@@ -447,14 +462,154 @@ const MODALS = {
   })}
 };
 
+let currentJob = null;
+
 function openModal(id){
-  const m=MODALS[id];
-  if(!m){toast('Detail','Opening details...');return;}
-  document.getElementById('mh-title').textContent=m.t;
-  document.getElementById('mc-body').innerHTML=m.b;
+  const m = MODALS[id];
+  if(!m) return;
+  document.getElementById('mh-title').innerText = m.t;
+  document.getElementById('mc-body').innerHTML = m.b;
   document.getElementById('overlay').classList.add('open');
-  document.body.style.overflow='hidden';
+  document.body.style.overflow = 'hidden';
+
+  // Reset post-job if needed
+  if(id === 'post-job') {
+    const btn = document.getElementById('pj-submit-btn');
+    const btnText = document.getElementById('pj-btn-text');
+    if(btnText) btnText.innerText = 'Post Job →';
+    if(btn) btn.onclick = submitPostJob;
+  }
 }
+
+function viewJobDetails(job) {
+  currentJob = job;
+  MODALS['view-job'] = {
+    t: job.title,
+    b: `
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+        <span class="badge b-${job.status === 'open' ? 'green' : (job.status === 'paused' ? 'yellow' : 'gray')}">${job.status.charAt(0).toUpperCase() + job.status.slice(1)}</span>
+        <span class="badge b-blue">${job.budget_type === 'fixed' ? 'Fixed Price' : 'Hourly'}</span>
+        <span class="badge b-gray">${job.category}</span>
+        <span class="badge b-purple" style="font-size:11px">${job.subcategory || 'General'}</span>
+      </div>
+      <div class="g2" style="margin-bottom:14px">
+        <div style="background:var(--uw-bg);padding:12px;border-radius:8px;border:1.5px solid var(--uw-border)">
+          <div style="font-size:11px;color:var(--uw-gray);margin-bottom:2px">Budget</div>
+          <div style="font-weight:700">$${new Intl.NumberFormat().format(job.budget)}</div>
+        </div>
+        <div style="background:var(--uw-bg);padding:12px;border-radius:8px;border:1.5px solid var(--uw-border)">
+          <div style="font-size:11px;color:var(--uw-gray);margin-bottom:2px">Proposals</div>
+          <div style="font-weight:700;color:var(--uw-green)">${job.proposal_count} received</div>
+        </div>
+      </div>
+      <div style="font-size:13px;color:#374151;line-height:1.7;margin-bottom:14px">${job.description}</div>
+      <div style="display:flex;gap:8px;margin-top:16px">
+        <button class="btn btn-w" style="flex:1;justify-content:center" onclick="toggleJobStatus(${job.id}, '${job.status === 'paused' ? 'open' : 'paused'}')">${job.status === 'paused' ? 'Resume Job' : 'Pause Job'}</button>
+        <button class="btn btn-o" style="flex:1;justify-content:center" onclick="showPage('proposals',document.querySelector('[onclick*=proposals]'));closeModal()">View Proposals (${job.proposal_count})</button>
+        <button class="btn btn-g" style="flex:1;justify-content:center" onclick="editJob()">Edit Job</button>
+      </div>
+    `
+  };
+  openModal('view-job');
+}
+
+async function toggleJobStatus(jobId, newStatus) {
+  toast('Updating...', 'Changing job status');
+  const formData = new FormData();
+  formData.append('job_id', jobId);
+  formData.append('status', newStatus);
+
+  try {
+    const res = await fetch(BASE_URL + '/actions/update_job_status.php', {
+      method: 'POST',
+      body: formData
+    });
+    const result = await res.json();
+    if(result.success) {
+      toast('Updated! 🎉', result.message);
+      setTimeout(() => location.reload(), 1000);
+    } else {
+      toast('Error', result.error || 'Failed to update status');
+    }
+  } catch(err) {
+    toast('Error', 'An unexpected error occurred.');
+  }
+}
+
+function editJob() {
+  const job = currentJob;
+  if(!job) return;
+  openModal('post-job');
+  document.getElementById('mh-title').innerText = 'Edit Job Post';
+  
+  // Fill fields
+  document.getElementById('pj-title').value = job.title;
+  document.getElementById('pj-cat').value = job.category;
+  updateSubcats();
+  document.getElementById('pj-subcat').value = job.subcategory || '';
+  updateSpecialties();
+  document.getElementById('pj-spec').value = job.specialty || '';
+  document.getElementById('pj-billing-type').value = job.budget_type;
+  document.getElementById('pj-budget').value = job.budget;
+  document.getElementById('pj-desc').value = job.description;
+  
+  // Parse skills from JSON if it's a string
+  let skillsArr = job.skills_required;
+  if(typeof skillsArr === 'string') {
+    try { skillsArr = JSON.parse(skillsArr); } catch(e) { skillsArr = []; }
+  }
+  document.getElementById('pj-skills').value = Array.isArray(skillsArr) ? skillsArr.join(', ') : '';
+
+  // Change button
+  const btn = document.getElementById('pj-submit-btn');
+  const btnText = document.getElementById('pj-btn-text');
+  btnText.innerText = 'Save Changes';
+  btn.onclick = () => updateJob(job.id);
+}
+
+async function updateJob(jobId) {
+  const title = document.getElementById('pj-title').value.trim();
+  const cat = document.getElementById('pj-cat').value;
+  const subcat = document.getElementById('pj-subcat').value;
+  const spec = document.getElementById('pj-spec').value;
+  const type = document.getElementById('pj-billing-type').value;
+  const budget = document.getElementById('pj-budget').value;
+  const desc = document.getElementById('pj-desc').value.trim();
+  const skills = document.getElementById('pj-skills').value.trim();
+
+  if(!title || !cat || !subcat || !budget || !desc) {
+    return toast('Error', 'Please fill in all required fields');
+  }
+
+  toast('Saving...', 'Updating your job post');
+  const formData = new FormData();
+  formData.append('job_id', jobId);
+  formData.append('title', title);
+  formData.append('category', cat);
+  formData.append('subcategory', subcat);
+  formData.append('specialty', spec);
+  formData.append('budget_type', type);
+  formData.append('budget', budget);
+  formData.append('description', desc);
+  formData.append('skills', skills);
+
+  try {
+    const res = await fetch(BASE_URL + '/actions/edit_job.php', {
+      method: 'POST',
+      body: formData
+    });
+    const result = await res.json();
+    if(result.success) {
+      toast('Success! 🎉', 'Job updated successfully.');
+      setTimeout(() => location.reload(), 1500);
+    } else {
+      toast('Error', result.error || 'Failed to update job');
+    }
+  } catch(err) {
+    toast('Error', 'An unexpected error occurred.');
+  }
+}
+
 function closeModal(){
   document.getElementById('overlay').classList.remove('open');
   document.body.style.overflow='';
@@ -673,41 +828,108 @@ function openChatWith(id, name, initials) {
 
 function showPage(id, navEl) {
   if (!id) id = 'home';
+  
+  // 1. Switch pages
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const targetPage = document.getElementById('page-' + id);
   if (targetPage) targetPage.classList.add('active');
 
+  // 2. Sync Sidebar
   document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
-  if (navEl) {
-    navEl.classList.add('active');
-  } else {
-    // Try to find the nav element by id or by its onclick attribute
-    const sideNav = document.querySelector(`.sb-item[onclick*="'${id}'"]`);
-    if (sideNav) sideNav.classList.add('active');
-  }
+  const sideNav = document.querySelector(`.sb-item[onclick*="'${id}'"]`);
+  if (sideNav) sideNav.classList.add('active');
 
-  const titles = { home: 'Home', jobs: 'My Jobs', proposals: 'Proposals', contracts: 'Contracts', talent: 'Talent', messages: 'Messages', payments: 'Payments', reports: 'Reports' };
-  document.getElementById('page-title').textContent = titles[id] || id;
-  
-  // Update hash
-  window.location.hash = id;
-  
-  closeMobSidebar();
-  
-  // sync bottom nav
-  const mobMap = { home: 'home', jobs: 'jobs', proposals: 'proposals', messages: 'messages' };
+  // 3. Sync Bottom Nav (Mobile)
   document.querySelectorAll('.mob-nav-item').forEach(b => b.classList.remove('active'));
-  const mbn = document.getElementById('mbn-' + (mobMap[id] || ''));
+  const mbn = document.getElementById('mbn-' + id);
   if (mbn) mbn.classList.add('active');
+
+  // 4. Update Header Title
+  const titles = { 
+    home: 'Home', 
+    jobs: 'My Jobs', 
+    proposals: 'Proposals', 
+    contracts: 'Contracts', 
+    talent: 'Talent', 
+    messages: 'Messages', 
+    payments: 'Payments', 
+    reports: 'Reports',
+    verification: 'Identity Verification'
+  };
+  const titleEl = document.getElementById('page-title');
+  if (titleEl) titleEl.textContent = titles[id] || id;
+  
+  // 5. Cleanup
+  window.location.hash = id;
+  closeMobSidebar();
+  window.scrollTo(0, 0);
 }
 
 function setTab(el, targetId){
-  el.closest('.tab-bar').querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  const tabBar = el.closest('.tab-bar');
+  tabBar.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
   el.classList.add('on');
+  
   if(targetId && targetId.includes('talent')) {
     document.querySelectorAll('.talent-list').forEach(l => l.style.display = 'none');
     const target = document.getElementById(targetId);
     if(target) target.style.display = 'table';
+  } else {
+    // Logic for filtering rows/cards (e.g. My Job Posts, Proposals)
+    const status = el.dataset.tabStatus || el.innerText.toLowerCase();
+    const nextEl = tabBar.nextElementSibling;
+    // We might have a card wrapping the table, or cards directly
+    const container = nextEl.classList.contains('card') ? nextEl : tabBar.parentElement;
+    
+    const items = container.querySelectorAll('[data-status]');
+    items.forEach(item => {
+      if(status === 'all') {
+        item.style.display = item.tagName === 'TR' ? 'table-row' : 'block';
+      } else {
+        const show = (item.dataset.status === status);
+        item.style.display = show ? (item.tagName === 'TR' ? 'table-row' : 'block') : 'none';
+      }
+    });
+    
+    // No results check
+    let noRes = container.querySelector('.no-results-msg');
+    const visibleItems = Array.from(items).filter(r => r.style.display !== 'none');
+    
+    if(visibleItems.length === 0) {
+      if(!noRes) {
+        noRes = document.createElement('div');
+        noRes.className = 'no-results-msg';
+        noRes.style.cssText = 'text-align:center;padding:40px;color:var(--uw-gray);background:white;border-radius:8px;border:1.5px dashed var(--uw-border);margin-top:16px';
+        container.appendChild(noRes);
+      }
+      noRes.style.display = 'block';
+      noRes.innerText = `No ${status} items found.`;
+    } else if(noRes) {
+      noRes.style.display = 'none';
+    }
+  }
+}
+
+async function updateProposalStatus(propId, newStatus) {
+  toast('Updating...', 'Changing proposal status');
+  const formData = new FormData();
+  formData.append('proposal_id', propId);
+  formData.append('status', newStatus);
+
+  try {
+    const res = await fetch(BASE_URL + '/actions/update_proposal_status.php', {
+      method: 'POST',
+      body: formData
+    });
+    const result = await res.json();
+    if(result.success) {
+      toast('Success! 🎉', result.message);
+      setTimeout(() => location.reload(), 1000);
+    } else {
+      toast('Error', result.error || 'Failed to update proposal');
+    }
+  } catch(err) {
+    toast('Error', 'An unexpected error occurred.');
   }
 }
 
@@ -835,16 +1057,57 @@ function updatePostJobFields(){
     if(el)el.style.display=(k===v)?'block':'none';
   });
 }
+
+function showChatWithFreelancer(id, name) {
+  const initials = name.split(' ').map(n=>n[0]).join('').toUpperCase().substring(0,2);
+  showPage('messages', document.querySelector('[onclick*=messages]'));
+  
+  // Wait for page to switch
+  setTimeout(() => {
+    const list = document.getElementById('conversations-list');
+    if(!list) return;
+    const items = list.querySelectorAll('.msg-item');
+    let foundEl = null;
+    items.forEach(item => {
+      const oc = item.getAttribute('onclick') || '';
+      if (oc.includes(id.toString())) {
+        foundEl = item;
+      }
+    });
+    
+    if (foundEl) {
+      foundEl.click();
+    } else {
+      // Create temporary sidebar item
+      const newItem = document.createElement('div');
+      newItem.className = 'msg-item active';
+      newItem.style.cssText = 'border-radius:0;margin:0;padding:12px 14px';
+      newItem.onclick = function() { loadChat(id, name, initials, this); };
+      newItem.innerHTML = `
+        <div class="av" style="background:var(--uw-green-light);color:var(--uw-green)">${initials}</div>
+        <div class="msg-meta">
+          <div class="msg-name">${name}<span class="msg-time">Now</span></div>
+          <div class="msg-text">Starting conversation...</div>
+        </div>
+      `;
+      list.prepend(newItem);
+      loadChat(id, name, initials, newItem);
+    }
+  }, 150);
+}
+
 async function submitPostJob(){
   const title = document.getElementById('pj-title').value.trim();
   const cat = document.getElementById('pj-cat').value;
+  const subcat = document.getElementById('pj-subcat').value;
+  const spec = document.getElementById('pj-spec').value;
   const type = document.getElementById('pj-billing-type').value;
   const budget = document.getElementById('pj-budget').value;
   const desc = document.getElementById('pj-desc').value.trim();
   const skills = document.getElementById('pj-skills').value.trim();
 
-  if(!title || !cat || !budget || !desc) {
-    return toast('Error', 'Please fill in all required fields');
+  if(!title || !cat || !subcat || !budget || !desc) {
+    return toast('Error', 'Please fill in all required fields including category and subcategory');
   }
 
   const btn = document.getElementById('pj-submit-btn');
@@ -855,6 +1118,8 @@ async function submitPostJob(){
   const formData = new FormData();
   formData.append('title', title);
   formData.append('category', cat);
+  formData.append('subcategory', subcat);
+  formData.append('specialty', spec);
   formData.append('budget_type', type);
   formData.append('budget', budget);
   formData.append('description', desc);

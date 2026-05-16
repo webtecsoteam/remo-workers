@@ -402,7 +402,7 @@ button{font-family:inherit;cursor:pointer}
 /* ── MODAL ── */
 .overlay{
   position:fixed;inset:0;background:rgba(0,20,0,.48);
-  z-index:900;display:flex;align-items:center;justify-content:center;
+  z-index:10000;display:flex;align-items:center;justify-content:center;
   padding:20px;opacity:0;pointer-events:none;
   transition:opacity .2s;backdrop-filter:blur(4px);
 }
@@ -523,9 +523,10 @@ button{font-family:inherit;cursor:pointer}
   position:fixed;bottom:0;left:0;right:0;
   background:var(--uw-sidebar);
   border-top:1px solid rgba(255,255,255,.1);
-  z-index:80;
+  z-index:9999;
   padding:0;
   padding-bottom:env(safe-area-inset-bottom);
+  pointer-events: auto;
 }
 .mob-bottom-nav-inner{
   display:flex;
@@ -590,10 +591,10 @@ button{font-family:inherit;cursor:pointer}
   /* ── bottom nav visible ── */
   .mob-bottom-nav{display:block}
 
-  /* ── extra bottom padding so content clears bottom nav ── */
+  /* ── extra bottom padding so content clears bottom nav + FAB ── */
   .content{
     padding:16px 14px;
-    padding-bottom:80px;
+    padding-bottom:140px; /* Increased to ensure all buttons are visible above bottom nav */
   }
 
   /* ── topbar ── */
@@ -604,7 +605,11 @@ button{font-family:inherit;cursor:pointer}
   }
   .tb-title{font-size:14px}
   .tb-search{display:none}
-  .mob-menu-btn{display:flex}
+  .mob-menu-btn{
+    display:flex;
+    z-index:1001; /* Ensure above sticky topbar content */
+    cursor:pointer;
+  }
 
   /* Hide "+ Post a Job" text button in topbar on mobile — use FAB instead */
   .topbar .btn-g.btn-sm{display:none}
@@ -722,6 +727,13 @@ button{font-family:inherit;cursor:pointer}
     transition:transform .15s,box-shadow .15s;
   }
   .mob-fab:active{transform:scale(.94);box-shadow:0 2px 8px rgba(20,168,0,.3)}
+
+  /* ── touch experience fixes ── */
+  * { -webkit-tap-highlight-color: transparent; }
+  .btn, .sb-item, .mob-nav-item, .tab, .stat-c, .job-card, .prop-card, .mob-fab, .mob-menu-btn {
+    cursor: pointer !important;
+    touch-action: manipulation;
+  }
 }
 
 /* ── very small phones ── */
