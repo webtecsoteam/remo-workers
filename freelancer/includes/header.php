@@ -8,5 +8,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://js.paystack.co/v1/inline.js"></script>
 <link rel="stylesheet" href="<?php echo baseUrl("freelancer/css/style.css"); ?>">
+<link rel="icon" type="image/png" href="<?php echo baseUrl("favicon.png?v=1.0.0"); ?>">
 <script>const BASE_URL = '<?php echo baseUrl(); ?>';</script>
 </head>
