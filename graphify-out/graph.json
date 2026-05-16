@@ -4,94 +4,40 @@
   "graph": {},
   "nodes": [
     {
-      "label": "add_funds.php",
+      "label": "edit_job.php",
       "file_type": "code",
-      "source_file": "actions/add_funds.php",
+      "source_file": "actions/edit_job.php",
       "source_location": "L1",
-      "id": "actions_add_funds_php",
-      "community": 63,
-      "norm_label": "add_funds.php"
+      "id": "actions_edit_job_php",
+      "community": 68,
+      "norm_label": "edit_job.php"
     },
     {
-      "label": "json_response()",
+      "label": "post_job.php",
       "file_type": "code",
-      "source_file": "actions/add_funds.php",
-      "source_location": "L7",
-      "id": "actions_add_funds_json_response",
-      "community": 63,
-      "norm_label": "json_response()"
-    },
-    {
-      "label": "change_password.php",
-      "file_type": "code",
-      "source_file": "actions/change_password.php",
+      "source_file": "actions/post_job.php",
       "source_location": "L1",
-      "id": "actions_change_password_php",
-      "community": 64,
-      "norm_label": "change_password.php"
+      "id": "actions_post_job_php",
+      "community": 30,
+      "norm_label": "post_job.php"
     },
     {
-      "label": "json_response()",
+      "label": "update_job_status.php",
       "file_type": "code",
-      "source_file": "actions/change_password.php",
-      "source_location": "L7",
-      "id": "actions_change_password_json_response",
-      "community": 64,
-      "norm_label": "json_response()"
-    },
-    {
-      "label": "get_messages.php",
-      "file_type": "code",
-      "source_file": "actions/get_messages.php",
+      "source_file": "actions/update_job_status.php",
       "source_location": "L1",
-      "id": "actions_get_messages_php",
-      "community": 65,
-      "norm_label": "get_messages.php"
+      "id": "actions_update_job_status_php",
+      "community": 69,
+      "norm_label": "update_job_status.php"
     },
     {
-      "label": "json_response()",
+      "label": "update_proposal_status.php",
       "file_type": "code",
-      "source_file": "actions/get_messages.php",
-      "source_location": "L7",
-      "id": "actions_get_messages_json_response",
-      "community": 65,
-      "norm_label": "json_response()"
-    },
-    {
-      "label": "send_message.php",
-      "file_type": "code",
-      "source_file": "actions/send_message.php",
+      "source_file": "actions/update_proposal_status.php",
       "source_location": "L1",
-      "id": "actions_send_message_php",
-      "community": 66,
-      "norm_label": "send_message.php"
-    },
-    {
-      "label": "json_response()",
-      "file_type": "code",
-      "source_file": "actions/send_message.php",
-      "source_location": "L7",
-      "id": "actions_send_message_json_response",
-      "community": 66,
-      "norm_label": "json_response()"
-    },
-    {
-      "label": "update_availability.php",
-      "file_type": "code",
-      "source_file": "actions/update_availability.php",
-      "source_location": "L1",
-      "id": "actions_update_availability_php",
-      "community": 67,
-      "norm_label": "update_availability.php"
-    },
-    {
-      "label": "json_response()",
-      "file_type": "code",
-      "source_file": "actions/update_availability.php",
-      "source_location": "L7",
-      "id": "actions_update_availability_json_response",
-      "community": 67,
-      "norm_label": "json_response()"
+      "id": "actions_update_proposal_status_php",
+      "community": 70,
+      "norm_label": "update_proposal_status.php"
     },
     {
       "label": "footer.php",
@@ -112,49 +58,139 @@
       "norm_label": "index.php"
     },
     {
+      "label": "add_funds.php",
+      "file_type": "code",
+      "source_file": "actions/add_funds.php",
+      "source_location": "L1",
+      "community": 63,
+      "norm_label": "add_funds.php",
+      "id": "actions_add_funds_php"
+    },
+    {
+      "label": "json_response()",
+      "file_type": "code",
+      "source_file": "actions/add_funds.php",
+      "source_location": "L7",
+      "community": 63,
+      "norm_label": "json_response()",
+      "id": "actions_add_funds_json_response"
+    },
+    {
+      "label": "change_password.php",
+      "file_type": "code",
+      "source_file": "actions/change_password.php",
+      "source_location": "L1",
+      "community": 64,
+      "norm_label": "change_password.php",
+      "id": "actions_change_password_php"
+    },
+    {
+      "label": "json_response()",
+      "file_type": "code",
+      "source_file": "actions/change_password.php",
+      "source_location": "L7",
+      "community": 64,
+      "norm_label": "json_response()",
+      "id": "actions_change_password_json_response"
+    },
+    {
+      "label": "get_messages.php",
+      "file_type": "code",
+      "source_file": "actions/get_messages.php",
+      "source_location": "L1",
+      "community": 65,
+      "norm_label": "get_messages.php",
+      "id": "actions_get_messages_php"
+    },
+    {
+      "label": "json_response()",
+      "file_type": "code",
+      "source_file": "actions/get_messages.php",
+      "source_location": "L7",
+      "community": 65,
+      "norm_label": "json_response()",
+      "id": "actions_get_messages_json_response"
+    },
+    {
+      "label": "send_message.php",
+      "file_type": "code",
+      "source_file": "actions/send_message.php",
+      "source_location": "L1",
+      "community": 66,
+      "norm_label": "send_message.php",
+      "id": "actions_send_message_php"
+    },
+    {
+      "label": "json_response()",
+      "file_type": "code",
+      "source_file": "actions/send_message.php",
+      "source_location": "L7",
+      "community": 66,
+      "norm_label": "json_response()",
+      "id": "actions_send_message_json_response"
+    },
+    {
+      "label": "update_availability.php",
+      "file_type": "code",
+      "source_file": "actions/update_availability.php",
+      "source_location": "L1",
+      "community": 67,
+      "norm_label": "update_availability.php",
+      "id": "actions_update_availability_php"
+    },
+    {
+      "label": "json_response()",
+      "file_type": "code",
+      "source_file": "actions/update_availability.php",
+      "source_location": "L7",
+      "community": 67,
+      "norm_label": "json_response()",
+      "id": "actions_update_availability_json_response"
+    },
+    {
       "label": "footer.php",
       "file_type": "code",
       "source_file": "freelancer/includes/footer.php",
       "source_location": "L1",
-      "id": "freelancer_includes_footer_php",
       "community": 41,
-      "norm_label": "footer.php"
+      "norm_label": "footer.php",
+      "id": "freelancer_includes_footer_php"
     },
     {
       "label": "index.php",
       "file_type": "code",
       "source_file": "freelancer/index.php",
       "source_location": "L1",
-      "id": "freelancer_index_php",
       "community": 39,
-      "norm_label": "index.php"
+      "norm_label": "index.php",
+      "id": "freelancer_index_php"
     },
     {
       "label": "earnings.php",
       "file_type": "code",
       "source_file": "freelancer/views/earnings.php",
       "source_location": "L1",
-      "id": "freelancer_views_earnings_php",
       "community": 48,
-      "norm_label": "earnings.php"
+      "norm_label": "earnings.php",
+      "id": "freelancer_views_earnings_php"
     },
     {
       "label": "messages.php",
       "file_type": "code",
       "source_file": "freelancer/views/messages.php",
       "source_location": "L1",
-      "id": "freelancer_views_messages_php",
       "community": 51,
-      "norm_label": "messages.php"
+      "norm_label": "messages.php",
+      "id": "freelancer_views_messages_php"
     },
     {
       "label": "reports.php",
       "file_type": "code",
       "source_file": "freelancer/views/reports.php",
       "source_location": "L1",
-      "id": "freelancer_views_reports_php",
       "community": 46,
-      "norm_label": "reports.php"
+      "norm_label": "reports.php",
+      "id": "freelancer_views_reports_php"
     },
     {
       "label": "create_service.php",
@@ -1480,15 +1516,6 @@
       "id": "scratch_run_migration_php"
     },
     {
-      "label": "post_job.php",
-      "file_type": "code",
-      "source_file": "actions/post_job.php",
-      "source_location": "L1",
-      "community": 30,
-      "norm_label": "post_job.php",
-      "id": "actions_post_job_php"
-    },
-    {
       "label": "login.php",
       "file_type": "code",
       "source_file": "actions/login.php",
@@ -2270,9 +2297,9 @@
       "source_file": "actions/add_funds.php",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "actions_add_funds_php",
-      "target": "actions_add_funds_json_response",
-      "confidence_score": 1.0
+      "target": "actions_add_funds_json_response"
     },
     {
       "relation": "contains",
@@ -2280,9 +2307,9 @@
       "source_file": "actions/change_password.php",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "actions_change_password_php",
-      "target": "actions_change_password_json_response",
-      "confidence_score": 1.0
+      "target": "actions_change_password_json_response"
     },
     {
       "relation": "contains",
@@ -2290,9 +2317,9 @@
       "source_file": "actions/get_messages.php",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "actions_get_messages_php",
-      "target": "actions_get_messages_json_response",
-      "confidence_score": 1.0
+      "target": "actions_get_messages_json_response"
     },
     {
       "relation": "contains",
@@ -2300,9 +2327,9 @@
       "source_file": "actions/send_message.php",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "actions_send_message_php",
-      "target": "actions_send_message_json_response",
-      "confidence_score": 1.0
+      "target": "actions_send_message_json_response"
     },
     {
       "relation": "contains",
@@ -2310,9 +2337,9 @@
       "source_file": "actions/update_availability.php",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "actions_update_availability_php",
-      "target": "actions_update_availability_json_response",
-      "confidence_score": 1.0
+      "target": "actions_update_availability_json_response"
     },
     {
       "relation": "contains",
@@ -4923,5 +4950,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "df330586f49e16ab4f8c288f33dafce2c68dbc84"
+  "built_at_commit": "90a7ce7f9f1feb07ca4884538f658dfeaf91a93d"
 }

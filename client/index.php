@@ -429,7 +429,7 @@ $reportStats = $reportStatsStmt->fetch(PDO::FETCH_ASSOC);
       </div>
       <div class="card" style="margin-bottom:0;overflow:auto">
         <table class="tbl">
-          <thead><tr><th>Job Title</th><th>Category</th><th>Subcategory</th><th>Budget</th><th>Proposals</th><th>Posted</th><th>Status</th><th>Action</th></tr></thead>
+          <thead><tr><th>Job Title</th><th class="hide-mob">Category</th><th class="hide-mob">Subcategory</th><th>Budget</th><th>Proposals</th><th class="hide-mob">Posted</th><th>Status</th><th>Action</th></tr></thead>
           <tbody>
             <?php if (empty($allJobs)): ?>
                 <tr><td colspan="8" style="text-align:center;padding:20px;color:var(--uw-gray)">No job posts found.</td></tr>
@@ -437,11 +437,11 @@ $reportStats = $reportStatsStmt->fetch(PDO::FETCH_ASSOC);
                 <?php foreach ($allJobs as $aj): ?>
                 <tr data-status="<?php echo $aj['status']; ?>">
                   <td class="cl" onclick="toast('Job Details','Viewing <?php echo htmlspecialchars($aj['title']); ?>')"><?php echo htmlspecialchars($aj['title']); ?></td>
-                  <td><span class="badge b-gray"><?php echo htmlspecialchars($aj['category']); ?></span></td>
-                  <td><span class="badge b-blue" style="font-size:11px"><?php echo htmlspecialchars($aj['subcategory'] ?? 'General'); ?></span></td>
+                  <td class="hide-mob"><span class="badge b-gray"><?php echo htmlspecialchars($aj['category']); ?></span></td>
+                  <td class="hide-mob"><span class="badge b-blue" style="font-size:11px"><?php echo htmlspecialchars($aj['subcategory'] ?? 'General'); ?></span></td>
                   <td>$<?php echo number_format($aj['budget']); ?></td>
                   <td><strong style="color:var(--uw-green)"><?php echo $aj['proposal_count']; ?></strong></td>
-                  <td><?php echo date('M j', strtotime($aj['created_at'])); ?></td>
+                  <td class="hide-mob"><?php echo date('M j', strtotime($aj['created_at'])); ?></td>
                   <td><span class="badge b-<?php echo ($aj['status'] === 'open' ? 'green' : ($aj['status'] === 'paused' ? 'yellow' : 'gray')); ?>"><?php echo ucfirst($aj['status']); ?></span></td>
                   <td><button class="btn btn-w btn-sm" onclick="viewJobDetails(<?php echo htmlspecialchars(json_encode($aj)); ?>)">View</button></td>
                 </tr>
@@ -517,7 +517,7 @@ $reportStats = $reportStatsStmt->fetch(PDO::FETCH_ASSOC);
 
       <div class="card" style="margin-bottom:0;overflow:auto">
         <table class="tbl">
-          <thead><tr><th>Freelancer</th><th>Job Title</th><th>Type</th><th>Budget</th><th>Start Date</th><th>Status</th><th>Action</th></tr></thead>
+          <thead><tr><th>Freelancer</th><th>Job Title</th><th class="hide-mob">Type</th><th>Budget</th><th class="hide-mob">Start Date</th><th>Status</th><th>Action</th></tr></thead>
           <tbody>
             <?php if (empty($allContracts)): ?>
                 <tr><td colspan="7" style="text-align:center;padding:20px;color:var(--uw-gray)">No contracts found.</td></tr>
@@ -526,9 +526,9 @@ $reportStats = $reportStatsStmt->fetch(PDO::FETCH_ASSOC);
                 <tr>
                   <td class="cl" onclick="toast('Freelancer','Viewing profile')"><?php echo htmlspecialchars($ac['freelancer_name']); ?></td>
                   <td><?php echo htmlspecialchars($ac['job_title']); ?></td>
-                  <td><?php echo ucfirst($ac['contract_type']); ?></td>
+                  <td class="hide-mob"><?php echo ucfirst($ac['contract_type']); ?></td>
                   <td>$<?php echo number_format($ac['amount']); ?></td>
-                  <td><?php echo date('M j, Y', strtotime($ac['start_date'])); ?></td>
+                  <td class="hide-mob"><?php echo date('M j, Y', strtotime($ac['start_date'])); ?></td>
                   <td><span class="badge b-<?php echo ($ac['status'] === 'active' ? 'green' : 'gray'); ?>"><?php echo ucfirst($ac['status']); ?></span></td>
                   <td><button class="btn btn-w btn-sm" onclick="toast('Contract','Viewing details')">Manage</button></td>
                 </tr>
@@ -556,7 +556,7 @@ $reportStats = $reportStatsStmt->fetch(PDO::FETCH_ASSOC);
       
       <div class="card" style="margin-bottom:0;overflow:auto">
         <table class="tbl talent-list" id="all-talent">
-          <thead><tr><th>Name</th><th>Skill</th><th>Rating</th><th>Rate</th><th>Status</th><th>Last Contract</th><th>Action</th></tr></thead>
+          <thead><tr><th>Name</th><th class="hide-mob">Skill</th><th class="hide-mob">Rating</th><th>Rate</th><th>Status</th><th class="hide-mob">Last Contract</th><th>Action</th></tr></thead>
           <tbody>
             <?php if(empty($allTalent)): ?>
               <tr><td colspan="7" style="text-align:center;padding:30px;color:var(--uw-gray)">No freelancers found.</td></tr>
@@ -588,7 +588,7 @@ $reportStats = $reportStatsStmt->fetch(PDO::FETCH_ASSOC);
                       <span class="badge b-blue">New</span>
                     <?php endif; ?>
                   </td>
-                  <td><?php echo $isHired ? 'Active now' : 'Never'; ?></td>
+                  <td class="hide-mob"><?php echo $isHired ? 'Active now' : 'Never'; ?></td>
                   <td><button class="btn btn-w btn-sm" onclick="event.stopPropagation();openChatWith(<?php echo $t['id']; ?>, '<?php echo addslashes($t['name']); ?>', '<?php echo $initials; ?>')">Message</button></td>
                 </tr>
               <?php endforeach; ?>
@@ -597,7 +597,7 @@ $reportStats = $reportStatsStmt->fetch(PDO::FETCH_ASSOC);
         </table>
 
         <table class="tbl talent-list" id="saved-talent" style="display:none">
-          <thead><tr><th>Name</th><th>Skill</th><th>Rating</th><th>Rate</th><th>Date Saved</th><th>Action</th></tr></thead>
+          <thead><tr><th>Name</th><th class="hide-mob">Skill</th><th class="hide-mob">Rating</th><th>Rate</th><th class="hide-mob">Date Saved</th><th>Action</th></tr></thead>
           <tbody>
             <?php if(empty($savedTalent)): ?>
               <tr><td colspan="6" style="text-align:center;padding:30px;color:var(--uw-gray)">You haven't saved any talent yet.</td></tr>
@@ -615,10 +615,10 @@ $reportStats = $reportStatsStmt->fetch(PDO::FETCH_ASSOC);
                       </div>
                     </div>
                   </td>
-                  <td><?php echo htmlspecialchars($t['title'] ?? 'Freelancer'); ?></td>
-                  <td>★ 5.0 (0)</td>
+                  <td class="hide-mob"><?php echo htmlspecialchars($t['title'] ?? 'Freelancer'); ?></td>
+                  <td class="hide-mob">★ 5.0 (0)</td>
                   <td>$<?php echo number_format($t['hourly_rate'] ?? 0); ?>/hr</td>
-                  <td><?php echo date('M d, Y', strtotime($t['created_at'])); ?></td>
+                  <td class="hide-mob"><?php echo date('M d, Y', strtotime($t['created_at'])); ?></td>
                   <td>
                     <button class="btn btn-w btn-sm" onclick="event.stopPropagation();openChatWith(<?php echo $t['id']; ?>, '<?php echo addslashes($t['name']); ?>', '<?php echo $initials; ?>')">Message</button>
                     <button class="btn btn-g btn-sm" onclick="toast('Invite','Invite sent to <?php echo htmlspecialchars($t['name']); ?>')">Invite</button>
@@ -670,17 +670,17 @@ $reportStats = $reportStatsStmt->fetch(PDO::FETCH_ASSOC);
         </div>
       </div>
 
-      <div class="card" style="margin-bottom:20px;padding:15px">
-        <div style="display:flex;gap:12px">
-          <div style="flex:1;position:relative">
+      <div class="talent-search-wrap" style="margin-bottom:20px">
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <div style="flex:1;min-width:240px;position:relative">
             <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--uw-gray)">🔍</span>
             <input type="text" id="talent-search" placeholder="Search by skill, name or title..." style="width:100%;padding:12px 12px 12px 40px;border:1.5px solid var(--uw-border);border-radius:10px;font-family:inherit;outline:none" onkeyup="filterTalent(this.value)">
           </div>
-          <button class="btn btn-w" onclick="toast('Filters','Advanced filters coming soon')">Filters</button>
+          <button class="btn btn-w" style="flex-shrink:0" onclick="toast('Filters','Advanced filters coming soon')">Filters</button>
         </div>
       </div>
 
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px" id="talent-grid">
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px" id="talent-grid">
         <?php foreach($allTalent as $t): 
           $initials = strtoupper(substr($t['name'], 0, 1) . substr(explode(' ', $t['name'])[1] ?? '', 0, 1));
           $rating = number_format(4.5 + (rand(0, 5) / 10), 1);

@@ -648,8 +648,14 @@ button{font-family:inherit;cursor:pointer}
   .prop-top{flex-wrap:wrap;gap:10px}
   .prop-top > div:last-child{margin-left:0;text-align:left;width:100%;display:flex;align-items:center;justify-content:space-between}
   .prop-foot{flex-direction:column;align-items:flex-start;gap:10px}
-  .prop-actions{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:6px}
-  .prop-actions .btn{justify-content:center;font-size:11.5px;padding:7px 8px}
+  .prop-actions{width:100%;display:grid;grid-template-columns:repeat(auto-fit, minmax(90px, 1fr));gap:6px}
+  .prop-actions .btn{justify-content:center;font-size:10.5px;padding:8px 4px;width:100%;min-width:0}
+
+  .stat-c{padding:12px;border-radius:8px}
+  .stat-val{font-size:20px;margin-bottom:2px}
+  .stat-label{font-size:10px;margin-bottom:6px}
+  .stat-sub{font-size:10px}
+  .stat-compact{display:flex;align-items:center;gap:0;margin-bottom:22px;background:white;border:1px solid var(--uw-border);border-radius:10px;overflow:hidden}
 
   /* ── tabs: scrollable ── */
   .tab-bar{overflow-x:auto;-webkit-overflow-scrolling:touch;flex-wrap:nowrap;scrollbar-width:none}
@@ -723,7 +729,7 @@ button{font-family:inherit;cursor:pointer}
     color:white;
     box-shadow:0 4px 16px rgba(20,168,0,.4);
     cursor:pointer;
-    z-index:79;
+    z-index:10001; /* Above mobile bottom nav (9999) */
     transition:transform .15s,box-shadow .15s;
   }
   .mob-fab:active{transform:scale(.94);box-shadow:0 2px 8px rgba(20,168,0,.3)}
