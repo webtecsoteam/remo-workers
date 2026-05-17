@@ -590,7 +590,7 @@ body.modal-open{
   border-top:1px solid rgba(255,255,255,.1);
   z-index:9999;
   padding:0;
-  padding-bottom:env(safe-area-inset-bottom);
+  padding-bottom:calc(16px + env(safe-area-inset-bottom));
   pointer-events: auto;
 }
 .mob-bottom-nav-inner{
@@ -608,6 +608,9 @@ body.modal-open{
   gap:3px;
   border:none;background:none;font-family:inherit;
   letter-spacing:.01em;
+  touch-action:manipulation;
+  user-select:none;-webkit-user-select:none;
+  outline:none;
 }
 .mob-nav-item .mn-ico{font-size:19px;line-height:1}
 .mob-nav-item.active{color:#6ee564}
@@ -783,7 +786,7 @@ body.modal-open{
   .tbl td:nth-child(5){display:none}
 
   /* ── modal full-screen on mobile ── */
-  .overlay{padding:0;align-items:flex-end}
+  .overlay{padding:0;align-items:flex-end;top:0;bottom:auto;height:100dvh!important}
   .modal{
     border-radius:16px 16px 0 0;
     max-height:92vh;
@@ -791,11 +794,11 @@ body.modal-open{
   }
   .mc{
     padding:18px 16px 12px;
-    padding-bottom:calc(12px + env(safe-area-inset-bottom));
+    padding-bottom:calc(48px + env(safe-area-inset-bottom));
   }
   .pj-modal-scroll{padding:18px 16px 8px}
   .pj-modal-footer{
-    padding:16px 16px calc(38px + env(safe-area-inset-bottom));
+    padding:16px 16px calc(48px + env(safe-area-inset-bottom));
     margin:0;
     box-shadow: 0 -8px 24px rgba(0,0,0,0.08);
     background: white;

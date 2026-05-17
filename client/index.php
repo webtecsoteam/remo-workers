@@ -38,6 +38,10 @@ $jobsStmt = $db->prepare("SELECT j.*, (SELECT COUNT(*) FROM proposals WHERE job_
 $jobsStmt->execute([$user['id']]);
 $openJobs = $jobsStmt->fetchAll(PDO::FETCH_ASSOC);
 
+$allOpenJobsStmt = $db->prepare("SELECT id, title, budget_type, budget FROM jobs WHERE client_id = ? AND status = 'open' ORDER BY created_at DESC");
+$allOpenJobsStmt->execute([$user['id']]);
+$allOpenJobs = $allOpenJobsStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+
 // 4. Conversations for Messages Page
 $conversationsStmt = $db->prepare("
     SELECT 
@@ -91,7 +95,7 @@ foreach ($allJobs as $aj) {
 }
 
 // 6. All Proposals for Proposals Page
-$proposalsStmt = $db->prepare("SELECT p.*, j.title as job_title, u.name as freelancer_name, u.email as freelancer_email, u.avatar_url as freelancer_avatar 
+$proposalsStmt = $db->prepare("SELECT p.*, j.title as job_title, u.name as freelancer_name, u.email as freelancer_email, u.avatar_url as freelancer_avatar, u.title as freelancer_title, u.hourly_rate as freelancer_hourly_rate
                                 FROM proposals p 
                                 JOIN jobs j ON p.job_id = j.id 
                                 JOIN users u ON p.freelancer_id = u.id 
@@ -317,7 +321,7 @@ window.closeModal = function() {
 <!-- ══ SIDEBAR ══ -->
 <aside class="sidebar">
   <a class="sb-logo" href="<?php echo baseUrl(); ?>"><div class="sb-wordmark">Remo<em>Workers</em></div></a>
-  <div class="sb-user">
+  <div class="sb-user" onclick="showPage('settings', document.querySelector('.sb-item[onclick*=\'settings\']'))" style="cursor:pointer">
     <div class="sb-av"><?php echo strtoupper(substr($user['name'], 0, 1)); ?></div>
     <div>
       <div class="sb-name"><?php echo htmlspecialchars($user['name']); ?></div>
@@ -364,7 +368,7 @@ window.closeModal = function() {
       <div class="tb-ico-btn" onclick="toast('Notifications','You have 4 unread notifications')">🔔<div class="notif-dot"></div></div>
       <div class="tb-ico-btn" onclick="showPage('messages',document.querySelector('[onclick*=messages]'))">💬</div>
       <button class="btn btn-g btn-sm" onclick="openModal('post-job')">+ Post a Job</button>
-      <div class="tb-av" onclick="toast('Profile','Opening account settings')">NX</div>
+      <div class="tb-av" onclick="showPage('settings', document.querySelector('.sb-item[onclick*=\'settings\']'))"><?php echo strtoupper(substr($user['name'], 0, 1)); ?></div>
     </div>
   </div>
 
@@ -638,7 +642,7 @@ window.closeModal = function() {
                   <h4 style="margin:0"><?php echo htmlspecialchars($p['freelancer_name']); ?></h4>
                   <span class="badge b-<?php echo ($p['status']==='shortlisted'?'blue':($p['status']==='archived'?'gray':'green')); ?>" style="font-size:9px;padding:2px 6px"><?php echo ucfirst($p['status']); ?></span>
                 </div>
-                <p>Freelancer · 0 reviews · ★ 0.0 · $0/hr</p>
+                <p><?php echo htmlspecialchars($p['freelancer_title'] ?: 'Freelancer'); ?> · 0 reviews · ★ 0.0 · $<?php echo number_format($p['freelancer_hourly_rate'] ?: 0, 2); ?>/hr</p>
               </div>
               <div style="margin-left:auto;text-align:right;flex-shrink:0">
                 <div class="prop-rate">$<?php echo number_format($p['bid_amount']); ?></div>
@@ -796,7 +800,7 @@ window.closeModal = function() {
                   <div style="font-size:32px;font-weight:800;color:var(--uw-black);margin-bottom:24px">$<?php echo number_format($pm['amount'], 2); ?></div>
                   <div style="display:flex;flex-direction:column;gap:10px">
                     <button class="btn btn-g" onclick="releaseMilestone(<?php echo $pm['id']; ?>, this)" style="width:100%;justify-content:center;padding:12px">Approve & Release</button>
-                    <button class="btn btn-w" onclick="toast('Reject','Coming soon')" style="width:100%;justify-content:center;padding:12px;border-color:#ddd">Reject Submission</button>
+                    <button class="btn btn-w" onclick="rejectMilestone(<?php echo $pm['id']; ?>, this)" style="width:100%;justify-content:center;padding:12px;border-color:#ddd">Reject Submission</button>
                   </div>
                 </div>
               </div>
@@ -812,9 +816,14 @@ window.closeModal = function() {
                     <div style="font-weight:700;font-size:18px;color:var(--uw-black)"><?php echo htmlspecialchars($wl['job_title']); ?></div>
                     <span class="badge <?php echo $wl['contract_type']==='hourly'?'b-blue':'b-green'; ?>" style="font-size:10px;letter-spacing:0.02em"><?php echo strtoupper($wl['contract_type']); ?></span>
                   </div>
-                  <div style="font-size:13px;color:var(--uw-gray);margin-bottom:20px;display:flex;align-items:center;gap:8px">
+                  <div style="font-size:13px;color:var(--uw-gray);margin-bottom:20px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
                     <div class="sb-av" style="width:24px;height:24px;font-size:10px"><?php echo strtoupper(substr($wl['freelancer_name'],0,1)); ?></div>
                     <span>By <strong><?php echo htmlspecialchars($wl['freelancer_name']); ?></strong> · Submitted <?php echo date('M d, Y', strtotime($wl['created_at'])); ?></span>
+                    <?php if (!empty($wl['start_time']) && !empty($wl['end_time'])): ?>
+                      <span style="color:#4b5563; font-weight:600; background:#f3f4f6; padding:3px 8px; border-radius:4px; font-size:11px; margin-left:8px; display:inline-flex; align-items:center; gap:4px">
+                        🕒 <?php echo substr($wl['start_time'], 0, 5); ?> - <?php echo substr($wl['end_time'], 0, 5); ?> UTC
+                      </span>
+                    <?php endif; ?>
                   </div>
                   <div style="background:#f8faf9;padding:20px;border-radius:12px;font-size:14.5px;line-height:1.7;color:#333;border:1px solid #eef2ee">
                     <?php echo nl2br(htmlspecialchars($wl['description'])); ?>
@@ -1425,4 +1434,129 @@ window.closeModal = function() {
     </button>
   </div>
 </nav>
+<!-- ══ DYNAMIC DIRECT HIRE MODALS AND HANDLERS ══ -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  <?php foreach($allTalent as $t): ?>
+    <?php
+      $initials = strtoupper(substr($t['name'], 0, 1) . substr(explode(' ', $t['name'])[1] ?? '', 0, 1));
+      $rateVal = (int)($t['hourly_rate'] ?? 20);
+    ?>
+    MODALS['hire-freelancer-<?php echo $t['id']; ?>'] = {
+      t: 'Hire <?php echo addslashes(htmlspecialchars($t['name'])); ?>',
+      b: `
+        <div class="mc" style="padding:16px 20px calc(24px + env(safe-area-inset-bottom))">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:15px;padding-bottom:12px;border-bottom:1px solid var(--uw-border)">
+            <div class="av" style="width:40px;height:40px;background:var(--uw-green-light);color:var(--uw-green);font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;border-radius:50%">
+              <?php echo $initials; ?>
+            </div>
+            <div>
+              <div style="font-weight:700;font-size:15px;color:var(--uw-black)"><?php echo addslashes(htmlspecialchars($t['name'])); ?></div>
+              <div style="font-size:12px;color:var(--uw-green);font-weight:600"><?php echo addslashes(htmlspecialchars($t['title'] ?? 'Freelancer')); ?></div>
+            </div>
+          </div>
+          
+          <form id="hire-form-<?php echo $t['id']; ?>" onsubmit="submitDirectHire(event, <?php echo $t['id']; ?>)">
+            <div class="fg" style="margin-bottom:14px">
+              <label style="display:block;font-size:13px;font-weight:700;margin-bottom:6px;color:var(--uw-black)">Select Job to Hire For</label>
+              <select id="hire-job-id-<?php echo $t['id']; ?>" required style="width:100%;padding:10px;border:1.5px solid var(--uw-border);border-radius:8px;font-family:inherit;font-size:14px;outline:none" onchange="updateHireRates(<?php echo $t['id']; ?>)">
+                <option value="">— Select an open job —</option>
+                <?php foreach($allOpenJobs as $j): ?>
+                  <option value="<?php echo $j['id']; ?>" data-type="<?php echo $j['budget_type']; ?>" data-budget="<?php echo $j['budget']; ?>">
+                    <?php echo addslashes(htmlspecialchars($j['title'])); ?> ($<?php echo number_format($j['budget']); ?>)
+                  </option>
+                <?php endforeach; ?>
+              </select>
+            </div>
+
+            <div class="fg" style="margin-bottom:14px">
+              <label style="display:block;font-size:13px;font-weight:700;margin-bottom:6px;color:var(--uw-black)">Contract Type</label>
+              <select id="hire-contract-type-<?php echo $t['id']; ?>" onchange="updateHireRates(<?php echo $t['id']; ?>)" required style="width:100%;padding:10px;border:1.5px solid var(--uw-border);border-radius:8px;font-family:inherit;font-size:14px;outline:none">
+                <option value="hourly">Hourly Rate</option>
+                <option value="fixed">Fixed Price</option>
+              </select>
+            </div>
+
+            <div class="fg" style="margin-bottom:14px">
+              <label id="hire-rate-label-<?php echo $t['id']; ?>" style="display:block;font-size:13px;font-weight:700;margin-bottom:6px;color:var(--uw-black)">Hourly Rate ($ / hr)</label>
+              <input type="number" id="hire-amount-<?php echo $t['id']; ?>" value="<?php echo $rateVal; ?>" required min="1" style="width:100%;padding:10px;border:1.5px solid var(--uw-border);border-radius:8px;font-family:inherit;font-size:14px;outline:none">
+            </div>
+
+            <div class="fg" style="margin-bottom:16px">
+              <label style="display:block;font-size:13px;font-weight:700;margin-bottom:6px;color:var(--uw-black)">Invitation Message / Terms</label>
+              <textarea id="hire-message-<?php echo $t['id']; ?>" placeholder="Write a message explaining the terms, expectations, and details..." required style="width:100%;padding:10px;border:1.5px solid var(--uw-border);border-radius:8px;min-height:80px;font-family:inherit;font-size:13px;outline:none;resize:vertical"></textarea>
+            </div>
+
+            <div style="margin-top:20px;display:flex;gap:10px">
+              <button type="submit" class="btn btn-g" style="flex:1;justify-content:center;padding:12px;font-size:14px">Send Offer & Start Contract</button>
+              <button type="button" class="btn btn-w" onclick="closeModal()" style="flex:1;justify-content:center;padding:12px;font-size:14px">Cancel</button>
+            </div>
+          </form>
+        </div>
+      `
+    };
+  <?php endforeach; ?>
+});
+
+function updateHireRates(fid) {
+  const jobSel = document.getElementById('hire-job-id-' + fid);
+  const typeSel = document.getElementById('hire-contract-type-' + fid);
+  const amountInput = document.getElementById('hire-amount-' + fid);
+  const labelEl = document.getElementById('hire-rate-label-' + fid);
+
+  if (typeSel.value === 'fixed') {
+    labelEl.innerText = 'Fixed Price Amount ($)';
+    const selectedOpt = jobSel.options[jobSel.selectedIndex];
+    if (selectedOpt && selectedOpt.value) {
+      amountInput.value = parseFloat(selectedOpt.getAttribute('data-budget')) || 500;
+    } else {
+      amountInput.value = 500;
+    }
+  } else {
+    labelEl.innerText = 'Hourly Rate ($ / hr)';
+    amountInput.value = 20; // Default hourly
+  }
+}
+
+function submitDirectHire(event, fid) {
+  event.preventDefault();
+  const jobVal = document.getElementById('hire-job-id-' + fid).value;
+  const typeVal = document.getElementById('hire-contract-type-' + fid).value;
+  const amountVal = document.getElementById('hire-amount-' + fid).value;
+  const messageVal = document.getElementById('hire-message-' + fid).value;
+
+  if (!jobVal) {
+    alert('Please select an open job first.');
+    return;
+  }
+
+  fetch(BASE_URL + 'client/api/direct-hire.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      freelancer_id: fid,
+      job_id: jobVal,
+      contract_type: typeVal,
+      amount: amountVal,
+      message: messageVal
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      toast('Success', data.message);
+      closeModal();
+      // Redirect to contracts page dynamically
+      showPage('contracts', document.querySelector('.sb-item[onclick*=\'contracts\']'));
+      setTimeout(() => location.reload(), 1000);
+    } else {
+      toast('Error', data.message);
+    }
+  })
+  .catch(err => {
+    console.error(err);
+    toast('Error', 'Failed to submit hire request.');
+  });
+}
+</script>
 <?php include __DIR__ . '/includes/footer.php'; ?>

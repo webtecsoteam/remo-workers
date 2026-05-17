@@ -297,7 +297,6 @@ include __DIR__ . '/includes/header.php';
 <div class="mob-sidebar-overlay" id="mob-overlay" onclick="toggleSidebar()"></div>
 
 <aside class="sidebar" id="main-sidebar">
-  <div class="sb-brand">RemoWorkers</div>
   
   <div class="sb-user" onclick="showPage('profile')">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">

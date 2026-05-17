@@ -42,10 +42,15 @@ try {
     $updateStmt->execute([$action, $log_id]);
 
     if ($action === 'approved') {
+        // Calculate platform fee (10%)
+        $amount = (float)$log['amount'];
+        $fee = $amount * 0.10;
+        $netAmount = $amount - $fee;
+
         // Create payment
         $payStmt = $db->prepare("
-            INSERT INTO payments (transaction_id, job_id, payer_id, payee_id, amount, status, payment_method)
-            VALUES (?, ?, ?, ?, ?, 'completed', ?)
+            INSERT INTO payments (transaction_id, job_id, payer_id, payee_id, amount, platform_fee, status, payment_method)
+            VALUES (?, ?, ?, ?, ?, ?, 'completed', ?)
         ");
         $transaction_id = 'TRX-' . strtoupper(uniqid());
         $payStmt->execute([
@@ -53,18 +58,19 @@ try {
             $log['job_id'],
             $log['client_id'],
             $log['freelancer_id'],
-            $log['amount'],
+            $amount,
+            $fee,
             'Upwork Balance'
         ]);
 
         // Update balances
-        // Deduct from client
+        // Deduct full amount from client
         $dStmt = $db->prepare("UPDATE users SET balance = balance - ? WHERE id = ?");
-        $dStmt->execute([$log['amount'], $log['client_id']]);
+        $dStmt->execute([$amount, $log['client_id']]);
 
-        // Add to freelancer
+        // Add net amount to freelancer
         $fStmt = $db->prepare("UPDATE users SET balance = balance + ? WHERE id = ?");
-        $fStmt->execute([$log['amount'], $log['freelancer_id']]);
+        $fStmt->execute([$netAmount, $log['freelancer_id']]);
     }
 
     $db->commit();

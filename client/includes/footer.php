@@ -620,7 +620,7 @@ function viewJobDetails(job) {
         </div>
       </div>
       <div style="font-size:13px;color:#374151;line-height:1.7;margin-bottom:14px">${job.description}</div>
-      <div style="display:flex;gap:8px;margin-top:16px">
+      <div style="display:flex;gap:8px;margin-top:16px;margin-bottom:24px">
         ${actionButtons}
       </div>
     `
@@ -675,7 +675,7 @@ function viewProposalDetails(p) {
             <h3 style="margin:0; font-size:18px">${p.freelancer_name}</h3>
             <span class="badge b-${p.status==='shortlisted'?'blue':(p.status==='archived'?'gray':'green')}" style="font-size:10px">${p.status.charAt(0).toUpperCase() + p.status.slice(1)}</span>
           </div>
-          <div style="font-size:13px; color:var(--uw-gray)">Freelancer · 0 reviews · ★ 0.0 · $0/hr</div>
+          <div style="font-size:13px; color:var(--uw-gray)">${p.freelancer_title || 'Freelancer'} · 0 reviews · ★ 0.0 · $${parseFloat(p.freelancer_hourly_rate || 0).toFixed(2)}/hr</div>
         </div>
         <div style="text-align:right">
           <div style="font-size:24px; font-weight:800; color:var(--uw-black)">$${new Intl.NumberFormat().format(p.bid_amount)}</div>
@@ -1275,7 +1275,10 @@ window.manageContract = async function(contract) {
                 ` : (ms.status === 'funded' ? `
                   <span class="badge" style="background:#e0f2fe; color:#0369a1; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:600">Funded (In Progress)</span>
                 ` : (ms.status === 'requested' ? `
-                  <button class="btn btn-g btn-sm" onclick="releaseMilestone(${ms.id}, this, ${contract.id})">Approve & Release</button>
+                  <div style="display:flex;gap:6px">
+                    <button class="btn btn-g btn-sm" onclick="releaseMilestone(${ms.id}, this, ${contract.id})">Approve</button>
+                    <button class="btn btn-w btn-sm" style="color:#ef4444;border-color:#fecaca" onclick="rejectMilestone(${ms.id}, this, ${contract.id})">Reject</button>
+                  </div>
                 ` : `
                   <span class="badge b-green" style="font-size:10px">Paid</span>
                 `))}
@@ -1334,6 +1337,42 @@ async function releaseMilestone(milestoneId, btn, contractId) {
       toast('Success! 🎉', data.message || 'Payment approved and released.');
       
       // Real-time update of parent contract details modal
+      setTimeout(() => {
+        if (typeof contractId !== 'undefined') {
+          manageContract(contractId);
+        } else {
+          location.reload();
+        }
+      }, 1000);
+    } else {
+      toast('Error', data.message);
+      btn.disabled = false;
+      btn.innerText = originalText;
+    }
+  } catch(err) {
+    toast('Error', 'Communication failed');
+    btn.disabled = false;
+    btn.innerText = originalText;
+  }
+}
+
+async function rejectMilestone(milestoneId, btn, contractId) {
+  if(!confirm('Are you sure you want to reject this submission? The milestone will return to Active status.')) return;
+  
+  const originalText = btn.innerText;
+  btn.disabled = true;
+  btn.innerText = 'Rejecting...';
+
+  try {
+    const res = await fetch(BASE_URL + 'client/api/reject-submission.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ milestone_id: milestoneId })
+    });
+    const data = await res.json();
+    if(data.success) {
+      toast('Submission Rejected', data.message || 'Work submission has been rejected.');
+      
       setTimeout(() => {
         if (typeof contractId !== 'undefined') {
           manageContract(contractId);
@@ -1768,7 +1807,7 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-setTimeout(()=>toast('Welcome back, NexaFlow!','You have 4 unread messages and 12 new proposals'),1000);
+setTimeout(()=>toast('Welcome back, <?php echo addslashes(htmlspecialchars($user['name'])); ?>!','You have <?php echo (int)$unreadMessagesCount; ?> unread messages and <?php echo (int)$stats['open_proposals']; ?> new proposals'),1000);
 function processWorkLog(logId, action) {
   if (action === 'approved' && !confirm('Are you sure you want to approve this work and release payment?')) return;
   if (action === 'rejected' && !confirm('Are you sure you want to reject this work?')) return;

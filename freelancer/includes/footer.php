@@ -898,7 +898,12 @@
                   </div>
                 </div>
               `).join('')}
-              ${(!c.milestones || c.milestones.length === 0) ? '<div style="color:#999; font-size:14px">No milestones defined.</div>' : ''}
+              ${(!c.milestones || c.milestones.length === 0) ? `
+                <div style="color:#666; font-size:14px; text-align:center; padding:25px; border:1.5px dashed #ccc; border-radius:12px; background:#fff">
+                  <div style="margin-bottom:12px; font-weight:600; color:#374151">No milestones defined for this contract.</div>
+                  <button class="btn btn-g" style="margin: 0 auto" onclick="openDirectSubmissionModal(${c.id}, ${parseFloat(c.amount)})">Submit Work & Request Payment</button>
+                </div>
+              ` : ''}
             </div>
             <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:12px; font-size:12px; color:#1e40af; margin-top:15px; line-height:1.5">
               💡 <strong>How Escrow Milestones Work:</strong><br>
@@ -910,32 +915,97 @@
 
           <!-- Log Time Section (for Hourly) -->
           <div id="hourly-log-section" style="margin-bottom:30px; display: ${c.contract_type === 'hourly' ? 'block' : 'none'}">
-            <h3 style="font-size:16px;margin-bottom:15px;font-weight:700">Log Time</h3>
-            <div style="display:grid;grid-template-columns:1fr 1.5fr;gap:20px;margin-bottom:15px">
-              <div>
-                <label style="display:block;font-size:13px;font-weight:600;margin-bottom:8px">Hours to Log</label>
-                <input type="number" id="work-amount" value="" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px">
-              </div>
-              <div>
-                <label style="display:block;font-size:13px;font-weight:600;margin-bottom:8px">Work Description</label>
-                <input type="text" id="work-desc" placeholder="e.g. Mobile responsive screens" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px">
-              </div>
+            <h3 style="font-size:16px;margin-bottom:15px;font-weight:700;color:var(--dark)">Work Session Logger</h3>
+            
+            <div style="display:flex;border-bottom:1.5px solid var(--border);margin-bottom:20px;gap:20px">
+              <div id="tab-tracker" style="font-weight:700;font-size:13px;color:var(--g);border-bottom:2.5px solid var(--g);padding-bottom:10px;cursor:pointer" onclick="switchHourlyTab('tracker')">⏱️ Start Tracker</div>
+              <div id="tab-manual" style="font-weight:600;font-size:13px;color:var(--muted);padding-bottom:10px;cursor:pointer" onclick="switchHourlyTab('manual')">✍️ Manual Log</div>
             </div>
-            <button class="btn btn-g" style="width:100%;padding:12px" onclick="logWork(currentContractId)">Log Hours</button>
+
+            <!-- Timer Panel -->
+            <div id="panel-tracker" style="display:block;background:#f9fafb;border:1px solid #eee;border-radius:12px;padding:25px 20px;text-align:center;margin-bottom:20px">
+              <div id="timer-display" style="font-family:'Courier New', monospace;font-size:48px;font-weight:800;color:var(--dark);margin-bottom:15px;letter-spacing:1px">00:00:00</div>
+              <div style="max-width:400px;margin:0 auto 15px auto">
+                <input type="text" id="tracker-desc" placeholder="What are you working on right now? (e.g. Designing dashboard)" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;text-align:center">
+              </div>
+              <button id="btn-timer-toggle" class="btn btn-g" style="padding:12px 30px;font-weight:800;font-size:14px;border-radius:8px;margin:0 auto" onclick="toggleTimer(currentContractId)">Start Tracker</button>
+            </div>
+
+            <!-- Manual Panel -->
+            <div id="panel-manual" style="display:none;background:#f9fafb;border:1px solid #eee;border-radius:12px;padding:20px;margin-bottom:20px">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:15px">
+                <div>
+                  <label style="display:block;font-size:12px;font-weight:700;margin-bottom:6px;color:var(--dark)">Select Date</label>
+                  <input type="date" id="work-date-manual" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:13px">
+                </div>
+                <div>
+                  <label style="display:block;font-size:12px;font-weight:700;margin-bottom:6px;color:var(--dark)">Calculated Hours (UTC)</label>
+                  <div id="calculated-hours-preview" data-hours="8.00" style="width:100%;padding:10px;background:#e5e7eb;border-radius:8px;font-size:13px;font-weight:800;color:var(--dark)">8.00 hrs</div>
+                </div>
+              </div>
+              
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:15px">
+                <div>
+                  <label style="display:block;font-size:12px;font-weight:700;margin-bottom:6px;color:var(--dark)">Start Time (UTC)</label>
+                  <input type="time" id="work-start-time" value="09:00" onchange="calculateManualHours()" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:13px">
+                </div>
+                <div>
+                  <label style="display:block;font-size:12px;font-weight:700;margin-bottom:6px;color:var(--dark)">End Time (UTC)</label>
+                  <input type="time" id="work-end-time" value="17:00" onchange="calculateManualHours()" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:13px">
+                </div>
+              </div>
+
+              <div style="margin-bottom:15px">
+                <label style="display:block;font-size:12px;font-weight:700;margin-bottom:6px;color:var(--dark)">Work Description</label>
+                <input type="text" id="work-desc-manual" placeholder="e.g. Implemented responsive screens" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:13px">
+              </div>
+              <button id="btn-log-work" class="btn btn-g" style="width:100%;padding:12px;font-weight:700;border-radius:8px" onclick="logWorkManual(currentContractId)">Log Hours</button>
+            </div>
+
+            <!-- Weekly Hour Limit Alert -->
+            <div style="background:#fef3c7;border:1px solid #fde68a;border-radius:8px;padding:12px;font-size:12px;color:#b45309;margin-bottom:25px;display:flex;align-items:center;gap:8px">
+              <span>⚠️</span>
+              <span><strong>Weekly Hour Limit: 40 hrs</strong>. Real-time logging & work activity tracking are enabled.</span>
+            </div>
+
+            <!-- Dynamic Work Diary -->
+            <h3 style="font-size:15px;font-weight:700;margin-bottom:15px;color:var(--dark)">📝 Work Diary & Activity Logs</h3>
+            <div id="work-diary-container" style="margin-bottom:20px">
+              <div style="color:#999;font-size:13px;text-align:center;padding:15px">Loading work logs...</div>
+            </div>
           </div>
 
           <!-- Footer Buttons -->
           <div style="display:flex;gap:15px;border-top:1px solid #eee;padding-top:25px">
             <button class="btn" style="flex:1;justify-content:center;border:1px solid #ddd;background:white;color:#333;font-weight:600;padding:12px;border-radius:8px" onclick="showPage('messages');closeModal()">Message Client</button>
-            <button class="btn" id="btn-pause-contract" style="flex:1;justify-content:center;background:#f3f4f6;color:#333;font-weight:600;padding:12px;border-radius:8px" onclick="toast('Pause','Feature coming soon')">Pause Contract</button>
+            <button class="btn" id="btn-pause-contract" style="flex:1;justify-content:center;background:#f3f4f6;color:#333;font-weight:600;padding:12px;border-radius:8px;display:none" onclick="toast('Status','Contract is active')">Contract Settings</button>
             <button class="btn btn-w" style="flex:1;justify-content:center;padding:12px" onclick="closeModal()">Close</button>
           </div>
         </div>
       `;
       overlay.classList.add('open');
       document.body.style.overflow = 'hidden';
+
+      // Load the work logs dynamically
+      setTimeout(() => {
+        loadWorkDiary(c.id);
+        initializeTimerUI();
+        
+        // Auto-configure the manual log date limits based on contract start_date
+        const dateInput = document.getElementById('work-date-manual');
+        if (dateInput) {
+          const today = new Date().toISOString().split('T')[0];
+          let startDateStr = today;
+          if (c.start_date) {
+            startDateStr = c.start_date.substring(0, 10);
+          }
+          dateInput.min = startDateStr;
+          dateInput.max = today;
+          dateInput.value = today;
+        }
+      }, 50);
     }
- else if (type === 'edit-profile') {
+    else if (type === 'edit-profile') {
       document.getElementById('mh-title').innerText = 'Edit Profile';
       modal.style.maxWidth = '700px';
       mc.innerHTML = `
@@ -1312,6 +1382,317 @@
       btn.innerText = originalText;
     });
   }
+
+  window.switchHourlyTab = function(tab) {
+    const tabTracker = document.getElementById('tab-tracker');
+    const tabManual = document.getElementById('tab-manual');
+    const panelTracker = document.getElementById('panel-tracker');
+    const panelManual = document.getElementById('panel-manual');
+
+    if (!tabTracker || !tabManual || !panelTracker || !panelManual) return;
+
+    if (tab === 'tracker') {
+      tabTracker.style.color = 'var(--g)';
+      tabTracker.style.borderBottom = '2.5px solid var(--g)';
+      tabTracker.style.fontWeight = '700';
+
+      tabManual.style.color = 'var(--muted)';
+      tabManual.style.borderBottom = 'none';
+      tabManual.style.fontWeight = '600';
+
+      panelTracker.style.display = 'block';
+      panelManual.style.display = 'none';
+    } else {
+      tabManual.style.color = 'var(--g)';
+      tabManual.style.borderBottom = '2.5px solid var(--g)';
+      tabManual.style.fontWeight = '700';
+
+      tabTracker.style.color = 'var(--muted)';
+      tabTracker.style.borderBottom = 'none';
+      tabTracker.style.fontWeight = '600';
+
+      panelTracker.style.display = 'none';
+      panelManual.style.display = 'block';
+    }
+  };
+
+  let trackerInterval = null;
+  let trackerSeconds = 0;
+  let trackerActiveContractId = null;
+
+  window.initializeTimerUI = function() {
+    const display = document.getElementById('timer-display');
+    const btn = document.getElementById('btn-timer-toggle');
+    const desc = document.getElementById('tracker-desc');
+
+    if (!display || !btn || !desc) return;
+
+    if (trackerInterval && trackerActiveContractId === window.currentContractId) {
+      btn.innerText = 'Stop Tracker';
+      btn.style.background = '#ef4444';
+      btn.style.borderColor = '#ef4444';
+      desc.disabled = true;
+    } else {
+      btn.innerText = 'Start Tracker';
+      btn.style.background = 'var(--g)';
+      btn.style.borderColor = 'var(--g)';
+      desc.disabled = false;
+      display.innerText = formatSeconds(trackerSeconds);
+    }
+  };
+
+  function formatSeconds(secs) {
+    const hrs = Math.floor(secs / 3600);
+    const mins = Math.floor((secs % 3600) / 60);
+    const s = secs % 60;
+    return [hrs, mins, s].map(v => v < 10 ? "0" + v : v).join(":");
+  }
+
+  window.toggleTimer = function(contractId) {
+    const btn = document.getElementById('btn-timer-toggle');
+    const descInput = document.getElementById('tracker-desc');
+    const display = document.getElementById('timer-display');
+
+    if (!btn || !descInput || !display) return;
+
+    if (trackerInterval) {
+      clearInterval(trackerInterval);
+      trackerInterval = null;
+      
+      const desc = descInput.value || 'Tracked work session';
+      const elapsedHours = parseFloat((trackerSeconds / 3600).toFixed(2));
+      
+      if (elapsedHours < 0.01) {
+        toast('Timer Stopped', 'Session too short to log (< 36 seconds).');
+        trackerSeconds = 0;
+        initializeTimerUI();
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerText = 'Submitting...';
+
+      fetch(BASE_URL + 'freelancer/api/log-work.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contract_id: contractId,
+          hours: elapsedHours,
+          description: desc
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          toast('Success! 🎉', `Logged ${elapsedHours} hrs successfully!`);
+          trackerSeconds = 0;
+          descInput.value = '';
+          loadWorkDiary(contractId);
+        } else {
+          toast('Error', data.message);
+        }
+      })
+      .catch(err => toast('Error', 'Failed to log tracked time.'))
+      .finally(() => {
+        btn.disabled = false;
+        initializeTimerUI();
+      });
+
+    } else {
+      trackerSeconds = 0;
+      trackerActiveContractId = contractId;
+      descInput.disabled = true;
+
+      btn.innerText = 'Stop Tracker';
+      btn.style.background = '#ef4444';
+      btn.style.borderColor = '#ef4444';
+
+      trackerInterval = setInterval(() => {
+        trackerSeconds++;
+        display.innerText = formatSeconds(trackerSeconds);
+      }, 1000);
+      
+      toast('Tracker Started', 'Real-time hour tracking is now active!');
+    }
+  };
+
+  window.calculateManualHours = function() {
+    const start = document.getElementById('work-start-time').value;
+    const end = document.getElementById('work-end-time').value;
+    const preview = document.getElementById('calculated-hours-preview');
+    if (!preview) return;
+
+    if (start && end) {
+      const [sH, sM] = start.split(':').map(Number);
+      const [eH, eM] = end.split(':').map(Number);
+      let diffMins = (eH * 60 + eM) - (sH * 60 + sM);
+      if (diffMins < 0) {
+        diffMins += 24 * 60; // handle cross-midnight
+      }
+      const hours = (diffMins / 60).toFixed(2);
+      preview.innerText = hours + ' hrs';
+      preview.dataset.hours = hours;
+    } else {
+      preview.innerText = '0.00 hrs';
+      preview.dataset.hours = '0';
+    }
+  };
+
+  window.logWorkManual = function(contractId) {
+    const dateInput = document.getElementById('work-date-manual');
+    const startTimeInput = document.getElementById('work-start-time');
+    const endTimeInput = document.getElementById('work-end-time');
+    const preview = document.getElementById('calculated-hours-preview');
+    const descInput = document.getElementById('work-desc-manual');
+    const btn = document.getElementById('btn-log-work');
+
+    if (!dateInput || !startTimeInput || !endTimeInput || !preview || !descInput || !btn) return;
+
+    const workDate = dateInput.value;
+    const startTime = startTimeInput.value;
+    const endTime = endTimeInput.value;
+    const hours = parseFloat(preview.dataset.hours || 0);
+    const desc = descInput.value;
+
+    if (!workDate) return toast('Error', 'Please select a date.');
+    if (!startTime || !endTime) return toast('Error', 'Please enter Start Time and End Time.');
+    if (!hours || hours <= 0) return toast('Error', 'Please enter a valid time range.');
+    if (!desc) return toast('Error', 'Please enter a work description.');
+
+    btn.disabled = true;
+    const originalText = btn.innerText;
+    btn.innerText = 'Logging...';
+
+    fetch(BASE_URL + 'freelancer/api/log-work.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contract_id: contractId,
+        hours: hours,
+        description: desc,
+        work_date: workDate,
+        start_time: startTime,
+        end_time: endTime
+      })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        toast('Success! 🎉', 'Hours logged successfully.');
+        descInput.value = '';
+        loadWorkDiary(contractId);
+      } else {
+        toast('Error', data.message);
+      }
+    })
+    .catch(err => toast('Error', 'Failed to log manual time.'))
+    .finally(() => {
+      btn.disabled = false;
+      btn.innerText = originalText;
+    });
+  };
+
+  window.loadWorkDiary = function(contractId) {
+    const container = document.getElementById('work-diary-container');
+    if (!container) return;
+
+    fetch(BASE_URL + 'freelancer/api/get-work-logs.php?contract_id=' + contractId)
+    .then(res => res.json())
+    .then(data => {
+      if (data.success && data.work_logs && data.work_logs.length > 0) {
+        // Group logs by date (YYYY-MM-DD from created_at)
+        const groups = {};
+        data.work_logs.forEach(log => {
+          const dateKey = log.created_at.substring(0, 10);
+          if (!groups[dateKey]) {
+            groups[dateKey] = {
+              logs: [],
+              totalHours: 0
+            };
+          }
+          groups[dateKey].logs.push(log);
+          groups[dateKey].totalHours += parseFloat(log.hours || 0);
+        });
+
+        // Get sorted list of date keys (descending order)
+        const sortedDates = Object.keys(groups).sort((a, b) => new Date(b) - new Date(a));
+
+        let html = `
+          <div style="display:grid; gap:20px; max-height:280px; overflow-y:auto; padding-right:5px">
+        `;
+
+        sortedDates.forEach(dateStr => {
+          const group = groups[dateStr];
+          
+          // Format dateStr to nice format: e.g. "May 15, 2026"
+          const displayDate = new Date(dateStr).toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric'
+          });
+
+          html += `
+            <div style="border-left: 3px solid var(--g); padding-left: 12px; margin-bottom: 5px">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px">
+                <span style="font-size:13px; font-weight:800; color:var(--dark)">📅 ${displayDate}</span>
+                <span style="font-size:12px; font-weight:800; color:var(--g); background:rgba(30, 190, 165, 0.1); padding:2px 8px; border-radius:12px">Day Total: ${group.totalHours.toFixed(2)} hrs</span>
+              </div>
+              <div style="display:grid; gap:8px">
+          `;
+
+          group.logs.forEach(log => {
+            let statusBadge = '';
+            if (log.status === 'pending') {
+              statusBadge = `<span class="badge" style="background:#fef3c7; color:#d97706; padding:3px 8px; border-radius:4px; font-size:10px; font-weight:700">Under Review</span>`;
+            } else if (log.status === 'approved') {
+              statusBadge = `<span class="badge" style="background:#d1fae5; color:#059669; padding:3px 8px; border-radius:4px; font-size:10px; font-weight:700">Approved & Paid</span>`;
+            } else {
+              statusBadge = `<span class="badge" style="background:#fee2e2; color:#dc2626; padding:3px 8px; border-radius:4px; font-size:10px; font-weight:700">Rejected</span>`;
+            }
+
+            let timeRange = '';
+            if (log.start_time && log.end_time) {
+              const formatTime = (t) => t.substring(0, 5);
+              timeRange = `<span style="color:#4b5563; font-weight:600; background:#f3f4f6; padding:2px 6px; border-radius:4px; font-size:10px; margin-right:8px">🕒 ${formatTime(log.start_time)} - ${formatTime(log.end_time)} UTC</span>`;
+            }
+
+            html += `
+              <div style="background:white; border:1px solid var(--border); border-radius:8px; padding:12px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 1px 2px rgba(0,0,0,0.01)">
+                <div style="flex:1; padding-right:15px">
+                  <div style="font-size:12.5px; font-weight:700; color:#374151; margin-bottom:4px">${log.description || 'Working Session'}</div>
+                  <div style="font-size:11px; color:var(--muted); display:flex; align-items:center; gap:5px; flex-wrap:wrap">
+                    ${timeRange}
+                    ${statusBadge}
+                  </div>
+                </div>
+                <div style="text-align:right">
+                  <div style="font-size:13px; font-weight:800; color:var(--dark)">${parseFloat(log.hours).toFixed(2)} hrs</div>
+                  <div style="font-size:11px; font-weight:600; color:var(--muted)">$${parseFloat(log.amount).toFixed(2)}</div>
+                </div>
+              </div>
+            `;
+          });
+
+          html += `
+              </div>
+            </div>
+          `;
+        });
+
+        html += `</div>`;
+        container.innerHTML = html;
+      } else {
+        container.innerHTML = `
+          <div style="color:var(--muted); font-size:13px; text-align:center; padding:20px; border:1.5px dashed var(--border); border-radius:10px; background:#fafafa">
+            No tracked sessions or manual logs yet.
+          </div>
+        `;
+      }
+    })
+    .catch(err => {
+      container.innerHTML = `<div style="color:red; font-size:13px; text-align:center">Failed to load work diary.</div>`;
+    });
+  };
 
   window.updateContractStatus = function(contractId, status) {
     const btn = document.getElementById('btn-pause-contract');
@@ -2197,5 +2578,73 @@ setTimeout(() => {
     </div>
   </div>
 </div>
+<!-- ══ DYNAMIC DIRECT WORK SUBMISSION ══ -->
+<script>
+window.openDirectSubmissionModal = function(contractId, totalAmount) {
+  const container = document.getElementById('milestone-list-detail');
+  container.innerHTML = `
+    <div style="background:#fff; border:1.5px dashed var(--g); border-radius:12px; padding:20px; box-shadow:0 2px 10px rgba(0,0,0,.04); text-align:left">
+      <h4 style="font-weight:700; font-size:14px; margin-bottom:12px; color:var(--dark)">Submit Work for Contract</h4>
+      <form id="direct-submit-form" onsubmit="submitDirectWork(event, ${contractId})">
+        <div class="fg" style="margin-bottom:12px">
+          <label style="display:block; font-size:12px; font-weight:700; margin-bottom:6px; color:var(--dark)">Work Description / Note</label>
+          <textarea id="direct-submit-note" placeholder="Describe the work you've completed for this contract..." required style="width:100%; padding:10px; border:1.5px solid var(--border); border-radius:8px; font-size:13px; font-family:inherit; min-height:80px; outline:none; resize:vertical"></textarea>
+        </div>
+        
+        <div class="fg" style="margin-bottom:15px">
+          <label style="display:block; font-size:12px; font-weight:700; margin-bottom:6px; color:var(--dark)">Requested Amount ($)</label>
+          <input type="number" id="direct-submit-amount" value="${totalAmount}" min="1" max="${totalAmount}" required style="width:100%; padding:10px; border:1.5px solid var(--border); border-radius:8px; font-size:13px; font-family:inherit; outline:none">
+          <span style="font-size:11px; color:#999; margin-top:4px; display:block">Maximum request: $${totalAmount.toLocaleString()}</span>
+        </div>
+
+        <div style="display:flex; gap:10px; margin-top:15px">
+          <button type="submit" class="btn btn-g" style="padding:10px 18px; font-size:13px">Submit to Client</button>
+          <button type="button" class="btn btn-w" style="padding:10px 18px; font-size:13px; color:#ef4444; border-color:#fecaca" onclick="cancelDirectSubmission(${contractId}, ${totalAmount})">Cancel</button>
+        </div>
+      </form>
+    </div>
+  `;
+}
+
+window.cancelDirectSubmission = function(contractId, totalAmount) {
+  const container = document.getElementById('milestone-list-detail');
+  container.innerHTML = `
+    <div style="color:#666; font-size:14px; text-align:center; padding:25px; border:1.5px dashed #ccc; border-radius:12px; background:#fff">
+      <div style="margin-bottom:12px; font-weight:600; color:#374151">No milestones defined for this contract.</div>
+      <button class="btn btn-g" style="margin: 0 auto" onclick="openDirectSubmissionModal(${contractId}, ${totalAmount})">Submit Work & Request Payment</button>
+    </div>
+  `;
+}
+
+window.submitDirectWork = function(event, contractId) {
+  event.preventDefault();
+  const noteVal = document.getElementById('direct-submit-note').value;
+  const amountVal = document.getElementById('direct-submit-amount').value;
+
+  fetch(BASE_URL + 'freelancer/api/submit-direct-work.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contract_id: contractId,
+      description: noteVal,
+      amount: amountVal
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      toast('Success', data.message || 'Work submitted successfully!');
+      closeModal();
+      setTimeout(() => location.reload(), 1000);
+    } else {
+      toast('Error', data.error || 'Failed to submit work.');
+    }
+  })
+  .catch(err => {
+    console.error(err);
+    toast('Error', 'Failed to submit work.');
+  });
+}
+</script>
 </body>
 </html>

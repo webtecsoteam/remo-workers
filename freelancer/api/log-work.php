@@ -26,10 +26,39 @@ if (!$contract_id || (!$hours && !$description && !$amount)) {
 
 try {
     $db = getDB();
-    $stmt = $db->prepare("INSERT INTO work_logs (contract_id, freelancer_id, amount, hours, description, attachments) VALUES (?, ?, ?, ?, ?, ?)");
-    $stmt->execute([$contract_id, $user['id'], $amount, $hours, $description, $attachments]);
+
+    // Fetch contract to determine rate and calculate amount automatically
+    $cStmt = $db->prepare("SELECT * FROM contracts WHERE id = ?");
+    $cStmt->execute([$contract_id]);
+    $contract = $cStmt->fetch();
     
-    echo json_encode(['success' => true, 'message' => 'Work submitted successfully']);
+    if (!$contract) {
+        echo json_encode(['success' => false, 'message' => 'Contract not found']);
+        exit;
+    }
+
+    if ($contract['contract_type'] === 'hourly') {
+        $amount = (float)$hours * (float)$contract['amount']; // contract['amount'] holds the hourly rate
+    }
+
+    $work_date = $input['work_date'] ?? null;
+    $created_at = null;
+    if ($work_date && preg_match('/^\d{4}-\d{2}-\d{2}$/', $work_date)) {
+        $created_at = $work_date . ' ' . date('H:i:s');
+    }
+
+    $start_time = $input['start_time'] ?? null;
+    $end_time = $input['end_time'] ?? null;
+
+    if ($created_at) {
+        $stmt = $db->prepare("INSERT INTO work_logs (contract_id, freelancer_id, amount, hours, description, attachments, created_at, start_time, end_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->execute([$contract_id, $user['id'], $amount, $hours, $description, $attachments, $created_at, $start_time, $end_time]);
+    } else {
+        $stmt = $db->prepare("INSERT INTO work_logs (contract_id, freelancer_id, amount, hours, description, attachments, start_time, end_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->execute([$contract_id, $user['id'], $amount, $hours, $description, $attachments, $start_time, $end_time]);
+    }
+    
+    echo json_encode(['success' => true, 'message' => 'Work logged successfully!']);
 } catch (Exception $e) {
     echo json_encode(['success' => false, 'message' => 'DB Error: ' . $e->getMessage()]);
 }

@@ -175,7 +175,7 @@ button{font-family:inherit;cursor:pointer}
 .mob-nav{
   display:none;position:fixed;bottom:0;left:0;right:0;
   background:var(--forest);z-index:9990;
-  padding:0 0 env(safe-area-inset-bottom,0px);
+  padding:0 0 calc(16px + env(safe-area-inset-bottom,0px));
   border-top:1px solid rgba(255,255,255,.07);
   box-shadow:0 -4px 20px rgba(0,0,0,.18);
   touch-action:manipulation;
@@ -299,7 +299,10 @@ button{font-family:inherit;cursor:pointer}
     max-height:90vh;
     margin-top:auto;
   }
-  .overlay{align-items:flex-end;padding:0}
+  .overlay{align-items:flex-end;padding:0;top:0;bottom:auto;height:100dvh!important}
+  .mc{
+    padding:16px 16px calc(48px + env(safe-area-inset-bottom));
+  }
   .mh{border-radius:20px 20px 0 0;padding:16px 20px}
 
   /* ── Profile page ────────────────────────────────────── */
