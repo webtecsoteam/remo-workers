@@ -18,7 +18,7 @@
         <div style="font-size:11.5px;color:var(--muted);margin-top:5px">Review window</div>
       </div>
       <div style="padding:20px 22px;border-right:1px solid var(--border);cursor:pointer" onclick="showEarningsInfo('pending')">
-        <div style="display:flex;align-items:center;gap:5px;font-size:12.5px;color:var(--muted);margin-bottom:8px;font-weight:500">Pending <span title="5-day security hold" style="display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;border:1.5px solid var(--muted2);font-size:10px;color:var(--muted2);cursor:help;flex-shrink:0">?</span></div>
+        <div style="display:flex;align-items:center;gap:5px;font-size:12.5px;color:var(--muted);margin-bottom:8px;font-weight:500">Processing <span title="5-day security hold" style="display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;border:1.5px solid var(--muted2);font-size:10px;color:var(--muted2);cursor:help;flex-shrink:0">?</span></div>
         <div class="earn-val" style="font-size:26px;font-weight:700;color:var(--dark)">$<?php echo number_format($fStats['pending_earnings'] ?? 0, 2); ?></div>
         <div style="font-size:11.5px;color:var(--muted);margin-top:5px">Security hold</div>
       </div>
@@ -85,11 +85,9 @@
                     <span class="badge <?php 
                       echo $t['status'] === 'completed' ? 'b-green' : ($t['status'] === 'pending' ? 'b-blue' : 'b-gray'); 
                     ?>">
-                      <?php echo ucfirst($t['status']); ?>
+                      <?php echo $t['status'] === 'pending' ? 'Processing' : ucfirst($t['status']); ?>
                     </span>
-                    <?php if ($t['status'] === 'pending'): ?>
-                      <button class="btn btn-g btn-sm" style="margin-left: 8px; padding: 2px 6px; font-size: 11px;" onclick="event.stopPropagation();releasePendingPayment(<?php echo $t['id']; ?>, this)">Clear Hold</button>
-                    <?php endif; ?>
+
                   </td>
                 </tr>
               <?php endforeach; ?>
@@ -108,10 +106,8 @@
               <div style="display:flex;justify-content:space-between;margin-bottom:8px">
                 <div style="font-weight:700;font-size:14px;color:var(--dark)"><?php echo htmlspecialchars($t['description']); ?></div>
                 <div style="display:flex;align-items:center;gap:6px">
-                  <span class="badge <?php echo $t['status'] === 'completed' ? 'b-green' : 'b-blue'; ?>" style="font-size:10px"><?php echo ucfirst($t['status']); ?></span>
-                  <?php if ($t['status'] === 'pending'): ?>
-                    <button class="btn btn-g btn-sm" style="padding: 2px 6px; font-size: 10px;" onclick="event.stopPropagation();releasePendingPayment(<?php echo $t['id']; ?>, this)">Clear Hold</button>
-                  <?php endif; ?>
+                  <span class="badge <?php echo $t['status'] === 'completed' ? 'b-green' : 'b-blue'; ?>" style="font-size:10px"><?php echo $t['status'] === 'pending' ? 'Processing' : ucfirst($t['status']); ?></span>
+
                 </div>
               </div>
               <div style="display:flex;justify-content:space-between;align-items:flex-end">

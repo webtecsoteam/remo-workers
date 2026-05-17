@@ -1822,15 +1822,6 @@
       "norm_label": "fix_jobs_table.php"
     },
     {
-      "label": "check_contracts.php",
-      "file_type": "code",
-      "source_file": "scratch/check_contracts.php",
-      "source_location": "L1",
-      "id": "scratch_check_contracts_php",
-      "community": 149,
-      "norm_label": "check_contracts.php"
-    },
-    {
       "label": "check_db_proposals.php",
       "file_type": "code",
       "source_file": "scratch/check_db_proposals.php",
@@ -1874,15 +1865,6 @@
       "id": "scratch_create_connects_history_table_php",
       "community": 141,
       "norm_label": "create_connects_history_table.php"
-    },
-    {
-      "label": "check_work_logs.php",
-      "file_type": "code",
-      "source_file": "scratch/check_work_logs.php",
-      "source_location": "L1",
-      "id": "scratch_check_work_logs_php",
-      "community": 150,
-      "norm_label": "check_work_logs.php"
     },
     {
       "label": "update_milestones_status.php",
@@ -2396,6 +2378,15 @@
       "id": "client_api_get_contract_php",
       "community": 77,
       "norm_label": "get-contract.php"
+    },
+    {
+      "label": "weekly-billing.php",
+      "file_type": "code",
+      "source_file": "cron/weekly-billing.php",
+      "source_location": "L1",
+      "id": "cron_weekly_billing_php",
+      "community": 151,
+      "norm_label": "weekly-billing.php"
     },
     {
       "label": "login.php",
@@ -3287,6 +3278,24 @@
       "id": "admin_readme_security_notes",
       "community": 3,
       "norm_label": "security notes"
+    },
+    {
+      "label": "check_contracts.php",
+      "file_type": "code",
+      "source_file": "scratch/check_contracts.php",
+      "source_location": "L1",
+      "community": 149,
+      "norm_label": "check_contracts.php",
+      "id": "scratch_check_contracts_php"
+    },
+    {
+      "label": "check_work_logs.php",
+      "file_type": "code",
+      "source_file": "scratch/check_work_logs.php",
+      "source_location": "L1",
+      "community": 150,
+      "norm_label": "check_work_logs.php",
+      "id": "scratch_check_work_logs_php"
     },
     {
       "label": "complete_job.php",
@@ -8536,5 +8545,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "eb99096e66095b87b584446f8c256eae8fe099bd"
+  "built_at_commit": "5bc697cd014e6f2813bb2650d207c300ac5f8596"
 }

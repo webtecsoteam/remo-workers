@@ -49,13 +49,14 @@ try {
 
     $start_time = $input['start_time'] ?? null;
     $end_time = $input['end_time'] ?? null;
+    $log_type = $input['log_type'] ?? 'auto';
 
     if ($created_at) {
-        $stmt = $db->prepare("INSERT INTO work_logs (contract_id, freelancer_id, amount, hours, description, attachments, created_at, start_time, end_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        $stmt->execute([$contract_id, $user['id'], $amount, $hours, $description, $attachments, $created_at, $start_time, $end_time]);
+        $stmt = $db->prepare("INSERT INTO work_logs (contract_id, freelancer_id, amount, hours, description, attachments, created_at, start_time, end_time, log_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->execute([$contract_id, $user['id'], $amount, $hours, $description, $attachments, $created_at, $start_time, $end_time, $log_type]);
     } else {
-        $stmt = $db->prepare("INSERT INTO work_logs (contract_id, freelancer_id, amount, hours, description, attachments, start_time, end_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-        $stmt->execute([$contract_id, $user['id'], $amount, $hours, $description, $attachments, $start_time, $end_time]);
+        $stmt = $db->prepare("INSERT INTO work_logs (contract_id, freelancer_id, amount, hours, description, attachments, start_time, end_time, log_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->execute([$contract_id, $user['id'], $amount, $hours, $description, $attachments, $start_time, $end_time, $log_type]);
     }
     
     echo json_encode(['success' => true, 'message' => 'Work logged successfully!']);

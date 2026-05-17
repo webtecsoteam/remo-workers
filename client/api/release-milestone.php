@@ -58,7 +58,7 @@ try {
         $milestone['amount']
     ]);
 
-    // 2. Create payment record for the freelancer with status 'completed' and deduct fee
+    // 2. Create payment record for the freelancer with status 'pending' (security hold) and deduct fee
     $transactionId = 'TXN-' . strtoupper(uniqid());
     $amount = (float)$milestone['amount'];
     $fee = $amount * 0.10; // 10% platform fee
@@ -66,7 +66,7 @@ try {
 
     $pStmt = $db->prepare("
         INSERT INTO payments (transaction_id, payer_id, payee_id, job_id, amount, platform_fee, status, payment_method) 
-        VALUES (?, ?, ?, ?, ?, ?, 'completed', 'Escrow Release')
+        VALUES (?, ?, ?, ?, ?, ?, 'pending', 'Escrow Release')
     ");
     $pStmt->execute([
         $transactionId,
@@ -77,12 +77,11 @@ try {
         $fee
     ]);
 
-    // 3. Immediately credit the freelancer's wallet balance with the net amount
-    $creditStmt = $db->prepare("UPDATE users SET balance = balance + ? WHERE id = ?");
-    $creditStmt->execute([$netAmount, $milestone['freelancer_id']]);
+    // 3. Do NOT credit available balance immediately. Funds will sit in security hold (pending) 
+    // until freelancer or admin clears the hold.
 
     $db->commit();
-    echo json_encode(['success' => true, 'message' => 'Milestone approved! Payments released and successfully credited to freelancer wallet.']);
+    echo json_encode(['success' => true, 'message' => 'Milestone approved! Payments released to security hold (Pending).']);
 } catch (Exception $e) {
     if ($db->inTransaction()) $db->rollBack();
     echo json_encode(['success' => false, 'message' => 'Error: ' . $e->getMessage()]);

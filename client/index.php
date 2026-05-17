@@ -206,18 +206,8 @@ for ($i = 6; $i >= 0; $i--) {
 $stats['avg_rating'] = "0.0"; 
 $stats['review_count'] = 0;
 
-// 11. Pending Work Logs for Review
-$pendingWorkStmt = $db->prepare("
-    SELECT wl.*, c.job_id, j.title as job_title, u.name as freelancer_name, c.contract_type
-    FROM work_logs wl
-    JOIN contracts c ON wl.contract_id = c.id
-    JOIN jobs j ON c.job_id = j.id
-    JOIN users u ON wl.freelancer_id = u.id
-    WHERE c.client_id = ? AND wl.status = 'pending'
-    ORDER BY wl.created_at DESC
-");
-$pendingWorkStmt->execute([$user['id']]);
-$pendingWorkLogs = $pendingWorkStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+// 11. Pending Work Logs for Review (Excluded for hourly since weekly cron bills them automatically)
+$pendingWorkLogs = [];
 
 // Pending Milestones for Review
 $pendingMilestonesStmt = $db->prepare("

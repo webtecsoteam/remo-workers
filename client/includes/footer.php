@@ -512,6 +512,7 @@ function openModal(id){
   lockBodyForModal();
 
   if(id === 'post-job') {
+    window.isEditingJobId = null;
     bindPostJobModal();
   }
 
@@ -556,7 +557,11 @@ function bindPostJobModal(){
     // Only prevent default if it's a real event
     if (e && e.preventDefault) e.preventDefault();
     
-    submitPostJob();
+    if (window.isEditingJobId) {
+      updateJob(window.isEditingJobId);
+    } else {
+      submitPostJob();
+    }
   };
 
   // Use a more universal approach for mobile
@@ -751,6 +756,7 @@ function editJob() {
   const job = currentJob;
   if(!job) return;
   openModal('post-job');
+  window.isEditingJobId = job.id;
   document.getElementById('mh-title').innerText = 'Edit Job Post';
   
   // Fill fields
@@ -779,11 +785,9 @@ function editJob() {
   }
   document.getElementById('pj-skills').value = Array.isArray(skillsArr) ? skillsArr.join(', ') : '';
 
-  // Change button
-  const btn = document.getElementById('pj-submit-btn');
+  // Change button text (onSubmit listener handles invocation dynamically via window.isEditingJobId)
   const btnText = document.getElementById('pj-btn-text');
-  btnText.innerText = 'Save Changes';
-  btn.onclick = () => updateJob(job.id);
+  if (btnText) btnText.innerText = 'Save Changes';
 }
 
 async function updateJob(jobId) {
@@ -824,6 +828,12 @@ async function updateJob(jobId) {
   if(!title || !cat || !desc) {
     return toast('Error', 'Please fill in job title, category, and description');
   }
+
+  const btn = document.getElementById('pj-submit-btn');
+  const btnText = document.getElementById('pj-btn-text');
+  if(btn && btn.disabled) return;
+  if(btn) btn.disabled = true;
+  if(btnText) btnText.innerHTML = '<span class="spinner" style="width:16px;height:16px;border-width:2px;margin-right:8px"></span>Saving...';
 
   toast('Saving...', 'Updating your job post');
   const formData = new FormData();
@@ -1368,11 +1378,15 @@ window.manageContract = async function(contract) {
               ${(contract.work_logs || []).map(wl => {
                 const dateStr = new Date(wl.created_at).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
                 const timeRange = (wl.start_time && wl.end_time) ? `<div style="font-size:10px; color:var(--uw-gray)">${wl.start_time} - ${wl.end_time}</div>` : '';
+                const typeLabel = wl.log_type === 'manual' ? 
+                  `<div style="font-size:9.5px; font-weight:700; color:#0369a1; background:#e0f2fe; display:inline-block; padding:2px 5px; border-radius:3px; margin-top:3px">✍️ Manual</div>` :
+                  `<div style="font-size:9.5px; font-weight:700; color:#15803d; background:#dcfce7; display:inline-block; padding:2px 5px; border-radius:3px; margin-top:3px">⏱️ Auto</div>`;
                 return `
                   <tr style="border-bottom:1px solid var(--uw-border)">
                     <td style="padding:10px; white-space:nowrap">
                       <div>${dateStr}</div>
                       ${timeRange}
+                      ${typeLabel}
                     </td>
                     <td style="padding:10px; font-weight:600">${parseFloat(wl.hours).toFixed(2)} hrs</td>
                     <td style="padding:10px; max-width:180px; word-break:break-word; color:var(--uw-gray)">${wl.description || 'No description'}</td>

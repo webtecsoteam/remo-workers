@@ -77,7 +77,7 @@
     const info = {
       'wip': '<strong>Work in Progress</strong>: These are hours you have logged during the current week that have not yet been billed to the client. This amount will move to "In Review" after the week ends (Sunday midnight UTC).',
       'review': '<strong>In Review</strong>: This includes hours from the previous week or completed milestones that the client is currently reviewing. Clients have 5 days to dispute hourly work.',
-      'pending': '<strong>Pending</strong>: These are funds that have been approved by the client but are held for a standard 5-day security period before becoming available for withdrawal.',
+      'pending': '<strong>Processing</strong>: These are funds that have been approved by the client but are held for a standard 5-day security period before becoming available for withdrawal.',
       'available': '<strong>Available</strong>: This is your balance ready to be withdrawn to your preferred payment method.'
     };
     
@@ -1005,7 +1005,7 @@
               <div style="max-width:400px;margin:0 auto 15px auto">
                 <input type="text" id="tracker-desc" placeholder="What are you working on right now? (e.g. Designing dashboard)" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;text-align:center">
               </div>
-              <button id="btn-timer-toggle" class="btn btn-g" style="padding:12px 30px;font-weight:800;font-size:14px;border-radius:8px;margin:0 auto" onclick="toggleTimer(currentContractId)">Start Tracker</button>
+              <button id="btn-timer-toggle" class="btn btn-g" style="padding:12px 30px;font-weight:800;font-size:14px;border-radius:8px;margin:0 auto" onclick="toggleTimer(window.currentContractId)">Start Tracker</button>
             </div>
 
             <!-- Manual Panel -->
@@ -1036,7 +1036,7 @@
                 <label style="display:block;font-size:12px;font-weight:700;margin-bottom:6px;color:var(--dark)">Work Description</label>
                 <input type="text" id="work-desc-manual" placeholder="e.g. Implemented responsive screens" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:13px">
               </div>
-              <button id="btn-log-work" class="btn btn-g" style="width:100%;padding:12px;font-weight:700;border-radius:8px" onclick="logWorkManual(currentContractId)">Log Hours</button>
+              <button id="btn-log-work" class="btn btn-g" style="width:100%;padding:12px;font-weight:700;border-radius:8px" onclick="logWorkManual(window.currentContractId)">Log Hours</button>
             </div>
 
             <!-- Weekly Hour Limit Alert -->
@@ -1497,6 +1497,28 @@
   let trackerSeconds = 0;
   let trackerActiveContractId = null;
 
+  window.restoreActiveTracker = function() {
+    const savedStartTime = localStorage.getItem('active_tracker_start_time');
+    const savedContractId = localStorage.getItem('active_tracker_contract_id');
+    const savedDesc = localStorage.getItem('active_tracker_description');
+
+    if (savedStartTime && savedContractId) {
+      const elapsed = Math.floor((Date.now() - parseInt(savedStartTime, 10)) / 1000);
+      trackerSeconds = Math.max(0, elapsed);
+      trackerActiveContractId = savedContractId;
+      
+      if (!trackerInterval) {
+        trackerInterval = setInterval(() => {
+          trackerSeconds++;
+          const display = document.getElementById('timer-display');
+          if (display && trackerActiveContractId === window.currentContractId) {
+            display.innerText = formatSeconds(trackerSeconds);
+          }
+        }, 1000);
+      }
+    }
+  };
+
   window.initializeTimerUI = function() {
     const display = document.getElementById('timer-display');
     const btn = document.getElementById('btn-timer-toggle');
@@ -1504,17 +1526,23 @@
 
     if (!display || !btn || !desc) return;
 
-    if (trackerInterval && trackerActiveContractId === window.currentContractId) {
+    restoreActiveTracker();
+
+    if (trackerActiveContractId === String(window.currentContractId) && trackerInterval) {
       btn.innerText = 'Stop Tracker';
       btn.style.background = '#ef4444';
       btn.style.borderColor = '#ef4444';
       desc.disabled = true;
+      const savedDesc = localStorage.getItem('active_tracker_description');
+      if (savedDesc) desc.value = savedDesc;
+      display.innerText = formatSeconds(trackerSeconds);
     } else {
       btn.innerText = 'Start Tracker';
       btn.style.background = 'var(--g)';
       btn.style.borderColor = 'var(--g)';
       desc.disabled = false;
-      display.innerText = formatSeconds(trackerSeconds);
+      display.innerText = formatSeconds(0);
+      desc.value = '';
     }
   };
 
@@ -1536,12 +1564,27 @@
       clearInterval(trackerInterval);
       trackerInterval = null;
       
-      const desc = descInput.value || 'Tracked work session';
-      const elapsedHours = parseFloat((trackerSeconds / 3600).toFixed(2));
+      const savedStartTime = localStorage.getItem('active_tracker_start_time');
+      const desc = localStorage.getItem('active_tracker_description') || descInput.value || 'Tracked work session';
       
-      if (elapsedHours < 0.01) {
-        toast('Timer Stopped', 'Session too short to log (< 36 seconds).');
+      let elapsedSeconds = trackerSeconds;
+      if (savedStartTime) {
+        elapsedSeconds = Math.floor((Date.now() - parseInt(savedStartTime, 10)) / 1000);
+      }
+      
+      let elapsedHours = parseFloat((elapsedSeconds / 3600).toFixed(2));
+      
+      if (elapsedHours < 0.01 && elapsedSeconds > 0) {
+        elapsedHours = 0.01;
+      }
+      
+      if (elapsedSeconds <= 0) {
+        toast('Timer Stopped', 'No elapsed time to log.');
+        localStorage.removeItem('active_tracker_contract_id');
+        localStorage.removeItem('active_tracker_start_time');
+        localStorage.removeItem('active_tracker_description');
         trackerSeconds = 0;
+        trackerActiveContractId = null;
         initializeTimerUI();
         return;
       }
@@ -1562,23 +1605,32 @@
       .then(data => {
         if (data.success) {
           toast('Success! 🎉', `Logged ${elapsedHours} hrs successfully!`);
-          trackerSeconds = 0;
           descInput.value = '';
-          loadWorkDiary(contractId);
         } else {
           toast('Error', data.message);
         }
       })
       .catch(err => toast('Error', 'Failed to log tracked time.'))
       .finally(() => {
+        localStorage.removeItem('active_tracker_contract_id');
+        localStorage.removeItem('active_tracker_start_time');
+        localStorage.removeItem('active_tracker_description');
+        trackerSeconds = 0;
+        trackerActiveContractId = null;
         btn.disabled = false;
         initializeTimerUI();
+        loadWorkDiary(contractId);
       });
 
     } else {
+      const descVal = descInput.value || '';
       trackerSeconds = 0;
-      trackerActiveContractId = contractId;
+      trackerActiveContractId = String(contractId);
       descInput.disabled = true;
+
+      localStorage.setItem('active_tracker_contract_id', contractId);
+      localStorage.setItem('active_tracker_start_time', Date.now().toString());
+      localStorage.setItem('active_tracker_description', descVal);
 
       btn.innerText = 'Stop Tracker';
       btn.style.background = '#ef4444';
@@ -1589,7 +1641,7 @@
         display.innerText = formatSeconds(trackerSeconds);
       }, 1000);
       
-      toast('Tracker Started', 'Real-time hour tracking is now active!');
+      toast('Tracker Started', 'Real-time hour tracking is now active! It will keep running even if you close the window.');
     }
   };
 
@@ -1727,6 +1779,13 @@
               statusBadge = `<span class="badge" style="background:#fee2e2; color:#dc2626; padding:3px 8px; border-radius:4px; font-size:10px; font-weight:700">Rejected</span>`;
             }
 
+            let typeBadge = '';
+            if (log.log_type === 'manual') {
+              typeBadge = `<span class="badge" style="background:#e0f2fe; color:#0369a1; padding:3px 8px; border-radius:4px; font-size:10px; font-weight:700">✍️ Manual Log</span>`;
+            } else {
+              typeBadge = `<span class="badge" style="background:#dcfce7; color:#15803d; padding:3px 8px; border-radius:4px; font-size:10px; font-weight:700">⏱️ Auto Tracker</span>`;
+            }
+
             let timeRange = '';
             if (log.start_time && log.end_time) {
               const formatTime = (t) => t.substring(0, 5);
@@ -1739,6 +1798,7 @@
                   <div style="font-size:12.5px; font-weight:700; color:#374151; margin-bottom:4px">${log.description || 'Working Session'}</div>
                   <div style="font-size:11px; color:var(--muted); display:flex; align-items:center; gap:5px; flex-wrap:wrap">
                     ${timeRange}
+                    ${typeBadge}
                     ${statusBadge}
                   </div>
                 </div>
@@ -2246,6 +2306,9 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
+    if (typeof restoreActiveTracker === 'function') {
+      restoreActiveTracker();
+    }
     const params = new URLSearchParams(window.location.search);
     if (params.get('verified') === 'email') {
       toast('Email verified', 'You can now apply to jobs after identity verification.');
