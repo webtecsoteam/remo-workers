@@ -44,6 +44,20 @@ try {
     $update = $db->prepare("UPDATE milestones SET status = 'paid' WHERE id = ?");
     $update->execute([$milestoneId]);
 
+    // Update original escrow funding payment record from pending to completed
+    $updatePayment = $db->prepare("
+        UPDATE payments 
+        SET status = 'completed' 
+        WHERE payer_id = ? AND payee_id = ? AND job_id = ? AND amount = ? AND status = 'pending' AND payment_method != 'Escrow Release'
+        LIMIT 1
+    ");
+    $updatePayment->execute([
+        $user['id'],
+        $milestone['freelancer_id'],
+        $milestone['job_id'],
+        $milestone['amount']
+    ]);
+
     // 2. Create payment record for the freelancer with status 'completed' and deduct fee
     $transactionId = 'TXN-' . strtoupper(uniqid());
     $amount = (float)$milestone['amount'];

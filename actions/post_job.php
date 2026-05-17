@@ -21,6 +21,9 @@ $budget = (float)($_POST['budget'] ?? 0);
 $budget_type = $_POST['budget_type'] ?? 'fixed';
 $skills = $_POST['skills'] ?? '';
 
+$min_hourly_rate = isset($_POST['min_hourly_rate']) && $_POST['min_hourly_rate'] !== '' ? (float)$_POST['min_hourly_rate'] : null;
+$max_hourly_rate = isset($_POST['max_hourly_rate']) && $_POST['max_hourly_rate'] !== '' ? (float)$_POST['max_hourly_rate'] : null;
+
 if (empty($title) || empty($description) || empty($category)) {
     echo json_encode(['success' => false, 'error' => 'Title, description, and category are required']);
     exit;
@@ -31,7 +34,7 @@ if (empty($subcategory)) {
 }
 
 try {
-    $stmt = $db->prepare("INSERT INTO jobs (client_id, title, description, category, subcategory, specialty, skills_required, budget, budget_type, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'open')");
+    $stmt = $db->prepare("INSERT INTO jobs (client_id, title, description, category, subcategory, specialty, skills_required, budget, budget_type, status, min_hourly_rate, max_hourly_rate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'open', ?, ?)");
     $stmt->execute([
         $user['id'],
         $title,
@@ -41,7 +44,9 @@ try {
         $specialty,
         json_encode(explode(',', $skills)),
         $budget,
-        $budget_type
+        $budget_type,
+        $min_hourly_rate,
+        $max_hourly_rate
     ]);
 
     echo json_encode(['success' => true, 'message' => 'Job posted successfully!']);

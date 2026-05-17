@@ -224,7 +224,22 @@ const MODALS = {
 
       <div class="fg"><label>Billing Type</label><select id="pj-billing-type" onchange="updatePostJobFields()"><option value="fixed">Fixed Price</option><option value="hourly">Hourly Rate</option><option value="monthly">Monthly Rate</option></select></div>
       
-      <div class="fg"><label>Budget ($)</label><input type="number" id="pj-budget" placeholder="e.g. 5000"></div>
+      <div id="pj-fixed-fields" class="fg"><label>Budget ($)</label><input type="number" id="pj-budget" placeholder="e.g. 5000"></div>
+
+      <div id="pj-hourly-fields" class="fg" style="display:none">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div>
+            <label>Min Hourly Rate ($/hr)</label>
+            <input type="number" id="pj-min-rate" placeholder="e.g. 20" min="1">
+          </div>
+          <div>
+            <label>Max Hourly Rate ($/hr)</label>
+            <input type="number" id="pj-max-rate" placeholder="e.g. 50" min="1">
+          </div>
+        </div>
+      </div>
+
+      <div id="pj-monthly-fields" class="fg" style="display:none"><label>Monthly Rate ($/month)</label><input type="number" id="pj-monthly-rate" placeholder="e.g. 3000"></div>
 
       <div class="fg"><label>Project Description</label><textarea id="pj-desc" placeholder="Describe the scope, goals, and requirements of your project…" style="min-height:100px"></textarea></div>
       <div class="fg"><label>Required Skills (comma separated)</label><input type="text" id="pj-skills" placeholder="e.g. React, Node.js, TypeScript"></div>
@@ -1647,8 +1662,30 @@ async function submitPostJob(){
   const typeEl = document.getElementById('pj-billing-type');
   const type = (typeEl && typeEl.value) ? typeEl.value : 'fixed';
   
-  const budgetEl = document.getElementById('pj-budget');
-  const budget = (budgetEl && budgetEl.value) ? budgetEl.value : '';
+  let budget = '';
+  let minRate = '';
+  let maxRate = '';
+  
+  if (type === 'hourly') {
+    const minEl = document.getElementById('pj-min-rate');
+    const maxEl = document.getElementById('pj-max-rate');
+    minRate = minEl ? minEl.value : '';
+    maxRate = maxEl ? maxEl.value : '';
+    if (!minRate || !maxRate) {
+      return toast('Error', 'Please enter minimum and maximum hourly rates.');
+    }
+    if (parseFloat(minRate) > parseFloat(maxRate)) {
+      return toast('Error', 'Minimum hourly rate cannot be greater than maximum hourly rate.');
+    }
+  } else if (type === 'monthly') {
+    const monthlyEl = document.getElementById('pj-monthly-rate');
+    budget = monthlyEl ? monthlyEl.value : '';
+    if (!budget) return toast('Error', 'Please enter monthly rate.');
+  } else {
+    const budgetEl = document.getElementById('pj-budget');
+    budget = budgetEl ? budgetEl.value : '';
+    if (!budget) return toast('Error', 'Please enter budget.');
+  }
   
   const descEl = document.getElementById('pj-desc');
   const desc = (descEl && descEl.value) ? descEl.value.trim() : '';
@@ -1658,8 +1695,8 @@ async function submitPostJob(){
   const subcatWrap = document.getElementById('pj-subcat-wrap');
   const subcatRequired = subcatWrap && subcatWrap.style.display !== 'none';
 
-  if(!title || !cat || !budget || !desc || (subcatRequired && !subcat)) {
-    return toast('Error', 'Please fill in job title, category, subcategory, budget, and description');
+  if(!title || !cat || !desc || (subcatRequired && !subcat)) {
+    return toast('Error', 'Please fill in job title, category, subcategory, and description.');
   }
 
   const btn = document.getElementById('pj-submit-btn');
@@ -1674,7 +1711,9 @@ async function submitPostJob(){
   formData.append('subcategory', subcat || 'General');
   formData.append('specialty', spec);
   formData.append('budget_type', type);
-  formData.append('budget', budget);
+  formData.append('budget', budget || '0');
+  formData.append('min_hourly_rate', minRate);
+  formData.append('max_hourly_rate', maxRate);
   formData.append('description', desc);
   formData.append('skills', skills);
 

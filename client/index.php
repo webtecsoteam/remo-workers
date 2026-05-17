@@ -169,7 +169,7 @@ $clientTransactionsStmt = $db->prepare("
     SELECT p.*, u.name as freelancer_name 
     FROM payments p 
     LEFT JOIN users u ON (p.payee_id = u.id AND p.payer_id = ?) OR (p.payer_id = u.id AND p.payee_id = ?)
-    WHERE p.payer_id = ? OR p.payee_id = ?
+    WHERE (p.payer_id = ? OR p.payee_id = ?) AND p.payment_method != 'Escrow Release'
     ORDER BY p.created_at DESC LIMIT 50
 ");
 $clientTransactionsStmt->execute([$user['id'], $user['id'], $user['id'], $user['id']]);

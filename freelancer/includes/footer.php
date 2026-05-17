@@ -388,7 +388,7 @@
       
       flist.innerHTML = jobs.length ? jobs.map(j => {
         const isSaved = SAVED_IDS.includes(parseInt(j.id));
-        const matchPercent = 90 + Math.floor(Math.random() * 9); // Mock match %
+        const matchPercent = getMatchPercentage(j);
         return `
         <div class="job-row" onclick="openJobDetail(${j.id})" style="display:grid;grid-template-columns:1fr 180px;padding:20px;border-radius:12px;margin-bottom:15px;align-items:start">
           <div style="padding-right:20px">
@@ -406,7 +406,18 @@
             </div>
 
             <div style="display:flex;gap:10px;flex-wrap:wrap">
-              <span style="background:#ede9fe;color:#5b21b6;font-size:11.5px;padding:3px 10px;border-radius:6px;font-weight:600">${j.budget_type === 'fixed' ? 'Fixed Price' : 'Hourly'}: $${parseFloat(j.budget || 0).toLocaleString()}</span>
+              <span style="background:#ede9fe;color:#5b21b6;font-size:11.5px;padding:3px 10px;border-radius:6px;font-weight:600">
+                ${j.budget_type === 'hourly' 
+                  ? (j.min_hourly_rate && j.max_hourly_rate 
+                      ? `Hourly: $${parseFloat(j.min_hourly_rate).toLocaleString()} - $${parseFloat(j.max_hourly_rate).toLocaleString()}`
+                      : `Hourly: $${parseFloat(j.budget || 0).toLocaleString()}`
+                    )
+                  : (j.budget_type === 'monthly'
+                      ? `Monthly: $${parseFloat(j.budget || 0).toLocaleString()}`
+                      : `Fixed Price: $${parseFloat(j.budget || 0).toLocaleString()}`
+                    )
+                }
+              </span>
               <span style="background:#f3f4f6;color:var(--dark3);font-size:11.5px;padding:3px 10px;border-radius:6px;font-weight:600">${parseInt(j.proposal_count, 10) || 0} proposal${(parseInt(j.proposal_count, 10) || 0) === 1 ? '' : 's'}</span>
             </div>
           </div>
@@ -424,6 +435,44 @@
         </div>`;
       }).join('') : `<div style="padding:60px;text-align:center;color:var(--muted)">No jobs found.</div>`;
     }
+  }
+
+  function getMatchPercentage(job) {
+    if (!job || !job.skills_required) return 100;
+    let skills = [];
+    try {
+      if (typeof job.skills_required === 'string') {
+        if (job.skills_required.startsWith('[')) {
+          skills = JSON.parse(job.skills_required);
+        } else {
+          skills = job.skills_required.split(',').map(s => s.trim());
+        }
+      } else if (Array.isArray(job.skills_required)) {
+        skills = job.skills_required;
+      }
+    } catch(e) {
+      skills = String(job.skills_required).split(',').map(s => s.trim());
+    }
+    
+    if (skills.length === 0) return 100;
+    
+    let matchCount = 0;
+    skills.forEach(skill => {
+      const normalized = skill.toLowerCase();
+      for (let uSkill of selectedSkills) {
+        if (String(uSkill).toLowerCase() === normalized) {
+          matchCount++;
+          break;
+        }
+      }
+    });
+    
+    if (matchCount > 0) {
+      return Math.min(100, 75 + Math.round((matchCount / skills.length) * 25));
+    }
+    
+    const seededRandom = (job.id * 17) % 25;
+    return 70 + seededRandom;
   }
 
   function timeAgo(date) {
@@ -524,7 +573,7 @@
   window.openJobDetail = function(id) {
     const job = JOBS.find(j => j.id == id);
     if (!job) return;
-    const matchPercent = 90 + Math.floor(Math.random() * 9);
+    const matchPercent = getMatchPercentage(job);
     
     document.getElementById('mh-title').textContent = 'Job Details';
     document.getElementById('mc-body').innerHTML = `
@@ -602,20 +651,48 @@
     }
     
     const isHourly = job.budget_type === 'hourly';
+    const isMonthly = job.budget_type === 'monthly';
+    
+    let budgetDisplay = '';
+    let defaultRate = 0;
+    if (isHourly) {
+      if (job.min_hourly_rate && job.max_hourly_rate) {
+        budgetDisplay = `Hourly · $${parseFloat(job.min_hourly_rate).toLocaleString()}/hr - $${parseFloat(job.max_hourly_rate).toLocaleString()}/hr`;
+        defaultRate = parseFloat(job.min_hourly_rate);
+      } else {
+        budgetDisplay = `Hourly · $${parseFloat(job.budget || 0).toLocaleString()}/hr`;
+        defaultRate = parseFloat(job.budget || 0);
+      }
+    } else if (isMonthly) {
+      budgetDisplay = `Monthly · $${parseFloat(job.budget || 0).toLocaleString()}/month`;
+      defaultRate = parseFloat(job.budget || 0);
+    } else {
+      budgetDisplay = `Fixed Price · $${parseFloat(job.budget || 0).toLocaleString()}`;
+      defaultRate = parseFloat(job.budget || 0);
+    }
+
+    let labelText = 'Your Proposed Rate ($)';
+    if (isHourly) {
+      labelText = 'Your Proposed Hourly Rate ($/hr)';
+    } else if (isMonthly) {
+      labelText = 'Your Proposed Monthly Rate ($/mo)';
+    }
+
+    const showMilestones = !isHourly && !isMonthly;
     
     document.getElementById('mh-title').textContent = 'Submit Proposal — ' + job.title;
     document.getElementById('mc-body').innerHTML = `
       <div style="padding:25px 25px 100px 25px">
         <div style="background:#f0f7ef;color:#14a800;padding:12px 18px;border-radius:8px;font-size:13.5px;margin-bottom:25px;border:1px solid #d4e8d4">
-          ${isHourly ? 'Hourly' : 'Fixed Price'} · $${job.budget || 0}${isHourly ? '/hr' : ''} · ${CONNECTS_PER_APPLICATION} Connects required · You have ${userConnectsBalance}
+          ${budgetDisplay} · ${CONNECTS_PER_APPLICATION} Connects required · You have ${userConnectsBalance}
         </div>
 
         <div style="margin-bottom:20px">
-          <label style="display:block;font-weight:700;margin-bottom:8px;font-size:14px">${isHourly ? 'Your Proposed Hourly Rate ($/hr)' : 'Your Proposed Rate ($)'}</label>
-          <input type="number" id="prop-rate" value="${job.budget || 0}" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-size:14px" oninput="updateMilestoneTotal()">
+          <label style="display:block;font-weight:700;margin-bottom:8px;font-size:14px">${labelText}</label>
+          <input type="number" id="prop-rate" value="${defaultRate || 0}" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-size:14px" oninput="updateMilestoneTotal()">
         </div>
 
-        <div id="milestones-section" style="margin-bottom:25px;border:1px solid var(--border);padding:15px;border-radius:12px;background:#fafafa; display: ${isHourly ? 'none' : 'block'}">
+        <div id="milestones-section" style="margin-bottom:25px;border:1px solid var(--border);padding:15px;border-radius:12px;background:#fafafa; display: ${showMilestones ? 'block' : 'none'}">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px">
             <label style="font-weight:700;font-size:14px">Milestones</label>
             <button class="btn btn-w btn-sm" onclick="addMilestoneRow()" style="font-size:12px;padding:4px 10px">+ Add Milestone</button>
@@ -623,12 +700,12 @@
           <div id="milestones-list-container">
             <div class="milestone-row" style="display:grid;grid-template-columns:1fr 100px 30px;gap:10px;margin-bottom:10px">
               <input type="text" placeholder="Description (e.g. Initial Draft)" class="ms-desc" style="padding:8px;border:1px solid var(--border);border-radius:6px;font-size:13px">
-              <input type="number" placeholder="Amount" class="ms-amount" value="${job.budget || 0}" style="padding:8px;border:1px solid var(--border);border-radius:6px;font-size:13px" oninput="updateMilestoneTotal()">
+              <input type="number" placeholder="Amount" class="ms-amount" value="${defaultRate || 0}" style="padding:8px;border:1px solid var(--border);border-radius:6px;font-size:13px" oninput="updateMilestoneTotal()">
               <button onclick="this.parentElement.remove();updateMilestoneTotal()" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:16px">×</button>
             </div>
           </div>
           <div style="font-size:12px;color:var(--muted2);margin-top:10px;display:flex;justify-content:space-between">
-            <span>Total Milestone Amount: <strong id="ms-total-display">$${job.budget || 0}</strong></span>
+            <span>Total Milestone Amount: <strong id="ms-total-display">$${defaultRate || 0}</strong></span>
           </div>
         </div>
 
