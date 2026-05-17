@@ -24,6 +24,9 @@ $budget = (float)($_POST['budget'] ?? 0);
 $budget_type = $_POST['budget_type'] ?? 'fixed';
 $skills = $_POST['skills'] ?? '';
 
+$min_hourly_rate = isset($_POST['min_hourly_rate']) && $_POST['min_hourly_rate'] !== '' ? (float)$_POST['min_hourly_rate'] : null;
+$max_hourly_rate = isset($_POST['max_hourly_rate']) && $_POST['max_hourly_rate'] !== '' ? (float)$_POST['max_hourly_rate'] : null;
+
 if (!$job_id || empty($title) || empty($description) || empty($category)) {
     echo json_encode(['success' => false, 'error' => 'Missing required fields']);
     exit;
@@ -39,7 +42,7 @@ try {
         exit;
     }
 
-    $stmt = $db->prepare("UPDATE jobs SET title = ?, description = ?, category = ?, subcategory = ?, specialty = ?, skills_required = ?, budget = ?, budget_type = ?, updated_at = NOW() WHERE id = ?");
+    $stmt = $db->prepare("UPDATE jobs SET title = ?, description = ?, category = ?, subcategory = ?, specialty = ?, skills_required = ?, budget = ?, budget_type = ?, min_hourly_rate = ?, max_hourly_rate = ?, updated_at = NOW() WHERE id = ?");
     $stmt->execute([
         $title,
         $description,
@@ -49,6 +52,8 @@ try {
         json_encode(explode(',', $skills)),
         $budget,
         $budget_type,
+        $min_hourly_rate,
+        $max_hourly_rate,
         $job_id
     ]);
 

@@ -761,7 +761,15 @@ function editJob() {
   updateSpecialties();
   document.getElementById('pj-spec').value = job.specialty || '';
   document.getElementById('pj-billing-type').value = job.budget_type;
-  document.getElementById('pj-budget').value = job.budget;
+  if (job.budget_type === 'hourly') {
+    document.getElementById('pj-min-rate').value = job.min_hourly_rate || '';
+    document.getElementById('pj-max-rate').value = job.max_hourly_rate || '';
+  } else if (job.budget_type === 'monthly') {
+    document.getElementById('pj-monthly-rate').value = job.budget || '';
+  } else {
+    document.getElementById('pj-budget').value = job.budget || '';
+  }
+  updatePostJobFields();
   document.getElementById('pj-desc').value = job.description;
   
   // Parse skills from JSON if it's a string
@@ -784,12 +792,37 @@ async function updateJob(jobId) {
   const subcat = document.getElementById('pj-subcat').value;
   const spec = document.getElementById('pj-spec').value;
   const type = document.getElementById('pj-billing-type').value;
-  const budget = document.getElementById('pj-budget').value;
+  
+  let budget = '';
+  let minRate = '';
+  let maxRate = '';
+  
+  if (type === 'hourly') {
+    const minEl = document.getElementById('pj-min-rate');
+    const maxEl = document.getElementById('pj-max-rate');
+    minRate = minEl ? minEl.value : '';
+    maxRate = maxEl ? maxEl.value : '';
+    if (!minRate || !maxRate) {
+      return toast('Error', 'Please enter minimum and maximum hourly rates.');
+    }
+    if (parseFloat(minRate) > parseFloat(maxRate)) {
+      return toast('Error', 'Minimum hourly rate cannot be greater than maximum hourly rate.');
+    }
+  } else if (type === 'monthly') {
+    const monthlyEl = document.getElementById('pj-monthly-rate');
+    budget = monthlyEl ? monthlyEl.value : '';
+    if (!budget) return toast('Error', 'Please enter monthly rate.');
+  } else {
+    const budgetEl = document.getElementById('pj-budget');
+    budget = budgetEl ? budgetEl.value : '';
+    if (!budget) return toast('Error', 'Please enter budget.');
+  }
+
   const desc = document.getElementById('pj-desc').value.trim();
   const skills = document.getElementById('pj-skills').value.trim();
 
-  if(!title || !cat || !budget || !desc) {
-    return toast('Error', 'Please fill in job title, category, budget, and description');
+  if(!title || !cat || !desc) {
+    return toast('Error', 'Please fill in job title, category, and description');
   }
 
   toast('Saving...', 'Updating your job post');
@@ -800,7 +833,9 @@ async function updateJob(jobId) {
   formData.append('subcategory', subcat || 'General');
   formData.append('specialty', spec);
   formData.append('budget_type', type);
-  formData.append('budget', budget);
+  formData.append('budget', budget || '0');
+  formData.append('min_hourly_rate', minRate);
+  formData.append('max_hourly_rate', maxRate);
   formData.append('description', desc);
   formData.append('skills', skills);
 

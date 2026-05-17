@@ -260,8 +260,8 @@
     "semantic_hash": ""
   },
   "/Users/chiraglimbachiya/Sites/upwork/upwork project/actions/edit_job.php": {
-    "mtime": 1778922068.1627004,
-    "ast_hash": "c3230a6d07eb714b66947d5591c730f9",
+    "mtime": 1779030807.6784937,
+    "ast_hash": "edbb124e6927140a8891570d44b781d9",
     "semantic_hash": ""
   },
   "/Users/chiraglimbachiya/Sites/upwork/upwork project/actions/update_contract_status.php": {
@@ -355,8 +355,8 @@
     "semantic_hash": ""
   },
   "/Users/chiraglimbachiya/Sites/upwork/upwork project/client/includes/footer.php": {
-    "mtime": 1779029679.4318793,
-    "ast_hash": "5c38452babd5b7cb4b9bcdd6100fa85f",
+    "mtime": 1779030823.5557375,
+    "ast_hash": "a79342d285f934c249f0a67ee1e584c5",
     "semantic_hash": ""
   },
   "/Users/chiraglimbachiya/Sites/upwork/upwork project/client/api/release-milestone.php": {
