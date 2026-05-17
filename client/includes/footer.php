@@ -1820,14 +1820,6 @@ window.updatePostJobFields = updatePostJobFields;
 window.submitPostJob = submitPostJob;
 window.bindPostJobModal = bindPostJobModal;
 async function hireFreelancer(proposalId, amount) {
-  const numericAmount = parseFloat(amount || 0);
-  const numericBalance = parseFloat(availableBalance || 0);
-
-  if (numericAmount > numericBalance) {
-    toast('Insufficient Balance', `Your current balance ($${numericBalance.toFixed(2)}) is less than the bid amount ($${numericAmount.toFixed(2)}). Please add funds to your account.`);
-    return;
-  }
-  
   if(!confirm('Are you sure you want to hire this freelancer?')) return;
   
   toast('Processing...', 'Setting up your contract');

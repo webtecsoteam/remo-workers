@@ -30,7 +30,8 @@ try {
         throw new Exception("Invalid proposal");
     }
 
-    // 1.1 Verify client has sufficient deposit balance to cover the contract/milestones bid amount
+    // 1.1 Balance check during acceptance is removed so clients can accept first and fund milestones later
+    /*
     $balanceStmt = $db->prepare("SELECT balance FROM users WHERE id = ? FOR UPDATE");
     $balanceStmt->execute([$user['id']]);
     $clientBalance = (float)$balanceStmt->fetchColumn();
@@ -39,6 +40,7 @@ try {
     if ($clientBalance < $requiredAmount) {
         throw new Exception("Insufficient balance to hire the freelancer. Your balance: $" . number_format($clientBalance, 2) . ", required: $" . number_format($requiredAmount, 2) . ". Please add funds to your account.");
     }
+    */
 
     // 2. Create contract
     $cStmt = $db->prepare("INSERT INTO contracts (job_id, client_id, freelancer_id, proposal_id, amount, contract_type, status) VALUES (?, ?, ?, ?, ?, ?, 'active')");
