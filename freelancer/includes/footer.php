@@ -32,7 +32,7 @@
       'home': 'Dashboard', 'find-work': 'Find Work', 'proposals': 'My Proposals',
       'contracts': 'My Contracts', 'messages': 'Messages', 'earnings': 'Earnings',
       'catalog': 'My Services', 'profile': 'My Profile', 'reports': 'Payment Reports',
-      'verification': 'ID Verification'
+      'verification': 'ID Verification', 'connects': 'Connects Management'
     };
     const titleEl = document.getElementById('page-title');
     if (titleEl) titleEl.textContent = titles[id] || id;
@@ -50,6 +50,7 @@
       if (id === 'contracts' && typeof renderContracts === 'function') renderContracts();
       if (id === 'reports' && typeof renderReports === 'function') renderReports();
       if (id === 'profile' && typeof renderSuggestedSkills === 'function') renderSuggestedSkills();
+      if (id === 'connects' && typeof loadConnectsPageData === 'function') loadConnectsPageData();
     } catch (e) { console.warn("Deferred render error:", e); }
   };
 
@@ -94,10 +95,36 @@
   }
 
   window.buyConnects = function(amount, price) {
-    if (confirm(`Buy ${amount} Connects for $${price.toFixed(2)}?`)) {
-      toast('Success', `Purchased ${amount} Connects!`);
-      // Update UI or hit API
-    }
+    if (!confirm(`Buy ${amount} Connects for $${price.toFixed(2)} using your available balance?`)) return;
+    
+    toast('Processing...', 'Purchasing connects');
+    
+    fetch(BASE_URL + 'freelancer/api/buy-connects.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ amount: amount, price: price })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        toast('Success! 🎉', data.message);
+        
+        // Dynamically update connects displays
+        const sbVal = document.getElementById('sb-connects-val');
+        if (sbVal) sbVal.textContent = data.new_connects;
+        
+        const navConn = document.getElementById('nav-connects');
+        if (navConn) navConn.innerHTML = `<span class="sb-ico">🔗</span>Connects (${data.new_connects})`;
+        
+        // Re-open the connects modal to refresh connects data and recent activity list in real-time
+        openModal('connects');
+      } else {
+        toast('Error', data.message);
+      }
+    })
+    .catch(err => {
+      toast('Error', 'Purchase request failed.');
+    });
   }
 
   window.togglePwVis = function(id, el) {
@@ -295,7 +322,14 @@
     }
 
     list.innerHTML = filtered.map(p => {
-      const statusClass = p.status === 'accepted' ? 'b-green' : (p.status === 'rejected' ? 'b-red' : 'b-purple');
+      let displayStatus = p.status;
+      let statusClass = p.status === 'accepted' ? 'b-green' : (p.status === 'rejected' ? 'b-red' : 'b-purple');
+      
+      if (p.job_status === 'closed' && p.status !== 'accepted') {
+        displayStatus = 'Job Closed';
+        statusClass = 'b-red';
+      }
+
       if (isMob) {
         return `
           <div class="card" style="padding:16px;margin:10px;border-radius:12px;margin-bottom:10px" onclick="toast('Details','Viewing ${p.job_title}')">
@@ -306,7 +340,7 @@
                 <div style="font-weight:700;font-size:15px;color:var(--dark)">$${parseFloat(p.bid_amount).toLocaleString()}</div>
                 <div style="font-size:10px;color:var(--muted2)">Proposed Bid</div>
               </div>
-              <span class="badge ${statusClass}" style="padding:6px 12px;border-radius:6px;text-transform:capitalize">${p.status}</span>
+              <span class="badge ${statusClass}" style="padding:6px 12px;border-radius:6px;text-transform:capitalize">${displayStatus}</span>
             </div>
           </div>`;
       }
@@ -325,7 +359,7 @@
               <div style="font-size:11px;color:var(--muted2)">Proposed Bid</div>
             </div>
             <div style="text-align:right;min-width:100px">
-              <span class="badge ${statusClass}" style="padding:6px 12px;border-radius:6px;text-transform:capitalize">${p.status}</span>
+              <span class="badge ${statusClass}" style="padding:6px 12px;border-radius:6px;text-transform:capitalize">${displayStatus}</span>
             </div>
           </div>
         </div>`;
@@ -567,19 +601,21 @@
       return;
     }
     
+    const isHourly = job.budget_type === 'hourly';
+    
     document.getElementById('mh-title').textContent = 'Submit Proposal — ' + job.title;
     document.getElementById('mc-body').innerHTML = `
       <div style="padding:25px 25px 100px 25px">
         <div style="background:#f0f7ef;color:#14a800;padding:12px 18px;border-radius:8px;font-size:13.5px;margin-bottom:25px;border:1px solid #d4e8d4">
-          Fixed Price · $${job.budget || 0} · ${CONNECTS_PER_APPLICATION} Connects required · You have ${userConnectsBalance}
+          ${isHourly ? 'Hourly' : 'Fixed Price'} · $${job.budget || 0}${isHourly ? '/hr' : ''} · ${CONNECTS_PER_APPLICATION} Connects required · You have ${userConnectsBalance}
         </div>
 
         <div style="margin-bottom:20px">
-          <label style="display:block;font-weight:700;margin-bottom:8px;font-size:14px">Your Proposed Rate ($)</label>
+          <label style="display:block;font-weight:700;margin-bottom:8px;font-size:14px">${isHourly ? 'Your Proposed Hourly Rate ($/hr)' : 'Your Proposed Rate ($)'}</label>
           <input type="number" id="prop-rate" value="${job.budget || 0}" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-size:14px" oninput="updateMilestoneTotal()">
         </div>
 
-        <div id="milestones-section" style="margin-bottom:25px;border:1px solid var(--border);padding:15px;border-radius:12px;background:#fafafa">
+        <div id="milestones-section" style="margin-bottom:25px;border:1px solid var(--border);padding:15px;border-radius:12px;background:#fafafa; display: ${isHourly ? 'none' : 'block'}">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px">
             <label style="font-weight:700;font-size:14px">Milestones</label>
             <button class="btn btn-w btn-sm" onclick="addMilestoneRow()" style="font-size:12px;padding:4px 10px">+ Add Milestone</button>
@@ -634,10 +670,22 @@
   }
 
   window.updateMilestoneTotal = function() {
+    const propRateInput = document.getElementById('prop-rate');
+    const milestonesSection = document.getElementById('milestones-section');
+    const isHourly = milestonesSection && milestonesSection.style.display === 'none';
+    
+    if (isHourly) {
+      return;
+    }
+    
     const amounts = document.querySelectorAll('.ms-amount');
     let total = 0;
     amounts.forEach(a => total += parseFloat(a.value || 0));
     document.getElementById('ms-total-display').textContent = '$' + total.toLocaleString();
+    
+    if (propRateInput) {
+      propRateInput.value = total;
+    }
   }
 
 
@@ -649,26 +697,32 @@
 
     if (!letter) return toast('Error', 'Please write a cover letter');
 
-    // Collect milestones
-    const milestones = [];
-    const rows = document.querySelectorAll('.milestone-row');
-    let msTotal = 0;
-    rows.forEach(row => {
-      const desc = row.querySelector('.ms-desc').value.trim();
-      const amt = parseFloat(row.querySelector('.ms-amount').value || 0);
-      if (desc && amt > 0) {
-        milestones.push({ description: desc, amount: amt });
-        msTotal += amt;
-      }
-    });
+    const job = JOBS.find(j => j.id == jobId);
+    const isHourly = job && job.budget_type === 'hourly';
 
-    if (milestones.length === 0) {
-      return toast('Error', 'Please add at least one milestone');
+    // Collect milestones (only if not hourly)
+    const milestones = [];
+    let msTotal = 0;
+    
+    if (!isHourly) {
+      const rows = document.querySelectorAll('.milestone-row');
+      rows.forEach(row => {
+        const desc = row.querySelector('.ms-desc').value.trim();
+        const amt = parseFloat(row.querySelector('.ms-amount').value || 0);
+        if (desc && amt > 0) {
+          milestones.push({ description: desc, amount: amt });
+          msTotal += amt;
+        }
+      });
+
+      if (milestones.length === 0) {
+        return toast('Error', 'Please add at least one milestone');
+      }
     }
 
     const payload = {
         job_id: jobId,
-        bid_amount: rate,
+        bid_amount: isHourly ? parseFloat(rate || 0) : msTotal,
         estimated_days: days,
         cover_letter: letter,
         attachments: attach,
@@ -833,16 +887,24 @@
                   </div>
                   <div>
                     ${ms.status === 'pending' ? `
-                      <button class="btn btn-g btn-sm" onclick="requestMilestone(${ms.id}, this)">Request Completion</button>
+                      <span class="badge" style="background:#f3f4f6; color:#4b5563; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:600">Awaiting Funding</span>
+                    ` : (ms.status === 'funded' ? `
+                      <button class="btn btn-g btn-sm" onclick="requestMilestone(${ms.id}, this)">Submit Work</button>
                     ` : (ms.status === 'requested' ? `
-                      <span class="badge" style="background:#fef3c7; color:#b45309; padding:4px 8px; border-radius:4px; font-size:11px">Requested</span>
+                      <span class="badge" style="background:#fef3c7; color:#b45309; padding:4px 8px; border-radius:4px; font-size:11px">Under Review</span>
                     ` : `
                       <span class="badge" style="background:#d1fae5; color:#065f46; padding:4px 8px; border-radius:4px; font-size:11px">Paid</span>
-                    `)}
+                    `))}
                   </div>
                 </div>
               `).join('')}
               ${(!c.milestones || c.milestones.length === 0) ? '<div style="color:#999; font-size:14px">No milestones defined.</div>' : ''}
+            </div>
+            <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:12px; font-size:12px; color:#1e40af; margin-top:15px; line-height:1.5">
+              💡 <strong>How Escrow Milestones Work:</strong><br>
+              1. The client must first fund the milestone (deposit the amount to escrow) from their Client dashboard.<br>
+              2. Once funded, the "Awaiting Funding" badge will turn into a green <strong>"Submit Work"</strong> button, allowing you to submit your work and request payment.<br>
+              3. After you submit, the client will approve it and release the funds to your balance!
             </div>
           </div>
 
@@ -966,48 +1028,76 @@
     } else if (type === 'connects') {
       document.getElementById('mh-title').innerText = 'Connects';
       modal.style.maxWidth = '500px';
-      const c = <?php echo $user['connects'] ?? 0; ?>;
-      const max = 200; 
-      const pct = Math.min((c / max) * 100, 100);
-      mc.innerHTML = `
-        <div style="padding:25px">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px">
-            <div style="font-size:24px;font-weight:700">${c} Connects</div>
-            <div style="font-size:13px;color:var(--muted)">Available</div>
-          </div>
-          <div style="background:var(--border);border-radius:6px;height:10px;overflow:hidden;margin-bottom:8px">
-            <div style="height:100%;background:var(--g);width:${pct}%"></div>
-          </div>
-          <div style="font-size:12.5px;color:var(--muted);margin-bottom:25px">${c} of ${max} max connects</div>
-
-          <div style="font-size:15px;font-weight:700;margin-bottom:12px">Buy Connects</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:25px">
-            <div style="border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;cursor:pointer" onclick="buyConnects(10, 1.50)">
-              <div style="font-weight:700;font-size:14px">10 Connects</div>
-              <div style="font-size:12px;color:var(--muted)">$1.50</div>
-            </div>
-            <div style="border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;cursor:pointer" onclick="buyConnects(20, 3.00)">
-              <div style="font-weight:700;font-size:14px">20 Connects</div>
-              <div style="font-size:12px;color:var(--muted)">$3.00</div>
-            </div>
-          </div>
-
-          <div style="font-size:15px;font-weight:700;margin-bottom:12px">Recent Activity</div>
-          <div style="border-top:1px solid var(--border)">
-            <div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);font-size:13px">
-              <div>Monthly Refresh</div>
-              <div style="color:var(--g);font-weight:700">+10</div>
-            </div>
-            <div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);font-size:13px">
-              <div>Proposal: Web Design</div>
-              <div style="color:#ef4444;font-weight:700">-6</div>
-            </div>
-          </div>
-          <button class="btn btn-g" style="width:100%;margin-top:25px;justify-content:center" onclick="closeModal()">Close</button>
-        </div>
-      `;
+      mc.innerHTML = `<div style="padding:40px;text-align:center;color:var(--muted)">Loading connects details...</div>`;
       overlay.classList.add('open');
       document.body.style.overflow = 'hidden';
+
+      fetch(BASE_URL + 'freelancer/api/get-connects-activity.php')
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            const c = data.connects;
+            const max = 200;
+            const pct = Math.min((c / max) * 100, 100);
+            
+            // Build history HTML
+            let historyHtml = '';
+            if (data.history && data.history.length > 0) {
+              historyHtml = data.history.map(item => {
+                const amountText = item.amount > 0 ? `+${item.amount}` : `${item.amount}`;
+                const amountColor = item.amount > 0 ? 'var(--g)' : '#ef4444';
+                const formattedDate = new Date(item.created_at).toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'});
+                return `
+                  <div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);font-size:13px">
+                    <div>
+                      <div style="font-weight:600">${item.description}</div>
+                      <div style="font-size:11px;color:var(--muted);margin-top:2px">${formattedDate}</div>
+                    </div>
+                    <div style="color:${amountColor};font-weight:700">${amountText}</div>
+                  </div>
+                `;
+              }).join('');
+            } else {
+              historyHtml = `<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px">No recent connects activity found.</div>`;
+            }
+
+            mc.innerHTML = `
+              <div style="padding:25px">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px">
+                  <div style="font-size:24px;font-weight:700">${c} Connects</div>
+                  <div style="font-size:13px;color:var(--muted)">Available</div>
+                </div>
+                <div style="background:var(--border);border-radius:6px;height:10px;overflow:hidden;margin-bottom:8px">
+                  <div style="height:100%;background:var(--g);width:${pct}%"></div>
+                </div>
+                <div style="font-size:12.5px;color:var(--muted);margin-bottom:25px">${c} of ${max} max connects</div>
+
+                <div style="font-size:15px;font-weight:700;margin-bottom:12px">Buy Connects</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:25px">
+                  <div style="border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;cursor:pointer" onclick="buyConnects(10, 1.50)">
+                    <div style="font-weight:700;font-size:14px">10 Connects</div>
+                    <div style="font-size:12px;color:var(--muted)">$1.50</div>
+                  </div>
+                  <div style="border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;cursor:pointer" onclick="buyConnects(20, 3.00)">
+                    <div style="font-weight:700;font-size:14px">20 Connects</div>
+                    <div style="font-size:12px;color:var(--muted)">$3.00</div>
+                  </div>
+                </div>
+
+                <div style="font-size:15px;font-weight:700;margin-bottom:12px">Recent Activity</div>
+                <div style="border-top:1px solid var(--border);max-height:220px;overflow-y:auto;padding-right:4px">
+                  ${historyHtml}
+                </div>
+                <button class="btn btn-g" style="width:100%;margin-top:25px;justify-content:center" onclick="closeModal()">Close</button>
+              </div>
+            `;
+          } else {
+            mc.innerHTML = `<div style="padding:30px;text-align:center;color:#ef4444">${data.message}</div>`;
+          }
+        })
+        .catch(err => {
+          mc.innerHTML = `<div style="padding:30px;text-align:center;color:#ef4444">Failed to load connects details.</div>`;
+        });
     } else {
       overlay.classList.add('open');
       document.body.style.overflow = 'hidden';
@@ -1727,7 +1817,7 @@ async function requestMilestone(milestoneId, btn) {
         if (data.success) {
             toast('Success', 'Request sent to client');
             // Update UI locally
-            btn.parentElement.innerHTML = '<span class="badge" style="background:#fef3c7; color:#b45309; padding:4px 8px; border-radius:4px; font-size:11px">Requested</span>';
+            btn.parentElement.innerHTML = '<span class="badge" style="background:#fef3c7; color:#b45309; padding:4px 8px; border-radius:4px; font-size:11px">Under Review</span>';
             
             // Also update the global CONTRACTS object so if they reopen modal it stays
             CONTRACTS.forEach(c => {
@@ -1748,6 +1838,333 @@ async function requestMilestone(milestoneId, btn) {
         btn.innerText = originalText;
     }
 }
+
+async function releasePendingPayment(paymentId, btn) {
+    if (!confirm('Are you sure you want to clear this hold and move funds to your available balance?')) return;
+    
+    const originalText = btn.innerText;
+    btn.disabled = true;
+    btn.innerText = 'Clearing...';
+
+    try {
+        const res = await fetch(BASE_URL + 'freelancer/api/clear-hold.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ payment_id: paymentId })
+        });
+        const data = await res.json();
+        if (data.success) {
+            toast('Success! 🎉', 'Hold cleared successfully.');
+            // Reload page to reflect stats and available balance
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        } else {
+            toast('Error', data.message);
+            btn.disabled = false;
+            btn.innerText = originalText;
+        }
+    } catch (err) {
+        toast('Error', 'Action failed');
+        btn.disabled = false;
+        btn.innerText = originalText;
+    }
+}
+
+// Dedicated Connects Page Helpers
+window.loadConnectsPageData = function() {
+  const tbody = document.getElementById('connects-history-tbody');
+  if (tbody) {
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--muted)">Loading connects history...</td></tr>`;
+  }
+  
+  fetch(BASE_URL + 'freelancer/api/get-connects-activity.php')
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        // Update stats
+        const countEl = document.getElementById('connects-page-count');
+        if (countEl) countEl.textContent = data.connects + ' Connects';
+        
+        const progEl = document.getElementById('connects-page-progress');
+        if (progEl) progEl.style.width = Math.min((data.connects / 200) * 100, 100) + '%';
+        
+        const infoEl = document.getElementById('connects-page-max-info');
+        if (infoEl) infoEl.innerHTML = `<span>${data.connects} of 200 max connects</span><span>Monthly Refresh: +10</span>`;
+        
+        const balEl = document.getElementById('connects-page-balance');
+        if (balEl) balEl.textContent = '$' + data.balance.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        
+        window.freelancerAvailableBalance = data.balance;
+        
+        // Render history table
+        if (tbody) {
+          if (data.history && data.history.length > 0) {
+            tbody.innerHTML = data.history.map(item => {
+              const isPositive = item.amount > 0;
+              const amtText = isPositive ? `+${item.amount}` : `${item.amount}`;
+              const actionText = item.action.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+              const dateStr = new Date(item.created_at).toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute:'2-digit'});
+              return `
+                <tr style="border-bottom:1px solid var(--border)">
+                  <td style="padding:14px 16px;font-size:13px;color:var(--muted)">${dateStr}</td>
+                  <td style="padding:14px 16px;font-size:13.5px;font-weight:700;color:var(--dark)">${item.description}</td>
+                  <td style="padding:14px 16px;font-size:13px;color:var(--muted)">${actionText}</td>
+                  <td style="padding:14px 16px;font-size:13.5px;font-weight:800;text-align:right;color:${isPositive ? 'var(--g)' : '#ef4444'}">${amtText}</td>
+                </tr>
+              `;
+            }).join('');
+          } else {
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:40px;color:var(--muted);font-size:13.5px">No connects history recorded yet.</td></tr>`;
+          }
+        }
+      } else {
+        toast('Error', data.message);
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      toast('Error', 'Failed to fetch connects details.');
+    });
+}
+
+window.selectConnectPack = function(qty, price, element) {
+  document.querySelectorAll('.connect-pack-btn').forEach(b => {
+    b.style.cssText = 'border:1px solid var(--border);border-radius:10px;padding:12px 6px;text-align:center;cursor:pointer;background:var(--off);transition:all 0.15s';
+  });
+  element.style.cssText = 'border:2px solid var(--g);border-radius:10px;padding:11px 5px;text-align:center;cursor:pointer;background:var(--gl);color:var(--forest)';
+  
+  document.getElementById('custom-connects-qty').value = '';
+  
+  window.selectedConnectsQty = qty;
+  window.selectedConnectsPrice = price;
+  
+  document.getElementById('connects-purchase-summary').textContent = qty + ' Connects = $' + price.toFixed(2);
+  document.getElementById('btn-buy-connects-submit').disabled = false;
+}
+
+window.calculateCustomConnects = function(val) {
+  document.querySelectorAll('.connect-pack-btn').forEach(b => {
+    b.style.cssText = 'border:1px solid var(--border);border-radius:10px;padding:12px 6px;text-align:center;cursor:pointer;background:var(--off);transition:all 0.15s';
+  });
+  
+  const qty = parseInt(val || 0);
+  if (qty <= 0) {
+    window.selectedConnectsQty = 0;
+    window.selectedConnectsPrice = 0;
+    document.getElementById('connects-purchase-summary').textContent = '0 Connects = $0.00';
+    document.getElementById('btn-buy-connects-submit').disabled = true;
+    return;
+  }
+  
+  const price = qty * 0.15; // $0.15 per Connect
+  window.selectedConnectsQty = qty;
+  window.selectedConnectsPrice = price;
+  
+  document.getElementById('connects-purchase-summary').textContent = qty + ' Connects = $' + price.toFixed(2);
+  document.getElementById('btn-buy-connects-submit').disabled = false;
+}
+
+window.selectConnectPaymentMethod = function(method) {
+  window.selectedConnectPaymentMethod = method;
+  const w = document.getElementById('connect-method-wallet');
+  const c = document.getElementById('connect-method-card');
+  const cardForm = document.getElementById('connects-card-form');
+  
+  if (method === 'wallet') {
+    w.style.cssText = 'border:2px solid var(--g);border-radius:10px;padding:11px;cursor:pointer;text-align:center;background:var(--gl)';
+    w.querySelector('div:nth-child(2)').style.color = 'var(--g)';
+    c.style.cssText = 'border:1px solid var(--border);border-radius:10px;padding:12px;cursor:pointer;text-align:center;background:white';
+    c.querySelector('div:nth-child(2)').style.color = 'var(--dark)';
+    cardForm.style.display = 'none';
+  } else {
+    c.style.cssText = 'border:2px solid var(--g);border-radius:10px;padding:11px;cursor:pointer;text-align:center;background:var(--gl)';
+    c.querySelector('div:nth-child(2)').style.color = 'var(--g)';
+    w.style.cssText = 'border:1px solid var(--border);border-radius:10px;padding:12px;cursor:pointer;text-align:center;background:white';
+    w.querySelector('div:nth-child(2)').style.color = 'var(--dark)';
+    cardForm.style.display = 'block';
+  }
+}
+
+window.submitConnectsPurchase = function() {
+  const qty = window.selectedConnectsQty || 0;
+  const price = window.selectedConnectsPrice || 0;
+  const method = window.selectedConnectPaymentMethod || 'wallet';
+  
+  if (qty <= 0 || price <= 0) {
+    window.toast('Error', 'Please select a package first.');
+    return;
+  }
+  
+  if (method === 'wallet' && window.freelancerAvailableBalance < price) {
+    window.toast('Insufficient Balance', `Your wallet balance ($${window.freelancerAvailableBalance.toFixed(2)}) is less than the package price ($${price.toFixed(2)}). Please select Credit Card instead!`);
+    return;
+  }
+  
+  if (method === 'card') {
+    const name = document.getElementById('connects-card-name').value.trim();
+    const num = document.getElementById('connects-card-number').value.replace(/\s+/g, ''); // strip spaces
+    const exp = document.getElementById('connects-card-expiry').value.trim();
+    const cvv = document.getElementById('connects-card-cvv').value.trim();
+    
+    // 1. Validate Cardholder Name
+    if (!name || name.length < 3) {
+      window.toast('Validation Error', 'Cardholder Name must be at least 3 characters.');
+      document.getElementById('connects-card-name').focus();
+      return;
+    }
+    if (!/^[a-zA-Z\s]+$/.test(name)) {
+      window.toast('Validation Error', 'Cardholder Name must contain only letters and spaces.');
+      document.getElementById('connects-card-name').focus();
+      return;
+    }
+    
+    // 2. Validate Card Number (15 to 16 digits)
+    if (!/^\d{15,16}$/.test(num)) {
+      window.toast('Validation Error', 'Card Number must be exactly 15 or 16 digits.');
+      document.getElementById('connects-card-number').focus();
+      return;
+    }
+    
+    // 3. Validate Expiry Date (MM/YY)
+    if (!/^(0[1-9]|1[0-2])\/([0-9]{2})$/.test(exp)) {
+      window.toast('Validation Error', 'Expiry Date must be in MM/YY format.');
+      document.getElementById('connects-card-expiry').focus();
+      return;
+    }
+    
+    const parts = exp.split('/');
+    const expMonth = parseInt(parts[0], 10);
+    const expYear = parseInt('20' + parts[1], 10);
+    const now = new Date();
+    const currentMonth = now.getMonth() + 1;
+    const currentYear = now.getFullYear();
+    
+    if (expYear < currentYear || (expYear === currentYear && expMonth < currentMonth)) {
+      window.toast('Validation Error', 'The credit card has expired.');
+      document.getElementById('connects-card-expiry').focus();
+      return;
+    }
+    
+    // 4. Validate CVV (3 or 4 digits)
+    if (!/^\d{3,4}$/.test(cvv)) {
+      window.toast('Validation Error', 'CVV must be 3 or 4 digits.');
+      document.getElementById('connects-card-cvv').focus();
+      return;
+    }
+  }
+  
+  const btn = document.getElementById('btn-buy-connects-submit');
+  const originalText = btn.innerText;
+  btn.disabled = true;
+  btn.innerText = 'Processing Payment...';
+  
+  fetch(BASE_URL + 'freelancer/api/buy-connects.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      amount: qty,
+      price: price,
+      payment_method: method
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      window.toast('Success! 🎉', data.message);
+      
+      // Update sidebar connects counters instantly
+      const sbVal = document.getElementById('sb-connects-val');
+      if (sbVal) sbVal.textContent = data.new_connects;
+      
+      const navConn = document.getElementById('nav-connects');
+      if (navConn) navConn.innerHTML = `<span class="sb-ico">🔗</span>Connects (${data.new_connects})`;
+      
+      // Reset inputs & fields
+      document.getElementById('custom-connects-qty').value = '';
+      document.getElementById('connects-purchase-summary').textContent = '0 Connects = $0.00';
+      document.getElementById('connects-card-name').value = '';
+      document.getElementById('connects-card-number').value = '';
+      document.getElementById('connects-card-expiry').value = '';
+      document.getElementById('connects-card-cvv').value = '';
+      
+      // Reload stats and history
+      loadConnectsPageData();
+      
+      // Select default wallet method
+      selectConnectPaymentMethod('wallet');
+    } else {
+      window.toast('Error', data.message);
+    }
+  })
+  .catch(err => {
+    console.error(err);
+    window.toast('Error', 'Payment processing failed.');
+  })
+  .finally(() => {
+    btn.disabled = false;
+    btn.innerText = originalText;
+  });
+}
+
+// Setup input formatting listeners
+window.setupConnectsCardFormatters = function() {
+  const nameInput = document.getElementById('connects-card-name');
+  const numInput = document.getElementById('connects-card-number');
+  const expInput = document.getElementById('connects-card-expiry');
+  const cvvInput = document.getElementById('connects-card-cvv');
+  
+  if (nameInput) {
+    nameInput.addEventListener('input', function(e) {
+      // Allow only letters and spaces
+      e.target.value = e.target.value.replace(/[^a-zA-Z\s]/g, '');
+    });
+  }
+  
+  if (numInput) {
+    numInput.addEventListener('input', function(e) {
+      let val = e.target.value.replace(/\D/g, '');
+      let formatted = '';
+      for (let i = 0; i < val.length; i++) {
+        if (i > 0 && i % 4 === 0) formatted += ' ';
+        formatted += val[i];
+      }
+      e.target.value = formatted.substring(0, 19); // Max 16 digits + 3 spaces
+    });
+  }
+  
+  if (expInput) {
+    expInput.addEventListener('input', function(e) {
+      let val = e.target.value.replace(/\D/g, '');
+      if (val.length >= 2) {
+        e.target.value = val.substring(0, 2) + '/' + val.substring(2, 4);
+      } else {
+        e.target.value = val;
+      }
+    });
+    
+    expInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Backspace' && e.target.value.endsWith('/')) {
+        e.preventDefault();
+        e.target.value = e.target.value.slice(0, -1);
+      }
+    });
+  }
+  
+  if (cvvInput) {
+    cvvInput.addEventListener('input', function(e) {
+      e.target.value = e.target.value.replace(/\D/g, '').substring(0, 4);
+    });
+  }
+};
+
+// Select default payment method and setup listeners on init
+setTimeout(() => {
+  if (document.getElementById('connect-method-wallet')) {
+    selectConnectPaymentMethod('wallet');
+  }
+  setupConnectsCardFormatters();
+}, 100);
 </script>
 
 

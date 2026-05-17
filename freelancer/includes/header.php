@@ -30,7 +30,7 @@ window.showPage = function(id) {
     home: 'Dashboard', 'find-work': 'Find Work', proposals: 'My Proposals',
     contracts: 'My Contracts', messages: 'Messages', earnings: 'Earnings',
     catalog: 'My Services', profile: 'My Profile', reports: 'Payment Reports',
-    verification: 'ID Verification'
+    verification: 'ID Verification', connects: 'Connects Management'
   };
   var titleEl = document.getElementById('page-title');
   if (titleEl) titleEl.textContent = titles[id] || id;

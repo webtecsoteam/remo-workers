@@ -34,8 +34,8 @@ try {
         exit;
     }
 
-    if ($milestone['status'] !== 'pending') {
-        echo json_encode(['success' => false, 'message' => 'Milestone already ' . $milestone['status']]);
+    if ($milestone['status'] !== 'funded') {
+        echo json_encode(['success' => false, 'message' => 'Milestone must be funded by the client before you can submit work.']);
         exit;
     }
 

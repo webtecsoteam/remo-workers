@@ -111,6 +111,21 @@ try {
     $upd = $db->prepare("UPDATE users SET connects = connects - ? WHERE id = ?");
     $upd->execute([$connectsCost, $user['id']]);
 
+    // Log connects deduction in connects_history
+    $jobStmt = $db->prepare("SELECT title FROM jobs WHERE id = ?");
+    $jobStmt->execute([$jobId]);
+    $jobTitle = $jobStmt->fetchColumn() ?: 'Job Application';
+    
+    $logConnects = $db->prepare("
+        INSERT INTO connects_history (user_id, action, description, amount) 
+        VALUES (?, 'proposal_submission', ?, ?)
+    ");
+    $logConnects->execute([
+        $user['id'], 
+        'Applied to Job: ' . $jobTitle, 
+        -$connectsCost
+    ]);
+
     $db->commit();
     ob_end_clean();
     echo json_encode([

@@ -418,11 +418,13 @@ window.closeModal = function() {
             <?php else: ?>
                 <?php foreach ($activeContracts as $c): ?>
                 <div class="contract-row">
-                <?php if (!empty($c['freelancer_avatar'])): ?>
-                  <div class="av"><img src="<?php echo baseUrl($c['freelancer_avatar']); ?>" style="width:100%;height:100%;border-radius:50%;object-fit:cover"></div>
-                <?php else: ?>
-                  <div class="av" style="background:var(--uw-green-light);color:var(--uw-green)"><?php echo strtoupper(substr($c['freelancer_name'], 0, 2)); ?></div>
-                <?php endif; ?>
+                  <div class="av">
+                    <?php if (!empty($c['freelancer_avatar'])): ?>
+                      <img src="<?php echo baseUrl($c['freelancer_avatar']); ?>" style="width:100%;height:100%;border-radius:50%;object-fit:cover">
+                    <?php else: ?>
+                      <div style="background:var(--uw-green-light);color:var(--uw-green);width:100%;height:100%;display:flex;align-items:center;justify-content:center;border-radius:50%"><?php echo strtoupper(substr($c['freelancer_name'], 0, 2)); ?></div>
+                    <?php endif; ?>
+                  </div>
                   <div class="cr-info">
                     <div class="cr-title"><?php echo htmlspecialchars($c['job_title']); ?></div>
                     <div class="cr-sub"><?php echo htmlspecialchars($c['freelancer_name']); ?> · <?php echo ucfirst($c['contract_type']); ?> · Active</div>
@@ -446,7 +448,13 @@ window.closeModal = function() {
             <?php else: ?>
                 <?php foreach ($recentMessages as $m): ?>
                 <div class="msg-item <?php echo $m['is_read'] ? '' : 'unread'; ?>" onclick="showPage('messages',document.querySelector('[onclick*=messages]'))">
-                  <div class="av" style="background:var(--uw-green-light);color:var(--uw-green)"><?php echo strtoupper(substr($m['sender_name'], 0, 2)); ?></div>
+                  <div class="av">
+                    <?php if (!empty($m['sender_avatar'])): ?>
+                      <img src="<?php echo baseUrl($m['sender_avatar']); ?>" style="width:100%;height:100%;border-radius:50%;object-fit:cover">
+                    <?php else: ?>
+                      <div style="background:var(--uw-green-light);color:var(--uw-green);width:100%;height:100%;display:flex;align-items:center;justify-content:center;border-radius:50%"><?php echo strtoupper(substr($m['sender_name'], 0, 2)); ?></div>
+                    <?php endif; ?>
+                  </div>
                   <div class="msg-meta">
                     <div class="msg-name"><?php echo htmlspecialchars($m['sender_name']); ?><span class="msg-time"><?php echo date('M j', strtotime($m['created_at'])); ?></span></div>
                     <div class="msg-text"><?php echo htmlspecialchars($m['message']); ?></div>
@@ -618,11 +626,13 @@ window.closeModal = function() {
           <?php foreach ($allProposals as $p): ?>
           <div class="prop-card" data-status="<?php echo $p['status']; ?>" onclick="viewProposalDetails(<?php echo htmlspecialchars(json_encode($p)); ?>)">
             <div class="prop-top">
-                <?php if (!empty($p['freelancer_avatar'])): ?>
-                  <div class="av"><img src="<?php echo baseUrl($p['freelancer_avatar']); ?>" style="width:42px;height:42px;border-radius:50%;object-fit:cover"></div>
-                <?php else: ?>
-                  <div class="av" style="background:var(--uw-green-light);color:var(--uw-green);width:42px;height:42px;font-size:13px"><?php echo strtoupper(substr($p['freelancer_name'], 0, 2)); ?></div>
-                <?php endif; ?>
+                <div class="av" style="width:42px;height:42px">
+                    <?php if (!empty($p['freelancer_avatar'])): ?>
+                      <img src="<?php echo baseUrl($p['freelancer_avatar']); ?>" style="width:100%;height:100%;border-radius:50%;object-fit:cover">
+                    <?php else: ?>
+                      <div style="background:var(--uw-green-light);color:var(--uw-green);width:100%;height:100%;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:13px"><?php echo strtoupper(substr($p['freelancer_name'], 0, 2)); ?></div>
+                    <?php endif; ?>
+                </div>
               <div class="prop-info">
                 <div style="display:flex;align-items:center;gap:8px">
                   <h4 style="margin:0"><?php echo htmlspecialchars($p['freelancer_name']); ?></h4>
@@ -658,7 +668,7 @@ window.closeModal = function() {
                   <button class="btn btn-w btn-sm" onclick="event.stopPropagation();updateProposalStatus(<?php echo $p['id']; ?>, 'archived')"><?php echo $p['status']==='archived'?'Unarchive':'Archive'; ?></button>
                   <button class="btn btn-o btn-sm" onclick="event.stopPropagation();updateProposalStatus(<?php echo $p['id']; ?>, '<?php echo $p['status']==='shortlisted'?'pending':'shortlisted'; ?>')"><?php echo $p['status']==='shortlisted'?'Unshortlist':'Shortlist'; ?></button>
                   <button class="btn btn-w btn-sm" onclick="event.stopPropagation();showChatWithFreelancer(<?php echo $p['freelancer_id']; ?>, '<?php echo addslashes($p['freelancer_name']); ?>')">💬 Message</button>
-                  <button class="btn btn-g btn-sm" onclick="event.stopPropagation();hireFreelancer(<?php echo $p['id']; ?>)">Hire →</button>
+                  <button class="btn btn-g btn-sm" onclick="event.stopPropagation();hireFreelancer(<?php echo $p['id']; ?>, <?php echo (float)$p['bid_amount']; ?>)">Hire →</button>
                 <?php endif; ?>
               </div>
             </div>
@@ -715,12 +725,14 @@ window.closeModal = function() {
         <?php else: ?>
             <?php foreach ($allContracts as $ac): ?>
             <div class="prop-card" data-status="<?php echo $ac['status']; ?>" <?php echo $ac['status'] !== 'active' ? 'style="display:none"' : ''; ?> onclick="manageContract(<?php echo htmlspecialchars(json_encode($ac)); ?>)">
-              <div class="prop-top" style="margin-bottom:8px">
-                <?php if (!empty($ac['freelancer_avatar'])): ?>
-                  <div class="av"><img src="<?php echo baseUrl($ac['freelancer_avatar']); ?>" style="width:40px;height:40px;border-radius:50%;object-fit:cover"></div>
-                <?php else: ?>
-                  <div class="av" style="background:var(--uw-green-light);color:var(--uw-green);width:40px;height:40px;font-size:14px"><?php echo strtoupper(substr($ac['freelancer_name'], 0, 2)); ?></div>
-                <?php endif; ?>
+              <div class="prop-top" style="margin-bottom:12px">
+                <div class="av" style="width:40px;height:40px">
+                    <?php if (!empty($ac['freelancer_avatar'])): ?>
+                      <img src="<?php echo baseUrl($ac['freelancer_avatar']); ?>" style="width:100%;height:100%;border-radius:50%;object-fit:cover">
+                    <?php else: ?>
+                      <div style="background:var(--uw-green-light);color:var(--uw-green);width:100%;height:100%;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:14px"><?php echo strtoupper(substr($ac['freelancer_name'], 0, 2)); ?></div>
+                    <?php endif; ?>
+                </div>
                 <div class="prop-info">
                   <h4 style="margin-bottom:2px"><?php echo htmlspecialchars($ac['freelancer_name']); ?></h4>
                   <div style="font-size:12px;color:var(--uw-gray)"><?php echo ucfirst($ac['contract_type']); ?> Contract</div>
@@ -905,7 +917,13 @@ window.closeModal = function() {
                 <tr>
                   <td>
                     <div style="display:flex;align-items:center;gap:10px">
-                      <div class="av" style="background:var(--uw-green-light);color:var(--uw-green)"><?php echo $initials; ?></div>
+                      <div class="av">
+                        <?php if (!empty($t['avatar_url'])): ?>
+                          <img src="<?php echo baseUrl($t['avatar_url']); ?>" style="width:100%;height:100%;border-radius:50%;object-fit:cover">
+                        <?php else: ?>
+                          <div style="background:var(--uw-green-light);color:var(--uw-green);width:100%;height:100%;display:flex;align-items:center;justify-content:center;border-radius:50%"><?php echo $initials; ?></div>
+                        <?php endif; ?>
+                      </div>
                       <div>
                         <div style="font-weight:600"><?php echo htmlspecialchars($t['name']); ?></div>
                         <div style="font-size:11px;color:var(--uw-gray)"><?php echo htmlspecialchars($t['country'] ?? 'Unknown'); ?></div>
@@ -925,7 +943,7 @@ window.closeModal = function() {
                     <?php endif; ?>
                   </td>
                   <td class="hide-mob"><?php echo $isHired ? 'Active now' : 'Never'; ?></td>
-                  <td><button class="btn btn-w btn-sm" onclick="event.stopPropagation();openChatWith(<?php echo $t['id']; ?>, '<?php echo addslashes($t['name']); ?>', '<?php echo $initials; ?>')">Message</button></td>
+                  <td><button class="btn btn-w btn-sm" onclick="event.stopPropagation();openChatWith(<?php echo $t['id']; ?>, '<?php echo addslashes($t['name']); ?>', '<?php echo $initials; ?>', '<?php echo $t['avatar_url'] ?? ''; ?>')">Message</button></td>
                 </tr>
               <?php endforeach; ?>
             <?php endif; ?>
@@ -944,7 +962,13 @@ window.closeModal = function() {
                 <tr>
                   <td>
                     <div style="display:flex;align-items:center;gap:10px">
-                      <div class="av" style="background:var(--uw-green-light);color:var(--uw-green)"><?php echo $initials; ?></div>
+                      <div class="av">
+                        <?php if (!empty($t['avatar_url'])): ?>
+                          <img src="<?php echo baseUrl($t['avatar_url']); ?>" style="width:100%;height:100%;border-radius:50%;object-fit:cover">
+                        <?php else: ?>
+                          <div style="background:var(--uw-green-light);color:var(--uw-green);width:100%;height:100%;display:flex;align-items:center;justify-content:center;border-radius:50%"><?php echo $initials; ?></div>
+                        <?php endif; ?>
+                      </div>
                       <div>
                         <div style="font-weight:600"><?php echo htmlspecialchars($t['name']); ?></div>
                         <div style="font-size:11px;color:var(--uw-gray)"><?php echo htmlspecialchars($t['country'] ?? 'Unknown'); ?></div>
@@ -956,7 +980,7 @@ window.closeModal = function() {
                   <td>$<?php echo number_format($t['hourly_rate'] ?? 0); ?>/hr</td>
                   <td class="hide-mob"><?php echo date('M d, Y', strtotime($t['created_at'])); ?></td>
                   <td>
-                    <button class="btn btn-w btn-sm" onclick="event.stopPropagation();openChatWith(<?php echo $t['id']; ?>, '<?php echo addslashes($t['name']); ?>', '<?php echo $initials; ?>')">Message</button>
+                    <button class="btn btn-w btn-sm" onclick="event.stopPropagation();openChatWith(<?php echo $t['id']; ?>, '<?php echo addslashes($t['name']); ?>', '<?php echo $initials; ?>', '<?php echo $t['avatar_url'] ?? ''; ?>')">Message</button>
                     <button class="btn btn-g btn-sm" onclick="toast('Invite','Invite sent to <?php echo htmlspecialchars($t['name']); ?>')">Invite</button>
                   </td>
                 </tr>
@@ -977,7 +1001,13 @@ window.closeModal = function() {
                 <tr>
                   <td>
                     <div style="display:flex;align-items:center;gap:10px">
-                      <div class="av" style="background:var(--uw-green-light);color:var(--uw-green)"><?php echo $initials; ?></div>
+                      <div class="av">
+                        <?php if (!empty($t['avatar_url'])): ?>
+                          <img src="<?php echo baseUrl($t['avatar_url']); ?>" style="width:100%;height:100%;border-radius:50%;object-fit:cover">
+                        <?php else: ?>
+                          <div style="background:var(--uw-green-light);color:var(--uw-green);width:100%;height:100%;display:flex;align-items:center;justify-content:center;border-radius:50%"><?php echo $initials; ?></div>
+                        <?php endif; ?>
+                      </div>
                       <div>
                         <div style="font-weight:600"><?php echo htmlspecialchars($t['name']); ?></div>
                         <div style="font-size:11px;color:var(--uw-gray)"><?php echo htmlspecialchars($t['country'] ?? 'Unknown'); ?></div>
@@ -988,7 +1018,7 @@ window.closeModal = function() {
                   <td><?php echo date('M d, Y', strtotime($t['last_hired_at'])); ?></td>
                   <td>$<?php echo number_format(1500); // Dummy for now ?></td>
                   <td><span class="badge b-green"><?php echo ucfirst($t['last_contract_status'] ?? 'Active'); ?></span></td>
-                  <td><button class="btn btn-w btn-sm" onclick="event.stopPropagation();openChatWith(<?php echo $t['id']; ?>, '<?php echo addslashes($t['name']); ?>', '<?php echo $initials; ?>')">Message</button></td>
+                  <td><button class="btn btn-w btn-sm" onclick="event.stopPropagation();openChatWith(<?php echo $t['id']; ?>, '<?php echo addslashes($t['name']); ?>', '<?php echo $initials; ?>', '<?php echo $t['avatar_url'] ?? ''; ?>')">Message</button></td>
                 </tr>
               <?php endforeach; ?>
             <?php endif; ?>
@@ -1025,7 +1055,13 @@ window.closeModal = function() {
           <div class="card talent-card" style="margin-bottom:0;transition:transform .2s, border-color .2s;cursor:pointer" onclick="openModal('hire-freelancer-<?php echo $t['id']; ?>')" onmouseover="this.style.borderColor='var(--uw-green)'" onmouseout="this.style.borderColor='var(--uw-border)'">
             <div class="card-body">
               <div style="display:flex;gap:15px;margin-bottom:15px">
-                <div class="av" style="width:50px;height:50px;background:var(--uw-green-light);color:var(--uw-green);font-size:18px"><?php echo $initials; ?></div>
+                <div class="av" style="width:50px;height:50px">
+                  <?php if (!empty($t['avatar_url'])): ?>
+                    <img src="<?php echo baseUrl($t['avatar_url']); ?>" style="width:100%;height:100%;border-radius:50%;object-fit:cover">
+                  <?php else: ?>
+                    <div style="background:var(--uw-green-light);color:var(--uw-green);width:100%;height:100%;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:18px"><?php echo $initials; ?></div>
+                  <?php endif; ?>
+                </div>
                 <div style="flex:1;min-width:0">
                   <div style="font-weight:700;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><?php echo htmlspecialchars($t['name']); ?></div>
                   <div style="font-size:13px;color:var(--uw-green);font-weight:600"><?php echo htmlspecialchars($t['title'] ?? 'Freelancer'); ?></div>
@@ -1039,7 +1075,7 @@ window.closeModal = function() {
               </div>
               <div style="display:flex;gap:10px">
                 <button class="btn btn-g btn-sm" style="flex:1;justify-content:center">Hire Now</button>
-                <button class="btn btn-w btn-sm" style="flex:1;justify-content:center" onclick="event.stopPropagation();openChatWith(<?php echo $t['id']; ?>, '<?php echo addslashes($t['name']); ?>', '<?php echo $initials; ?>')">Message</button>
+                <button class="btn btn-w btn-sm" style="flex:1;justify-content:center" onclick="event.stopPropagation();openChatWith(<?php echo $t['id']; ?>, '<?php echo addslashes($t['name']); ?>', '<?php echo $initials; ?>', '<?php echo $t['avatar_url'] ?? ''; ?>')">Message</button>
               </div>
             </div>
           </div>
@@ -1067,8 +1103,14 @@ window.closeModal = function() {
                 $isUnread = ($c['is_read'] == 0 && $c['sender_id'] != $user['id']);
                 $time = date('H:i', strtotime($c['last_time']));
               ?>
-                <div class="msg-item <?php echo $isUnread ? 'unread' : ''; ?>" style="border-radius:0;margin:0;padding:12px 14px" onclick="loadChat(<?php echo $c['other_id']; ?>, '<?php echo addslashes($c['other_name']); ?>', '<?php echo $initials; ?>', this)">
-                  <div class="av" style="background:var(--uw-green-light);color:var(--uw-green)"><?php echo $initials; ?></div>
+                <div class="msg-item <?php echo $isUnread ? 'unread' : ''; ?>" style="border-radius:0;margin:0;padding:12px 14px" onclick="loadChat(<?php echo $c['other_id']; ?>, '<?php echo addslashes($c['other_name']); ?>', '<?php echo $initials; ?>', this, '<?php echo $c['other_avatar'] ?? ''; ?>')">
+                  <div class="av">
+                    <?php if (!empty($c['other_avatar'])): ?>
+                      <img src="<?php echo baseUrl($c['other_avatar']); ?>" style="width:100%;height:100%;border-radius:50%;object-fit:cover">
+                    <?php else: ?>
+                      <div style="background:var(--uw-green-light);color:var(--uw-green);width:100%;height:100%;display:flex;align-items:center;justify-content:center;border-radius:50%"><?php echo $initials; ?></div>
+                    <?php endif; ?>
+                  </div>
                   <div class="msg-meta">
                     <div class="msg-name"><?php echo htmlspecialchars($c['other_name']); ?><span class="msg-time"><?php echo $time; ?></span></div>
                     <div class="msg-text"><?php echo htmlspecialchars($c['last_message']); ?></div>
@@ -1106,7 +1148,7 @@ window.closeModal = function() {
         <div class="card" style="margin-bottom:0">
           <div class="card-body" style="text-align:center">
             <div style="font-size:11.5px;font-weight:700;color:var(--uw-gray);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Available Balance</div>
-            <div style="font-size:30px;font-weight:700;color:var(--uw-black)">$<?php echo number_format($user['balance'] ?? 0, 2); ?></div>
+            <div id="client-available-balance" style="font-size:30px;font-weight:700;color:var(--uw-black)">$<?php echo number_format($user['balance'] ?? 0, 2); ?></div>
             <button class="btn btn-g btn-sm" style="margin-top:12px;width:100%;justify-content:center" onclick="openModal('add-funds')">Add Funds</button>
           </div>
         </div>

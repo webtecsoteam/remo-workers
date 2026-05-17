@@ -62,8 +62,8 @@ try {
     // All Contracts with earnings (completed and pending)
     $allContractsStmt = $db->prepare("
         SELECT c.*, j.title as job_title, u.name as client_name,
-        (SELECT SUM(amount) FROM payments WHERE job_id = c.job_id AND payee_id = c.freelancer_id AND status = 'completed') as total_earned,
-        (SELECT SUM(amount) FROM payments WHERE job_id = c.job_id AND payee_id = c.freelancer_id AND status = 'pending') as pending_earned
+        (SELECT SUM(amount) FROM payments WHERE job_id = c.job_id AND payee_id = c.freelancer_id AND status = 'completed' AND transaction_id NOT LIKE 'ESC-%') as total_earned,
+        (SELECT SUM(amount) FROM payments WHERE job_id = c.job_id AND payee_id = c.freelancer_id AND status = 'pending' AND transaction_id NOT LIKE 'ESC-%') as pending_earned
         FROM contracts c 
         LEFT JOIN jobs j ON c.job_id = j.id 
         LEFT JOIN users u ON j.client_id = u.id 
@@ -91,17 +91,28 @@ try {
 
 
     // Stats
-    $totalEarnedStmt = $db->prepare("SELECT SUM(amount) FROM payments WHERE payee_id = ? AND status = 'completed'");
+    $totalEarnedStmt = $db->prepare("SELECT SUM(amount) FROM payments WHERE payee_id = ? AND status = 'completed' AND transaction_id NOT LIKE 'ESC-%'");
     $totalEarnedStmt->execute([$user['id']]);
     $fStats['total_earned'] = (float)$totalEarnedStmt->fetchColumn() ?: 0;
     
-    $pendingEarnedStmt = $db->prepare("SELECT SUM(amount) FROM payments WHERE payee_id = ? AND status = 'pending'");
+    $pendingEarnedStmt = $db->prepare("SELECT SUM(amount) FROM payments WHERE payee_id = ? AND status = 'pending' AND transaction_id NOT LIKE 'ESC-%'");
     $pendingEarnedStmt->execute([$user['id']]);
     $fStats['pending_earnings'] = (float)$pendingEarnedStmt->fetchColumn() ?: 0;
 
     $wipStmt = $db->prepare("SELECT SUM(amount) FROM work_logs WHERE freelancer_id = ? AND status = 'pending'");
     $wipStmt->execute([$user['id']]);
-    $fStats['wip_earnings'] = (float)$wipStmt->fetchColumn() ?: 0;
+    
+    // Add funded milestones to WIP earnings
+    $fundedMilestonesStmt = $db->prepare("
+        SELECT SUM(m.amount) 
+        FROM milestones m 
+        JOIN contracts c ON m.contract_id = c.id 
+        WHERE c.freelancer_id = ? AND m.status = 'funded'
+    ");
+    $fundedMilestonesStmt->execute([$user['id']]);
+    $fundedMilestonesAmount = (float)$fundedMilestonesStmt->fetchColumn() ?: 0;
+
+    $fStats['wip_earnings'] = ((float)$wipStmt->fetchColumn() ?: 0) + $fundedMilestonesAmount;
 
     $fStats['active_contracts'] = count($activeContracts);
     
@@ -109,7 +120,7 @@ try {
     $pendingStmt->execute([$user['id']]);
     $fStats['pending_proposals'] = (int)$pendingStmt->fetchColumn() ?: 0;
     
-    $monthlyStmt = $db->prepare("SELECT SUM(amount) FROM payments WHERE payee_id = ? AND status = 'completed' AND MONTH(created_at) = MONTH(CURRENT_DATE()) AND YEAR(created_at) = YEAR(CURRENT_DATE())");
+    $monthlyStmt = $db->prepare("SELECT SUM(amount) FROM payments WHERE payee_id = ? AND status = 'completed' AND MONTH(created_at) = MONTH(CURRENT_DATE()) AND YEAR(created_at) = YEAR(CURRENT_DATE()) AND transaction_id NOT LIKE 'ESC-%'");
     $monthlyStmt->execute([$user['id']]);
     $fStats['monthly_earnings'] = (float)$monthlyStmt->fetchColumn() ?: 0;
 
@@ -134,7 +145,7 @@ try {
         CONCAT('Payment for ', IFNULL(j.title, 'Service')) as description
         FROM payments p
         LEFT JOIN jobs j ON p.job_id = j.id
-        WHERE (p.payer_id = ? OR p.payee_id = ?) 
+        WHERE (p.payer_id = ? OR p.payee_id = ?) AND p.transaction_id NOT LIKE 'ESC-%'
         ORDER BY p.created_at DESC LIMIT 10
     ");
     $transactionsStmt->execute([$user['id'], $user['id'], $user['id']]);
@@ -165,7 +176,7 @@ try {
         FROM payments p
         LEFT JOIN jobs j ON p.job_id = j.id
         LEFT JOIN users u ON p.payer_id = u.id
-        WHERE p.payee_id = ? OR p.payer_id = ?
+        WHERE (p.payee_id = ? OR p.payer_id = ?) AND p.transaction_id NOT LIKE 'ESC-%'
         ORDER BY p.created_at DESC
     ");
     $ledgerStmt->execute([$user['id'], $user['id']]);
@@ -176,7 +187,7 @@ try {
         SELECT u.name as client_name, SUM(p.amount) as total
         FROM payments p
         JOIN users u ON p.payer_id = u.id
-        WHERE p.payee_id = ? AND p.status = 'completed'
+        WHERE p.payee_id = ? AND p.status = 'completed' AND p.transaction_id NOT LIKE 'ESC-%'
         GROUP BY p.payer_id
         ORDER BY total DESC
     ");
@@ -234,7 +245,7 @@ try {
 
     // Submitted Proposals
     $proposalsStmt = $db->prepare("
-        SELECT p.*, j.title as job_title 
+        SELECT p.*, j.title as job_title, j.status as job_status 
         FROM proposals p 
         JOIN jobs j ON p.job_id = j.id 
         WHERE p.freelancer_id = ? 
@@ -331,7 +342,7 @@ include __DIR__ . '/includes/header.php';
     <div class="sb-section">Earnings</div>
     <div id="nav-earnings" class="sb-item" onclick="showPage('earnings')"><span class="sb-ico">💰</span>Earnings & Payments</div>
     <div id="nav-reports" class="sb-item" onclick="showPage('reports')"><span class="sb-ico">📊</span>Payment Reports</div>
-    <div id="nav-connects" class="sb-item" onclick="openModal('connects')"><span class="sb-ico">🔗</span>Connects (<?php echo $user['connects'] ?? 0; ?>)</div>
+    <div id="nav-connects" class="sb-item" onclick="showPage('connects')"><span class="sb-ico">🔗</span>Connects (<?php echo $user['connects'] ?? 0; ?>)</div>
     <div id="nav-catalog" class="sb-item" onclick="showPage('catalog')"><span class="sb-ico">📦</span>My Services</div>
     
     <div class="sb-section">Settings</div>
@@ -391,6 +402,7 @@ include __DIR__ . '/includes/header.php';
     include __DIR__ . '/views/catalog.php';
     include __DIR__ . '/views/profile.php';
     include __DIR__ . '/views/verification.php';
+    include __DIR__ . '/views/connects.php';
     ?>
   </div>
 </main>

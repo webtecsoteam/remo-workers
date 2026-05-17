@@ -36,6 +36,9 @@ try {
     // 3. Update contract status to completed
     $db->prepare("UPDATE contracts SET status = 'completed', end_date = NOW() WHERE proposal_id = ? AND status = 'active'")->execute([$proposalId]);
 
+    // 4. Reject all other non-accepted proposals for this job
+    $db->prepare("UPDATE proposals SET status = 'rejected' WHERE job_id = ? AND id != ? AND status NOT IN ('accepted', 'withdrawn')")->execute([$proposal['job_id'], $proposalId]);
+
     $db->commit();
     echo json_encode(['success' => true, 'message' => 'Job marked as completed!']);
 

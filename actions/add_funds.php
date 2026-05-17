@@ -19,8 +19,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $db = getDB();
     $amount = floatval($_POST['amount'] ?? 0);
 
-    if ($amount < 50) {
-        json_response(['success' => false, 'error' => 'Minimum $50 required']);
+    if ($amount < 1) {
+        json_response(['success' => false, 'error' => 'Minimum $1 required']);
     }
 
     try {

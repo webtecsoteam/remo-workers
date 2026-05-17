@@ -71,7 +71,7 @@ async function handleAddFunds(){
   const input = document.getElementById('add-funds-amount');
     const val = input ? input.value : 0;
     const v = parseFloat(val || 0);
-  if(v < 50){ toast('Minimum $50', 'Please enter at least $50 to add'); return; }
+  if(v < 1){ toast('Minimum $1', 'Please enter at least $1 to add'); return; }
   
   const btn = event.target;
   const originalText = btn.innerText;
@@ -400,8 +400,8 @@ const MODALS = {
   'fund-milestone-james':{t:'Fund Milestone — James Kowalski',b:fundMilestoneBody({name:'James Kowalski',initials:'JK',avatarBg:'#dbeafe',avatarColor:'#1e40af',role:'Full Stack Engineer',milestone:'Milestone 3 — Final Delivery',amount:2300,contract:'Backend API Development'})},
   'fund-milestone-marcus':{t:'Fund Milestone — Marcus Patel',b:fundMilestoneBody({name:'Marcus Patel',initials:'MP',avatarBg:'#ede9fe',avatarColor:'#5b21b6',role:'AI/ML Engineer',milestone:'Milestone 2 — AI Chatbot Build',amount:1100,contract:'AI Chatbot Integration'})},
   'add-funds':{t:'Add Funds to Balance',b:`
-    <div class="balance-pill">💰 Current Balance: $1,250.00</div>
-    <div class="fg"><label>Amount to Add ($)</label><input type="number" placeholder="e.g. 500" min="50" id="add-funds-amount" oninput="document.getElementById('add-total').textContent='$'+(parseFloat(this.value)||0).toFixed(2)"></div>
+    <div class="balance-pill" id="add-funds-current-bal-pill">💰 Current Balance: $0.00</div>
+    <div class="fg"><label>Amount to Add ($)</label><input type="number" placeholder="e.g. 500" min="1" id="add-funds-amount" oninput="updateAddFundsSummary(this)"></div>
     <div class="fg"><label>Charge to</label></div>
     <div class="pay-method selected" onclick="selectPayMethod(this)">
       <div class="pay-method-icon">💳</div>
@@ -415,7 +415,7 @@ const MODALS = {
     <div class="fund-summary">
       <div class="fund-summary-row"><span style="color:var(--uw-gray)">Amount</span><span id="add-total">$0.00</span></div>
       <div class="fund-summary-row"><span style="color:var(--uw-gray)">Processing fee</span><span>$0.00</span></div>
-      <div class="fund-summary-row total"><span>New balance after deposit</span><span style="color:var(--uw-green)">$1,250.00</span></div>
+      <div class="fund-summary-row total"><span>New balance after deposit</span><span id="add-new-bal" style="color:var(--uw-green)">$0.00</span></div>
     </div>
     <button class="btn btn-g" style="width:100%;justify-content:center;padding:11px" onclick="handleAddFunds()">Add Funds →</button>
   `},
@@ -499,7 +499,32 @@ function openModal(id){
   if(id === 'post-job') {
     bindPostJobModal();
   }
+
+  if (id === 'add-funds') {
+    // Populate current balance dynamically
+    const curBalEl = document.getElementById('add-funds-current-bal-pill');
+    if (curBalEl) {
+      curBalEl.innerHTML = `💰 Current Balance: $${parseFloat(availableBalance || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+    }
+    const newBalEl = document.getElementById('add-new-bal');
+    if (newBalEl) {
+      newBalEl.textContent = `$${parseFloat(availableBalance || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+    }
+  }
 }
+
+// Update Add Funds summary dynamically
+window.updateAddFundsSummary = function(input) {
+  const amt = parseFloat(input.value) || 0;
+  const current = parseFloat(availableBalance || 0);
+  const total = current + amt;
+  
+  const addTotalEl = document.getElementById('add-total');
+  const addNewBalEl = document.getElementById('add-new-bal');
+  
+  if (addTotalEl) addTotalEl.textContent = '$' + amt.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  if (addNewBalEl) addNewBalEl.textContent = '$' + total.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+};
 
 function bindPostJobModal(){
   const btn = document.getElementById('pj-submit-btn');
@@ -641,7 +666,10 @@ function viewProposalDetails(p) {
     t: 'Proposal: ' + p.job_title,
     b: `
       <div style="display:flex; gap:16px; align-items:center; margin-bottom:20px">
-        <div class="av" style="background:var(--uw-green-light);color:var(--uw-green);width:56px;height:56px;font-size:18px">${p.freelancer_name.substring(0,2).toUpperCase()}</div>
+        <div class="av" style="width:56px;height:56px">
+          ${p.freelancer_avatar ? `<img src="${BASE_URL}${p.freelancer_avatar}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">` : 
+          `<div style="background:var(--uw-green-light);color:var(--uw-green);width:100%;height:100%;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:18px">${p.freelancer_name.substring(0,2).toUpperCase()}</div>`}
+        </div>
         <div style="flex:1">
           <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px">
             <h3 style="margin:0; font-size:18px">${p.freelancer_name}</h3>
@@ -844,7 +872,7 @@ function toast(title, msg) {
 
 let activeChatId = null;
 
-async function loadChat(otherId, name, initials, el) {
+async function loadChat(otherId, name, initials, el, avatar = '') {
   activeChatId = otherId;
   
   // Highlight sidebar
@@ -864,8 +892,8 @@ async function loadChat(otherId, name, initials, el) {
     const result = await response.json();
     
     if(result.success) {
-      renderChatWindow(name, initials, result.messages);
-      startChatPolling(otherId, name, initials);
+      renderChatWindow(name, initials, result.messages, avatar);
+      startChatPolling(otherId, name, initials, avatar);
     } else {
       chatWindow.innerHTML = `<div style="padding:20px;text-align:center;color:red">${result.error}</div>`;
     }
@@ -874,13 +902,17 @@ async function loadChat(otherId, name, initials, el) {
   }
 }
 
-function renderChatWindow(name, initials, messages) {
+function renderChatWindow(name, initials, messages, avatar = '') {
   const chatWindow = document.getElementById('chat-window');
   const msgHtml = messages.map(m => {
     const isMe = (m.sender_id != activeChatId);
     return `
       <div style="display:flex;gap:10px;${isMe ? 'flex-direction:row-reverse' : ''}">
-        <div class="av" style="width:30px;height:30px;font-size:10px;background:${isMe ? 'var(--uw-green)' : 'var(--uw-green-light)'};color:${isMe ? 'white' : 'var(--uw-green)'};flex-shrink:0">${isMe ? 'Me' : initials}</div>
+        <div class="av" style="width:30px;height:30px;font-size:10px">
+          ${isMe ? '<div style="background:var(--uw-green);color:white;width:100%;height:100%;display:flex;align-items:center;justify-content:center;border-radius:50%">Me</div>' : 
+          (avatar ? `<img src="${BASE_URL}${avatar}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">` : 
+          `<div style="background:var(--uw-green-light);color:var(--uw-green);width:100%;height:100%;display:flex;align-items:center;justify-content:center;border-radius:50%">${initials}</div>`)}
+        </div>
         <div style="max-width:75%;${isMe ? 'text-align:right' : ''}">
           <div style="background:${isMe ? 'var(--uw-green)' : 'var(--uw-bg)'};color:${isMe ? 'white' : 'var(--uw-dark)'};border:${isMe ? 'none' : '1.5px solid var(--uw-border)'};border-radius:${isMe ? '12px 2px 12px 12px' : '2px 12px 12px 12px'};padding:10px 14px;font-size:13px;line-height:1.6;text-align:left">${m.message}</div>
           <div style="font-size:11px;color:var(--uw-gray2);margin-top:4px">${new Date(m.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>
@@ -891,7 +923,10 @@ function renderChatWindow(name, initials, messages) {
 
   chatWindow.innerHTML = `
     <div style="padding:14px 18px;border-bottom:1px solid var(--uw-border);display:flex;align-items:center;gap:12px">
-      <div class="av" style="background:var(--uw-green-light);color:var(--uw-green);width:36px;height:36px">${initials}</div>
+      <div class="av" style="width:36px;height:36px">
+        ${avatar ? `<img src="${BASE_URL}${avatar}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">` : 
+        `<div style="background:var(--uw-green-light);color:var(--uw-green);width:100%;height:100%;display:flex;align-items:center;justify-content:center;border-radius:50%">${initials}</div>`}
+      </div>
       <div><div style="font-weight:700;font-size:14px">${name}</div><div style="font-size:12px;color:var(--uw-green)">Online</div></div>
     </div>
     <div style="flex:1;padding:18px;overflow-y:auto;display:flex;flex-direction:column;gap:12px" id="chat-messages-scroll">${msgHtml}</div>
@@ -951,7 +986,7 @@ async function sendMsg() {
 
 // Polling for new messages
 let chatPollInterval = null;
-function startChatPolling(otherId, name, initials) {
+function startChatPolling(otherId, name, initials, avatar = '') {
   if(chatPollInterval) clearInterval(chatPollInterval);
   chatPollInterval = setInterval(async () => {
     if(activeChatId !== otherId || document.getElementById('page-messages').style.display === 'none') {
@@ -965,7 +1000,7 @@ function startChatPolling(otherId, name, initials) {
         // Only re-render if message count changed
         const currentCount = document.querySelectorAll('#chat-messages-scroll > div').length;
         if(result.messages.length > currentCount) {
-          renderChatWindow(name, initials, result.messages);
+          renderChatWindow(name, initials, result.messages, avatar);
         }
       }
     } catch(e) {}
@@ -998,7 +1033,7 @@ function setMobNav(id){
   if(btn) btn.classList.add('active');
 }
 
-function openChatWith(id, name, initials) {
+function openChatWith(id, name, initials, avatar = '') {
   showPage('messages', document.querySelector('.sb-item[onclick*="messages"]'));
   
   // Wait for page to switch
@@ -1019,9 +1054,12 @@ function openChatWith(id, name, initials) {
       const newItem = document.createElement('div');
       newItem.className = 'msg-item active';
       newItem.style.cssText = 'border-radius:0;margin:0;padding:12px 14px';
-      newItem.onclick = function() { loadChat(id, name, initials, this); };
+      newItem.onclick = function() { loadChat(id, name, initials, this, avatar); };
       newItem.innerHTML = `
-        <div class="av" style="background:var(--uw-green-light);color:var(--uw-green)">${initials}</div>
+        <div class="av">
+          ${avatar ? `<img src="${BASE_URL}${avatar}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">` : 
+          `<div style="background:var(--uw-green-light);color:var(--uw-green);width:100%;height:100%;display:flex;align-items:center;justify-content:center;border-radius:50%">${initials}</div>`}
+        </div>
         <div class="msg-meta">
           <div class="msg-name">${name}<span class="msg-time">Now</span></div>
           <div class="msg-text">Starting conversation...</div>
@@ -1190,12 +1228,31 @@ async function cancelHiring(propId) {
   }
 }
 
-function manageContract(contract) {
+window.manageContract = async function(contract) {
+  if (typeof contract === 'number' || typeof contract === 'string') {
+    toast('Loading...', 'Fetching contract details');
+    try {
+      const res = await fetch(BASE_URL + 'client/api/get-contract.php?id=' + contract);
+      const data = await res.json();
+      if (!data.success) {
+        toast('Error', data.message);
+        return;
+      }
+      contract = data.contract;
+    } catch(err) {
+      toast('Error', 'Failed to fetch contract details');
+      return;
+    }
+  }
+
   MODALS['manage-contract'] = {
     t: 'Manage Contract',
     b: `
       <div style="display:flex;gap:12px;align-items:center;background:var(--uw-bg);border-radius:12px;padding:16px;margin-bottom:20px;border:1.5px solid var(--uw-border)">
-        <div class="av" style="background:var(--uw-green-light);color:var(--uw-green);width:48px;height:48px;font-size:16px">${contract.freelancer_name.substring(0,2).toUpperCase()}</div>
+        <div class="av" style="width:48px;height:48px">
+          ${contract.freelancer_avatar ? `<img src="${BASE_URL}${contract.freelancer_avatar}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">` : 
+          `<div style="background:var(--uw-green-light);color:var(--uw-green);width:100%;height:100%;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:16px">${contract.freelancer_name.substring(0,2).toUpperCase()}</div>`}
+        </div>
         <div style="flex:1">
           <div style="font-weight:700;font-size:15px;margin-bottom:2px">${contract.freelancer_name}</div>
           <div style="font-size:12px;color:var(--uw-gray)">${contract.job_title}</div>
@@ -1213,13 +1270,15 @@ function manageContract(contract) {
                 <div style="font-size:11px; color:var(--uw-gray)">$${parseFloat(ms.amount).toLocaleString()} · ${ms.status.charAt(0).toUpperCase() + ms.status.slice(1)}</div>
               </div>
               <div>
-                ${ms.status === 'requested' ? `
-                  <button class="btn btn-g btn-sm" onclick="releaseMilestone(${ms.id}, this)">Approve & Pay</button>
-                ` : (ms.status === 'paid' ? `
-                  <span class="badge b-green" style="font-size:10px">Paid</span>
+                ${ms.status === 'pending' ? `
+                  <button class="btn btn-g btn-sm" onclick="openFundMilestoneModal(${ms.id}, ${ms.amount}, '${ms.description.replace(/'/g, "\\'")}', ${contract.id})">Fund Milestone</button>
+                ` : (ms.status === 'funded' ? `
+                  <span class="badge" style="background:#e0f2fe; color:#0369a1; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:600">Funded (In Progress)</span>
+                ` : (ms.status === 'requested' ? `
+                  <button class="btn btn-g btn-sm" onclick="releaseMilestone(${ms.id}, this, ${contract.id})">Approve & Release</button>
                 ` : `
-                  <span class="badge b-gray" style="font-size:10px">Pending</span>
-                `)}
+                  <span class="badge b-green" style="font-size:10px">Paid</span>
+                `))}
               </div>
             </div>
           `).join('')}
@@ -1257,7 +1316,7 @@ function manageContract(contract) {
   openModal('manage-contract');
 }
 
-async function releaseMilestone(milestoneId, btn) {
+async function releaseMilestone(milestoneId, btn, contractId) {
   if(!confirm('Are you sure you want to approve this milestone and release payment?')) return;
   
   const originalText = btn.innerText;
@@ -1272,9 +1331,16 @@ async function releaseMilestone(milestoneId, btn) {
     });
     const data = await res.json();
     if(data.success) {
-      toast('Success! 🎉', 'Payment released successfully');
-      btn.parentElement.innerHTML = '<span class="badge b-green" style="font-size:10px">Paid</span>';
-      // We might want to reload or update global state too
+      toast('Success! 🎉', data.message || 'Payment approved and released.');
+      
+      // Real-time update of parent contract details modal
+      setTimeout(() => {
+        if (typeof contractId !== 'undefined') {
+          manageContract(contractId);
+        } else {
+          location.reload();
+        }
+      }, 1000);
     } else {
       toast('Error', data.message);
       btn.disabled = false;
@@ -1548,8 +1614,11 @@ window.updatePostJobFields = updatePostJobFields;
 window.submitPostJob = submitPostJob;
 window.bindPostJobModal = bindPostJobModal;
 async function hireFreelancer(proposalId, amount) {
-  if (amount > availableBalance) {
-    toast('Insufficient Balance', `Your current balance ($${availableBalance.toFixed(2)}) is less than the bid amount ($${amount.toFixed(2)}). Please add funds to your account.`);
+  const numericAmount = parseFloat(amount || 0);
+  const numericBalance = parseFloat(availableBalance || 0);
+
+  if (numericAmount > numericBalance) {
+    toast('Insufficient Balance', `Your current balance ($${numericBalance.toFixed(2)}) is less than the bid amount ($${numericAmount.toFixed(2)}). Please add funds to your account.`);
     return;
   }
   
@@ -1757,6 +1826,179 @@ function saveClientProfile() {
     btn.disabled = false;
     btn.innerText = originalText;
   });
+}
+
+window.openFundMilestoneModal = function(milestoneId, amount, description, contractId) {
+  const modal = document.getElementById('modal-panel');
+  const mc = document.getElementById('mc-body');
+  
+  document.getElementById('mh-title').innerText = 'Fund Milestone';
+  modal.style.maxWidth = '500px';
+  
+  const isWalletDisabled = availableBalance < amount;
+  
+  mc.innerHTML = `
+    <div style="padding:20px">
+      <div style="background:var(--uw-bg); border:1px solid var(--uw-border); border-radius:10px; padding:15px; margin-bottom:20px">
+        <div style="font-size:12px; color:var(--uw-gray); margin-bottom:4px; font-weight:600; text-transform:uppercase">Milestone Description</div>
+        <div style="font-size:14px; font-weight:700; color:var(--uw-black); margin-bottom:12px">${description}</div>
+        <div style="display:flex; justify-content:space-between; align-items:center">
+          <span style="font-size:13px; color:var(--uw-gray)">Funding Amount:</span>
+          <span style="font-size:18px; font-weight:800; color:var(--uw-green)">$${parseFloat(amount).toLocaleString()}</span>
+        </div>
+      </div>
+      
+      <div style="margin-bottom:20px">
+        <label style="display:block; font-size:13px; font-weight:700; margin-bottom:8px; color:var(--uw-black)">Select Payment Method</label>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px">
+          <div id="method-wallet" onclick="selectFundingMethod('wallet', ${isWalletDisabled})" style="border:1.5px solid ${isWalletDisabled ? '#ef4444' : 'var(--uw-green)'}; background:${isWalletDisabled ? '#fef2f2' : 'var(--uw-green-light)'}; border-radius:10px; padding:15px; cursor:pointer; text-align:center; position:relative">
+            <div style="font-size:20px; margin-bottom:5px">💼</div>
+            <div style="font-size:13px; font-weight:700; color:${isWalletDisabled ? '#b91c1c' : 'var(--uw-green)'}">Wallet Balance</div>
+            <div style="font-size:11px; color:var(--uw-gray); margin-top:4px">Bal: $${availableBalance.toFixed(2)}</div>
+            ${isWalletDisabled ? '<span style="font-size:9px; color:#ef4444; font-weight:700; display:block; margin-top:4px">Insufficient Balance</span>' : ''}
+          </div>
+          <div id="method-card" onclick="selectFundingMethod('card', false)" style="border:1.5px solid var(--uw-border); border-radius:10px; padding:15px; cursor:pointer; text-align:center">
+            <div style="font-size:20px; margin-bottom:5px">💳</div>
+            <div style="font-size:13px; font-weight:700; color:var(--uw-black)">Credit/Debit Card</div>
+            <div style="font-size:11px; color:var(--uw-gray); margin-top:4px">Instant checkout</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Card Information Section (Hidden by default) -->
+      <div id="card-fields-section" style="display:none; background:#f9fafb; border:1px solid var(--uw-border); border-radius:10px; padding:15px; margin-bottom:20px">
+        <div style="margin-bottom:12px">
+          <label style="display:block; font-size:11px; font-weight:700; color:var(--uw-gray); text-transform:uppercase; margin-bottom:5px">Cardholder Name</label>
+          <input type="text" id="funding-card-name" placeholder="John Doe" style="width:100%; padding:10px; border:1.5px solid var(--uw-border); border-radius:6px; font-size:13px">
+        </div>
+        <div style="margin-bottom:12px">
+          <label style="display:block; font-size:11px; font-weight:700; color:var(--uw-gray); text-transform:uppercase; margin-bottom:5px">Card Number</label>
+          <input type="text" id="funding-card-number" placeholder="4111 2222 3333 4444" maxlength="19" style="width:100%; padding:10px; border:1.5px solid var(--uw-border); border-radius:6px; font-size:13px">
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px">
+          <div>
+            <label style="display:block; font-size:11px; font-weight:700; color:var(--uw-gray); text-transform:uppercase; margin-bottom:5px">Expiry Date</label>
+            <input type="text" id="funding-card-expiry" placeholder="MM/YY" maxlength="5" style="width:100%; padding:10px; border:1.5px solid var(--uw-border); border-radius:6px; font-size:13px">
+          </div>
+          <div>
+            <label style="display:block; font-size:11px; font-weight:700; color:var(--uw-gray); text-transform:uppercase; margin-bottom:5px">CVV</label>
+            <input type="password" id="funding-card-cvv" placeholder="•••" maxlength="4" style="width:100%; padding:10px; border:1.5px solid var(--uw-border); border-radius:6px; font-size:13px">
+          </div>
+        </div>
+      </div>
+      
+      <div style="display:flex; gap:12px">
+        <button class="btn btn-w" style="flex:1; justify-content:center; padding:12px" onclick="openContractDetailsAfterEscrow(${contractId})">Back</button>
+        <button id="btn-submit-funding" class="btn btn-g" style="flex:2; justify-content:center; padding:12px" onclick="submitFunding(${milestoneId}, ${amount}, ${contractId})" ${isWalletDisabled ? 'disabled' : ''}>Fund Milestone →</button>
+      </div>
+    </div>
+  `;
+  
+  // Track selected method
+  window.selectedFundingMethod = isWalletDisabled ? 'card' : 'wallet';
+  if (isWalletDisabled) {
+    selectFundingMethod('card', false);
+  }
+}
+
+window.selectFundingMethod = function(method, isDisabled) {
+  if (isDisabled) return;
+  window.selectedFundingMethod = method;
+  
+  const w = document.getElementById('method-wallet');
+  const c = document.getElementById('method-card');
+  const cardSection = document.getElementById('card-fields-section');
+  const btn = document.getElementById('btn-submit-funding');
+  
+  if (method === 'wallet') {
+    w.style.border = '1.5px solid var(--uw-green)';
+    w.style.background = 'var(--uw-green-light)';
+    w.querySelector('div:nth-child(2)').style.color = 'var(--uw-green)';
+    
+    c.style.border = '1.5px solid var(--uw-border)';
+    c.style.background = 'white';
+    c.querySelector('div:nth-child(2)').style.color = 'var(--uw-black)';
+    
+    cardSection.style.display = 'none';
+    btn.disabled = false;
+  } else {
+    c.style.border = '1.5px solid var(--uw-green)';
+    c.style.background = 'var(--uw-green-light)';
+    c.querySelector('div:nth-child(2)').style.color = 'var(--uw-green)';
+    
+    w.style.border = '1.5px solid var(--uw-border)';
+    w.style.background = 'white';
+    w.querySelector('div:nth-child(2)').style.color = 'var(--uw-black)';
+    
+    cardSection.style.display = 'block';
+    btn.disabled = false;
+  }
+}
+
+window.openContractDetailsAfterEscrow = function(contractId) {
+  toast('Loading...', 'Returning to contract');
+  setTimeout(() => {
+    manageContract(contractId);
+  }, 100);
+}
+
+window.submitFunding = async function(milestoneId, amount, contractId) {
+  const btn = document.getElementById('btn-submit-funding');
+  const originalText = btn.innerText;
+  
+  if (window.selectedFundingMethod === 'card') {
+    const name = document.getElementById('funding-card-name').value.trim();
+    const num = document.getElementById('funding-card-number').value.trim();
+    const exp = document.getElementById('funding-card-expiry').value.trim();
+    const cvv = document.getElementById('funding-card-cvv').value.trim();
+    
+    if (!name || !num || !exp || !cvv) {
+      toast('Required', 'Please complete all credit card fields.');
+      return;
+    }
+  }
+  
+  btn.disabled = true;
+  btn.innerText = 'Processing Payment...';
+  
+  try {
+    const res = await fetch(BASE_URL + 'client/api/fund-milestone.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        milestone_id: milestoneId,
+        payment_method: window.selectedFundingMethod
+      })
+    });
+    
+    const data = await res.json();
+    if (data.success) {
+      toast('Funded! 🎉', 'Milestone accepted & funded in escrow!');
+      
+      // Update balance globally if wallet was used
+      if (window.selectedFundingMethod === 'wallet' && typeof data.new_balance === 'number') {
+        availableBalance = data.new_balance;
+        const balEl = document.getElementById('client-available-balance');
+        if (balEl) balEl.textContent = '$' + availableBalance.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      }
+      
+      // Close the funding modal
+      closeModal();
+      
+      // Return to contract details modal to reflect updated funded state in real-time
+      setTimeout(() => {
+        manageContract(contractId);
+      }, 1000);
+    } else {
+      toast('Error', data.message);
+      btn.disabled = false;
+      btn.innerText = originalText;
+    }
+  } catch(err) {
+    toast('Error', 'Payment processing failed.');
+    btn.disabled = false;
+    btn.innerText = originalText;
+  }
 }
 </script>
 </body>

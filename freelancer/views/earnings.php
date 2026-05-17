@@ -87,6 +87,9 @@
                     ?>">
                       <?php echo ucfirst($t['status']); ?>
                     </span>
+                    <?php if ($t['status'] === 'pending'): ?>
+                      <button class="btn btn-g btn-sm" style="margin-left: 8px; padding: 2px 6px; font-size: 11px;" onclick="event.stopPropagation();releasePendingPayment(<?php echo $t['id']; ?>, this)">Clear Hold</button>
+                    <?php endif; ?>
                   </td>
                 </tr>
               <?php endforeach; ?>
@@ -104,7 +107,12 @@
             <div style="padding:16px;border-bottom:1px solid #eee">
               <div style="display:flex;justify-content:space-between;margin-bottom:8px">
                 <div style="font-weight:700;font-size:14px;color:var(--dark)"><?php echo htmlspecialchars($t['description']); ?></div>
-                <span class="badge <?php echo $t['status'] === 'completed' ? 'b-green' : 'b-blue'; ?>" style="font-size:10px"><?php echo ucfirst($t['status']); ?></span>
+                <div style="display:flex;align-items:center;gap:6px">
+                  <span class="badge <?php echo $t['status'] === 'completed' ? 'b-green' : 'b-blue'; ?>" style="font-size:10px"><?php echo ucfirst($t['status']); ?></span>
+                  <?php if ($t['status'] === 'pending'): ?>
+                    <button class="btn btn-g btn-sm" style="padding: 2px 6px; font-size: 10px;" onclick="event.stopPropagation();releasePendingPayment(<?php echo $t['id']; ?>, this)">Clear Hold</button>
+                  <?php endif; ?>
+                </div>
               </div>
               <div style="display:flex;justify-content:space-between;align-items:flex-end">
                 <div style="font-size:12px;color:var(--muted)"><?php echo date('M j, Y', strtotime($t['created_at'])); ?></div>
