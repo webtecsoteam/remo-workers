@@ -1,16 +1,16 @@
 # Graph Report - upwork project  (2026-05-17)
 
 ## Corpus Check
-- 109 files · ~307,576 words
+- 111 files · ~307,849 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 422 nodes · 460 edges · 149 communities (135 shown, 14 thin omitted)
+- 424 nodes · 460 edges · 151 communities (137 shown, 14 thin omitted)
 - Extraction: 90% EXTRACTED · 10% INFERRED · 0% AMBIGUOUS · INFERRED: 44 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `572579fc`
+- Built from commit: `eb99096e`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -62,7 +62,7 @@
 - `toggleSkill()` --calls--> `renderSelectedPreview()`  [INFERRED]
   freelancer/includes/footer_test.js → scratch/simulated_footer.js
 
-## Communities (149 total, 14 thin omitted)
+## Communities (151 total, 14 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.12
@@ -115,7 +115,7 @@ _Questions this graph is uniquely positioned to answer:_
 - **Why does `job` connect `Community 2` to `Community 6`?**
   _High betweenness centrality (0.048) - this node is a cross-community bridge._
 - **Why does `renderSelectedPreview()` connect `Community 1` to `Community 6`?**
-  _High betweenness centrality (0.023) - this node is a cross-community bridge._
+  _High betweenness centrality (0.022) - this node is a cross-community bridge._
 - **Are the 12 inferred relationships involving `job` (e.g. with `.stats()` and `.recentActivity()`) actually correct?**
   _`job` has 12 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 2 inferred relationships involving `toast()` (e.g. with `sendMsg()` and `requestMilestone()`) actually correct?**

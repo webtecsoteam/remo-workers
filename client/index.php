@@ -858,7 +858,7 @@ window.closeModal = function() {
           <div class="pg-title">Profile Settings</div>
           <div class="pg-sub">Manage your personal and company information</div>
         </div>
-        <button class="btn btn-g" onclick="saveClientProfile()">Save Changes</button>
+        <button class="btn btn-g" onclick="saveClientProfile(this)">Save Changes</button>
       </div>
 
       <div class="card" style="padding:32px;border-radius:16px;box-shadow:var(--sh);max-width:800px">
@@ -890,7 +890,7 @@ window.closeModal = function() {
         </div>
 
         <div style="border-top:1px solid var(--uw-border);padding-top:24px;display:flex;justify-content:flex-end">
-            <button class="btn btn-g" style="padding:12px 30px;font-size:15px" onclick="saveClientProfile()">Save Profile Changes</button>
+            <button class="btn btn-g" style="padding:12px 30px;font-size:15px" onclick="saveClientProfile(this)">Save Profile Changes</button>
         </div>
       </div>
     </div>

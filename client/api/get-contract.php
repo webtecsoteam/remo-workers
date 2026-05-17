@@ -38,6 +38,11 @@ try {
     $mStmt->execute([$contractId]);
     $contract['milestones'] = $mStmt->fetchAll(PDO::FETCH_ASSOC);
 
+    // Fetch work logs
+    $wlStmt = $db->prepare("SELECT * FROM work_logs WHERE contract_id = ? ORDER BY created_at DESC");
+    $wlStmt->execute([$contractId]);
+    $contract['work_logs'] = $wlStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+
     echo json_encode([
         'success' => true,
         'contract' => $contract

@@ -299,9 +299,9 @@ button{font-family:inherit;cursor:pointer}
     max-height:90vh;
     margin-top:auto;
   }
-  .overlay{align-items:flex-end;padding:0;top:0;bottom:auto;height:100dvh!important}
+  .overlay{align-items:flex-end;padding:0;top:0;bottom:0!important;height:auto!important}
   .mc{
-    padding:16px 16px calc(48px + env(safe-area-inset-bottom));
+    padding:16px 16px calc(80px + env(safe-area-inset-bottom));
   }
   .mh{border-radius:20px 20px 0 0;padding:16px 20px}
 

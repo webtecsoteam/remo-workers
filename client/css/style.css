@@ -786,7 +786,7 @@ body.modal-open{
   .tbl td:nth-child(5){display:none}
 
   /* ── modal full-screen on mobile ── */
-  .overlay{padding:0;align-items:flex-end;top:0;bottom:auto;height:100dvh!important}
+  .overlay{padding:0;align-items:flex-end;top:0;bottom:0!important;height:auto!important}
   .modal{
     border-radius:16px 16px 0 0;
     max-height:92vh;
@@ -794,7 +794,7 @@ body.modal-open{
   }
   .mc{
     padding:18px 16px 12px;
-    padding-bottom:calc(48px + env(safe-area-inset-bottom));
+    padding-bottom:calc(80px + env(safe-area-inset-bottom));
   }
   .pj-modal-scroll{padding:18px 16px 8px}
   .pj-modal-footer{

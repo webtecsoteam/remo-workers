@@ -67,13 +67,13 @@ function confirmFundMilestone(amount, name, milestone){
   closeModal();
 }
 function selectPayMethod(el){document.querySelectorAll('.pay-method').forEach(x=>x.classList.remove('selected'));el.classList.add('selected');}
-async function handleAddFunds(){
+async function handleAddFunds(btn){
   const input = document.getElementById('add-funds-amount');
     const val = input ? input.value : 0;
     const v = parseFloat(val || 0);
   if(v < 1){ toast('Minimum $1', 'Please enter at least $1 to add'); return; }
   
-  const btn = event.target;
+  if (!btn) btn = document.querySelector('#overlay button.btn-g');
   const originalText = btn.innerText;
   btn.disabled = true;
   btn.innerText = 'Processing...';
@@ -417,7 +417,7 @@ const MODALS = {
       <div class="fund-summary-row"><span style="color:var(--uw-gray)">Processing fee</span><span>$0.00</span></div>
       <div class="fund-summary-row total"><span>New balance after deposit</span><span id="add-new-bal" style="color:var(--uw-green)">$0.00</span></div>
     </div>
-    <button class="btn btn-g" style="width:100%;justify-content:center;padding:11px" onclick="handleAddFunds()">Add Funds →</button>
+    <button class="btn btn-g" style="width:100%;justify-content:center;padding:11px" onclick="handleAddFunds(this)">Add Funds →</button>
   `},
   'manage-cards':{t:'Payment Methods',b:`
     <div style="margin-bottom:14px">
@@ -1229,10 +1229,17 @@ async function cancelHiring(propId) {
 }
 
 window.manageContract = async function(contract) {
-  if (typeof contract === 'number' || typeof contract === 'string') {
+  let contractId = null;
+  if (typeof contract === 'object' && contract !== null) {
+    contractId = contract.id;
+  } else {
+    contractId = contract;
+  }
+
+  if (contractId) {
     toast('Loading...', 'Fetching contract details');
     try {
-      const res = await fetch(BASE_URL + 'client/api/get-contract.php?id=' + contract);
+      const res = await fetch(BASE_URL + 'client/api/get-contract.php?id=' + contractId);
       const data = await res.json();
       if (!data.success) {
         toast('Error', data.message);
@@ -1286,6 +1293,50 @@ window.manageContract = async function(contract) {
             </div>
           `).join('')}
           ${(!contract.milestones || contract.milestones.length === 0) ? '<div style="color:var(--uw-gray); font-size:13px; text-align:center; padding:10px; border:1.5px dashed var(--uw-border); border-radius:10px">No milestones defined.</div>' : ''}
+        </div>
+      </div>
+
+      <!-- Logged Timesheet Section -->
+      <div style="margin-bottom:25px">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px">
+          <h4 style="margin:0; font-size:14px; color:var(--uw-black)">Logged Timesheet</h4>
+          <span style="font-size:12px; font-weight:700; color:var(--uw-green)">
+            Total: ${(contract.work_logs || []).reduce((acc, curr) => acc + parseFloat(curr.hours), 0).toFixed(2)} hrs
+          </span>
+        </div>
+        <div style="max-height:220px; overflow-y:auto; border:1px solid var(--uw-border); border-radius:10px; background:white">
+          <table style="width:100%; border-collapse:collapse; font-size:12.5px; text-align:left">
+            <thead>
+              <tr style="background:var(--uw-bg); border-bottom:1.5px solid var(--uw-border)">
+                <th style="padding:10px; font-weight:700; color:var(--uw-black)">Date</th>
+                <th style="padding:10px; font-weight:700; color:var(--uw-black)">Hours</th>
+                <th style="padding:10px; font-weight:700; color:var(--uw-black)">Description</th>
+                <th style="padding:10px; font-weight:700; color:var(--uw-black)">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${(contract.work_logs || []).map(wl => {
+                const dateStr = new Date(wl.created_at).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
+                const timeRange = (wl.start_time && wl.end_time) ? `<div style="font-size:10px; color:var(--uw-gray)">${wl.start_time} - ${wl.end_time}</div>` : '';
+                return `
+                  <tr style="border-bottom:1px solid var(--uw-border)">
+                    <td style="padding:10px; white-space:nowrap">
+                      <div>${dateStr}</div>
+                      ${timeRange}
+                    </td>
+                    <td style="padding:10px; font-weight:600">${parseFloat(wl.hours).toFixed(2)} hrs</td>
+                    <td style="padding:10px; max-width:180px; word-break:break-word; color:var(--uw-gray)">${wl.description || 'No description'}</td>
+                    <td style="padding:10px; font-weight:600; color:var(--uw-green)">$${parseFloat(wl.amount).toFixed(2)}</td>
+                  </tr>
+                `;
+              }).join('')}
+              ${(!contract.work_logs || contract.work_logs.length === 0) ? `
+                <tr>
+                  <td colspan="4" style="text-align:center; padding:15px; color:var(--uw-gray)">No logged hours recorded yet.</td>
+                </tr>
+              ` : ''}
+            </tbody>
+          </table>
         </div>
       </div>
       
@@ -1828,7 +1879,7 @@ function processWorkLog(logId, action) {
   })
   .catch(err => toast('Error', 'Communication failed'));
 }
-function saveClientProfile() {
+function saveClientProfile(btn) {
   const name = document.getElementById('client-name').value;
   const company = document.getElementById('client-company').value;
   const country = document.getElementById('client-country').value;
@@ -1836,7 +1887,7 @@ function saveClientProfile() {
 
   if (!name) return toast('Error', 'Name is required');
 
-  const btn = event.target;
+  if (!btn) btn = document.querySelector('#page-settings button.btn-g');
   const originalText = btn.innerText;
   btn.disabled = true;
   btn.innerText = 'Saving...';
