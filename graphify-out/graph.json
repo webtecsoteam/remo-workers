@@ -2821,6 +2821,15 @@
       "norm_label": "buy-connects.php"
     },
     {
+      "label": "add-milestone.php",
+      "file_type": "code",
+      "source_file": "freelancer/api/add-milestone.php",
+      "source_location": "L1",
+      "id": "freelancer_api_add_milestone_php",
+      "community": 152,
+      "norm_label": "add-milestone.php"
+    },
+    {
       "label": "request-milestone.php",
       "file_type": "code",
       "source_file": "freelancer/api/request-milestone.php",
@@ -8545,5 +8554,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "5bc697cd014e6f2813bb2650d207c300ac5f8596"
+  "built_at_commit": "6046e1e0390a701bdb62c5258ad814e7a8eeebc7"
 }

@@ -62,10 +62,12 @@ $conversationsStmt = $db->prepare("
 $conversationsStmt->execute([$user['id'], $user['id'], $user['id']]);
 $conversations = $conversationsStmt->fetchAll(PDO::FETCH_ASSOC);
 $recentMessages = array_slice($conversations, 0, 5);
-// Map other_name to sender_name for consistency in the dashboard view
+// Map other_name to sender_name and match expected keys for consistency in the dashboard view
 foreach($recentMessages as &$rm) {
     $rm['sender_name'] = $rm['other_name'];
     $rm['sender_avatar'] = $rm['other_avatar'];
+    $rm['created_at'] = $rm['last_time'];
+    $rm['message'] = $rm['last_message'];
 }
 unset($rm);
 

@@ -965,9 +965,13 @@
                   <div>
                     ${ms.status === 'pending' ? `
                       <span class="badge" style="background:#f3f4f6; color:#4b5563; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:600">Awaiting Funding</span>
-                    ` : (ms.status === 'funded' ? `
-                      <button class="btn btn-g btn-sm" onclick="requestMilestone(${ms.id}, this)">Submit Work</button>
-                    ` : (ms.status === 'requested' ? `
+                    ` : (ms.status === 'funded' ? (
+                      (c.status === 'completed' || c.status === 'cancelled') ? `
+                        <span class="badge" style="background:#e0f2fe; color:#0369a1; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:600">Funded</span>
+                      ` : `
+                        <button class="btn btn-g btn-sm" onclick="requestMilestone(${ms.id}, this)">Submit Work</button>
+                      `
+                    ) : (ms.status === 'requested' ? `
                       <span class="badge" style="background:#fef3c7; color:#b45309; padding:4px 8px; border-radius:4px; font-size:11px">Under Review</span>
                     ` : `
                       <span class="badge" style="background:#d1fae5; color:#065f46; padding:4px 8px; border-radius:4px; font-size:11px">Paid</span>
@@ -978,7 +982,9 @@
               ${(!c.milestones || c.milestones.length === 0) ? `
                 <div style="color:#666; font-size:14px; text-align:center; padding:25px; border:1.5px dashed #ccc; border-radius:12px; background:#fff">
                   <div style="margin-bottom:12px; font-weight:600; color:#374151">No milestones defined for this contract.</div>
-                  <button class="btn btn-g" style="margin: 0 auto" onclick="openDirectSubmissionModal(${c.id}, ${parseFloat(c.amount)})">Submit Work & Request Payment</button>
+                  ${(c.status === 'completed' || c.status === 'cancelled') ? '' : `
+                    <button class="btn btn-g" style="margin: 0 auto" onclick="openDirectSubmissionModal(${c.id}, ${parseFloat(c.amount)})">Submit Work & Request Payment</button>
+                  `}
                 </div>
               ` : ''}
             </div>
@@ -992,7 +998,12 @@
 
           <!-- Log Time Section (for Hourly) -->
           <div id="hourly-log-section" style="margin-bottom:30px; display: ${c.contract_type === 'hourly' ? 'block' : 'none'}">
-            <h3 style="font-size:16px;margin-bottom:15px;font-weight:700;color:var(--dark)">Work Session Logger</h3>
+            ${(c.status === 'completed' || c.status === 'cancelled') ? `
+              <div style="background:#f3f4f6; border:1px solid #e5e7eb; border-radius:8px; padding:15px; font-size:13px; color:#4b5563; text-align:center">
+                🔒 This contract is ${c.status}. Logging time is disabled.
+              </div>
+            ` : `
+              <h3 style="font-size:16px;margin-bottom:15px;font-weight:700;color:var(--dark)">Work Session Logger</h3>
             
             <div style="display:flex;border-bottom:1.5px solid var(--border);margin-bottom:20px;gap:20px">
               <div id="tab-tracker" style="font-weight:700;font-size:13px;color:var(--g);border-bottom:2.5px solid var(--g);padding-bottom:10px;cursor:pointer" onclick="switchHourlyTab('tracker')">⏱️ Start Tracker</div>
@@ -1044,6 +1055,7 @@
               <span>⚠️</span>
               <span><strong>Weekly Hour Limit: 40 hrs</strong>. Real-time logging & work activity tracking are enabled.</span>
             </div>
+            `}
 
             <!-- Dynamic Work Diary -->
             <h3 style="font-size:15px;font-weight:700;margin-bottom:15px;color:var(--dark)">📝 Work Diary & Activity Logs</h3>
@@ -1081,6 +1093,62 @@
           dateInput.value = today;
         }
       }, 50);
+    }
+    else if (type === 'add-milestone') {
+      const clientId = data;
+      const activeContracts = CONTRACTS.filter(c => c.client_id == clientId && (c.status === 'active' || c.status === 'paused' || c.status === 'completed'));
+      
+      document.getElementById('mh-title').innerText = 'Propose Milestone';
+      modal.style.maxWidth = '500px';
+
+      if (activeContracts.length === 0) {
+        mc.innerHTML = `
+          <div style="padding:30px; text-align:center">
+            <div style="font-size:40px; margin-bottom:15px">⚠️</div>
+            <h3 style="font-size:16px; font-weight:700; color:var(--dark); margin-bottom:10px">No Contract Found</h3>
+            <p style="font-size:13.5px; color:var(--muted); line-height:1.5; margin-bottom:20px">
+              You must have a contract with this client to propose a new milestone.
+            </p>
+            <button class="btn btn-g" style="margin:0 auto" onclick="closeModal()">OK</button>
+          </div>
+        `;
+      } else {
+        let contractOptions = activeContracts.map(c => 
+          `<option value="${c.id}">${c.job_title} (${c.status.charAt(0).toUpperCase() + c.status.slice(1)} · $${parseFloat(c.amount).toLocaleString()})</option>`
+        ).join('');
+
+        mc.innerHTML = `
+          <div style="padding:25px">
+            <p style="font-size:13.5px; color:var(--muted); margin-bottom:20px; line-height:1.5">
+              Propose a new milestone for this contract. Once submitted, the client will see it and can fund it to start the work.
+            </p>
+            
+            <div class="fg" style="margin-bottom:15px">
+              <label style="display:block; font-weight:700; font-size:12.5px; margin-bottom:6px; color:var(--dark)">Select Contract</label>
+              <select id="ms-contract-id" style="width:100%; padding:10px; border:1.5px solid var(--border); border-radius:8px; font-size:13.5px; background:white; font-family:inherit; color:var(--dark)">
+                ${contractOptions}
+              </select>
+            </div>
+
+            <div class="fg" style="margin-bottom:15px">
+              <label style="display:block; font-weight:700; font-size:12.5px; margin-bottom:6px; color:var(--dark)">Milestone Description</label>
+              <input type="text" id="ms-desc" placeholder="e.g. Phase 2: React Native App Integration" style="width:100%; padding:10px; border:1.5px solid var(--border); border-radius:8px; font-size:13.5px; font-family:inherit; color:var(--dark)">
+            </div>
+
+            <div class="fg" style="margin-bottom:25px">
+              <label style="display:block; font-weight:700; font-size:12.5px; margin-bottom:6px; color:var(--dark)">Milestone Budget ($)</label>
+              <input type="number" id="ms-amt" placeholder="e.g. 500" min="1" step="any" style="width:100%; padding:10px; border:1.5px solid var(--border); border-radius:8px; font-size:13.5px; font-family:inherit; color:var(--dark)">
+            </div>
+
+            <div style="display:flex; gap:12px">
+              <button class="btn btn-w" style="flex:1; justify-content:center" onclick="closeModal()">Cancel</button>
+              <button class="btn btn-g" style="flex:2; justify-content:center" id="btn-submit-ms" onclick="submitNewMilestone(${clientId})">Propose Milestone →</button>
+            </div>
+          </div>
+        `;
+      }
+      overlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
     }
     else if (type === 'edit-profile') {
       document.getElementById('mh-title').innerText = 'Edit Profile';
@@ -2141,6 +2209,12 @@
 
   function renderChatWindow(name, initials, messages) {
     const chatWindow = document.getElementById('chat-window');
+    
+    // Check if freelancer has contracts with this client
+    const clientContracts = (typeof CONTRACTS !== 'undefined' && Array.isArray(CONTRACTS)) 
+      ? CONTRACTS.filter(c => c.client_id == activeChatId && (c.status === 'active' || c.status === 'paused' || c.status === 'completed'))
+      : [];
+
     const msgHtml = messages.map(m => {
       const isMe = (m.sender_id != activeChatId);
       return `
@@ -2155,9 +2229,16 @@
     }).join('');
 
     chatWindow.innerHTML = `
-      <div style="padding:15px;background:white;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px">
-        <div class="av" style="width:32px;height:32px;background:var(--gl);color:var(--forest)">${initials}</div>
-        <div style="font-weight:700;font-size:14px">${name}</div>
+      <div style="padding:15px;background:white;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="av" style="width:32px;height:32px;background:var(--gl);color:var(--forest)">${initials}</div>
+          <div style="font-weight:700;font-size:14px">${name}</div>
+        </div>
+        ${clientContracts.length > 0 ? `
+          <button class="btn btn-g btn-sm" onclick="openModal('add-milestone', ${activeChatId})" style="padding:6px 12px;font-size:12.5px;display:flex;align-items:center;gap:6px">
+            <span>➕</span> Add Milestone
+          </button>
+        ` : ''}
       </div>
       <div style="flex:1;padding:20px;display:flex;flex-direction:column;gap:15px;overflow-y:auto" id="chat-messages-scroll">${msgHtml}</div>
       <div style="padding:15px;background:white;border-top:1px solid var(--border);display:flex;gap:10px">
@@ -2269,6 +2350,12 @@
 
   function renderChatWindow(name, initials, messages) {
     const chatWindow = document.getElementById('chat-window');
+    
+    // Check if freelancer has contracts with this client
+    const clientContracts = (typeof CONTRACTS !== 'undefined' && Array.isArray(CONTRACTS)) 
+      ? CONTRACTS.filter(c => c.client_id == activeChatId && (c.status === 'active' || c.status === 'paused' || c.status === 'completed'))
+      : [];
+
     const msgHtml = messages.map(m => {
       const isMe = (m.sender_id != activeChatId);
       return `
@@ -2283,9 +2370,16 @@
     }).join('');
 
     chatWindow.innerHTML = `
-      <div style="padding:15px;background:white;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px">
-        <div class="av" style="width:32px;height:32px;background:var(--gl);color:var(--forest)">${initials}</div>
-        <div style="font-weight:700;font-size:14px">${name}</div>
+      <div style="padding:15px;background:white;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="av" style="width:32px;height:32px;background:var(--gl);color:var(--forest)">${initials}</div>
+          <div style="font-weight:700;font-size:14px">${name}</div>
+        </div>
+        ${clientContracts.length > 0 ? `
+          <button class="btn btn-g btn-sm" onclick="openModal('add-milestone', ${activeChatId})" style="padding:6px 12px;font-size:12.5px;display:flex;align-items:center;gap:6px">
+            <span>➕</span> Add Milestone
+          </button>
+        ` : ''}
       </div>
       <div style="flex:1;padding:20px;display:flex;flex-direction:column;gap:15px;overflow-y:auto" id="chat-messages-scroll">${msgHtml}</div>
       <div style="padding:15px;background:white;border-top:1px solid var(--border);display:flex;gap:10px">
@@ -2784,6 +2878,83 @@ window.submitDirectWork = function(event, contractId) {
     console.error(err);
     toast('Error', 'Failed to submit work.');
   });
+}
+
+window.submitNewMilestone = async function(clientId) {
+  const contractSelect = document.getElementById('ms-contract-id');
+  if (!contractSelect) return;
+  const contractId = contractSelect.value;
+  const desc = document.getElementById('ms-desc').value.trim();
+  const amountStr = document.getElementById('ms-amt').value;
+  const amount = parseFloat(amountStr);
+
+  if (!desc) {
+    toast('Error', 'Please enter a description for the milestone.');
+    return;
+  }
+
+  if (isNaN(amount) || amount <= 0) {
+    toast('Error', 'Please enter a valid amount greater than $0.');
+    return;
+  }
+
+  const btn = document.getElementById('btn-submit-ms');
+  btn.disabled = true;
+  btn.innerText = 'Submitting...';
+
+  try {
+    const response = await fetch(BASE_URL + 'freelancer/api/add-milestone.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contract_id: contractId,
+        description: desc,
+        amount: amount
+      })
+    });
+    const result = await response.json();
+
+    if (result.success) {
+      toast('Success 🎉', result.message);
+      closeModal();
+
+      // Dynamically add the milestone to the local CONTRACTS list in memory
+      CONTRACTS.forEach(c => {
+        if (c.id == contractId) {
+          if (!c.milestones) c.milestones = [];
+          c.milestones.push(result.milestone);
+        }
+      });
+
+      // Proactively send a system/chat message about the newly added milestone
+      const msg = `PROPOSED MILESTONE: I have proposed a new milestone of $${amount.toLocaleString()} for: "${desc}". Please approve and fund this milestone from your dashboard.`;
+      
+      // Use sendMsg logic but post it directly
+      const formData = new FormData();
+      formData.append('receiver_id', clientId);
+      formData.append('message', msg);
+      
+      await fetch(BASE_URL + 'actions/send_message.php', {
+        method: 'POST',
+        body: formData
+      });
+
+      // If chat is open, reload messages
+      if (activeChatId == clientId) {
+        const chatName = document.querySelector('.msg-item.active div[style*="font-weight:700"]')?.innerText || 'Client';
+        const chatInitials = document.querySelector('.msg-item.active .av')?.innerText || 'CL';
+        loadChat(clientId, chatName, chatInitials);
+      }
+    } else {
+      toast('Error', result.message);
+      btn.disabled = false;
+      btn.innerText = 'Propose Milestone →';
+    }
+  } catch(err) {
+    toast('Error', 'Failed to propose milestone.');
+    btn.disabled = false;
+    btn.innerText = 'Propose Milestone →';
+  }
 }
 </script>
 </body>

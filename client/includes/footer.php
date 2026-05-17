@@ -966,6 +966,24 @@ function renderChatWindow(name, initials, messages, avatar = '') {
   const chatWindow = document.getElementById('chat-window');
   const msgHtml = messages.map(m => {
     const isMe = (m.sender_id != activeChatId);
+    
+    // Inline rich card for proposed milestones
+    let bubbleContent = m.message;
+    if (!isMe && m.message.startsWith('PROPOSED MILESTONE:')) {
+      bubbleContent = `
+        <div style="margin-bottom:10px">${m.message}</div>
+        <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:12px; margin-top:8px; display:flex; flex-direction:column; gap:8px; align-items:flex-start">
+          <div style="display:flex; align-items:center; gap:6px; color:#1e40af; font-weight:700; font-size:12px">
+            <span>💼</span> Proposed Milestone Request
+          </div>
+          <div style="font-size:11.5px; color:#1e3a8a; line-height:1.4">
+            The freelancer has added this milestone to your contract. You can review and fund it now.
+          </div>
+          <button class="btn btn-g btn-sm" onclick="showPage('contracts')" style="padding:4px 10px; font-size:11px; margin-top:4px">Review & Fund Milestone</button>
+        </div>
+      `;
+    }
+
     return `
       <div style="display:flex;gap:10px;${isMe ? 'flex-direction:row-reverse' : ''}">
         <div class="av" style="width:30px;height:30px;font-size:10px">
@@ -974,7 +992,7 @@ function renderChatWindow(name, initials, messages, avatar = '') {
           `<div style="background:var(--uw-green-light);color:var(--uw-green);width:100%;height:100%;display:flex;align-items:center;justify-content:center;border-radius:50%">${initials}</div>`)}
         </div>
         <div style="max-width:75%;${isMe ? 'text-align:right' : ''}">
-          <div style="background:${isMe ? 'var(--uw-green)' : 'var(--uw-bg)'};color:${isMe ? 'white' : 'var(--uw-dark)'};border:${isMe ? 'none' : '1.5px solid var(--uw-border)'};border-radius:${isMe ? '12px 2px 12px 12px' : '2px 12px 12px 12px'};padding:10px 14px;font-size:13px;line-height:1.6;text-align:left">${m.message}</div>
+          <div style="background:${isMe ? 'var(--uw-green)' : 'var(--uw-bg)'};color:${isMe ? 'white' : 'var(--uw-dark)'};border:${isMe ? 'none' : '1.5px solid var(--uw-border)'};border-radius:${isMe ? '12px 2px 12px 12px' : '2px 12px 12px 12px'};padding:10px 14px;font-size:13px;line-height:1.6;text-align:left">${bubbleContent}</div>
           <div style="font-size:11px;color:var(--uw-gray2);margin-top:4px">${new Date(m.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>
         </div>
       </div>
@@ -1337,16 +1355,24 @@ window.manageContract = async function(contract) {
                 <div style="font-size:11px; color:var(--uw-gray)">$${parseFloat(ms.amount).toLocaleString()} · ${ms.status.charAt(0).toUpperCase() + ms.status.slice(1)}</div>
               </div>
               <div>
-                ${ms.status === 'pending' ? `
-                  <button class="btn btn-g btn-sm" onclick="openFundMilestoneModal(${ms.id}, ${ms.amount}, '${ms.description.replace(/'/g, "\\'")}', ${contract.id})">Fund Milestone</button>
-                ` : (ms.status === 'funded' ? `
+                ${ms.status === 'pending' ? (
+                  (contract.status === 'completed' || contract.status === 'cancelled') ? `
+                    <span class="badge" style="background:#f3f4f6; color:#9ca3af; padding:4px 8px; border-radius:4px; font-size:11px">Awaiting Funding</span>
+                  ` : `
+                    <button class="btn btn-g btn-sm" onclick="openFundMilestoneModal(${ms.id}, ${ms.amount}, '${ms.description.replace(/'/g, "\\'")}', ${contract.id})">Fund Milestone</button>
+                  `
+                ) : (ms.status === 'funded' ? `
                   <span class="badge" style="background:#e0f2fe; color:#0369a1; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:600">Funded (In Progress)</span>
-                ` : (ms.status === 'requested' ? `
-                  <div style="display:flex;gap:6px">
-                    <button class="btn btn-g btn-sm" onclick="releaseMilestone(${ms.id}, this, ${contract.id})">Approve</button>
-                    <button class="btn btn-w btn-sm" style="color:#ef4444;border-color:#fecaca" onclick="rejectMilestone(${ms.id}, this, ${contract.id})">Reject</button>
-                  </div>
-                ` : `
+                ` : (ms.status === 'requested' ? (
+                  (contract.status === 'completed' || contract.status === 'cancelled') ? `
+                    <span class="badge" style="background:#fef3c7; color:#b45309; padding:4px 8px; border-radius:4px; font-size:11px">Requested</span>
+                  ` : `
+                    <div style="display:flex;gap:6px">
+                      <button class="btn btn-g btn-sm" onclick="releaseMilestone(${ms.id}, this, ${contract.id})">Approve</button>
+                      <button class="btn btn-w btn-sm" style="color:#ef4444;border-color:#fecaca" onclick="rejectMilestone(${ms.id}, this, ${contract.id})">Reject</button>
+                    </div>
+                  `
+                ) : `
                   <span class="badge b-green" style="font-size:10px">Paid</span>
                 `))}
               </div>
@@ -1421,13 +1447,15 @@ window.manageContract = async function(contract) {
           </button>
         ` : ''}
         
-        <button class="btn btn-o" style="justify-content:center;padding:12px" onclick="closeModal();completeJob(${contract.proposal_id})">
-          ✅ Mark Job as Completed
-        </button>
-        
-        <button class="btn btn-w" style="justify-content:center;padding:12px;color:#ef4444;border-color:#fecaca" onclick="closeModal();cancelHiring(${contract.proposal_id})">
-          ❌ Cancel Hiring
-        </button>
+        ${(contract.status === 'active' || contract.status === 'paused') ? `
+          <button class="btn btn-o" style="justify-content:center;padding:12px" onclick="closeModal();completeJob(${contract.proposal_id})">
+            ✅ Mark Job as Completed
+          </button>
+          
+          <button class="btn btn-w" style="justify-content:center;padding:12px;color:#ef4444;border-color:#fecaca" onclick="closeModal();cancelHiring(${contract.proposal_id})">
+            ❌ Cancel Hiring
+          </button>
+        ` : ''}
       </div>
     `
   };
