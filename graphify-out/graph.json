@@ -4,1840 +4,184 @@
   "graph": {},
   "nodes": [
     {
-      "label": "index.php",
+      "label": "add_funds.php",
       "file_type": "code",
-      "source_file": "index.php",
+      "source_file": "actions/add_funds.php",
       "source_location": "L1",
-      "id": "index_php",
-      "community": 86,
-      "norm_label": "index.php"
+      "id": "actions_add_funds_php",
+      "community": 21,
+      "norm_label": "add_funds.php"
     },
     {
-      "label": "logout.php",
+      "label": "json_response()",
       "file_type": "code",
-      "source_file": "logout.php",
-      "source_location": "L1",
-      "id": "logout_php",
-      "community": 134,
-      "norm_label": "logout.php"
+      "source_file": "actions/add_funds.php",
+      "source_location": "L7",
+      "id": "actions_add_funds_json_response",
+      "community": 21,
+      "norm_label": "json_response()"
     },
     {
-      "label": "migrate.php",
+      "label": "complete_job.php",
       "file_type": "code",
-      "source_file": "migrate.php",
+      "source_file": "actions/complete_job.php",
       "source_location": "L1",
-      "id": "migrate_php",
-      "community": 135,
-      "norm_label": "migrate.php"
+      "id": "actions_complete_job_php",
+      "community": 52,
+      "norm_label": "complete_job.php"
     },
     {
-      "label": "repair_db.php",
+      "label": "hire_freelancer.php",
       "file_type": "code",
-      "source_file": "repair_db.php",
+      "source_file": "actions/hire_freelancer.php",
       "source_location": "L1",
-      "id": "repair_db_php",
-      "community": 39,
-      "norm_label": "repair_db.php"
+      "id": "actions_hire_freelancer_php",
+      "community": 50,
+      "norm_label": "hire_freelancer.php"
     },
     {
-      "label": "verification.php",
+      "label": "fund-milestone.php",
       "file_type": "code",
-      "source_file": "home/verification.php",
+      "source_file": "client/api/fund-milestone.php",
       "source_location": "L1",
-      "id": "home_verification_php",
-      "community": 130,
-      "norm_label": "verification.php"
+      "id": "client_api_fund_milestone_php",
+      "community": 115,
+      "norm_label": "fund-milestone.php"
     },
     {
-      "label": "index.php",
+      "label": "get-contract.php",
       "file_type": "code",
-      "source_file": "home/index.php",
+      "source_file": "client/api/get-contract.php",
       "source_location": "L1",
-      "id": "home_index_php",
-      "community": 129,
-      "norm_label": "index.php"
+      "id": "client_api_get_contract_php",
+      "community": 77,
+      "norm_label": "get-contract.php"
     },
     {
-      "label": "header.php",
+      "label": "release-milestone.php",
       "file_type": "code",
-      "source_file": "home/includes/header.php",
+      "source_file": "client/api/release-milestone.php",
       "source_location": "L1",
-      "id": "home_includes_header_php",
-      "community": 29,
-      "norm_label": "header.php"
+      "id": "client_api_release_milestone_php",
+      "community": 59,
+      "norm_label": "release-milestone.php"
     },
     {
       "label": "footer.php",
       "file_type": "code",
-      "source_file": "home/includes/footer.php",
+      "source_file": "client/includes/footer.php",
       "source_location": "L1",
-      "id": "home_includes_footer_php",
-      "community": 128,
+      "id": "client_includes_footer_php",
+      "community": 89,
       "norm_label": "footer.php"
-    },
-    {
-      "label": "404.php",
-      "file_type": "code",
-      "source_file": "includes/404.php",
-      "source_location": "L1",
-      "id": "includes_404_php",
-      "community": 131,
-      "norm_label": "404.php"
-    },
-    {
-      "label": "config.php",
-      "file_type": "code",
-      "source_file": "includes/config.php",
-      "source_location": "L1",
-      "id": "includes_config_php",
-      "community": 5,
-      "norm_label": "config.php"
-    },
-    {
-      "label": "loadEnv()",
-      "file_type": "code",
-      "source_file": "includes/config.php",
-      "source_location": "L10",
-      "id": "includes_config_loadenv",
-      "community": 5,
-      "norm_label": "loadenv()"
-    },
-    {
-      "label": "env()",
-      "file_type": "code",
-      "source_file": "includes/config.php",
-      "source_location": "L41",
-      "id": "includes_config_env",
-      "community": 5,
-      "norm_label": "env()"
-    },
-    {
-      "label": "getDB()",
-      "file_type": "code",
-      "source_file": "includes/config.php",
-      "source_location": "L80",
-      "id": "includes_config_getdb",
-      "community": 5,
-      "norm_label": "getdb()"
-    },
-    {
-      "label": "ensureFreelancerSchema()",
-      "file_type": "code",
-      "source_file": "includes/config.php",
-      "source_location": "L101",
-      "id": "includes_config_ensurefreelancerschema",
-      "community": 5,
-      "norm_label": "ensurefreelancerschema()"
-    },
-    {
-      "label": "baseUrl()",
-      "file_type": "code",
-      "source_file": "includes/config.php",
-      "source_location": "L117",
-      "id": "includes_config_baseurl",
-      "community": 5,
-      "norm_label": "baseurl()"
-    },
-    {
-      "label": "redirect()",
-      "file_type": "code",
-      "source_file": "includes/config.php",
-      "source_location": "L122",
-      "id": "includes_config_redirect",
-      "community": 5,
-      "norm_label": "redirect()"
-    },
-    {
-      "label": "isRoute()",
-      "file_type": "code",
-      "source_file": "includes/config.php",
-      "source_location": "L128",
-      "id": "includes_config_isroute",
-      "community": 5,
-      "norm_label": "isroute()"
-    },
-    {
-      "label": "header.php",
-      "file_type": "code",
-      "source_file": "includes/header.php",
-      "source_location": "L1",
-      "id": "includes_header_php",
-      "community": 133,
-      "norm_label": "header.php"
-    },
-    {
-      "label": "footer.php",
-      "file_type": "code",
-      "source_file": "includes/footer.php",
-      "source_location": "L1",
-      "id": "includes_footer_php",
-      "community": 132,
-      "norm_label": "footer.php"
-    },
-    {
-      "label": "Auth.php",
-      "file_type": "code",
-      "source_file": "includes/classes/Auth.php",
-      "source_location": "L1",
-      "id": "includes_classes_auth_php",
-      "community": 5,
-      "norm_label": "auth.php"
-    },
-    {
-      "label": "Auth",
-      "file_type": "code",
-      "source_file": "includes/classes/Auth.php",
-      "source_location": "L2",
-      "id": "classes_auth_auth",
-      "community": 5,
-      "norm_label": "auth"
-    },
-    {
-      "label": ".register()",
-      "file_type": "code",
-      "source_file": "includes/classes/Auth.php",
-      "source_location": "L6",
-      "id": "classes_auth_auth_register",
-      "community": 5,
-      "norm_label": ".register()"
-    },
-    {
-      "label": ".login()",
-      "file_type": "code",
-      "source_file": "includes/classes/Auth.php",
-      "source_location": "L20",
-      "id": "classes_auth_auth_login",
-      "community": 5,
-      "norm_label": ".login()"
-    },
-    {
-      "label": ".logout()",
-      "file_type": "code",
-      "source_file": "includes/classes/Auth.php",
-      "source_location": "L43",
-      "id": "classes_auth_auth_logout",
-      "community": 5,
-      "norm_label": ".logout()"
-    },
-    {
-      "label": ".user()",
-      "file_type": "code",
-      "source_file": "includes/classes/Auth.php",
-      "source_location": "L55",
-      "id": "classes_auth_auth_user",
-      "community": 2,
-      "norm_label": ".user()"
-    },
-    {
-      "label": ".check()",
-      "file_type": "code",
-      "source_file": "includes/classes/Auth.php",
-      "source_location": "L64",
-      "id": "classes_auth_auth_check",
-      "community": 5,
-      "norm_label": ".check()"
-    },
-    {
-      "label": ".isEmailVerified()",
-      "file_type": "code",
-      "source_file": "includes/classes/Auth.php",
-      "source_location": "L68",
-      "id": "classes_auth_auth_isemailverified",
-      "community": 5,
-      "norm_label": ".isemailverified()"
-    },
-    {
-      "label": ".isIdentityVerified()",
-      "file_type": "code",
-      "source_file": "includes/classes/Auth.php",
-      "source_location": "L74",
-      "id": "classes_auth_auth_isidentityverified",
-      "community": 5,
-      "norm_label": ".isidentityverified()"
-    },
-    {
-      "label": ".canApplyToJobs()",
-      "file_type": "code",
-      "source_file": "includes/classes/Auth.php",
-      "source_location": "L80",
-      "id": "classes_auth_auth_canapplytojobs",
-      "community": 5,
-      "norm_label": ".canapplytojobs()"
-    },
-    {
-      "label": ".verifyEmailByToken()",
-      "file_type": "code",
-      "source_file": "includes/classes/Auth.php",
-      "source_location": "L86",
-      "id": "classes_auth_auth_verifyemailbytoken",
-      "community": 5,
-      "norm_label": ".verifyemailbytoken()"
-    },
-    {
-      "label": ".resendEmailVerification()",
-      "file_type": "code",
-      "source_file": "includes/classes/Auth.php",
-      "source_location": "L103",
-      "id": "classes_auth_auth_resendemailverification",
-      "community": 5,
-      "norm_label": ".resendemailverification()"
-    },
-    {
-      "label": ".emailVerificationUrl()",
-      "file_type": "code",
-      "source_file": "includes/classes/Auth.php",
-      "source_location": "L113",
-      "id": "classes_auth_auth_emailverificationurl",
-      "community": 5,
-      "norm_label": ".emailverificationurl()"
-    },
-    {
-      "label": "api.laravel.php",
-      "file_type": "code",
-      "source_file": "admin/api.laravel.php",
-      "source_location": "L1",
-      "id": "admin_api_laravel_php",
-      "community": 99,
-      "norm_label": "api.laravel.php"
-    },
-    {
-      "label": "UserController.php",
-      "file_type": "code",
-      "source_file": "admin/UserController.php",
-      "source_location": "L1",
-      "id": "admin_usercontroller_php",
-      "community": 2,
-      "norm_label": "usercontroller.php"
-    },
-    {
-      "label": "UserController",
-      "file_type": "code",
-      "source_file": "admin/UserController.php",
-      "source_location": "L9",
-      "id": "admin_usercontroller_usercontroller",
-      "community": 2,
-      "norm_label": "usercontroller"
-    },
-    {
-      "label": ".index()",
-      "file_type": "code",
-      "source_file": "admin/UserController.php",
-      "source_location": "L11",
-      "id": "admin_usercontroller_usercontroller_index",
-      "community": 2,
-      "norm_label": ".index()"
-    },
-    {
-      "label": ".show()",
-      "file_type": "code",
-      "source_file": "admin/UserController.php",
-      "source_location": "L40",
-      "id": "admin_usercontroller_usercontroller_show",
-      "community": 2,
-      "norm_label": ".show()"
-    },
-    {
-      "label": ".update()",
-      "file_type": "code",
-      "source_file": "admin/UserController.php",
-      "source_location": "L52",
-      "id": "admin_usercontroller_usercontroller_update",
-      "community": 2,
-      "norm_label": ".update()"
-    },
-    {
-      "label": ".destroy()",
-      "file_type": "code",
-      "source_file": "admin/UserController.php",
-      "source_location": "L71",
-      "id": "admin_usercontroller_usercontroller_destroy",
-      "community": 2,
-      "norm_label": ".destroy()"
-    },
-    {
-      "label": ".suspend()",
-      "file_type": "code",
-      "source_file": "admin/UserController.php",
-      "source_location": "L90",
-      "id": "admin_usercontroller_usercontroller_suspend",
-      "community": 2,
-      "norm_label": ".suspend()"
-    },
-    {
-      "label": ".activate()",
-      "file_type": "code",
-      "source_file": "admin/UserController.php",
-      "source_location": "L101",
-      "id": "admin_usercontroller_usercontroller_activate",
-      "community": 2,
-      "norm_label": ".activate()"
-    },
-    {
-      "label": ".verify()",
-      "file_type": "code",
-      "source_file": "admin/UserController.php",
-      "source_location": "L112",
-      "id": "admin_usercontroller_usercontroller_verify",
-      "community": 2,
-      "norm_label": ".verify()"
-    },
-    {
-      "label": ".jobs()",
-      "file_type": "code",
-      "source_file": "admin/UserController.php",
-      "source_location": "L123",
-      "id": "admin_usercontroller_usercontroller_jobs",
-      "community": 2,
-      "norm_label": ".jobs()"
-    },
-    {
-      "label": ".payments()",
-      "file_type": "code",
-      "source_file": "admin/UserController.php",
-      "source_location": "L138",
-      "id": "admin_usercontroller_usercontroller_payments",
-      "community": 2,
-      "norm_label": ".payments()"
-    },
-    {
-      "label": "login.php",
-      "file_type": "code",
-      "source_file": "/Applications/MAMP/htdocs/upwork-project/admin/login.php",
-      "source_location": "L1",
-      "id": "applications_mamp_htdocs_upwork_project_admin_login_php",
-      "community": 108,
-      "norm_label": "login.php"
     },
     {
       "label": "index.php",
       "file_type": "code",
-      "source_file": "/Applications/MAMP/htdocs/upwork-project/admin/index.php",
+      "source_file": "client/index.php",
       "source_location": "L1",
-      "id": "applications_mamp_htdocs_upwork_project_admin_index_php",
-      "community": 107,
+      "id": "client_index_php",
+      "community": 56,
       "norm_label": "index.php"
     },
     {
-      "label": "DashboardController.php",
+      "label": "buy-connects.php",
       "file_type": "code",
-      "source_file": "admin/DashboardController.php",
+      "source_file": "freelancer/api/buy-connects.php",
       "source_location": "L1",
-      "id": "admin_dashboardcontroller_php",
-      "community": 2,
-      "norm_label": "dashboardcontroller.php"
+      "id": "freelancer_api_buy_connects_php",
+      "community": 139,
+      "norm_label": "buy-connects.php"
     },
     {
-      "label": "DashboardController",
+      "label": "clear-hold.php",
       "file_type": "code",
-      "source_file": "admin/DashboardController.php",
-      "source_location": "L12",
-      "id": "admin_dashboardcontroller_dashboardcontroller",
-      "community": 2,
-      "norm_label": "dashboardcontroller"
-    },
-    {
-      "label": ".stats()",
-      "file_type": "code",
-      "source_file": "admin/DashboardController.php",
-      "source_location": "L14",
-      "id": "admin_dashboardcontroller_dashboardcontroller_stats",
-      "community": 2,
-      "norm_label": ".stats()"
-    },
-    {
-      "label": ".revenueChart()",
-      "file_type": "code",
-      "source_file": "admin/DashboardController.php",
-      "source_location": "L42",
-      "id": "admin_dashboardcontroller_dashboardcontroller_revenuechart",
-      "community": 2,
-      "norm_label": ".revenuechart()"
-    },
-    {
-      "label": ".recentActivity()",
-      "file_type": "code",
-      "source_file": "admin/DashboardController.php",
-      "source_location": "L59",
-      "id": "admin_dashboardcontroller_dashboardcontroller_recentactivity",
-      "community": 2,
-      "norm_label": ".recentactivity()"
-    },
-    {
-      "label": "AuthController.php",
-      "file_type": "code",
-      "source_file": "admin/AuthController.php",
+      "source_file": "freelancer/api/clear-hold.php",
       "source_location": "L1",
-      "id": "admin_authcontroller_php",
-      "community": 8,
-      "norm_label": "authcontroller.php"
+      "id": "freelancer_api_clear_hold_php",
+      "community": 118,
+      "norm_label": "clear-hold.php"
     },
     {
-      "label": "AuthController",
+      "label": "get-connects-activity.php",
       "file_type": "code",
-      "source_file": "admin/AuthController.php",
-      "source_location": "L12",
-      "id": "admin_authcontroller_authcontroller",
-      "community": 8,
-      "norm_label": "authcontroller"
-    },
-    {
-      "label": ".login()",
-      "file_type": "code",
-      "source_file": "admin/AuthController.php",
-      "source_location": "L14",
-      "id": "admin_authcontroller_authcontroller_login",
-      "community": 8,
-      "norm_label": ".login()"
-    },
-    {
-      "label": ".logout()",
-      "file_type": "code",
-      "source_file": "admin/AuthController.php",
-      "source_location": "L49",
-      "id": "admin_authcontroller_authcontroller_logout",
-      "community": 8,
-      "norm_label": ".logout()"
-    },
-    {
-      "label": ".me()",
-      "file_type": "code",
-      "source_file": "admin/AuthController.php",
-      "source_location": "L59",
-      "id": "admin_authcontroller_authcontroller_me",
-      "community": 8,
-      "norm_label": ".me()"
-    },
-    {
-      "label": ".formatUser()",
-      "file_type": "code",
-      "source_file": "admin/AuthController.php",
-      "source_location": "L67",
-      "id": "admin_authcontroller_authcontroller_formatuser",
-      "community": 8,
-      "norm_label": ".formatuser()"
-    },
-    {
-      "label": "ReportController.php",
-      "file_type": "code",
-      "source_file": "admin/ReportController.php",
+      "source_file": "freelancer/api/get-connects-activity.php",
       "source_location": "L1",
-      "id": "admin_reportcontroller_php",
-      "community": 2,
-      "norm_label": "reportcontroller.php"
+      "id": "freelancer_api_get_connects_activity_php",
+      "community": 140,
+      "norm_label": "get-connects-activity.php"
     },
     {
-      "label": "ReportController",
+      "label": "request-milestone.php",
       "file_type": "code",
-      "source_file": "admin/ReportController.php",
-      "source_location": "L12",
-      "id": "admin_reportcontroller_reportcontroller",
-      "community": 2,
-      "norm_label": "reportcontroller"
-    },
-    {
-      "label": ".overview()",
-      "file_type": "code",
-      "source_file": "admin/ReportController.php",
-      "source_location": "L14",
-      "id": "admin_reportcontroller_reportcontroller_overview",
-      "community": 2,
-      "norm_label": ".overview()"
-    },
-    {
-      "label": ".users()",
-      "file_type": "code",
-      "source_file": "admin/ReportController.php",
-      "source_location": "L48",
-      "id": "admin_reportcontroller_reportcontroller_users",
-      "community": 2,
-      "norm_label": ".users()"
-    },
-    {
-      "label": ".jobs()",
-      "file_type": "code",
-      "source_file": "admin/ReportController.php",
-      "source_location": "L80",
-      "id": "admin_reportcontroller_reportcontroller_jobs",
-      "community": 2,
-      "norm_label": ".jobs()"
-    },
-    {
-      "label": ".revenue()",
-      "file_type": "code",
-      "source_file": "admin/ReportController.php",
-      "source_location": "L105",
-      "id": "admin_reportcontroller_reportcontroller_revenue",
-      "community": 2,
-      "norm_label": ".revenue()"
-    },
-    {
-      "label": ".export()",
-      "file_type": "code",
-      "source_file": "admin/ReportController.php",
-      "source_location": "L130",
-      "id": "admin_reportcontroller_reportcontroller_export",
-      "community": 2,
-      "norm_label": ".export()"
-    },
-    {
-      "label": "2024_01_01_create_tables.php",
-      "file_type": "code",
-      "source_file": "admin/2024_01_01_create_tables.php",
+      "source_file": "freelancer/api/request-milestone.php",
       "source_location": "L1",
-      "id": "admin_2024_01_01_create_tables_php",
-      "community": 10,
-      "norm_label": "2024_01_01_create_tables.php"
+      "id": "freelancer_api_request_milestone_php",
+      "community": 71,
+      "norm_label": "request-milestone.php"
     },
     {
-      "label": "up()",
+      "label": "submit-proposal.php",
       "file_type": "code",
-      "source_file": "admin/2024_01_01_create_tables.php",
-      "source_location": "L9",
-      "id": "admin_2024_01_01_create_tables_up",
-      "community": 10,
-      "norm_label": "up()"
-    },
-    {
-      "label": "down()",
-      "file_type": "code",
-      "source_file": "admin/2024_01_01_create_tables.php",
-      "source_location": "L68",
-      "id": "admin_2024_01_01_create_tables_down",
-      "community": 10,
-      "norm_label": "down()"
-    },
-    {
-      "label": "JobController.php",
-      "file_type": "code",
-      "source_file": "admin/JobController.php",
+      "source_file": "freelancer/api/submit-proposal.php",
       "source_location": "L1",
-      "id": "admin_jobcontroller_php",
-      "community": 2,
-      "norm_label": "jobcontroller.php"
+      "id": "freelancer_api_submit_proposal_php",
+      "community": 70,
+      "norm_label": "submit-proposal.php"
     },
     {
-      "label": "JobController",
+      "label": "footer.php",
       "file_type": "code",
-      "source_file": "admin/JobController.php",
-      "source_location": "L9",
-      "id": "admin_jobcontroller_jobcontroller",
-      "community": 2,
-      "norm_label": "jobcontroller"
-    },
-    {
-      "label": ".index()",
-      "file_type": "code",
-      "source_file": "admin/JobController.php",
-      "source_location": "L11",
-      "id": "admin_jobcontroller_jobcontroller_index",
-      "community": 2,
-      "norm_label": ".index()"
-    },
-    {
-      "label": ".show()",
-      "file_type": "code",
-      "source_file": "admin/JobController.php",
-      "source_location": "L44",
-      "id": "admin_jobcontroller_jobcontroller_show",
-      "community": 2,
-      "norm_label": ".show()"
-    },
-    {
-      "label": ".approve()",
-      "file_type": "code",
-      "source_file": "admin/JobController.php",
-      "source_location": "L57",
-      "id": "admin_jobcontroller_jobcontroller_approve",
-      "community": 2,
-      "norm_label": ".approve()"
-    },
-    {
-      "label": ".reject()",
-      "file_type": "code",
-      "source_file": "admin/JobController.php",
-      "source_location": "L68",
-      "id": "admin_jobcontroller_jobcontroller_reject",
-      "community": 2,
-      "norm_label": ".reject()"
-    },
-    {
-      "label": ".close()",
-      "file_type": "code",
-      "source_file": "admin/JobController.php",
-      "source_location": "L79",
-      "id": "admin_jobcontroller_jobcontroller_close",
-      "community": 2,
-      "norm_label": ".close()"
-    },
-    {
-      "label": ".flag()",
-      "file_type": "code",
-      "source_file": "admin/JobController.php",
-      "source_location": "L90",
-      "id": "admin_jobcontroller_jobcontroller_flag",
-      "community": 2,
-      "norm_label": ".flag()"
-    },
-    {
-      "label": ".destroy()",
-      "file_type": "code",
-      "source_file": "admin/JobController.php",
-      "source_location": "L103",
-      "id": "admin_jobcontroller_jobcontroller_destroy",
-      "community": 2,
-      "norm_label": ".destroy()"
-    },
-    {
-      "label": "api.php",
-      "file_type": "code",
-      "source_file": "admin/api.php",
+      "source_file": "freelancer/includes/footer.php",
       "source_location": "L1",
-      "id": "admin_api_php",
-      "community": 100,
-      "norm_label": "api.php"
+      "id": "freelancer_includes_footer_php",
+      "community": 65,
+      "norm_label": "footer.php"
     },
     {
-      "label": "PaymentController.php",
+      "label": "header.php",
       "file_type": "code",
-      "source_file": "admin/PaymentController.php",
+      "source_file": "freelancer/includes/header.php",
       "source_location": "L1",
-      "id": "admin_paymentcontroller_php",
-      "community": 7,
-      "norm_label": "paymentcontroller.php"
+      "id": "freelancer_includes_header_php",
+      "community": 64,
+      "norm_label": "header.php"
     },
     {
-      "label": "PaymentController",
+      "label": "index.php",
       "file_type": "code",
-      "source_file": "admin/PaymentController.php",
-      "source_location": "L9",
-      "id": "admin_paymentcontroller_paymentcontroller",
-      "community": 7,
-      "norm_label": "paymentcontroller"
-    },
-    {
-      "label": ".index()",
-      "file_type": "code",
-      "source_file": "admin/PaymentController.php",
-      "source_location": "L11",
-      "id": "admin_paymentcontroller_paymentcontroller_index",
-      "community": 7,
-      "norm_label": ".index()"
-    },
-    {
-      "label": ".show()",
-      "file_type": "code",
-      "source_file": "admin/PaymentController.php",
-      "source_location": "L48",
-      "id": "admin_paymentcontroller_paymentcontroller_show",
-      "community": 7,
-      "norm_label": ".show()"
-    },
-    {
-      "label": ".refund()",
-      "file_type": "code",
-      "source_file": "admin/PaymentController.php",
-      "source_location": "L62",
-      "id": "admin_paymentcontroller_paymentcontroller_refund",
-      "community": 7,
-      "norm_label": ".refund()"
-    },
-    {
-      "label": ".resolveDispute()",
-      "file_type": "code",
-      "source_file": "admin/PaymentController.php",
-      "source_location": "L91",
-      "id": "admin_paymentcontroller_paymentcontroller_resolvedispute",
-      "community": 7,
-      "norm_label": ".resolvedispute()"
-    },
-    {
-      "label": ".summary()",
-      "file_type": "code",
-      "source_file": "admin/PaymentController.php",
-      "source_location": "L113",
-      "id": "admin_paymentcontroller_paymentcontroller_summary",
-      "community": 7,
-      "norm_label": ".summary()"
-    },
-    {
-      "label": "api.js",
-      "file_type": "code",
-      "source_file": "admin/api.js",
+      "source_file": "freelancer/index.php",
       "source_location": "L1",
-      "id": "admin_api_js",
-      "community": 0,
-      "norm_label": "api.js"
+      "id": "freelancer_index_php",
+      "community": 63,
+      "norm_label": "index.php"
     },
     {
-      "label": "ApiService",
+      "label": "connects.php",
       "file_type": "code",
-      "source_file": "admin/api.js",
-      "source_location": "L4",
-      "id": "admin_api_apiservice",
-      "community": 0,
-      "norm_label": "apiservice"
-    },
-    {
-      "label": ".constructor()",
-      "file_type": "code",
-      "source_file": "admin/api.js",
-      "source_location": "L5",
-      "id": "admin_api_apiservice_constructor",
-      "community": 0,
-      "norm_label": ".constructor()"
-    },
-    {
-      "label": ".getToken()",
-      "file_type": "code",
-      "source_file": "admin/api.js",
-      "source_location": "L9",
-      "id": "admin_api_apiservice_gettoken",
-      "community": 0,
-      "norm_label": ".gettoken()"
-    },
-    {
-      "label": ".request()",
-      "file_type": "code",
-      "source_file": "admin/api.js",
-      "source_location": "L13",
-      "id": "admin_api_apiservice_request",
-      "community": 0,
-      "norm_label": ".request()"
-    },
-    {
-      "label": ".get()",
-      "file_type": "code",
-      "source_file": "admin/api.js",
-      "source_location": "L41",
-      "id": "admin_api_apiservice_get",
-      "community": 0,
-      "norm_label": ".get()"
-    },
-    {
-      "label": ".post()",
-      "file_type": "code",
-      "source_file": "admin/api.js",
-      "source_location": "L42",
-      "id": "admin_api_apiservice_post",
-      "community": 0,
-      "norm_label": ".post()"
-    },
-    {
-      "label": ".put()",
-      "file_type": "code",
-      "source_file": "admin/api.js",
-      "source_location": "L43",
-      "id": "admin_api_apiservice_put",
-      "community": 0,
-      "norm_label": ".put()"
-    },
-    {
-      "label": ".patch()",
-      "file_type": "code",
-      "source_file": "admin/api.js",
-      "source_location": "L44",
-      "id": "admin_api_apiservice_patch",
-      "community": 0,
-      "norm_label": ".patch()"
-    },
-    {
-      "label": ".delete()",
-      "file_type": "code",
-      "source_file": "admin/api.js",
-      "source_location": "L45",
-      "id": "admin_api_apiservice_delete",
-      "community": 0,
-      "norm_label": ".delete()"
-    },
-    {
-      "label": "api",
-      "file_type": "code",
-      "source_file": "admin/api.js",
-      "source_location": "L48",
-      "id": "admin_api_api",
-      "community": 0,
-      "norm_label": "api"
-    },
-    {
-      "label": "login()",
-      "file_type": "code",
-      "source_file": "admin/api.js",
-      "source_location": "L51",
-      "id": "admin_api_login",
-      "community": 0,
-      "norm_label": "login()"
-    },
-    {
-      "label": "logout()",
-      "file_type": "code",
-      "source_file": "admin/api.js",
-      "source_location": "L52",
-      "id": "admin_api_logout",
-      "community": 0,
-      "norm_label": "logout()"
-    },
-    {
-      "label": "getMe()",
-      "file_type": "code",
-      "source_file": "admin/api.js",
-      "source_location": "L53",
-      "id": "admin_api_getme",
-      "community": 0,
-      "norm_label": "getme()"
-    },
-    {
-      "label": "getDashboardStats()",
-      "file_type": "code",
-      "source_file": "admin/api.js",
-      "source_location": "L56",
-      "id": "admin_api_getdashboardstats",
-      "community": 0,
-      "norm_label": "getdashboardstats()"
-    },
-    {
-      "label": "getRevenueChart()",
-      "file_type": "code",
-      "source_file": "admin/api.js",
-      "source_location": "L57",
-      "id": "admin_api_getrevenuechart",
-      "community": 0,
-      "norm_label": "getrevenuechart()"
-    },
-    {
-      "label": "getRecentActivity()",
-      "file_type": "code",
-      "source_file": "admin/api.js",
-      "source_location": "L58",
-      "id": "admin_api_getrecentactivity",
-      "community": 0,
-      "norm_label": "getrecentactivity()"
-    },
-    {
-      "label": "getUsers()",
-      "file_type": "code",
-      "source_file": "admin/api.js",
-      "source_location": "L61",
-      "id": "admin_api_getusers",
-      "community": 0,
-      "norm_label": "getusers()"
-    },
-    {
-      "label": "getUser()",
-      "file_type": "code",
-      "source_file": "admin/api.js",
-      "source_location": "L62",
-      "id": "admin_api_getuser",
-      "community": 0,
-      "norm_label": "getuser()"
-    },
-    {
-      "label": "updateUser()",
-      "file_type": "code",
-      "source_file": "admin/api.js",
-      "source_location": "L63",
-      "id": "admin_api_updateuser",
-      "community": 0,
-      "norm_label": "updateuser()"
-    },
-    {
-      "label": "deleteUser()",
-      "file_type": "code",
-      "source_file": "admin/api.js",
-      "source_location": "L64",
-      "id": "admin_api_deleteuser",
-      "community": 0,
-      "norm_label": "deleteuser()"
-    },
-    {
-      "label": "suspendUser()",
-      "file_type": "code",
-      "source_file": "admin/api.js",
-      "source_location": "L65",
-      "id": "admin_api_suspenduser",
-      "community": 0,
-      "norm_label": "suspenduser()"
-    },
-    {
-      "label": "activateUser()",
-      "file_type": "code",
-      "source_file": "admin/api.js",
-      "source_location": "L66",
-      "id": "admin_api_activateuser",
-      "community": 0,
-      "norm_label": "activateuser()"
-    },
-    {
-      "label": "verifyUser()",
-      "file_type": "code",
-      "source_file": "admin/api.js",
-      "source_location": "L67",
-      "id": "admin_api_verifyuser",
-      "community": 0,
-      "norm_label": "verifyuser()"
-    },
-    {
-      "label": "getUserJobs()",
-      "file_type": "code",
-      "source_file": "admin/api.js",
-      "source_location": "L68",
-      "id": "admin_api_getuserjobs",
-      "community": 0,
-      "norm_label": "getuserjobs()"
-    },
-    {
-      "label": "getUserPayments()",
-      "file_type": "code",
-      "source_file": "admin/api.js",
-      "source_location": "L69",
-      "id": "admin_api_getuserpayments",
-      "community": 0,
-      "norm_label": "getuserpayments()"
-    },
-    {
-      "label": "getJobs()",
-      "file_type": "code",
-      "source_file": "admin/api.js",
-      "source_location": "L72",
-      "id": "admin_api_getjobs",
-      "community": 0,
-      "norm_label": "getjobs()"
-    },
-    {
-      "label": "getJob()",
-      "file_type": "code",
-      "source_file": "admin/api.js",
-      "source_location": "L73",
-      "id": "admin_api_getjob",
-      "community": 0,
-      "norm_label": "getjob()"
-    },
-    {
-      "label": "approveJob()",
-      "file_type": "code",
-      "source_file": "admin/api.js",
-      "source_location": "L74",
-      "id": "admin_api_approvejob",
-      "community": 0,
-      "norm_label": "approvejob()"
-    },
-    {
-      "label": "rejectJob()",
-      "file_type": "code",
-      "source_file": "admin/api.js",
-      "source_location": "L75",
-      "id": "admin_api_rejectjob",
-      "community": 0,
-      "norm_label": "rejectjob()"
-    },
-    {
-      "label": "closeJob()",
-      "file_type": "code",
-      "source_file": "admin/api.js",
-      "source_location": "L76",
-      "id": "admin_api_closejob",
-      "community": 0,
-      "norm_label": "closejob()"
-    },
-    {
-      "label": "flagJob()",
-      "file_type": "code",
-      "source_file": "admin/api.js",
-      "source_location": "L77",
-      "id": "admin_api_flagjob",
-      "community": 0,
-      "norm_label": "flagjob()"
-    },
-    {
-      "label": "deleteJob()",
-      "file_type": "code",
-      "source_file": "admin/api.js",
-      "source_location": "L78",
-      "id": "admin_api_deletejob",
-      "community": 0,
-      "norm_label": "deletejob()"
-    },
-    {
-      "label": "getPayments()",
-      "file_type": "code",
-      "source_file": "admin/api.js",
-      "source_location": "L81",
-      "id": "admin_api_getpayments",
-      "community": 0,
-      "norm_label": "getpayments()"
-    },
-    {
-      "label": "getPayment()",
-      "file_type": "code",
-      "source_file": "admin/api.js",
-      "source_location": "L82",
-      "id": "admin_api_getpayment",
-      "community": 0,
-      "norm_label": "getpayment()"
-    },
-    {
-      "label": "refundPayment()",
-      "file_type": "code",
-      "source_file": "admin/api.js",
-      "source_location": "L83",
-      "id": "admin_api_refundpayment",
-      "community": 0,
-      "norm_label": "refundpayment()"
-    },
-    {
-      "label": "resolveDispute()",
-      "file_type": "code",
-      "source_file": "admin/api.js",
-      "source_location": "L84",
-      "id": "admin_api_resolvedispute",
-      "community": 0,
-      "norm_label": "resolvedispute()"
-    },
-    {
-      "label": "getPaymentSummary()",
-      "file_type": "code",
-      "source_file": "admin/api.js",
-      "source_location": "L85",
-      "id": "admin_api_getpaymentsummary",
-      "community": 0,
-      "norm_label": "getpaymentsummary()"
-    },
-    {
-      "label": "getReportOverview()",
-      "file_type": "code",
-      "source_file": "admin/api.js",
-      "source_location": "L88",
-      "id": "admin_api_getreportoverview",
-      "community": 0,
-      "norm_label": "getreportoverview()"
-    },
-    {
-      "label": "getUserReport()",
-      "file_type": "code",
-      "source_file": "admin/api.js",
-      "source_location": "L89",
-      "id": "admin_api_getuserreport",
-      "community": 0,
-      "norm_label": "getuserreport()"
-    },
-    {
-      "label": "getJobReport()",
-      "file_type": "code",
-      "source_file": "admin/api.js",
-      "source_location": "L90",
-      "id": "admin_api_getjobreport",
-      "community": 0,
-      "norm_label": "getjobreport()"
-    },
-    {
-      "label": "getRevenueReport()",
-      "file_type": "code",
-      "source_file": "admin/api.js",
-      "source_location": "L91",
-      "id": "admin_api_getrevenuereport",
-      "community": 0,
-      "norm_label": "getrevenuereport()"
-    },
-    {
-      "label": "exportReport()",
-      "file_type": "code",
-      "source_file": "admin/api.js",
-      "source_location": "L92",
-      "id": "admin_api_exportreport",
-      "community": 0,
-      "norm_label": "exportreport()"
-    },
-    {
-      "label": "seed_dashboard.php",
-      "file_type": "code",
-      "source_file": "scratch/seed_dashboard.php",
+      "source_file": "freelancer/views/connects.php",
       "source_location": "L1",
-      "id": "scratch_seed_dashboard_php",
-      "community": 137,
-      "norm_label": "seed_dashboard.php"
+      "id": "freelancer_views_connects_php",
+      "community": 142,
+      "norm_label": "connects.php"
     },
     {
-      "label": "simulated_footer.js",
+      "label": "earnings.php",
       "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
+      "source_file": "freelancer/views/earnings.php",
       "source_location": "L1",
-      "id": "scratch_simulated_footer_js",
-      "community": 6,
-      "norm_label": "simulated_footer.js"
+      "id": "freelancer_views_earnings_php",
+      "community": 125,
+      "norm_label": "earnings.php"
     },
     {
-      "label": "JOBS",
+      "label": "check_user_balance.php",
       "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L2",
-      "id": "scratch_simulated_footer_jobs",
-      "community": 6,
-      "norm_label": "jobs"
-    },
-    {
-      "label": "SAVED_IDS",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L3",
-      "id": "scratch_simulated_footer_saved_ids",
-      "community": 6,
-      "norm_label": "saved_ids"
-    },
-    {
-      "label": "PROPOSALS",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L4",
-      "id": "scratch_simulated_footer_proposals",
-      "community": 6,
-      "norm_label": "proposals"
-    },
-    {
-      "label": "CONTRACTS",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L5",
-      "id": "scratch_simulated_footer_contracts",
-      "community": 6,
-      "norm_label": "contracts"
-    },
-    {
-      "label": "showPage()",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L8",
-      "id": "scratch_simulated_footer_showpage",
-      "community": 90,
-      "norm_label": "showpage()"
-    },
-    {
-      "label": "panel",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L60",
-      "id": "scratch_simulated_footer_panel",
-      "community": 6,
-      "norm_label": "panel"
-    },
-    {
-      "label": "info",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L63",
-      "id": "scratch_simulated_footer_info",
-      "community": 6,
-      "norm_label": "info"
-    },
-    {
-      "label": "input",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L91",
-      "id": "scratch_simulated_footer_input",
-      "community": 6,
-      "norm_label": "input"
-    },
-    {
-      "label": "fd",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L110",
-      "id": "scratch_simulated_footer_fd",
-      "community": 6,
-      "norm_label": "fd"
-    },
-    {
-      "label": "textEl",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L131",
-      "id": "scratch_simulated_footer_textel",
-      "community": 6,
-      "norm_label": "textel"
-    },
-    {
-      "label": "dotEl",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L132",
-      "id": "scratch_simulated_footer_dotel",
-      "community": 6,
-      "norm_label": "dotel"
-    },
-    {
-      "label": "renderContracts()",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L167",
-      "id": "scratch_simulated_footer_rendercontracts",
-      "community": 90,
-      "norm_label": "rendercontracts()"
-    },
-    {
-      "label": "renderProposals()",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L259",
-      "id": "scratch_simulated_footer_renderproposals",
-      "community": 90,
-      "norm_label": "renderproposals()"
-    },
-    {
-      "label": "renderJobs()",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L323",
-      "id": "scratch_simulated_footer_renderjobs",
-      "community": 90,
-      "norm_label": "renderjobs()"
-    },
-    {
-      "label": "timeAgo()",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L383",
-      "id": "scratch_simulated_footer_timeago",
-      "community": 6,
-      "norm_label": "timeago()"
-    },
-    {
-      "label": "job",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L392",
-      "id": "scratch_simulated_footer_job",
-      "community": 2,
-      "norm_label": "job"
-    },
-    {
-      "label": "container",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L518",
-      "id": "scratch_simulated_footer_container",
-      "community": 6,
-      "norm_label": "container"
-    },
-    {
-      "label": "row",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L519",
-      "id": "scratch_simulated_footer_row",
-      "community": 6,
-      "norm_label": "row"
-    },
-    {
-      "label": "amounts",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L531",
-      "id": "scratch_simulated_footer_amounts",
-      "community": 6,
-      "norm_label": "amounts"
-    },
-    {
-      "label": "rate",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L536",
-      "id": "scratch_simulated_footer_rate",
-      "community": 6,
-      "norm_label": "rate"
-    },
-    {
-      "label": "warning",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L537",
-      "id": "scratch_simulated_footer_warning",
-      "community": 6,
-      "norm_label": "warning"
-    },
-    {
-      "label": "milestones",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L555",
-      "id": "scratch_simulated_footer_milestones",
-      "community": 6,
-      "norm_label": "milestones"
-    },
-    {
-      "label": "rows",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L556",
-      "id": "scratch_simulated_footer_rows",
-      "community": 6,
-      "norm_label": "rows"
-    },
-    {
-      "label": "desc",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L559",
-      "id": "scratch_simulated_footer_desc",
-      "community": 6,
-      "norm_label": "desc"
-    },
-    {
-      "label": "amt",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L560",
-      "id": "scratch_simulated_footer_amt",
-      "community": 6,
-      "norm_label": "amt"
-    },
-    {
-      "label": "payload",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L575",
-      "id": "scratch_simulated_footer_payload",
-      "community": 6,
-      "norm_label": "payload"
-    },
-    {
-      "label": "idx",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L632",
-      "id": "scratch_simulated_footer_idx",
-      "community": 6,
-      "norm_label": "idx"
-    },
-    {
-      "label": "t",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L650",
-      "id": "scratch_simulated_footer_t",
-      "community": 6,
-      "norm_label": "t"
-    },
-    {
-      "label": "filter",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L664",
-      "id": "scratch_simulated_footer_filter",
-      "community": 90,
-      "norm_label": "filter"
-    },
-    {
-      "label": "modal",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L682",
-      "id": "scratch_simulated_footer_modal",
-      "community": 6,
-      "norm_label": "modal"
-    },
-    {
-      "label": "mc",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L683",
-      "id": "scratch_simulated_footer_mc",
-      "community": 6,
-      "norm_label": "mc"
-    },
-    {
-      "label": "overlay",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L684",
-      "id": "scratch_simulated_footer_overlay",
-      "community": 6,
-      "norm_label": "overlay"
-    },
-    {
-      "label": "c",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L687",
-      "id": "scratch_simulated_footer_c",
-      "community": 6,
-      "norm_label": "c"
-    },
-    {
-      "label": "pct",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L872",
-      "id": "scratch_simulated_footer_pct",
-      "community": 6,
-      "norm_label": "pct"
-    },
-    {
-      "label": "imageInput",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L928",
-      "id": "scratch_simulated_footer_imageinput",
-      "community": 6,
-      "norm_label": "imageinput"
-    },
-    {
-      "label": "sbName",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L1045",
-      "id": "scratch_simulated_footer_sbname",
-      "community": 6,
-      "norm_label": "sbname"
-    },
-    {
-      "label": "sbAv",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L1047",
-      "id": "scratch_simulated_footer_sbav",
-      "community": 6,
-      "norm_label": "sbav"
-    },
-    {
-      "label": "bioEl",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L1051",
-      "id": "scratch_simulated_footer_bioel",
-      "community": 6,
-      "norm_label": "bioel"
-    },
-    {
-      "label": "btn",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L1065",
-      "id": "scratch_simulated_footer_btn",
-      "community": 6,
-      "norm_label": "btn"
-    },
-    {
-      "label": "renderReports()",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L1147",
-      "id": "scratch_simulated_footer_renderreports",
-      "community": 90,
-      "norm_label": "renderreports()"
-    },
-    {
-      "label": "SKILL_TREE",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L1158",
-      "id": "scratch_simulated_footer_skill_tree",
-      "community": 6,
-      "norm_label": "skill_tree"
-    },
-    {
-      "label": "selectedSkills",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L1174",
-      "id": "scratch_simulated_footer_selectedskills",
-      "community": 6,
-      "norm_label": "selectedskills"
-    },
-    {
-      "label": "renderCatCol()",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L1192",
-      "id": "scratch_simulated_footer_rendercatcol",
-      "community": 6,
-      "norm_label": "rendercatcol()"
-    },
-    {
-      "label": "countSelected()",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L1203",
-      "id": "scratch_simulated_footer_countselected",
-      "community": 6,
-      "norm_label": "countselected()"
-    },
-    {
-      "label": "col",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L1213",
-      "id": "scratch_simulated_footer_col",
-      "community": 6,
-      "norm_label": "col"
-    },
-    {
-      "label": "renderSpecCol()",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L1236",
-      "id": "scratch_simulated_footer_renderspeccol",
-      "community": 6,
-      "norm_label": "renderspeccol()"
-    },
-    {
-      "label": "renderSelectedPreview()",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L1269",
-      "id": "scratch_simulated_footer_renderselectedpreview",
-      "community": 1,
-      "norm_label": "renderselectedpreview()"
-    },
-    {
-      "label": "skills",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L1281",
-      "id": "scratch_simulated_footer_skills",
-      "community": 6,
-      "norm_label": "skills"
-    },
-    {
-      "label": "display",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L1296",
-      "id": "scratch_simulated_footer_display",
-      "community": 6,
-      "norm_label": "display"
-    },
-    {
-      "label": "empty",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L1297",
-      "id": "scratch_simulated_footer_empty",
-      "community": 5,
-      "norm_label": "empty"
-    },
-    {
-      "label": "badge",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L1298",
-      "id": "scratch_simulated_footer_badge",
-      "community": 6,
-      "norm_label": "badge"
-    },
-    {
-      "label": "skill",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L1322",
-      "id": "scratch_simulated_footer_skill",
-      "community": 6,
-      "norm_label": "skill"
-    },
-    {
-      "label": "query",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L1331",
-      "id": "scratch_simulated_footer_query",
-      "community": 6,
-      "norm_label": "query"
-    },
-    {
-      "label": "catCol",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L1337",
-      "id": "scratch_simulated_footer_catcol",
-      "community": 6,
-      "norm_label": "catcol"
-    },
-    {
-      "label": "subCol",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L1338",
-      "id": "scratch_simulated_footer_subcol",
-      "community": 6,
-      "norm_label": "subcol"
-    },
-    {
-      "label": "skillCol",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L1339",
-      "id": "scratch_simulated_footer_skillcol",
-      "community": 6,
-      "norm_label": "skillcol"
-    },
-    {
-      "label": "results",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L1340",
-      "id": "scratch_simulated_footer_results",
-      "community": 6,
-      "norm_label": "results"
-    },
-    {
-      "label": "sel",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L1354",
-      "id": "scratch_simulated_footer_sel",
-      "community": 6,
-      "norm_label": "sel"
-    },
-    {
-      "label": "SUGGESTED_FOR_DESIGNER",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L1363",
-      "id": "scratch_simulated_footer_suggested_for_designer",
-      "community": 6,
-      "norm_label": "suggested_for_designer"
-    },
-    {
-      "label": "el",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L1371",
-      "id": "scratch_simulated_footer_el",
-      "community": 6,
-      "norm_label": "el"
-    },
-    {
-      "label": "shown",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L1373",
-      "id": "scratch_simulated_footer_shown",
-      "community": 6,
-      "norm_label": "shown"
-    },
-    {
-      "label": "loadChat()",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L1387",
-      "id": "scratch_simulated_footer_loadchat",
-      "community": 91,
-      "norm_label": "loadchat()"
-    },
-    {
-      "label": "renderChatWindow()",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L1419",
-      "id": "scratch_simulated_footer_renderchatwindow",
-      "community": 91,
-      "norm_label": "renderchatwindow()"
-    },
-    {
-      "label": "sendMsg()",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L1449",
-      "id": "scratch_simulated_footer_sendmsg",
-      "community": 1,
-      "norm_label": "sendmsg()"
-    },
-    {
-      "label": "startChatPolling()",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L1494",
-      "id": "scratch_simulated_footer_startchatpolling",
-      "community": 91,
-      "norm_label": "startchatpolling()"
-    },
-    {
-      "label": "filterConversations()",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L1577",
-      "id": "scratch_simulated_footer_filterconversations",
-      "community": 6,
-      "norm_label": "filterconversations()"
-    },
-    {
-      "label": "hash",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L1586",
-      "id": "scratch_simulated_footer_hash",
-      "community": 8,
-      "norm_label": "hash"
-    },
-    {
-      "label": "requestMilestone()",
-      "file_type": "code",
-      "source_file": "scratch/simulated_footer.js",
-      "source_location": "L1594",
-      "id": "scratch_simulated_footer_requestmilestone",
-      "community": 1,
-      "norm_label": "requestmilestone()"
-    },
-    {
-      "label": "check_db.php",
-      "file_type": "code",
-      "source_file": "scratch/check_db.php",
+      "source_file": "scratch/check_user_balance.php",
       "source_location": "L1",
-      "id": "scratch_check_db_php",
-      "community": 87,
-      "norm_label": "check_db.php"
-    },
-    {
-      "label": "fix_job_status.php",
-      "file_type": "code",
-      "source_file": "/Applications/MAMP/htdocs/upwork-project/scratch/fix_job_status.php",
-      "source_location": "L1",
-      "id": "applications_mamp_htdocs_upwork_project_scratch_fix_job_status_php",
-      "community": 112,
-      "norm_label": "fix_job_status.php"
-    },
-    {
-      "label": "fix_jobs_table.php",
-      "file_type": "code",
-      "source_file": "/Applications/MAMP/htdocs/upwork-project/scratch/fix_jobs_table.php",
-      "source_location": "L1",
-      "id": "applications_mamp_htdocs_upwork_project_scratch_fix_jobs_table_php",
-      "community": 113,
-      "norm_label": "fix_jobs_table.php"
-    },
-    {
-      "label": "check_db_proposals.php",
-      "file_type": "code",
-      "source_file": "scratch/check_db_proposals.php",
-      "source_location": "L1",
-      "id": "scratch_check_db_proposals_php",
-      "community": 88,
-      "norm_label": "check_db_proposals.php"
-    },
-    {
-      "label": "run_migration.php",
-      "file_type": "code",
-      "source_file": "scratch/run_migration.php",
-      "source_location": "L1",
-      "id": "scratch_run_migration_php",
-      "community": 136,
-      "norm_label": "run_migration.php"
-    },
-    {
-      "label": "create_milestones_table.php",
-      "file_type": "code",
-      "source_file": "/Applications/MAMP/htdocs/upwork-project/scratch/create_milestones_table.php",
-      "source_location": "L1",
-      "id": "applications_mamp_htdocs_upwork_project_scratch_create_milestones_table_php",
-      "community": 111,
-      "norm_label": "create_milestones_table.php"
-    },
-    {
-      "label": "fix_proposal_status.php",
-      "file_type": "code",
-      "source_file": "/Applications/MAMP/htdocs/upwork-project/scratch/fix_proposal_status.php",
-      "source_location": "L1",
-      "id": "applications_mamp_htdocs_upwork_project_scratch_fix_proposal_status_php",
-      "community": 114,
-      "norm_label": "fix_proposal_status.php"
+      "id": "scratch_check_user_balance_php",
+      "community": 143,
+      "norm_label": "check_user_balance.php"
     },
     {
       "label": "create_connects_history_table.php",
@@ -1858,1354 +202,3037 @@
       "norm_label": "update_milestones_status.php"
     },
     {
+      "label": "index.php",
+      "file_type": "code",
+      "source_file": "index.php",
+      "source_location": "L1",
+      "community": 86,
+      "norm_label": "index.php",
+      "id": "index_php"
+    },
+    {
+      "label": "logout.php",
+      "file_type": "code",
+      "source_file": "logout.php",
+      "source_location": "L1",
+      "community": 134,
+      "norm_label": "logout.php",
+      "id": "logout_php"
+    },
+    {
+      "label": "migrate.php",
+      "file_type": "code",
+      "source_file": "migrate.php",
+      "source_location": "L1",
+      "community": 135,
+      "norm_label": "migrate.php",
+      "id": "migrate_php"
+    },
+    {
+      "label": "repair_db.php",
+      "file_type": "code",
+      "source_file": "repair_db.php",
+      "source_location": "L1",
+      "community": 39,
+      "norm_label": "repair_db.php",
+      "id": "repair_db_php"
+    },
+    {
+      "label": "verification.php",
+      "file_type": "code",
+      "source_file": "home/verification.php",
+      "source_location": "L1",
+      "community": 130,
+      "norm_label": "verification.php",
+      "id": "home_verification_php"
+    },
+    {
+      "label": "index.php",
+      "file_type": "code",
+      "source_file": "home/index.php",
+      "source_location": "L1",
+      "community": 129,
+      "norm_label": "index.php",
+      "id": "home_index_php"
+    },
+    {
+      "label": "header.php",
+      "file_type": "code",
+      "source_file": "home/includes/header.php",
+      "source_location": "L1",
+      "community": 29,
+      "norm_label": "header.php",
+      "id": "home_includes_header_php"
+    },
+    {
+      "label": "footer.php",
+      "file_type": "code",
+      "source_file": "home/includes/footer.php",
+      "source_location": "L1",
+      "community": 128,
+      "norm_label": "footer.php",
+      "id": "home_includes_footer_php"
+    },
+    {
+      "label": "404.php",
+      "file_type": "code",
+      "source_file": "includes/404.php",
+      "source_location": "L1",
+      "community": 131,
+      "norm_label": "404.php",
+      "id": "includes_404_php"
+    },
+    {
+      "label": "config.php",
+      "file_type": "code",
+      "source_file": "includes/config.php",
+      "source_location": "L1",
+      "community": 5,
+      "norm_label": "config.php",
+      "id": "includes_config_php"
+    },
+    {
+      "label": "loadEnv()",
+      "file_type": "code",
+      "source_file": "includes/config.php",
+      "source_location": "L10",
+      "community": 5,
+      "norm_label": "loadenv()",
+      "id": "includes_config_loadenv"
+    },
+    {
+      "label": "env()",
+      "file_type": "code",
+      "source_file": "includes/config.php",
+      "source_location": "L41",
+      "community": 5,
+      "norm_label": "env()",
+      "id": "includes_config_env"
+    },
+    {
+      "label": "getDB()",
+      "file_type": "code",
+      "source_file": "includes/config.php",
+      "source_location": "L80",
+      "community": 5,
+      "norm_label": "getdb()",
+      "id": "includes_config_getdb"
+    },
+    {
+      "label": "ensureFreelancerSchema()",
+      "file_type": "code",
+      "source_file": "includes/config.php",
+      "source_location": "L101",
+      "community": 5,
+      "norm_label": "ensurefreelancerschema()",
+      "id": "includes_config_ensurefreelancerschema"
+    },
+    {
+      "label": "baseUrl()",
+      "file_type": "code",
+      "source_file": "includes/config.php",
+      "source_location": "L117",
+      "community": 5,
+      "norm_label": "baseurl()",
+      "id": "includes_config_baseurl"
+    },
+    {
+      "label": "redirect()",
+      "file_type": "code",
+      "source_file": "includes/config.php",
+      "source_location": "L122",
+      "community": 5,
+      "norm_label": "redirect()",
+      "id": "includes_config_redirect"
+    },
+    {
+      "label": "isRoute()",
+      "file_type": "code",
+      "source_file": "includes/config.php",
+      "source_location": "L128",
+      "community": 5,
+      "norm_label": "isroute()",
+      "id": "includes_config_isroute"
+    },
+    {
+      "label": "header.php",
+      "file_type": "code",
+      "source_file": "includes/header.php",
+      "source_location": "L1",
+      "community": 133,
+      "norm_label": "header.php",
+      "id": "includes_header_php"
+    },
+    {
+      "label": "footer.php",
+      "file_type": "code",
+      "source_file": "includes/footer.php",
+      "source_location": "L1",
+      "community": 132,
+      "norm_label": "footer.php",
+      "id": "includes_footer_php"
+    },
+    {
+      "label": "Auth.php",
+      "file_type": "code",
+      "source_file": "includes/classes/Auth.php",
+      "source_location": "L1",
+      "community": 5,
+      "norm_label": "auth.php",
+      "id": "includes_classes_auth_php"
+    },
+    {
+      "label": "Auth",
+      "file_type": "code",
+      "source_file": "includes/classes/Auth.php",
+      "source_location": "L2",
+      "community": 5,
+      "norm_label": "auth",
+      "id": "classes_auth_auth"
+    },
+    {
+      "label": ".register()",
+      "file_type": "code",
+      "source_file": "includes/classes/Auth.php",
+      "source_location": "L6",
+      "community": 5,
+      "norm_label": ".register()",
+      "id": "classes_auth_auth_register"
+    },
+    {
+      "label": ".login()",
+      "file_type": "code",
+      "source_file": "includes/classes/Auth.php",
+      "source_location": "L20",
+      "community": 5,
+      "norm_label": ".login()",
+      "id": "classes_auth_auth_login"
+    },
+    {
+      "label": ".logout()",
+      "file_type": "code",
+      "source_file": "includes/classes/Auth.php",
+      "source_location": "L43",
+      "community": 5,
+      "norm_label": ".logout()",
+      "id": "classes_auth_auth_logout"
+    },
+    {
+      "label": ".user()",
+      "file_type": "code",
+      "source_file": "includes/classes/Auth.php",
+      "source_location": "L55",
+      "community": 2,
+      "norm_label": ".user()",
+      "id": "classes_auth_auth_user"
+    },
+    {
+      "label": ".check()",
+      "file_type": "code",
+      "source_file": "includes/classes/Auth.php",
+      "source_location": "L64",
+      "community": 5,
+      "norm_label": ".check()",
+      "id": "classes_auth_auth_check"
+    },
+    {
+      "label": ".isEmailVerified()",
+      "file_type": "code",
+      "source_file": "includes/classes/Auth.php",
+      "source_location": "L68",
+      "community": 5,
+      "norm_label": ".isemailverified()",
+      "id": "classes_auth_auth_isemailverified"
+    },
+    {
+      "label": ".isIdentityVerified()",
+      "file_type": "code",
+      "source_file": "includes/classes/Auth.php",
+      "source_location": "L74",
+      "community": 5,
+      "norm_label": ".isidentityverified()",
+      "id": "classes_auth_auth_isidentityverified"
+    },
+    {
+      "label": ".canApplyToJobs()",
+      "file_type": "code",
+      "source_file": "includes/classes/Auth.php",
+      "source_location": "L80",
+      "community": 5,
+      "norm_label": ".canapplytojobs()",
+      "id": "classes_auth_auth_canapplytojobs"
+    },
+    {
+      "label": ".verifyEmailByToken()",
+      "file_type": "code",
+      "source_file": "includes/classes/Auth.php",
+      "source_location": "L86",
+      "community": 5,
+      "norm_label": ".verifyemailbytoken()",
+      "id": "classes_auth_auth_verifyemailbytoken"
+    },
+    {
+      "label": ".resendEmailVerification()",
+      "file_type": "code",
+      "source_file": "includes/classes/Auth.php",
+      "source_location": "L103",
+      "community": 5,
+      "norm_label": ".resendemailverification()",
+      "id": "classes_auth_auth_resendemailverification"
+    },
+    {
+      "label": ".emailVerificationUrl()",
+      "file_type": "code",
+      "source_file": "includes/classes/Auth.php",
+      "source_location": "L113",
+      "community": 5,
+      "norm_label": ".emailverificationurl()",
+      "id": "classes_auth_auth_emailverificationurl"
+    },
+    {
+      "label": "api.laravel.php",
+      "file_type": "code",
+      "source_file": "admin/api.laravel.php",
+      "source_location": "L1",
+      "community": 99,
+      "norm_label": "api.laravel.php",
+      "id": "admin_api_laravel_php"
+    },
+    {
+      "label": "UserController.php",
+      "file_type": "code",
+      "source_file": "admin/UserController.php",
+      "source_location": "L1",
+      "community": 2,
+      "norm_label": "usercontroller.php",
+      "id": "admin_usercontroller_php"
+    },
+    {
+      "label": "UserController",
+      "file_type": "code",
+      "source_file": "admin/UserController.php",
+      "source_location": "L9",
+      "community": 2,
+      "norm_label": "usercontroller",
+      "id": "admin_usercontroller_usercontroller"
+    },
+    {
+      "label": ".index()",
+      "file_type": "code",
+      "source_file": "admin/UserController.php",
+      "source_location": "L11",
+      "community": 2,
+      "norm_label": ".index()",
+      "id": "admin_usercontroller_usercontroller_index"
+    },
+    {
+      "label": ".show()",
+      "file_type": "code",
+      "source_file": "admin/UserController.php",
+      "source_location": "L40",
+      "community": 2,
+      "norm_label": ".show()",
+      "id": "admin_usercontroller_usercontroller_show"
+    },
+    {
+      "label": ".update()",
+      "file_type": "code",
+      "source_file": "admin/UserController.php",
+      "source_location": "L52",
+      "community": 2,
+      "norm_label": ".update()",
+      "id": "admin_usercontroller_usercontroller_update"
+    },
+    {
+      "label": ".destroy()",
+      "file_type": "code",
+      "source_file": "admin/UserController.php",
+      "source_location": "L71",
+      "community": 2,
+      "norm_label": ".destroy()",
+      "id": "admin_usercontroller_usercontroller_destroy"
+    },
+    {
+      "label": ".suspend()",
+      "file_type": "code",
+      "source_file": "admin/UserController.php",
+      "source_location": "L90",
+      "community": 2,
+      "norm_label": ".suspend()",
+      "id": "admin_usercontroller_usercontroller_suspend"
+    },
+    {
+      "label": ".activate()",
+      "file_type": "code",
+      "source_file": "admin/UserController.php",
+      "source_location": "L101",
+      "community": 2,
+      "norm_label": ".activate()",
+      "id": "admin_usercontroller_usercontroller_activate"
+    },
+    {
+      "label": ".verify()",
+      "file_type": "code",
+      "source_file": "admin/UserController.php",
+      "source_location": "L112",
+      "community": 2,
+      "norm_label": ".verify()",
+      "id": "admin_usercontroller_usercontroller_verify"
+    },
+    {
+      "label": ".jobs()",
+      "file_type": "code",
+      "source_file": "admin/UserController.php",
+      "source_location": "L123",
+      "community": 2,
+      "norm_label": ".jobs()",
+      "id": "admin_usercontroller_usercontroller_jobs"
+    },
+    {
+      "label": ".payments()",
+      "file_type": "code",
+      "source_file": "admin/UserController.php",
+      "source_location": "L138",
+      "community": 2,
+      "norm_label": ".payments()",
+      "id": "admin_usercontroller_usercontroller_payments"
+    },
+    {
+      "label": "login.php",
+      "file_type": "code",
+      "source_file": "/Applications/MAMP/htdocs/upwork-project/admin/login.php",
+      "source_location": "L1",
+      "community": 108,
+      "norm_label": "login.php",
+      "id": "applications_mamp_htdocs_upwork_project_admin_login_php"
+    },
+    {
+      "label": "index.php",
+      "file_type": "code",
+      "source_file": "/Applications/MAMP/htdocs/upwork-project/admin/index.php",
+      "source_location": "L1",
+      "community": 107,
+      "norm_label": "index.php",
+      "id": "applications_mamp_htdocs_upwork_project_admin_index_php"
+    },
+    {
+      "label": "DashboardController.php",
+      "file_type": "code",
+      "source_file": "admin/DashboardController.php",
+      "source_location": "L1",
+      "community": 2,
+      "norm_label": "dashboardcontroller.php",
+      "id": "admin_dashboardcontroller_php"
+    },
+    {
+      "label": "DashboardController",
+      "file_type": "code",
+      "source_file": "admin/DashboardController.php",
+      "source_location": "L12",
+      "community": 2,
+      "norm_label": "dashboardcontroller",
+      "id": "admin_dashboardcontroller_dashboardcontroller"
+    },
+    {
+      "label": ".stats()",
+      "file_type": "code",
+      "source_file": "admin/DashboardController.php",
+      "source_location": "L14",
+      "community": 2,
+      "norm_label": ".stats()",
+      "id": "admin_dashboardcontroller_dashboardcontroller_stats"
+    },
+    {
+      "label": ".revenueChart()",
+      "file_type": "code",
+      "source_file": "admin/DashboardController.php",
+      "source_location": "L42",
+      "community": 2,
+      "norm_label": ".revenuechart()",
+      "id": "admin_dashboardcontroller_dashboardcontroller_revenuechart"
+    },
+    {
+      "label": ".recentActivity()",
+      "file_type": "code",
+      "source_file": "admin/DashboardController.php",
+      "source_location": "L59",
+      "community": 2,
+      "norm_label": ".recentactivity()",
+      "id": "admin_dashboardcontroller_dashboardcontroller_recentactivity"
+    },
+    {
+      "label": "AuthController.php",
+      "file_type": "code",
+      "source_file": "admin/AuthController.php",
+      "source_location": "L1",
+      "community": 8,
+      "norm_label": "authcontroller.php",
+      "id": "admin_authcontroller_php"
+    },
+    {
+      "label": "AuthController",
+      "file_type": "code",
+      "source_file": "admin/AuthController.php",
+      "source_location": "L12",
+      "community": 8,
+      "norm_label": "authcontroller",
+      "id": "admin_authcontroller_authcontroller"
+    },
+    {
+      "label": ".login()",
+      "file_type": "code",
+      "source_file": "admin/AuthController.php",
+      "source_location": "L14",
+      "community": 8,
+      "norm_label": ".login()",
+      "id": "admin_authcontroller_authcontroller_login"
+    },
+    {
+      "label": ".logout()",
+      "file_type": "code",
+      "source_file": "admin/AuthController.php",
+      "source_location": "L49",
+      "community": 8,
+      "norm_label": ".logout()",
+      "id": "admin_authcontroller_authcontroller_logout"
+    },
+    {
+      "label": ".me()",
+      "file_type": "code",
+      "source_file": "admin/AuthController.php",
+      "source_location": "L59",
+      "community": 8,
+      "norm_label": ".me()",
+      "id": "admin_authcontroller_authcontroller_me"
+    },
+    {
+      "label": ".formatUser()",
+      "file_type": "code",
+      "source_file": "admin/AuthController.php",
+      "source_location": "L67",
+      "community": 8,
+      "norm_label": ".formatuser()",
+      "id": "admin_authcontroller_authcontroller_formatuser"
+    },
+    {
+      "label": "ReportController.php",
+      "file_type": "code",
+      "source_file": "admin/ReportController.php",
+      "source_location": "L1",
+      "community": 2,
+      "norm_label": "reportcontroller.php",
+      "id": "admin_reportcontroller_php"
+    },
+    {
+      "label": "ReportController",
+      "file_type": "code",
+      "source_file": "admin/ReportController.php",
+      "source_location": "L12",
+      "community": 2,
+      "norm_label": "reportcontroller",
+      "id": "admin_reportcontroller_reportcontroller"
+    },
+    {
+      "label": ".overview()",
+      "file_type": "code",
+      "source_file": "admin/ReportController.php",
+      "source_location": "L14",
+      "community": 2,
+      "norm_label": ".overview()",
+      "id": "admin_reportcontroller_reportcontroller_overview"
+    },
+    {
+      "label": ".users()",
+      "file_type": "code",
+      "source_file": "admin/ReportController.php",
+      "source_location": "L48",
+      "community": 2,
+      "norm_label": ".users()",
+      "id": "admin_reportcontroller_reportcontroller_users"
+    },
+    {
+      "label": ".jobs()",
+      "file_type": "code",
+      "source_file": "admin/ReportController.php",
+      "source_location": "L80",
+      "community": 2,
+      "norm_label": ".jobs()",
+      "id": "admin_reportcontroller_reportcontroller_jobs"
+    },
+    {
+      "label": ".revenue()",
+      "file_type": "code",
+      "source_file": "admin/ReportController.php",
+      "source_location": "L105",
+      "community": 2,
+      "norm_label": ".revenue()",
+      "id": "admin_reportcontroller_reportcontroller_revenue"
+    },
+    {
+      "label": ".export()",
+      "file_type": "code",
+      "source_file": "admin/ReportController.php",
+      "source_location": "L130",
+      "community": 2,
+      "norm_label": ".export()",
+      "id": "admin_reportcontroller_reportcontroller_export"
+    },
+    {
+      "label": "2024_01_01_create_tables.php",
+      "file_type": "code",
+      "source_file": "admin/2024_01_01_create_tables.php",
+      "source_location": "L1",
+      "community": 10,
+      "norm_label": "2024_01_01_create_tables.php",
+      "id": "admin_2024_01_01_create_tables_php"
+    },
+    {
+      "label": "up()",
+      "file_type": "code",
+      "source_file": "admin/2024_01_01_create_tables.php",
+      "source_location": "L9",
+      "community": 10,
+      "norm_label": "up()",
+      "id": "admin_2024_01_01_create_tables_up"
+    },
+    {
+      "label": "down()",
+      "file_type": "code",
+      "source_file": "admin/2024_01_01_create_tables.php",
+      "source_location": "L68",
+      "community": 10,
+      "norm_label": "down()",
+      "id": "admin_2024_01_01_create_tables_down"
+    },
+    {
+      "label": "JobController.php",
+      "file_type": "code",
+      "source_file": "admin/JobController.php",
+      "source_location": "L1",
+      "community": 2,
+      "norm_label": "jobcontroller.php",
+      "id": "admin_jobcontroller_php"
+    },
+    {
+      "label": "JobController",
+      "file_type": "code",
+      "source_file": "admin/JobController.php",
+      "source_location": "L9",
+      "community": 2,
+      "norm_label": "jobcontroller",
+      "id": "admin_jobcontroller_jobcontroller"
+    },
+    {
+      "label": ".index()",
+      "file_type": "code",
+      "source_file": "admin/JobController.php",
+      "source_location": "L11",
+      "community": 2,
+      "norm_label": ".index()",
+      "id": "admin_jobcontroller_jobcontroller_index"
+    },
+    {
+      "label": ".show()",
+      "file_type": "code",
+      "source_file": "admin/JobController.php",
+      "source_location": "L44",
+      "community": 2,
+      "norm_label": ".show()",
+      "id": "admin_jobcontroller_jobcontroller_show"
+    },
+    {
+      "label": ".approve()",
+      "file_type": "code",
+      "source_file": "admin/JobController.php",
+      "source_location": "L57",
+      "community": 2,
+      "norm_label": ".approve()",
+      "id": "admin_jobcontroller_jobcontroller_approve"
+    },
+    {
+      "label": ".reject()",
+      "file_type": "code",
+      "source_file": "admin/JobController.php",
+      "source_location": "L68",
+      "community": 2,
+      "norm_label": ".reject()",
+      "id": "admin_jobcontroller_jobcontroller_reject"
+    },
+    {
+      "label": ".close()",
+      "file_type": "code",
+      "source_file": "admin/JobController.php",
+      "source_location": "L79",
+      "community": 2,
+      "norm_label": ".close()",
+      "id": "admin_jobcontroller_jobcontroller_close"
+    },
+    {
+      "label": ".flag()",
+      "file_type": "code",
+      "source_file": "admin/JobController.php",
+      "source_location": "L90",
+      "community": 2,
+      "norm_label": ".flag()",
+      "id": "admin_jobcontroller_jobcontroller_flag"
+    },
+    {
+      "label": ".destroy()",
+      "file_type": "code",
+      "source_file": "admin/JobController.php",
+      "source_location": "L103",
+      "community": 2,
+      "norm_label": ".destroy()",
+      "id": "admin_jobcontroller_jobcontroller_destroy"
+    },
+    {
+      "label": "api.php",
+      "file_type": "code",
+      "source_file": "admin/api.php",
+      "source_location": "L1",
+      "community": 100,
+      "norm_label": "api.php",
+      "id": "admin_api_php"
+    },
+    {
+      "label": "PaymentController.php",
+      "file_type": "code",
+      "source_file": "admin/PaymentController.php",
+      "source_location": "L1",
+      "community": 7,
+      "norm_label": "paymentcontroller.php",
+      "id": "admin_paymentcontroller_php"
+    },
+    {
+      "label": "PaymentController",
+      "file_type": "code",
+      "source_file": "admin/PaymentController.php",
+      "source_location": "L9",
+      "community": 7,
+      "norm_label": "paymentcontroller",
+      "id": "admin_paymentcontroller_paymentcontroller"
+    },
+    {
+      "label": ".index()",
+      "file_type": "code",
+      "source_file": "admin/PaymentController.php",
+      "source_location": "L11",
+      "community": 7,
+      "norm_label": ".index()",
+      "id": "admin_paymentcontroller_paymentcontroller_index"
+    },
+    {
+      "label": ".show()",
+      "file_type": "code",
+      "source_file": "admin/PaymentController.php",
+      "source_location": "L48",
+      "community": 7,
+      "norm_label": ".show()",
+      "id": "admin_paymentcontroller_paymentcontroller_show"
+    },
+    {
+      "label": ".refund()",
+      "file_type": "code",
+      "source_file": "admin/PaymentController.php",
+      "source_location": "L62",
+      "community": 7,
+      "norm_label": ".refund()",
+      "id": "admin_paymentcontroller_paymentcontroller_refund"
+    },
+    {
+      "label": ".resolveDispute()",
+      "file_type": "code",
+      "source_file": "admin/PaymentController.php",
+      "source_location": "L91",
+      "community": 7,
+      "norm_label": ".resolvedispute()",
+      "id": "admin_paymentcontroller_paymentcontroller_resolvedispute"
+    },
+    {
+      "label": ".summary()",
+      "file_type": "code",
+      "source_file": "admin/PaymentController.php",
+      "source_location": "L113",
+      "community": 7,
+      "norm_label": ".summary()",
+      "id": "admin_paymentcontroller_paymentcontroller_summary"
+    },
+    {
+      "label": "api.js",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L1",
+      "community": 0,
+      "norm_label": "api.js",
+      "id": "admin_api_js"
+    },
+    {
+      "label": "ApiService",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L4",
+      "community": 0,
+      "norm_label": "apiservice",
+      "id": "admin_api_apiservice"
+    },
+    {
+      "label": ".constructor()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L5",
+      "community": 0,
+      "norm_label": ".constructor()",
+      "id": "admin_api_apiservice_constructor"
+    },
+    {
+      "label": ".getToken()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L9",
+      "community": 0,
+      "norm_label": ".gettoken()",
+      "id": "admin_api_apiservice_gettoken"
+    },
+    {
+      "label": ".request()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L13",
+      "community": 0,
+      "norm_label": ".request()",
+      "id": "admin_api_apiservice_request"
+    },
+    {
+      "label": ".get()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L41",
+      "community": 0,
+      "norm_label": ".get()",
+      "id": "admin_api_apiservice_get"
+    },
+    {
+      "label": ".post()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L42",
+      "community": 0,
+      "norm_label": ".post()",
+      "id": "admin_api_apiservice_post"
+    },
+    {
+      "label": ".put()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L43",
+      "community": 0,
+      "norm_label": ".put()",
+      "id": "admin_api_apiservice_put"
+    },
+    {
+      "label": ".patch()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L44",
+      "community": 0,
+      "norm_label": ".patch()",
+      "id": "admin_api_apiservice_patch"
+    },
+    {
+      "label": ".delete()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L45",
+      "community": 0,
+      "norm_label": ".delete()",
+      "id": "admin_api_apiservice_delete"
+    },
+    {
+      "label": "api",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L48",
+      "community": 0,
+      "norm_label": "api",
+      "id": "admin_api_api"
+    },
+    {
+      "label": "login()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L51",
+      "community": 0,
+      "norm_label": "login()",
+      "id": "admin_api_login"
+    },
+    {
+      "label": "logout()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L52",
+      "community": 0,
+      "norm_label": "logout()",
+      "id": "admin_api_logout"
+    },
+    {
+      "label": "getMe()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L53",
+      "community": 0,
+      "norm_label": "getme()",
+      "id": "admin_api_getme"
+    },
+    {
+      "label": "getDashboardStats()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L56",
+      "community": 0,
+      "norm_label": "getdashboardstats()",
+      "id": "admin_api_getdashboardstats"
+    },
+    {
+      "label": "getRevenueChart()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L57",
+      "community": 0,
+      "norm_label": "getrevenuechart()",
+      "id": "admin_api_getrevenuechart"
+    },
+    {
+      "label": "getRecentActivity()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L58",
+      "community": 0,
+      "norm_label": "getrecentactivity()",
+      "id": "admin_api_getrecentactivity"
+    },
+    {
+      "label": "getUsers()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L61",
+      "community": 0,
+      "norm_label": "getusers()",
+      "id": "admin_api_getusers"
+    },
+    {
+      "label": "getUser()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L62",
+      "community": 0,
+      "norm_label": "getuser()",
+      "id": "admin_api_getuser"
+    },
+    {
+      "label": "updateUser()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L63",
+      "community": 0,
+      "norm_label": "updateuser()",
+      "id": "admin_api_updateuser"
+    },
+    {
+      "label": "deleteUser()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L64",
+      "community": 0,
+      "norm_label": "deleteuser()",
+      "id": "admin_api_deleteuser"
+    },
+    {
+      "label": "suspendUser()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L65",
+      "community": 0,
+      "norm_label": "suspenduser()",
+      "id": "admin_api_suspenduser"
+    },
+    {
+      "label": "activateUser()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L66",
+      "community": 0,
+      "norm_label": "activateuser()",
+      "id": "admin_api_activateuser"
+    },
+    {
+      "label": "verifyUser()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L67",
+      "community": 0,
+      "norm_label": "verifyuser()",
+      "id": "admin_api_verifyuser"
+    },
+    {
+      "label": "getUserJobs()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L68",
+      "community": 0,
+      "norm_label": "getuserjobs()",
+      "id": "admin_api_getuserjobs"
+    },
+    {
+      "label": "getUserPayments()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L69",
+      "community": 0,
+      "norm_label": "getuserpayments()",
+      "id": "admin_api_getuserpayments"
+    },
+    {
+      "label": "getJobs()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L72",
+      "community": 0,
+      "norm_label": "getjobs()",
+      "id": "admin_api_getjobs"
+    },
+    {
+      "label": "getJob()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L73",
+      "community": 0,
+      "norm_label": "getjob()",
+      "id": "admin_api_getjob"
+    },
+    {
+      "label": "approveJob()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L74",
+      "community": 0,
+      "norm_label": "approvejob()",
+      "id": "admin_api_approvejob"
+    },
+    {
+      "label": "rejectJob()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L75",
+      "community": 0,
+      "norm_label": "rejectjob()",
+      "id": "admin_api_rejectjob"
+    },
+    {
+      "label": "closeJob()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L76",
+      "community": 0,
+      "norm_label": "closejob()",
+      "id": "admin_api_closejob"
+    },
+    {
+      "label": "flagJob()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L77",
+      "community": 0,
+      "norm_label": "flagjob()",
+      "id": "admin_api_flagjob"
+    },
+    {
+      "label": "deleteJob()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L78",
+      "community": 0,
+      "norm_label": "deletejob()",
+      "id": "admin_api_deletejob"
+    },
+    {
+      "label": "getPayments()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L81",
+      "community": 0,
+      "norm_label": "getpayments()",
+      "id": "admin_api_getpayments"
+    },
+    {
+      "label": "getPayment()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L82",
+      "community": 0,
+      "norm_label": "getpayment()",
+      "id": "admin_api_getpayment"
+    },
+    {
+      "label": "refundPayment()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L83",
+      "community": 0,
+      "norm_label": "refundpayment()",
+      "id": "admin_api_refundpayment"
+    },
+    {
+      "label": "resolveDispute()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L84",
+      "community": 0,
+      "norm_label": "resolvedispute()",
+      "id": "admin_api_resolvedispute"
+    },
+    {
+      "label": "getPaymentSummary()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L85",
+      "community": 0,
+      "norm_label": "getpaymentsummary()",
+      "id": "admin_api_getpaymentsummary"
+    },
+    {
+      "label": "getReportOverview()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L88",
+      "community": 0,
+      "norm_label": "getreportoverview()",
+      "id": "admin_api_getreportoverview"
+    },
+    {
+      "label": "getUserReport()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L89",
+      "community": 0,
+      "norm_label": "getuserreport()",
+      "id": "admin_api_getuserreport"
+    },
+    {
+      "label": "getJobReport()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L90",
+      "community": 0,
+      "norm_label": "getjobreport()",
+      "id": "admin_api_getjobreport"
+    },
+    {
+      "label": "getRevenueReport()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L91",
+      "community": 0,
+      "norm_label": "getrevenuereport()",
+      "id": "admin_api_getrevenuereport"
+    },
+    {
+      "label": "exportReport()",
+      "file_type": "code",
+      "source_file": "admin/api.js",
+      "source_location": "L92",
+      "community": 0,
+      "norm_label": "exportreport()",
+      "id": "admin_api_exportreport"
+    },
+    {
+      "label": "seed_dashboard.php",
+      "file_type": "code",
+      "source_file": "scratch/seed_dashboard.php",
+      "source_location": "L1",
+      "community": 137,
+      "norm_label": "seed_dashboard.php",
+      "id": "scratch_seed_dashboard_php"
+    },
+    {
+      "label": "simulated_footer.js",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L1",
+      "community": 6,
+      "norm_label": "simulated_footer.js",
+      "id": "scratch_simulated_footer_js"
+    },
+    {
+      "label": "JOBS",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L2",
+      "community": 6,
+      "norm_label": "jobs",
+      "id": "scratch_simulated_footer_jobs"
+    },
+    {
+      "label": "SAVED_IDS",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L3",
+      "community": 6,
+      "norm_label": "saved_ids",
+      "id": "scratch_simulated_footer_saved_ids"
+    },
+    {
+      "label": "PROPOSALS",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L4",
+      "community": 6,
+      "norm_label": "proposals",
+      "id": "scratch_simulated_footer_proposals"
+    },
+    {
+      "label": "CONTRACTS",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L5",
+      "community": 6,
+      "norm_label": "contracts",
+      "id": "scratch_simulated_footer_contracts"
+    },
+    {
+      "label": "showPage()",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L8",
+      "community": 90,
+      "norm_label": "showpage()",
+      "id": "scratch_simulated_footer_showpage"
+    },
+    {
+      "label": "panel",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L60",
+      "community": 6,
+      "norm_label": "panel",
+      "id": "scratch_simulated_footer_panel"
+    },
+    {
+      "label": "info",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L63",
+      "community": 6,
+      "norm_label": "info",
+      "id": "scratch_simulated_footer_info"
+    },
+    {
+      "label": "input",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L91",
+      "community": 6,
+      "norm_label": "input",
+      "id": "scratch_simulated_footer_input"
+    },
+    {
+      "label": "fd",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L110",
+      "community": 6,
+      "norm_label": "fd",
+      "id": "scratch_simulated_footer_fd"
+    },
+    {
+      "label": "textEl",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L131",
+      "community": 6,
+      "norm_label": "textel",
+      "id": "scratch_simulated_footer_textel"
+    },
+    {
+      "label": "dotEl",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L132",
+      "community": 6,
+      "norm_label": "dotel",
+      "id": "scratch_simulated_footer_dotel"
+    },
+    {
+      "label": "renderContracts()",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L167",
+      "community": 90,
+      "norm_label": "rendercontracts()",
+      "id": "scratch_simulated_footer_rendercontracts"
+    },
+    {
+      "label": "renderProposals()",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L259",
+      "community": 90,
+      "norm_label": "renderproposals()",
+      "id": "scratch_simulated_footer_renderproposals"
+    },
+    {
+      "label": "renderJobs()",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L323",
+      "community": 90,
+      "norm_label": "renderjobs()",
+      "id": "scratch_simulated_footer_renderjobs"
+    },
+    {
+      "label": "timeAgo()",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L383",
+      "community": 6,
+      "norm_label": "timeago()",
+      "id": "scratch_simulated_footer_timeago"
+    },
+    {
+      "label": "job",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L392",
+      "community": 2,
+      "norm_label": "job",
+      "id": "scratch_simulated_footer_job"
+    },
+    {
+      "label": "container",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L518",
+      "community": 6,
+      "norm_label": "container",
+      "id": "scratch_simulated_footer_container"
+    },
+    {
+      "label": "row",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L519",
+      "community": 6,
+      "norm_label": "row",
+      "id": "scratch_simulated_footer_row"
+    },
+    {
+      "label": "amounts",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L531",
+      "community": 6,
+      "norm_label": "amounts",
+      "id": "scratch_simulated_footer_amounts"
+    },
+    {
+      "label": "rate",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L536",
+      "community": 6,
+      "norm_label": "rate",
+      "id": "scratch_simulated_footer_rate"
+    },
+    {
+      "label": "warning",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L537",
+      "community": 6,
+      "norm_label": "warning",
+      "id": "scratch_simulated_footer_warning"
+    },
+    {
+      "label": "milestones",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L555",
+      "community": 6,
+      "norm_label": "milestones",
+      "id": "scratch_simulated_footer_milestones"
+    },
+    {
+      "label": "rows",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L556",
+      "community": 6,
+      "norm_label": "rows",
+      "id": "scratch_simulated_footer_rows"
+    },
+    {
+      "label": "desc",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L559",
+      "community": 6,
+      "norm_label": "desc",
+      "id": "scratch_simulated_footer_desc"
+    },
+    {
+      "label": "amt",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L560",
+      "community": 6,
+      "norm_label": "amt",
+      "id": "scratch_simulated_footer_amt"
+    },
+    {
+      "label": "payload",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L575",
+      "community": 6,
+      "norm_label": "payload",
+      "id": "scratch_simulated_footer_payload"
+    },
+    {
+      "label": "idx",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L632",
+      "community": 6,
+      "norm_label": "idx",
+      "id": "scratch_simulated_footer_idx"
+    },
+    {
+      "label": "t",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L650",
+      "community": 6,
+      "norm_label": "t",
+      "id": "scratch_simulated_footer_t"
+    },
+    {
+      "label": "filter",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L664",
+      "community": 90,
+      "norm_label": "filter",
+      "id": "scratch_simulated_footer_filter"
+    },
+    {
+      "label": "modal",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L682",
+      "community": 6,
+      "norm_label": "modal",
+      "id": "scratch_simulated_footer_modal"
+    },
+    {
+      "label": "mc",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L683",
+      "community": 6,
+      "norm_label": "mc",
+      "id": "scratch_simulated_footer_mc"
+    },
+    {
+      "label": "overlay",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L684",
+      "community": 6,
+      "norm_label": "overlay",
+      "id": "scratch_simulated_footer_overlay"
+    },
+    {
+      "label": "c",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L687",
+      "community": 6,
+      "norm_label": "c",
+      "id": "scratch_simulated_footer_c"
+    },
+    {
+      "label": "pct",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L872",
+      "community": 6,
+      "norm_label": "pct",
+      "id": "scratch_simulated_footer_pct"
+    },
+    {
+      "label": "imageInput",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L928",
+      "community": 6,
+      "norm_label": "imageinput",
+      "id": "scratch_simulated_footer_imageinput"
+    },
+    {
+      "label": "sbName",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L1045",
+      "community": 6,
+      "norm_label": "sbname",
+      "id": "scratch_simulated_footer_sbname"
+    },
+    {
+      "label": "sbAv",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L1047",
+      "community": 6,
+      "norm_label": "sbav",
+      "id": "scratch_simulated_footer_sbav"
+    },
+    {
+      "label": "bioEl",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L1051",
+      "community": 6,
+      "norm_label": "bioel",
+      "id": "scratch_simulated_footer_bioel"
+    },
+    {
+      "label": "btn",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L1065",
+      "community": 6,
+      "norm_label": "btn",
+      "id": "scratch_simulated_footer_btn"
+    },
+    {
+      "label": "renderReports()",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L1147",
+      "community": 90,
+      "norm_label": "renderreports()",
+      "id": "scratch_simulated_footer_renderreports"
+    },
+    {
+      "label": "SKILL_TREE",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L1158",
+      "community": 6,
+      "norm_label": "skill_tree",
+      "id": "scratch_simulated_footer_skill_tree"
+    },
+    {
+      "label": "selectedSkills",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L1174",
+      "community": 6,
+      "norm_label": "selectedskills",
+      "id": "scratch_simulated_footer_selectedskills"
+    },
+    {
+      "label": "renderCatCol()",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L1192",
+      "community": 6,
+      "norm_label": "rendercatcol()",
+      "id": "scratch_simulated_footer_rendercatcol"
+    },
+    {
+      "label": "countSelected()",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L1203",
+      "community": 6,
+      "norm_label": "countselected()",
+      "id": "scratch_simulated_footer_countselected"
+    },
+    {
+      "label": "col",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L1213",
+      "community": 6,
+      "norm_label": "col",
+      "id": "scratch_simulated_footer_col"
+    },
+    {
+      "label": "renderSpecCol()",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L1236",
+      "community": 6,
+      "norm_label": "renderspeccol()",
+      "id": "scratch_simulated_footer_renderspeccol"
+    },
+    {
+      "label": "renderSelectedPreview()",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L1269",
+      "community": 1,
+      "norm_label": "renderselectedpreview()",
+      "id": "scratch_simulated_footer_renderselectedpreview"
+    },
+    {
+      "label": "skills",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L1281",
+      "community": 6,
+      "norm_label": "skills",
+      "id": "scratch_simulated_footer_skills"
+    },
+    {
+      "label": "display",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L1296",
+      "community": 6,
+      "norm_label": "display",
+      "id": "scratch_simulated_footer_display"
+    },
+    {
+      "label": "empty",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L1297",
+      "community": 5,
+      "norm_label": "empty",
+      "id": "scratch_simulated_footer_empty"
+    },
+    {
+      "label": "badge",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L1298",
+      "community": 6,
+      "norm_label": "badge",
+      "id": "scratch_simulated_footer_badge"
+    },
+    {
+      "label": "skill",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L1322",
+      "community": 6,
+      "norm_label": "skill",
+      "id": "scratch_simulated_footer_skill"
+    },
+    {
+      "label": "query",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L1331",
+      "community": 6,
+      "norm_label": "query",
+      "id": "scratch_simulated_footer_query"
+    },
+    {
+      "label": "catCol",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L1337",
+      "community": 6,
+      "norm_label": "catcol",
+      "id": "scratch_simulated_footer_catcol"
+    },
+    {
+      "label": "subCol",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L1338",
+      "community": 6,
+      "norm_label": "subcol",
+      "id": "scratch_simulated_footer_subcol"
+    },
+    {
+      "label": "skillCol",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L1339",
+      "community": 6,
+      "norm_label": "skillcol",
+      "id": "scratch_simulated_footer_skillcol"
+    },
+    {
+      "label": "results",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L1340",
+      "community": 6,
+      "norm_label": "results",
+      "id": "scratch_simulated_footer_results"
+    },
+    {
+      "label": "sel",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L1354",
+      "community": 6,
+      "norm_label": "sel",
+      "id": "scratch_simulated_footer_sel"
+    },
+    {
+      "label": "SUGGESTED_FOR_DESIGNER",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L1363",
+      "community": 6,
+      "norm_label": "suggested_for_designer",
+      "id": "scratch_simulated_footer_suggested_for_designer"
+    },
+    {
+      "label": "el",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L1371",
+      "community": 6,
+      "norm_label": "el",
+      "id": "scratch_simulated_footer_el"
+    },
+    {
+      "label": "shown",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L1373",
+      "community": 6,
+      "norm_label": "shown",
+      "id": "scratch_simulated_footer_shown"
+    },
+    {
+      "label": "loadChat()",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L1387",
+      "community": 91,
+      "norm_label": "loadchat()",
+      "id": "scratch_simulated_footer_loadchat"
+    },
+    {
+      "label": "renderChatWindow()",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L1419",
+      "community": 91,
+      "norm_label": "renderchatwindow()",
+      "id": "scratch_simulated_footer_renderchatwindow"
+    },
+    {
+      "label": "sendMsg()",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L1449",
+      "community": 1,
+      "norm_label": "sendmsg()",
+      "id": "scratch_simulated_footer_sendmsg"
+    },
+    {
+      "label": "startChatPolling()",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L1494",
+      "community": 91,
+      "norm_label": "startchatpolling()",
+      "id": "scratch_simulated_footer_startchatpolling"
+    },
+    {
+      "label": "filterConversations()",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L1577",
+      "community": 6,
+      "norm_label": "filterconversations()",
+      "id": "scratch_simulated_footer_filterconversations"
+    },
+    {
+      "label": "hash",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L1586",
+      "community": 8,
+      "norm_label": "hash",
+      "id": "scratch_simulated_footer_hash"
+    },
+    {
+      "label": "requestMilestone()",
+      "file_type": "code",
+      "source_file": "scratch/simulated_footer.js",
+      "source_location": "L1594",
+      "community": 1,
+      "norm_label": "requestmilestone()",
+      "id": "scratch_simulated_footer_requestmilestone"
+    },
+    {
+      "label": "check_db.php",
+      "file_type": "code",
+      "source_file": "scratch/check_db.php",
+      "source_location": "L1",
+      "community": 87,
+      "norm_label": "check_db.php",
+      "id": "scratch_check_db_php"
+    },
+    {
+      "label": "fix_job_status.php",
+      "file_type": "code",
+      "source_file": "/Applications/MAMP/htdocs/upwork-project/scratch/fix_job_status.php",
+      "source_location": "L1",
+      "community": 112,
+      "norm_label": "fix_job_status.php",
+      "id": "applications_mamp_htdocs_upwork_project_scratch_fix_job_status_php"
+    },
+    {
+      "label": "fix_jobs_table.php",
+      "file_type": "code",
+      "source_file": "/Applications/MAMP/htdocs/upwork-project/scratch/fix_jobs_table.php",
+      "source_location": "L1",
+      "community": 113,
+      "norm_label": "fix_jobs_table.php",
+      "id": "applications_mamp_htdocs_upwork_project_scratch_fix_jobs_table_php"
+    },
+    {
+      "label": "check_db_proposals.php",
+      "file_type": "code",
+      "source_file": "scratch/check_db_proposals.php",
+      "source_location": "L1",
+      "community": 88,
+      "norm_label": "check_db_proposals.php",
+      "id": "scratch_check_db_proposals_php"
+    },
+    {
+      "label": "run_migration.php",
+      "file_type": "code",
+      "source_file": "scratch/run_migration.php",
+      "source_location": "L1",
+      "community": 136,
+      "norm_label": "run_migration.php",
+      "id": "scratch_run_migration_php"
+    },
+    {
+      "label": "create_milestones_table.php",
+      "file_type": "code",
+      "source_file": "/Applications/MAMP/htdocs/upwork-project/scratch/create_milestones_table.php",
+      "source_location": "L1",
+      "community": 111,
+      "norm_label": "create_milestones_table.php",
+      "id": "applications_mamp_htdocs_upwork_project_scratch_create_milestones_table_php"
+    },
+    {
+      "label": "fix_proposal_status.php",
+      "file_type": "code",
+      "source_file": "/Applications/MAMP/htdocs/upwork-project/scratch/fix_proposal_status.php",
+      "source_location": "L1",
+      "community": 114,
+      "norm_label": "fix_proposal_status.php",
+      "id": "applications_mamp_htdocs_upwork_project_scratch_fix_proposal_status_php"
+    },
+    {
       "label": "check_parens.py",
       "file_type": "code",
       "source_file": "scratch/check_parens.py",
       "source_location": "L1",
-      "id": "scratch_check_parens_py",
       "community": 93,
-      "norm_label": "check_parens.py"
+      "norm_label": "check_parens.py",
+      "id": "scratch_check_parens_py"
     },
     {
       "label": "check_parens()",
       "file_type": "code",
       "source_file": "scratch/check_parens.py",
       "source_location": "L3",
-      "id": "scratch_check_parens_check_parens",
       "community": 93,
-      "norm_label": "check_parens()"
+      "norm_label": "check_parens()",
+      "id": "scratch_check_parens_check_parens"
     },
     {
       "label": "simulate_footer.php",
       "file_type": "code",
       "source_file": "scratch/simulate_footer.php",
       "source_location": "L1",
-      "id": "scratch_simulate_footer_php",
       "community": 94,
-      "norm_label": "simulate_footer.php"
+      "norm_label": "simulate_footer.php",
+      "id": "scratch_simulate_footer_php"
     },
     {
       "label": "baseUrl()",
       "file_type": "code",
       "source_file": "scratch/simulate_footer.php",
       "source_location": "L3",
-      "id": "scratch_simulate_footer_baseurl",
       "community": 94,
-      "norm_label": "baseurl()"
+      "norm_label": "baseurl()",
+      "id": "scratch_simulate_footer_baseurl"
     },
     {
       "label": "upload_doc.php",
       "file_type": "code",
       "source_file": "actions/upload_doc.php",
       "source_location": "L1",
-      "id": "actions_upload_doc_php",
       "community": 11,
-      "norm_label": "upload_doc.php"
+      "norm_label": "upload_doc.php",
+      "id": "actions_upload_doc_php"
     },
     {
       "label": "json_response()",
       "file_type": "code",
       "source_file": "actions/upload_doc.php",
       "source_location": "L7",
-      "id": "actions_upload_doc_json_response",
       "community": 11,
-      "norm_label": "json_response()"
+      "norm_label": "json_response()",
+      "id": "actions_upload_doc_json_response"
     },
     {
       "label": "delete_service.php",
       "file_type": "code",
       "source_file": "actions/delete_service.php",
       "source_location": "L1",
-      "id": "actions_delete_service_php",
       "community": 12,
-      "norm_label": "delete_service.php"
+      "norm_label": "delete_service.php",
+      "id": "actions_delete_service_php"
     },
     {
       "label": "json_response()",
       "file_type": "code",
       "source_file": "actions/delete_service.php",
       "source_location": "L7",
-      "id": "actions_delete_service_json_response",
       "community": 12,
-      "norm_label": "json_response()"
+      "norm_label": "json_response()",
+      "id": "actions_delete_service_json_response"
     },
     {
       "label": "get_messages.php",
       "file_type": "code",
       "source_file": "actions/get_messages.php",
       "source_location": "L1",
-      "id": "actions_get_messages_php",
       "community": 13,
-      "norm_label": "get_messages.php"
+      "norm_label": "get_messages.php",
+      "id": "actions_get_messages_php"
     },
     {
       "label": "json_response()",
       "file_type": "code",
       "source_file": "actions/get_messages.php",
       "source_location": "L7",
-      "id": "actions_get_messages_json_response",
       "community": 13,
-      "norm_label": "json_response()"
+      "norm_label": "json_response()",
+      "id": "actions_get_messages_json_response"
     },
     {
       "label": "submit_verification.php",
       "file_type": "code",
       "source_file": "actions/submit_verification.php",
       "source_location": "L1",
-      "id": "actions_submit_verification_php",
       "community": 14,
-      "norm_label": "submit_verification.php"
+      "norm_label": "submit_verification.php",
+      "id": "actions_submit_verification_php"
     },
     {
       "label": "json_response()",
       "file_type": "code",
       "source_file": "actions/submit_verification.php",
       "source_location": "L7",
-      "id": "actions_submit_verification_json_response",
       "community": 14,
-      "norm_label": "json_response()"
+      "norm_label": "json_response()",
+      "id": "actions_submit_verification_json_response"
     },
     {
       "label": "post_job.php",
       "file_type": "code",
       "source_file": "actions/post_job.php",
       "source_location": "L1",
-      "id": "actions_post_job_php",
       "community": 45,
-      "norm_label": "post_job.php"
+      "norm_label": "post_job.php",
+      "id": "actions_post_job_php"
     },
     {
       "label": "send_message.php",
       "file_type": "code",
       "source_file": "actions/send_message.php",
       "source_location": "L1",
-      "id": "actions_send_message_php",
       "community": 15,
-      "norm_label": "send_message.php"
+      "norm_label": "send_message.php",
+      "id": "actions_send_message_php"
     },
     {
       "label": "json_response()",
       "file_type": "code",
       "source_file": "actions/send_message.php",
       "source_location": "L7",
-      "id": "actions_send_message_json_response",
       "community": 15,
-      "norm_label": "json_response()"
+      "norm_label": "json_response()",
+      "id": "actions_send_message_json_response"
     },
     {
       "label": "create_service.php",
       "file_type": "code",
       "source_file": "actions/create_service.php",
       "source_location": "L1",
-      "id": "actions_create_service_php",
       "community": 16,
-      "norm_label": "create_service.php"
+      "norm_label": "create_service.php",
+      "id": "actions_create_service_php"
     },
     {
       "label": "json_response()",
       "file_type": "code",
       "source_file": "actions/create_service.php",
       "source_location": "L7",
-      "id": "actions_create_service_json_response",
       "community": 16,
-      "norm_label": "json_response()"
+      "norm_label": "json_response()",
+      "id": "actions_create_service_json_response"
     },
     {
       "label": "login.php",
       "file_type": "code",
       "source_file": "actions/login.php",
       "source_location": "L1",
-      "id": "actions_login_php",
       "community": 96,
-      "norm_label": "login.php"
+      "norm_label": "login.php",
+      "id": "actions_login_php"
     },
     {
       "label": "edit_job.php",
       "file_type": "code",
       "source_file": "actions/edit_job.php",
       "source_location": "L1",
-      "id": "actions_edit_job_php",
       "community": 95,
-      "norm_label": "edit_job.php"
+      "norm_label": "edit_job.php",
+      "id": "actions_edit_job_php"
     },
     {
       "label": "update_contract_status.php",
       "file_type": "code",
       "source_file": "/Applications/MAMP/htdocs/upwork-project/actions/update_contract_status.php",
       "source_location": "L1",
-      "id": "applications_mamp_htdocs_upwork_project_actions_update_contract_status_php",
       "community": 104,
-      "norm_label": "update_contract_status.php"
+      "norm_label": "update_contract_status.php",
+      "id": "applications_mamp_htdocs_upwork_project_actions_update_contract_status_php"
     },
     {
       "label": "register.php",
       "file_type": "code",
       "source_file": "actions/register.php",
       "source_location": "L1",
-      "id": "actions_register_php",
       "community": 97,
-      "norm_label": "register.php"
-    },
-    {
-      "label": "hire_freelancer.php",
-      "file_type": "code",
-      "source_file": "actions/hire_freelancer.php",
-      "source_location": "L1",
-      "id": "actions_hire_freelancer_php",
-      "community": 50,
-      "norm_label": "hire_freelancer.php"
+      "norm_label": "register.php",
+      "id": "actions_register_php"
     },
     {
       "label": "update_service.php",
       "file_type": "code",
       "source_file": "actions/update_service.php",
       "source_location": "L1",
-      "id": "actions_update_service_php",
       "community": 17,
-      "norm_label": "update_service.php"
+      "norm_label": "update_service.php",
+      "id": "actions_update_service_php"
     },
     {
       "label": "json_response()",
       "file_type": "code",
       "source_file": "actions/update_service.php",
       "source_location": "L7",
-      "id": "actions_update_service_json_response",
       "community": 17,
-      "norm_label": "json_response()"
+      "norm_label": "json_response()",
+      "id": "actions_update_service_json_response"
     },
     {
       "label": "update_profile.php",
       "file_type": "code",
       "source_file": "actions/update_profile.php",
       "source_location": "L1",
-      "id": "actions_update_profile_php",
       "community": 18,
-      "norm_label": "update_profile.php"
+      "norm_label": "update_profile.php",
+      "id": "actions_update_profile_php"
     },
     {
       "label": "json_response()",
       "file_type": "code",
       "source_file": "actions/update_profile.php",
       "source_location": "L6",
-      "id": "actions_update_profile_json_response",
       "community": 18,
-      "norm_label": "json_response()"
+      "norm_label": "json_response()",
+      "id": "actions_update_profile_json_response"
     },
     {
       "label": "cancel_hiring.php",
       "file_type": "code",
       "source_file": "/Applications/MAMP/htdocs/upwork-project/actions/cancel_hiring.php",
       "source_location": "L1",
-      "id": "applications_mamp_htdocs_upwork_project_actions_cancel_hiring_php",
       "community": 101,
-      "norm_label": "cancel_hiring.php"
+      "norm_label": "cancel_hiring.php",
+      "id": "applications_mamp_htdocs_upwork_project_actions_cancel_hiring_php"
     },
     {
       "label": "complete_job.php",
       "file_type": "code",
       "source_file": "/Applications/MAMP/htdocs/upwork-project/actions/complete_job.php",
       "source_location": "L1",
-      "id": "applications_mamp_htdocs_upwork_project_actions_complete_job_php",
       "community": 102,
-      "norm_label": "complete_job.php"
+      "norm_label": "complete_job.php",
+      "id": "applications_mamp_htdocs_upwork_project_actions_complete_job_php"
     },
     {
       "label": "update_job_status.php",
       "file_type": "code",
       "source_file": "/Applications/MAMP/htdocs/upwork-project/actions/update_job_status.php",
       "source_location": "L1",
-      "id": "applications_mamp_htdocs_upwork_project_actions_update_job_status_php",
       "community": 105,
-      "norm_label": "update_job_status.php"
+      "norm_label": "update_job_status.php",
+      "id": "applications_mamp_htdocs_upwork_project_actions_update_job_status_php"
     },
     {
       "label": "submit_proposal.php",
       "file_type": "code",
       "source_file": "actions/submit_proposal.php",
       "source_location": "L1",
-      "id": "actions_submit_proposal_php",
       "community": 98,
-      "norm_label": "submit_proposal.php"
+      "norm_label": "submit_proposal.php",
+      "id": "actions_submit_proposal_php"
     },
     {
       "label": "change_password.php",
       "file_type": "code",
       "source_file": "actions/change_password.php",
       "source_location": "L1",
-      "id": "actions_change_password_php",
       "community": 92,
-      "norm_label": "change_password.php"
+      "norm_label": "change_password.php",
+      "id": "actions_change_password_php"
     },
     {
       "label": "json_response()",
       "file_type": "code",
       "source_file": "actions/change_password.php",
       "source_location": "L7",
-      "id": "actions_change_password_json_response",
       "community": 92,
-      "norm_label": "json_response()"
+      "norm_label": "json_response()",
+      "id": "actions_change_password_json_response"
     },
     {
       "label": "update_skills.php",
       "file_type": "code",
       "source_file": "actions/update_skills.php",
       "source_location": "L1",
-      "id": "actions_update_skills_php",
       "community": 19,
-      "norm_label": "update_skills.php"
+      "norm_label": "update_skills.php",
+      "id": "actions_update_skills_php"
     },
     {
       "label": "json_response()",
       "file_type": "code",
       "source_file": "actions/update_skills.php",
       "source_location": "L6",
-      "id": "actions_update_skills_json_response",
       "community": 19,
-      "norm_label": "json_response()"
+      "norm_label": "json_response()",
+      "id": "actions_update_skills_json_response"
     },
     {
       "label": "update_availability.php",
       "file_type": "code",
       "source_file": "actions/update_availability.php",
       "source_location": "L1",
-      "id": "actions_update_availability_php",
       "community": 20,
-      "norm_label": "update_availability.php"
+      "norm_label": "update_availability.php",
+      "id": "actions_update_availability_php"
     },
     {
       "label": "json_response()",
       "file_type": "code",
       "source_file": "actions/update_availability.php",
       "source_location": "L7",
-      "id": "actions_update_availability_json_response",
       "community": 20,
-      "norm_label": "json_response()"
+      "norm_label": "json_response()",
+      "id": "actions_update_availability_json_response"
     },
     {
       "label": "verify_email.php",
       "file_type": "code",
       "source_file": "actions/verify_email.php",
       "source_location": "L1",
-      "id": "actions_verify_email_php",
       "community": 82,
-      "norm_label": "verify_email.php"
-    },
-    {
-      "label": "add_funds.php",
-      "file_type": "code",
-      "source_file": "actions/add_funds.php",
-      "source_location": "L1",
-      "id": "actions_add_funds_php",
-      "community": 21,
-      "norm_label": "add_funds.php"
-    },
-    {
-      "label": "json_response()",
-      "file_type": "code",
-      "source_file": "actions/add_funds.php",
-      "source_location": "L7",
-      "id": "actions_add_funds_json_response",
-      "community": 21,
-      "norm_label": "json_response()"
+      "norm_label": "verify_email.php",
+      "id": "actions_verify_email_php"
     },
     {
       "label": "update_proposal_status.php",
       "file_type": "code",
       "source_file": "/Applications/MAMP/htdocs/upwork-project/actions/update_proposal_status.php",
       "source_location": "L1",
-      "id": "applications_mamp_htdocs_upwork_project_actions_update_proposal_status_php",
       "community": 106,
-      "norm_label": "update_proposal_status.php"
+      "norm_label": "update_proposal_status.php",
+      "id": "applications_mamp_htdocs_upwork_project_actions_update_proposal_status_php"
     },
     {
       "label": "main.js",
       "file_type": "code",
       "source_file": "assets/js/main.js",
       "source_location": "L1",
-      "id": "assets_js_main_js",
       "community": 9,
-      "norm_label": "main.js"
+      "norm_label": "main.js",
+      "id": "assets_js_main_js"
     },
     {
       "label": "toggle",
       "file_type": "code",
       "source_file": "assets/js/main.js",
       "source_location": "L7",
-      "id": "js_main_toggle",
       "community": 9,
-      "norm_label": "toggle"
+      "norm_label": "toggle",
+      "id": "js_main_toggle"
     },
     {
       "label": "menu",
       "file_type": "code",
       "source_file": "assets/js/main.js",
       "source_location": "L8",
-      "id": "js_main_menu",
       "community": 9,
-      "norm_label": "menu"
+      "norm_label": "menu",
+      "id": "js_main_menu"
     },
     {
       "label": "navbar",
       "file_type": "code",
       "source_file": "assets/js/main.js",
       "source_location": "L17",
-      "id": "js_main_navbar",
       "community": 9,
-      "norm_label": "navbar"
+      "norm_label": "navbar",
+      "id": "js_main_navbar"
     },
     {
       "label": "observerOptions",
       "file_type": "code",
       "source_file": "assets/js/main.js",
       "source_location": "L31",
-      "id": "js_main_observeroptions",
       "community": 9,
-      "norm_label": "observeroptions"
+      "norm_label": "observeroptions",
+      "id": "js_main_observeroptions"
     },
     {
       "label": "observer",
       "file_type": "code",
       "source_file": "assets/js/main.js",
       "source_location": "L36",
-      "id": "js_main_observer",
       "community": 9,
-      "norm_label": "observer"
-    },
-    {
-      "label": "index.php",
-      "file_type": "code",
-      "source_file": "client/index.php",
-      "source_location": "L1",
-      "id": "client_index_php",
-      "community": 56,
-      "norm_label": "index.php"
+      "norm_label": "observer",
+      "id": "js_main_observer"
     },
     {
       "label": "header.php",
       "file_type": "code",
       "source_file": "/Applications/MAMP/htdocs/upwork-project/client/includes/header.php",
       "source_location": "L1",
-      "id": "applications_mamp_htdocs_upwork_project_client_includes_header_php",
       "community": 109,
-      "norm_label": "header.php"
-    },
-    {
-      "label": "footer.php",
-      "file_type": "code",
-      "source_file": "client/includes/footer.php",
-      "source_location": "L1",
-      "id": "client_includes_footer_php",
-      "community": 89,
-      "norm_label": "footer.php"
-    },
-    {
-      "label": "release-milestone.php",
-      "file_type": "code",
-      "source_file": "client/api/release-milestone.php",
-      "source_location": "L1",
-      "id": "client_api_release_milestone_php",
-      "community": 59,
-      "norm_label": "release-milestone.php"
+      "norm_label": "header.php",
+      "id": "applications_mamp_htdocs_upwork_project_client_includes_header_php"
     },
     {
       "label": "update-profile.php",
       "file_type": "code",
       "source_file": "client/api/update-profile.php",
       "source_location": "L1",
-      "id": "client_api_update_profile_php",
       "community": 117,
-      "norm_label": "update-profile.php"
-    },
-    {
-      "label": "fund-milestone.php",
-      "file_type": "code",
-      "source_file": "client/api/fund-milestone.php",
-      "source_location": "L1",
-      "id": "client_api_fund_milestone_php",
-      "community": 115,
-      "norm_label": "fund-milestone.php"
+      "norm_label": "update-profile.php",
+      "id": "client_api_update_profile_php"
     },
     {
       "label": "process-work.php",
       "file_type": "code",
       "source_file": "client/api/process-work.php",
       "source_location": "L1",
-      "id": "client_api_process_work_php",
       "community": 116,
-      "norm_label": "process-work.php"
+      "norm_label": "process-work.php",
+      "id": "client_api_process_work_php"
     },
     {
       "label": "login.php",
       "file_type": "code",
       "source_file": "freelancer/login.php",
       "source_location": "L1",
-      "id": "freelancer_login_php",
       "community": 122,
-      "norm_label": "login.php"
-    },
-    {
-      "label": "index.php",
-      "file_type": "code",
-      "source_file": "freelancer/index.php",
-      "source_location": "L1",
-      "id": "freelancer_index_php",
-      "community": 63,
-      "norm_label": "index.php"
-    },
-    {
-      "label": "header.php",
-      "file_type": "code",
-      "source_file": "freelancer/includes/header.php",
-      "source_location": "L1",
-      "id": "freelancer_includes_header_php",
-      "community": 64,
-      "norm_label": "header.php"
-    },
-    {
-      "label": "footer.php",
-      "file_type": "code",
-      "source_file": "freelancer/includes/footer.php",
-      "source_location": "L1",
-      "id": "freelancer_includes_footer_php",
-      "community": 65,
-      "norm_label": "footer.php"
+      "norm_label": "login.php",
+      "id": "freelancer_login_php"
     },
     {
       "label": "footer_test.js",
       "file_type": "code",
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L1",
-      "id": "freelancer_includes_footer_test_js",
       "community": 1,
-      "norm_label": "footer_test.js"
+      "norm_label": "footer_test.js",
+      "id": "freelancer_includes_footer_test_js"
     },
     {
       "label": "CLIENTS",
       "file_type": "code",
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L8",
-      "id": "includes_footer_test_clients",
       "community": 1,
-      "norm_label": "clients"
+      "norm_label": "clients",
+      "id": "includes_footer_test_clients"
     },
     {
       "label": "spentBadge()",
       "file_type": "code",
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L18",
-      "id": "includes_footer_test_spentbadge",
       "community": 1,
-      "norm_label": "spentbadge()"
+      "norm_label": "spentbadge()",
+      "id": "includes_footer_test_spentbadge"
     },
     {
       "label": "jobRowHTML()",
       "file_type": "code",
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L25",
-      "id": "includes_footer_test_jobrowhtml",
       "community": 1,
-      "norm_label": "jobrowhtml()"
+      "norm_label": "jobrowhtml()",
+      "id": "includes_footer_test_jobrowhtml"
     },
     {
       "label": "renderJobs()",
       "file_type": "code",
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L68",
-      "id": "includes_footer_test_renderjobs",
       "community": 1,
-      "norm_label": "renderjobs()"
+      "norm_label": "renderjobs()",
+      "id": "includes_footer_test_renderjobs"
     },
     {
       "label": "MODALS",
       "file_type": "code",
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L77",
-      "id": "includes_footer_test_modals",
       "community": 1,
-      "norm_label": "modals"
+      "norm_label": "modals",
+      "id": "includes_footer_test_modals"
     },
     {
       "label": "togglePwVis()",
       "file_type": "code",
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L317",
-      "id": "includes_footer_test_togglepwvis",
       "community": 1,
-      "norm_label": "togglepwvis()"
+      "norm_label": "togglepwvis()",
+      "id": "includes_footer_test_togglepwvis"
     },
     {
       "label": "checkPwStrength()",
       "file_type": "code",
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L324",
-      "id": "includes_footer_test_checkpwstrength",
       "community": 1,
-      "norm_label": "checkpwstrength()"
+      "norm_label": "checkpwstrength()",
+      "id": "includes_footer_test_checkpwstrength"
     },
     {
       "label": "checkPwMatch()",
       "file_type": "code",
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L352",
-      "id": "includes_footer_test_checkpwmatch",
       "community": 1,
-      "norm_label": "checkpwmatch()"
+      "norm_label": "checkpwmatch()",
+      "id": "includes_footer_test_checkpwmatch"
     },
     {
       "label": "checkAndApply()",
       "file_type": "code",
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L367",
-      "id": "includes_footer_test_checkandapply",
       "community": 1,
-      "norm_label": "checkandapply()"
+      "norm_label": "checkandapply()",
+      "id": "includes_footer_test_checkandapply"
     },
     {
       "label": "submitProposal()",
       "file_type": "code",
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L386",
-      "id": "includes_footer_test_submitproposal",
       "community": 1,
-      "norm_label": "submitproposal()"
+      "norm_label": "submitproposal()",
+      "id": "includes_footer_test_submitproposal"
     },
     {
       "label": "submitPasswordReset()",
       "file_type": "code",
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L436",
-      "id": "includes_footer_test_submitpasswordreset",
       "community": 1,
-      "norm_label": "submitpasswordreset()"
+      "norm_label": "submitpasswordreset()",
+      "id": "includes_footer_test_submitpasswordreset"
     },
     {
       "label": "openModal()",
       "file_type": "code",
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L464",
-      "id": "includes_footer_test_openmodal",
       "community": 1,
-      "norm_label": "openmodal()"
+      "norm_label": "openmodal()",
+      "id": "includes_footer_test_openmodal"
     },
     {
       "label": "closeModal()",
       "file_type": "code",
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L465",
-      "id": "includes_footer_test_closemodal",
       "community": 1,
-      "norm_label": "closemodal()"
+      "norm_label": "closemodal()",
+      "id": "includes_footer_test_closemodal"
     },
     {
       "label": "toast()",
       "file_type": "code",
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L468",
-      "id": "includes_footer_test_toast",
       "community": 1,
-      "norm_label": "toast()"
+      "norm_label": "toast()",
+      "id": "includes_footer_test_toast"
     },
     {
       "label": "toggleSidebar()",
       "file_type": "code",
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L469",
-      "id": "includes_footer_test_togglesidebar",
       "community": 1,
-      "norm_label": "togglesidebar()"
+      "norm_label": "togglesidebar()",
+      "id": "includes_footer_test_togglesidebar"
     },
     {
       "label": "showPage()",
       "file_type": "code",
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L475",
-      "id": "includes_footer_test_showpage",
       "community": 1,
-      "norm_label": "showpage()"
+      "norm_label": "showpage()",
+      "id": "includes_footer_test_showpage"
     },
     {
       "label": "EARNINGS_INFO",
       "file_type": "code",
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L493",
-      "id": "includes_footer_test_earnings_info",
       "community": 1,
-      "norm_label": "earnings_info"
+      "norm_label": "earnings_info",
+      "id": "includes_footer_test_earnings_info"
     },
     {
       "label": "showEarningsInfo()",
       "file_type": "code",
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L514",
-      "id": "includes_footer_test_showearningsinfo",
       "community": 1,
-      "norm_label": "showearningsinfo()"
+      "norm_label": "showearningsinfo()",
+      "id": "includes_footer_test_showearningsinfo"
     },
     {
       "label": "freelancerState",
       "file_type": "code",
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L534",
-      "id": "includes_footer_test_freelancerstate",
       "community": 1,
-      "norm_label": "freelancerstate"
+      "norm_label": "freelancerstate",
+      "id": "includes_footer_test_freelancerstate"
     },
     {
       "label": "selectedPkg",
       "file_type": "code",
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L542",
-      "id": "includes_footer_test_selectedpkg",
       "community": 1,
-      "norm_label": "selectedpkg"
+      "norm_label": "selectedpkg",
+      "id": "includes_footer_test_selectedpkg"
     },
     {
       "label": "selectConnectPkg()",
       "file_type": "code",
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L544",
-      "id": "includes_footer_test_selectconnectpkg",
       "community": 1,
-      "norm_label": "selectconnectpkg()"
+      "norm_label": "selectconnectpkg()",
+      "id": "includes_footer_test_selectconnectpkg"
     },
     {
       "label": "initiatePaystackPayment()",
       "file_type": "code",
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L573",
-      "id": "includes_footer_test_initiatepaystackpayment",
       "community": 1,
-      "norm_label": "initiatepaystackpayment()"
+      "norm_label": "initiatepaystackpayment()",
+      "id": "includes_footer_test_initiatepaystackpayment"
     },
     {
       "label": "onPaystackSuccess()",
       "file_type": "code",
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L606",
-      "id": "includes_footer_test_onpaystacksuccess",
       "community": 1,
-      "norm_label": "onpaystacksuccess()"
+      "norm_label": "onpaystacksuccess()",
+      "id": "includes_footer_test_onpaystacksuccess"
     },
     {
       "label": "updateApplyModalConnects()",
       "file_type": "code",
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L661",
-      "id": "includes_footer_test_updateapplymodalconnects",
       "community": 1,
-      "norm_label": "updateapplymodalconnects()"
+      "norm_label": "updateapplymodalconnects()",
+      "id": "includes_footer_test_updateapplymodalconnects"
     },
     {
       "label": "SKILL_TREE",
       "file_type": "code",
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L678",
-      "id": "includes_footer_test_skill_tree",
       "community": 1,
-      "norm_label": "skill_tree"
+      "norm_label": "skill_tree",
+      "id": "includes_footer_test_skill_tree"
     },
     {
       "label": "selectedSkills",
       "file_type": "code",
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L806",
-      "id": "includes_footer_test_selectedskills",
       "community": 1,
-      "norm_label": "selectedskills"
+      "norm_label": "selectedskills",
+      "id": "includes_footer_test_selectedskills"
     },
     {
       "label": "openSkillSelector()",
       "file_type": "code",
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L809",
-      "id": "includes_footer_test_openskillselector",
       "community": 1,
-      "norm_label": "openskillselector()"
+      "norm_label": "openskillselector()",
+      "id": "includes_footer_test_openskillselector"
     },
     {
       "label": "closeSkillSelector()",
       "file_type": "code",
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L819",
-      "id": "includes_footer_test_closeskillselector",
       "community": 1,
-      "norm_label": "closeskillselector()"
+      "norm_label": "closeskillselector()",
+      "id": "includes_footer_test_closeskillselector"
     },
     {
       "label": "renderCatCol()",
       "file_type": "code",
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L824",
-      "id": "includes_footer_test_rendercatcol",
       "community": 1,
-      "norm_label": "rendercatcol()"
+      "norm_label": "rendercatcol()",
+      "id": "includes_footer_test_rendercatcol"
     },
     {
       "label": "renderSpecCol()",
       "file_type": "code",
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L836",
-      "id": "includes_footer_test_renderspeccol",
       "community": 1,
-      "norm_label": "renderspeccol()"
+      "norm_label": "renderspeccol()",
+      "id": "includes_footer_test_renderspeccol"
     },
     {
       "label": "toggleSkill()",
       "file_type": "code",
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L855",
-      "id": "includes_footer_test_toggleskill",
       "community": 1,
-      "norm_label": "toggleskill()"
+      "norm_label": "toggleskill()",
+      "id": "includes_footer_test_toggleskill"
     },
     {
       "label": "el",
       "file_type": "code",
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L873",
-      "id": "includes_footer_test_el",
       "community": 1,
-      "norm_label": "el"
+      "norm_label": "el",
+      "id": "includes_footer_test_el"
     },
     {
       "label": "arr",
       "file_type": "code",
       "source_file": "freelancer/includes/footer_test.js",
       "source_location": "L874",
-      "id": "includes_footer_test_arr",
       "community": 1,
-      "norm_label": "arr"
+      "norm_label": "arr",
+      "id": "includes_footer_test_arr"
     },
     {
       "label": "submit_proposal.php",
       "file_type": "code",
       "source_file": "freelancer/actions/submit_proposal.php",
       "source_location": "L1",
-      "id": "freelancer_actions_submit_proposal_php",
       "community": 83,
-      "norm_label": "submit_proposal.php"
+      "norm_label": "submit_proposal.php",
+      "id": "freelancer_actions_submit_proposal_php"
     },
     {
       "label": "update-contract.php",
       "file_type": "code",
       "source_file": "freelancer/api/update-contract.php",
       "source_location": "L1",
-      "id": "freelancer_api_update_contract_php",
       "community": 121,
-      "norm_label": "update-contract.php"
+      "norm_label": "update-contract.php",
+      "id": "freelancer_api_update_contract_php"
     },
     {
       "label": "toggle-save.php",
       "file_type": "code",
       "source_file": "freelancer/api/toggle-save.php",
       "source_location": "L1",
-      "id": "freelancer_api_toggle_save_php",
       "community": 120,
-      "norm_label": "toggle-save.php"
+      "norm_label": "toggle-save.php",
+      "id": "freelancer_api_toggle_save_php"
     },
     {
       "label": "log-work.php",
       "file_type": "code",
       "source_file": "freelancer/api/log-work.php",
       "source_location": "L1",
-      "id": "freelancer_api_log_work_php",
       "community": 119,
-      "norm_label": "log-work.php"
-    },
-    {
-      "label": "get-connects-activity.php",
-      "file_type": "code",
-      "source_file": "freelancer/api/get-connects-activity.php",
-      "source_location": "L1",
-      "id": "freelancer_api_get_connects_activity_php",
-      "community": 140,
-      "norm_label": "get-connects-activity.php"
-    },
-    {
-      "label": "submit-proposal.php",
-      "file_type": "code",
-      "source_file": "freelancer/api/submit-proposal.php",
-      "source_location": "L1",
-      "id": "freelancer_api_submit_proposal_php",
-      "community": 70,
-      "norm_label": "submit-proposal.php"
-    },
-    {
-      "label": "clear-hold.php",
-      "file_type": "code",
-      "source_file": "freelancer/api/clear-hold.php",
-      "source_location": "L1",
-      "id": "freelancer_api_clear_hold_php",
-      "community": 118,
-      "norm_label": "clear-hold.php"
-    },
-    {
-      "label": "buy-connects.php",
-      "file_type": "code",
-      "source_file": "freelancer/api/buy-connects.php",
-      "source_location": "L1",
-      "id": "freelancer_api_buy_connects_php",
-      "community": 139,
-      "norm_label": "buy-connects.php"
-    },
-    {
-      "label": "request-milestone.php",
-      "file_type": "code",
-      "source_file": "freelancer/api/request-milestone.php",
-      "source_location": "L1",
-      "id": "freelancer_api_request_milestone_php",
-      "community": 71,
-      "norm_label": "request-milestone.php"
-    },
-    {
-      "label": "connects.php",
-      "file_type": "code",
-      "source_file": "freelancer/views/connects.php",
-      "source_location": "L1",
-      "id": "freelancer_views_connects_php",
-      "community": 142,
-      "norm_label": "connects.php"
+      "norm_label": "log-work.php",
+      "id": "freelancer_api_log_work_php"
     },
     {
       "label": "verification.php",
       "file_type": "code",
       "source_file": "freelancer/views/verification.php",
       "source_location": "L1",
-      "id": "freelancer_views_verification_php",
       "community": 85,
-      "norm_label": "verification.php"
+      "norm_label": "verification.php",
+      "id": "freelancer_views_verification_php"
     },
     {
       "label": "catalog.php",
       "file_type": "code",
       "source_file": "freelancer/views/catalog.php",
       "source_location": "L1",
-      "id": "freelancer_views_catalog_php",
       "community": 123,
-      "norm_label": "catalog.php"
+      "norm_label": "catalog.php",
+      "id": "freelancer_views_catalog_php"
     },
     {
       "label": "find-work.php",
       "file_type": "code",
       "source_file": "freelancer/views/find-work.php",
       "source_location": "L1",
-      "id": "freelancer_views_find_work_php",
       "community": 126,
-      "norm_label": "find-work.php"
+      "norm_label": "find-work.php",
+      "id": "freelancer_views_find_work_php"
     },
     {
       "label": "reports.php",
       "file_type": "code",
       "source_file": "freelancer/views/reports.php",
       "source_location": "L1",
-      "id": "freelancer_views_reports_php",
       "community": 84,
-      "norm_label": "reports.php"
+      "norm_label": "reports.php",
+      "id": "freelancer_views_reports_php"
     },
     {
       "label": "home.php",
       "file_type": "code",
       "source_file": "freelancer/views/home.php",
       "source_location": "L1",
-      "id": "freelancer_views_home_php",
       "community": 76,
-      "norm_label": "home.php"
-    },
-    {
-      "label": "earnings.php",
-      "file_type": "code",
-      "source_file": "freelancer/views/earnings.php",
-      "source_location": "L1",
-      "id": "freelancer_views_earnings_php",
-      "community": 125,
-      "norm_label": "earnings.php"
+      "norm_label": "home.php",
+      "id": "freelancer_views_home_php"
     },
     {
       "label": "profile.php",
       "file_type": "code",
       "source_file": "freelancer/views/profile.php",
       "source_location": "L1",
-      "id": "freelancer_views_profile_php",
       "community": 78,
-      "norm_label": "profile.php"
+      "norm_label": "profile.php",
+      "id": "freelancer_views_profile_php"
     },
     {
       "label": "contracts.php",
       "file_type": "code",
       "source_file": "freelancer/views/contracts.php",
       "source_location": "L1",
-      "id": "freelancer_views_contracts_php",
       "community": 124,
-      "norm_label": "contracts.php"
+      "norm_label": "contracts.php",
+      "id": "freelancer_views_contracts_php"
     },
     {
       "label": "messages.php",
       "file_type": "code",
       "source_file": "freelancer/views/messages.php",
       "source_location": "L1",
-      "id": "freelancer_views_messages_php",
       "community": 127,
-      "norm_label": "messages.php"
+      "norm_label": "messages.php",
+      "id": "freelancer_views_messages_php"
     },
     {
       "label": "proposals.php",
       "file_type": "code",
       "source_file": "/Applications/MAMP/htdocs/upwork-project/freelancer/views/proposals.php",
       "source_location": "L1",
-      "id": "applications_mamp_htdocs_upwork_project_freelancer_views_proposals_php",
       "community": 110,
-      "norm_label": "proposals.php"
+      "norm_label": "proposals.php",
+      "id": "applications_mamp_htdocs_upwork_project_freelancer_views_proposals_php"
     },
     {
       "label": "graphify.md",
       "file_type": "document",
       "source_file": ".agents/workflows/graphify.md",
       "source_location": "L1",
-      "id": "agents_workflows_graphify_md",
       "community": 22,
-      "norm_label": "graphify.md"
+      "norm_label": "graphify.md",
+      "id": "agents_workflows_graphify_md"
     },
     {
       "label": "Workflow: graphify",
       "file_type": "document",
       "source_file": ".agents/workflows/graphify.md",
       "source_location": "L6",
-      "id": "workflows_graphify_workflow_graphify",
       "community": 22,
-      "norm_label": "workflow: graphify"
+      "norm_label": "workflow: graphify",
+      "id": "workflows_graphify_workflow_graphify"
     },
     {
       "label": "graphify.md",
       "file_type": "document",
       "source_file": ".agents/rules/graphify.md",
       "source_location": "L1",
-      "id": "agents_rules_graphify_md",
       "community": 23,
-      "norm_label": "graphify.md"
+      "norm_label": "graphify.md",
+      "id": "agents_rules_graphify_md"
     },
     {
       "label": "graphify",
       "file_type": "document",
       "source_file": ".agents/rules/graphify.md",
       "source_location": "L6",
-      "id": "rules_graphify_graphify",
       "community": 23,
-      "norm_label": "graphify"
+      "norm_label": "graphify",
+      "id": "rules_graphify_graphify"
     },
     {
       "label": "README.md",
       "file_type": "document",
       "source_file": "admin/README.md",
       "source_location": "L1",
-      "id": "admin_readme_md",
       "community": 3,
-      "norm_label": "readme.md"
+      "norm_label": "readme.md",
+      "id": "admin_readme_md"
     },
     {
       "label": "UpAdmin \u2014 Upwork-Style Admin Panel",
       "file_type": "document",
       "source_file": "admin/README.md",
       "source_location": "L1",
-      "id": "admin_readme_upadmin_upwork_style_admin_panel",
       "community": 3,
-      "norm_label": "upadmin \u2014 upwork-style admin panel"
+      "norm_label": "upadmin \u2014 upwork-style admin panel",
+      "id": "admin_readme_upadmin_upwork_style_admin_panel"
     },
     {
       "label": "Project Structure",
       "file_type": "document",
       "source_file": "admin/README.md",
       "source_location": "L7",
-      "id": "admin_readme_project_structure",
       "community": 3,
-      "norm_label": "project structure"
+      "norm_label": "project structure",
+      "id": "admin_readme_project_structure"
     },
     {
       "label": "code:block1 (upwork-admin/)",
       "file_type": "document",
       "source_file": "admin/README.md",
       "source_location": "L9",
-      "id": "admin_readme_codeblock_1",
       "community": 3,
-      "norm_label": "code:block1 (upwork-admin/)"
+      "norm_label": "code:block1 (upwork-admin/)",
+      "id": "admin_readme_codeblock_1"
     },
     {
       "label": "Backend Setup (Laravel)",
       "file_type": "document",
       "source_file": "admin/README.md",
       "source_location": "L41",
-      "id": "admin_readme_backend_setup_laravel",
       "community": 4,
-      "norm_label": "backend setup (laravel)"
+      "norm_label": "backend setup (laravel)",
+      "id": "admin_readme_backend_setup_laravel"
     },
     {
       "label": "1. Install in your existing Laravel project",
       "file_type": "document",
       "source_file": "admin/README.md",
       "source_location": "L43",
-      "id": "admin_readme_1_install_in_your_existing_laravel_project",
       "community": 4,
-      "norm_label": "1. install in your existing laravel project"
+      "norm_label": "1. install in your existing laravel project",
+      "id": "admin_readme_1_install_in_your_existing_laravel_project"
     },
     {
       "label": "code:bash (# Copy controllers)",
       "file_type": "document",
       "source_file": "admin/README.md",
       "source_location": "L47",
-      "id": "admin_readme_codeblock_2",
       "community": 4,
-      "norm_label": "code:bash (# copy controllers)"
+      "norm_label": "code:bash (# copy controllers)",
+      "id": "admin_readme_codeblock_2"
     },
     {
       "label": "2. Register middleware in `app/Http/Kernel.php`",
       "file_type": "document",
       "source_file": "admin/README.md",
       "source_location": "L63",
-      "id": "admin_readme_2_register_middleware_in_app_http_kernel_php",
       "community": 4,
-      "norm_label": "2. register middleware in `app/http/kernel.php`"
+      "norm_label": "2. register middleware in `app/http/kernel.php`",
+      "id": "admin_readme_2_register_middleware_in_app_http_kernel_php"
     },
     {
       "label": "code:php (protected $routeMiddleware = [)",
       "file_type": "document",
       "source_file": "admin/README.md",
       "source_location": "L65",
-      "id": "admin_readme_codeblock_3",
       "community": 4,
-      "norm_label": "code:php (protected $routemiddleware = [)"
+      "norm_label": "code:php (protected $routemiddleware = [)",
+      "id": "admin_readme_codeblock_3"
     },
     {
       "label": "3. Install Laravel Sanctum (if not already)",
       "file_type": "document",
       "source_file": "admin/README.md",
       "source_location": "L72",
-      "id": "admin_readme_3_install_laravel_sanctum_if_not_already",
       "community": 4,
-      "norm_label": "3. install laravel sanctum (if not already)"
+      "norm_label": "3. install laravel sanctum (if not already)",
+      "id": "admin_readme_3_install_laravel_sanctum_if_not_already"
     },
     {
       "label": "code:bash (composer require laravel/sanctum)",
       "file_type": "document",
       "source_file": "admin/README.md",
       "source_location": "L74",
-      "id": "admin_readme_codeblock_4",
       "community": 4,
-      "norm_label": "code:bash (composer require laravel/sanctum)"
+      "norm_label": "code:bash (composer require laravel/sanctum)",
+      "id": "admin_readme_codeblock_4"
     },
     {
       "label": "4. Run migrations",
       "file_type": "document",
       "source_file": "admin/README.md",
       "source_location": "L80",
-      "id": "admin_readme_4_run_migrations",
       "community": 4,
-      "norm_label": "4. run migrations"
+      "norm_label": "4. run migrations",
+      "id": "admin_readme_4_run_migrations"
     },
     {
       "label": "code:bash (php artisan migrate)",
       "file_type": "document",
       "source_file": "admin/README.md",
       "source_location": "L82",
-      "id": "admin_readme_codeblock_5",
       "community": 4,
-      "norm_label": "code:bash (php artisan migrate)"
+      "norm_label": "code:bash (php artisan migrate)",
+      "id": "admin_readme_codeblock_5"
     },
     {
       "label": "5. Create your first admin user",
       "file_type": "document",
       "source_file": "admin/README.md",
       "source_location": "L86",
-      "id": "admin_readme_5_create_your_first_admin_user",
       "community": 4,
-      "norm_label": "5. create your first admin user"
+      "norm_label": "5. create your first admin user",
+      "id": "admin_readme_5_create_your_first_admin_user"
     },
     {
       "label": "code:bash (php artisan tinker)",
       "file_type": "document",
       "source_file": "admin/README.md",
       "source_location": "L88",
-      "id": "admin_readme_codeblock_6",
       "community": 4,
-      "norm_label": "code:bash (php artisan tinker)"
+      "norm_label": "code:bash (php artisan tinker)",
+      "id": "admin_readme_codeblock_6"
     },
     {
       "label": "code:php (\\App\\Models\\User::create([)",
       "file_type": "document",
       "source_file": "admin/README.md",
       "source_location": "L91",
-      "id": "admin_readme_codeblock_7",
       "community": 4,
-      "norm_label": "code:php (\\app\\models\\user::create([)"
+      "norm_label": "code:php (\\app\\models\\user::create([)",
+      "id": "admin_readme_codeblock_7"
     },
     {
       "label": "6. Add CORS headers (if frontend is on a different domain)",
       "file_type": "document",
       "source_file": "admin/README.md",
       "source_location": "L101",
-      "id": "admin_readme_6_add_cors_headers_if_frontend_is_on_a_different_domain",
       "community": 4,
-      "norm_label": "6. add cors headers (if frontend is on a different domain)"
+      "norm_label": "6. add cors headers (if frontend is on a different domain)",
+      "id": "admin_readme_6_add_cors_headers_if_frontend_is_on_a_different_domain"
     },
     {
       "label": "code:php ('paths' => ['api/*'],)",
       "file_type": "document",
       "source_file": "admin/README.md",
       "source_location": "L104",
-      "id": "admin_readme_codeblock_8",
       "community": 4,
-      "norm_label": "code:php ('paths' => ['api/*'],)"
+      "norm_label": "code:php ('paths' => ['api/*'],)",
+      "id": "admin_readme_codeblock_8"
     },
     {
       "label": "Frontend Setup",
       "file_type": "document",
       "source_file": "admin/README.md",
       "source_location": "L113",
-      "id": "admin_readme_frontend_setup",
       "community": 3,
-      "norm_label": "frontend setup"
+      "norm_label": "frontend setup",
+      "id": "admin_readme_frontend_setup"
     },
     {
       "label": "Option A \u2014 Drop-in HTML (simplest)",
       "file_type": "document",
       "source_file": "admin/README.md",
       "source_location": "L115",
-      "id": "admin_readme_option_a_drop_in_html_simplest",
       "community": 3,
-      "norm_label": "option a \u2014 drop-in html (simplest)"
+      "norm_label": "option a \u2014 drop-in html (simplest)",
+      "id": "admin_readme_option_a_drop_in_html_simplest"
     },
     {
       "label": "code:js (const API = (window.API_BASE_URL || 'http://localhost:8000/a)",
       "file_type": "document",
       "source_file": "admin/README.md",
       "source_location": "L119",
-      "id": "admin_readme_codeblock_9",
       "community": 3,
-      "norm_label": "code:js (const api = (window.api_base_url || 'http://localhost:8000/a)"
+      "norm_label": "code:js (const api = (window.api_base_url || 'http://localhost:8000/a)",
+      "id": "admin_readme_codeblock_9"
     },
     {
       "label": "code:js (const API = 'https://yoursite.com/api';)",
       "file_type": "document",
       "source_file": "admin/README.md",
       "source_location": "L123",
-      "id": "admin_readme_codeblock_10",
       "community": 3,
-      "norm_label": "code:js (const api = 'https://yoursite.com/api';)"
+      "norm_label": "code:js (const api = 'https://yoursite.com/api';)",
+      "id": "admin_readme_codeblock_10"
     },
     {
       "label": "Option B \u2014 Inject API URL via server",
       "file_type": "document",
       "source_file": "admin/README.md",
       "source_location": "L128",
-      "id": "admin_readme_option_b_inject_api_url_via_server",
       "community": 3,
-      "norm_label": "option b \u2014 inject api url via server"
+      "norm_label": "option b \u2014 inject api url via server",
+      "id": "admin_readme_option_b_inject_api_url_via_server"
     },
     {
       "label": "code:html (<script>window.API_BASE_URL = '<?= env(\"APP_URL\") ?>/api';</)",
       "file_type": "document",
       "source_file": "admin/README.md",
       "source_location": "L131",
-      "id": "admin_readme_codeblock_11",
       "community": 3,
-      "norm_label": "code:html (<script>window.api_base_url = '<?= env(\"app_url\") ?>/api';</)"
+      "norm_label": "code:html (<script>window.api_base_url = '<?= env(\"app_url\") ?>/api';</)",
+      "id": "admin_readme_codeblock_11"
     },
     {
       "label": "Option C \u2014 React/Vue integration",
       "file_type": "document",
       "source_file": "admin/README.md",
       "source_location": "L135",
-      "id": "admin_readme_option_c_react_vue_integration",
       "community": 3,
-      "norm_label": "option c \u2014 react/vue integration"
+      "norm_label": "option c \u2014 react/vue integration",
+      "id": "admin_readme_option_c_react_vue_integration"
     },
     {
       "label": "code:js (import { login, getUsers, getJobs, getPayments } from './ser)",
       "file_type": "document",
       "source_file": "admin/README.md",
       "source_location": "L138",
-      "id": "admin_readme_codeblock_12",
       "community": 3,
-      "norm_label": "code:js (import { login, getusers, getjobs, getpayments } from './ser)"
+      "norm_label": "code:js (import { login, getusers, getjobs, getpayments } from './ser)",
+      "id": "admin_readme_codeblock_12"
     },
     {
       "label": "API Reference",
       "file_type": "document",
       "source_file": "admin/README.md",
       "source_location": "L147",
-      "id": "admin_readme_api_reference",
       "community": 3,
-      "norm_label": "api reference"
+      "norm_label": "api reference",
+      "id": "admin_readme_api_reference"
     },
     {
       "label": "Authentication",
       "file_type": "document",
       "source_file": "admin/README.md",
       "source_location": "L149",
-      "id": "admin_readme_authentication",
       "community": 3,
-      "norm_label": "authentication"
+      "norm_label": "authentication",
+      "id": "admin_readme_authentication"
     },
     {
       "label": "Dashboard",
       "file_type": "document",
       "source_file": "admin/README.md",
       "source_location": "L156",
-      "id": "admin_readme_dashboard",
       "community": 3,
-      "norm_label": "dashboard"
+      "norm_label": "dashboard",
+      "id": "admin_readme_dashboard"
     },
     {
       "label": "Users",
       "file_type": "document",
       "source_file": "admin/README.md",
       "source_location": "L163",
-      "id": "admin_readme_users",
       "community": 3,
-      "norm_label": "users"
+      "norm_label": "users",
+      "id": "admin_readme_users"
     },
     {
       "label": "Jobs",
       "file_type": "document",
       "source_file": "admin/README.md",
       "source_location": "L174",
-      "id": "admin_readme_jobs",
       "community": 3,
-      "norm_label": "jobs"
+      "norm_label": "jobs",
+      "id": "admin_readme_jobs"
     },
     {
       "label": "Payments",
       "file_type": "document",
       "source_file": "admin/README.md",
       "source_location": "L183",
-      "id": "admin_readme_payments",
       "community": 3,
-      "norm_label": "payments"
+      "norm_label": "payments",
+      "id": "admin_readme_payments"
     },
     {
       "label": "Reports",
       "file_type": "document",
       "source_file": "admin/README.md",
       "source_location": "L191",
-      "id": "admin_readme_reports",
       "community": 3,
-      "norm_label": "reports"
+      "norm_label": "reports",
+      "id": "admin_readme_reports"
     },
     {
       "label": "Admin Panel Features",
       "file_type": "document",
       "source_file": "admin/README.md",
       "source_location": "L202",
-      "id": "admin_readme_admin_panel_features",
       "community": 3,
-      "norm_label": "admin panel features"
+      "norm_label": "admin panel features",
+      "id": "admin_readme_admin_panel_features"
     },
     {
       "label": "Security Notes",
       "file_type": "document",
       "source_file": "admin/README.md",
       "source_location": "L213",
-      "id": "admin_readme_security_notes",
       "community": 3,
-      "norm_label": "security notes"
+      "norm_label": "security notes",
+      "id": "admin_readme_security_notes"
     },
     {
       "label": "hire_freelancer.php",
@@ -3532,15 +3559,6 @@
       "id": "actions_cancel_hiring_php"
     },
     {
-      "label": "complete_job.php",
-      "file_type": "code",
-      "source_file": "actions/complete_job.php",
-      "source_location": "L1",
-      "community": 52,
-      "norm_label": "complete_job.php",
-      "id": "actions_complete_job_php"
-    },
-    {
       "label": "update_job_status.php",
       "file_type": "code",
       "source_file": "actions/update_job_status.php",
@@ -3575,15 +3593,6 @@
       "community": 20,
       "norm_label": "update_availability.php",
       "id": "users_chiraglimbachiya_sites_upwork_upwork_project_actions_update_availability_php"
-    },
-    {
-      "label": "add_funds.php",
-      "file_type": "code",
-      "source_file": "actions/add_funds.php",
-      "source_location": "L1",
-      "community": 21,
-      "norm_label": "add_funds.php",
-      "id": "users_chiraglimbachiya_sites_upwork_upwork_project_actions_add_funds_php"
     },
     {
       "label": "update_proposal_status.php",
@@ -3721,15 +3730,6 @@
       "id": "users_chiraglimbachiya_sites_upwork_upwork_project_freelancer_views_reports_php"
     },
     {
-      "label": "earnings.php",
-      "file_type": "code",
-      "source_file": "freelancer/views/earnings.php",
-      "source_location": "L1",
-      "community": 77,
-      "norm_label": "earnings.php",
-      "id": "users_chiraglimbachiya_sites_upwork_upwork_project_freelancer_views_earnings_php"
-    },
-    {
       "label": "contracts.php",
       "file_type": "code",
       "source_file": "freelancer/views/contracts.php",
@@ -3758,6 +3758,16 @@
     }
   ],
   "links": [
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "actions/add_funds.php",
+      "source_location": "L7",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "actions_add_funds_php",
+      "target": "actions_add_funds_json_response"
+    },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
@@ -7168,26 +7178,6 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "actions/add_funds.php",
-      "source_location": "L7",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "actions_add_funds_php",
-      "target": "actions_add_funds_json_response"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "actions/add_funds.php",
-      "source_location": "L7",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "users_chiraglimbachiya_sites_upwork_upwork_project_actions_add_funds_php",
-      "target": "actions_add_funds_json_response"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
       "source_file": "assets/js/main.js",
       "source_location": "L7",
       "weight": 1.0,
@@ -8483,5 +8473,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "699325cc4787b509104c2f2492dd287236dd27c3"
+  "built_at_commit": "46358508b7ce431d3105ac265531d92c1b691753"
 }

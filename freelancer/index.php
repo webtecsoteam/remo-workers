@@ -315,7 +315,7 @@ include __DIR__ . '/includes/header.php';
     </div>
     <div class="sb-stats">
       <div class="sb-stat"><div class="sb-stat-val"><?php echo $fStats['jss']; ?></div><div class="sb-stat-lbl">Job Success</div></div>
-      <div class="sb-stat" onclick="openModal('connects')" style="cursor:pointer">
+      <div class="sb-stat" onclick="showPage('connects')" style="cursor:pointer">
         <div class="sb-stat-val" id="sb-connects-val"><?php echo $user['connects'] ?? 0; ?></div>
         <div class="sb-stat-lbl">Connects</div>
       </div>

@@ -492,8 +492,8 @@
     if (userConnectsBalance < CONNECTS_PER_APPLICATION) {
       return {
         title: 'Not enough Connects',
-        message: 'Each application costs ' + CONNECTS_PER_APPLICATION + ' Connects. You have ' + userConnectsBalance + '.',
-        action: function() { openModal('connects'); }
+        message: 'Redirecting you to the Connects page. You need ' + CONNECTS_PER_APPLICATION + ' Connects but only have ' + userConnectsBalance + '.',
+        action: function() { showPage('connects'); }
       };
     }
     return null;
