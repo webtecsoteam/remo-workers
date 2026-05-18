@@ -28,6 +28,7 @@ if ($response['status'] && $response['data']['status'] === 'success') {
     }
     
     $userId = $metadata['user_id'] ?? null;
+    $type = $metadata['type'] ?? 'deposit';
 
     if (!$userId) {
         die("Invalid metadata: user_id missing.");
@@ -37,24 +38,59 @@ if ($response['status'] && $response['data']['status'] === 'success') {
     try {
         $db->beginTransaction();
 
-        // 1. Update User Balance
-        $stmt = $db->prepare("UPDATE users SET balance = balance + ? WHERE id = ?");
-        $stmt->execute([$amount, $userId]);
+        if ($type === 'connects') {
+            $connectsAmount = intval($metadata['connects_amount'] ?? 0);
 
-        // 2. Update Payment Status
-        $stmt = $db->prepare("UPDATE payments SET status = 'completed', currency = ?, amount = ? WHERE transaction_id = ?");
-        $stmt->execute([
-            $data['currency'],
-            $amount,
-            $reference
-        ]);
+            // 1. Update User Connects
+            $stmt = $db->prepare("UPDATE users SET connects = connects + ? WHERE id = ?");
+            $stmt->execute([$connectsAmount, $userId]);
 
-        $db->commit();
+            // 2. Add Connects History
+            $stmt = $db->prepare("
+                INSERT INTO connects_history (user_id, action, description, amount) 
+                VALUES (?, 'purchase', ?, ?)
+            ");
+            $stmt->execute([
+                $userId,
+                'Purchased ' . $connectsAmount . ' Connects Pack',
+                $connectsAmount
+            ]);
 
-        // Redirect with success
-        $redirectUrl = baseUrl('client/index.php?payment=success&amount=' . $amount);
-        header("Location: $redirectUrl");
-        exit;
+            // 3. Update Payment Status to completed
+            $stmt = $db->prepare("UPDATE payments SET status = 'completed', currency = ?, amount = ?, description = ? WHERE transaction_id = ?");
+            $stmt->execute([
+                $data['currency'],
+                $amount,
+                'Purchased ' . $connectsAmount . ' Connects (Paystack completed)',
+                $reference
+            ]);
+
+            $db->commit();
+
+            // Redirect to Freelancer Connects dashboard with success
+            $redirectUrl = baseUrl('remoworkers-dashboard?payment=success&connects=' . $connectsAmount);
+            header("Location: $redirectUrl");
+            exit;
+        } else {
+            // 1. Update User Balance (Client Deposit)
+            $stmt = $db->prepare("UPDATE users SET balance = balance + ? WHERE id = ?");
+            $stmt->execute([$amount, $userId]);
+
+            // 2. Update Payment Status to completed
+            $stmt = $db->prepare("UPDATE payments SET status = 'completed', currency = ?, amount = ? WHERE transaction_id = ?");
+            $stmt->execute([
+                $data['currency'],
+                $amount,
+                $reference
+            ]);
+
+            $db->commit();
+
+            // Redirect to Client dashboard with success
+            $redirectUrl = baseUrl('client/index.php?payment=success&amount=' . $amount);
+            header("Location: $redirectUrl");
+            exit;
+        }
 
     } catch (Exception $e) {
         $db->rollBack();
@@ -62,7 +98,17 @@ if ($response['status'] && $response['data']['status'] === 'success') {
     }
 } else {
     // Payment failed or was cancelled
-    $redirectUrl = baseUrl('client/index.php?payment=failed');
+    $db = getDB();
+    $stmt = $db->prepare("SELECT description FROM payments WHERE transaction_id = ?");
+    $stmt->execute([$reference]);
+    $desc = $stmt->fetchColumn();
+    $isConnects = ($desc && stripos($desc, 'Connects') !== false);
+
+    if ($isConnects) {
+        $redirectUrl = baseUrl('remoworkers-dashboard?payment=failed');
+    } else {
+        $redirectUrl = baseUrl('client/index.php?payment=failed');
+    }
     header("Location: $redirectUrl");
     exit;
 }

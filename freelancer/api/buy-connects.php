@@ -40,11 +40,53 @@ try {
         $deduct->execute([$price, $user['id']]);
         $paymentType = 'Upwork Balance';
     } else {
-        // Card checkout (Simulated/Instant card processing)
-        $paymentType = 'Credit Card';
+        // Paystack checkout for connects!
+        require_once __DIR__ . '/../../includes/classes/Paystack.php';
+        $paystack = new Paystack();
+        
+        $callbackUrl = baseUrl('actions/paystack_callback.php');
+        $metadata = [
+            'user_id' => $user['id'],
+            'type' => 'connects',
+            'connects_amount' => $amount,
+            'price' => $price
+        ];
+
+        // Initialize Paystack with price in USD (lowest denomination: cents)
+        $response = $paystack->initialize($user['email'], $price, $callbackUrl, $metadata);
+
+        if ($response['status'] && isset($response['data']['authorization_url'])) {
+            $paymentType = 'paystack';
+            $transactionId = $response['data']['reference'];
+
+            // Record pending transaction so we can trace it when Paystack callbacks or webhooks are fired
+            $logPayment = $db->prepare("
+                INSERT INTO payments (transaction_id, payer_id, payee_id, amount, status, payment_method, description, platform_fee) 
+                VALUES (?, ?, ?, ?, 'pending', ?, ?, 0.0)
+            ");
+            // Payer is freelancer, payee is 1 (Admin/System)
+            $logPayment->execute([
+                $transactionId,
+                $user['id'],
+                1, // System
+                $price,
+                $paymentType,
+                'Purchased ' . $amount . ' Connects (' . $paymentType . ' pending)'
+            ]);
+
+            $db->commit();
+            echo json_encode([
+                'success' => true,
+                'redirect' => true,
+                'authorization_url' => $response['data']['authorization_url']
+            ]);
+            exit;
+        } else {
+            throw new Exception($response['message'] ?? 'Failed to initialize Paystack transaction');
+        }
     }
 
-    // 2. Add connects to freelancer
+    // 2. Add connects to freelancer (Only reached for instant wallet payments)
     $addConnects = $db->prepare("UPDATE users SET connects = connects + ? WHERE id = ?");
     $addConnects->execute([$amount, $user['id']]);
 

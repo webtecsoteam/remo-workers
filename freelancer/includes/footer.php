@@ -2428,8 +2428,32 @@
     if (params.get('verified') === 'email') {
       toast('Email verified', 'You can now apply to jobs after identity verification.');
     }
-    const hash = window.location.hash.replace('#', '');
-    showPage(hash || 'home');
+    
+    // Handle Paystack payment callbacks
+    if (params.get('payment') === 'success') {
+      const connects = params.get('connects') || 0;
+      setTimeout(() => {
+        toast('Payment Successful! 🎉', `${connects} connects have been successfully added to your account.`);
+        loadConnectsPageData();
+      }, 500);
+      
+      // Clear query params from URL and navigate to connects page
+      const newurl = window.location.protocol + "//" + window.location.host + window.location.pathname + '#connects';
+      window.history.pushState({path:newurl}, '', newurl);
+      showPage('connects');
+    } else if (params.get('payment') === 'failed') {
+      setTimeout(() => {
+        toast('Payment Failed ❌', 'Your purchase was cancelled or failed.');
+        loadConnectsPageData();
+      }, 500);
+      
+      const newurl = window.location.protocol + "//" + window.location.host + window.location.pathname + '#connects';
+      window.history.pushState({path:newurl}, '', newurl);
+      showPage('connects');
+    } else {
+      const hash = window.location.hash.replace('#', '');
+      showPage(hash || 'home');
+    }
   }
 
   if (document.readyState === 'loading') {
@@ -2547,10 +2571,32 @@ window.loadConnectsPageData = function() {
               const amtText = isPositive ? `+${item.amount}` : `${item.amount}`;
               const actionText = item.action.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
               const dateStr = new Date(item.created_at).toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute:'2-digit'});
+              
+              let sourceBadge = '';
+              if (item.action === 'purchase' && item.payment_method) {
+                const methodLower = item.payment_method.toLowerCase();
+                if (methodLower.includes('paystack')) {
+                  sourceBadge = `
+                    <div style="display:inline-flex;align-items:center;gap:4px;background:#e0f2fe;color:#0369a1;padding:3px 6px;border-radius:4px;font-size:10px;font-weight:700;text-transform:uppercase;margin-top:4px">
+                      <span>💳</span> Paystack
+                    </div>
+                  `;
+                } else {
+                  sourceBadge = `
+                    <div style="display:inline-flex;align-items:center;gap:4px;background:#f0fdf4;color:#15803d;padding:3px 6px;border-radius:4px;font-size:10px;font-weight:700;text-transform:uppercase;margin-top:4px">
+                      <span>💼</span> Wallet
+                    </div>
+                  `;
+                }
+              }
+
               return `
                 <tr style="border-bottom:1px solid var(--border)">
                   <td style="padding:14px 16px;font-size:13px;color:var(--muted)">${dateStr}</td>
-                  <td style="padding:14px 16px;font-size:13.5px;font-weight:700;color:var(--dark)">${item.description}</td>
+                  <td style="padding:14px 16px;font-size:13.5px;font-weight:700;color:var(--dark)">
+                    <div>${item.description}</div>
+                    ${sourceBadge}
+                  </td>
                   <td style="padding:14px 16px;font-size:13px;color:var(--muted)">${actionText}</td>
                   <td style="padding:14px 16px;font-size:13.5px;font-weight:800;text-align:right;color:${isPositive ? 'var(--g)' : '#ef4444'}">${amtText}</td>
                 </tr>
@@ -2618,13 +2664,13 @@ window.selectConnectPaymentMethod = function(method) {
     w.querySelector('div:nth-child(2)').style.color = 'var(--g)';
     c.style.cssText = 'border:1px solid var(--border);border-radius:10px;padding:12px;cursor:pointer;text-align:center;background:white';
     c.querySelector('div:nth-child(2)').style.color = 'var(--dark)';
-    cardForm.style.display = 'none';
+    if (cardForm) cardForm.style.display = 'none';
   } else {
     c.style.cssText = 'border:2px solid var(--g);border-radius:10px;padding:11px;cursor:pointer;text-align:center;background:var(--gl)';
     c.querySelector('div:nth-child(2)').style.color = 'var(--g)';
     w.style.cssText = 'border:1px solid var(--border);border-radius:10px;padding:12px;cursor:pointer;text-align:center;background:white';
     w.querySelector('div:nth-child(2)').style.color = 'var(--dark)';
-    cardForm.style.display = 'block';
+    if (cardForm) cardForm.style.display = 'block';
   }
 }
 
@@ -2643,63 +2689,10 @@ window.submitConnectsPurchase = function() {
     return;
   }
   
-  if (method === 'card') {
-    const name = document.getElementById('connects-card-name').value.trim();
-    const num = document.getElementById('connects-card-number').value.replace(/\s+/g, ''); // strip spaces
-    const exp = document.getElementById('connects-card-expiry').value.trim();
-    const cvv = document.getElementById('connects-card-cvv').value.trim();
-    
-    // 1. Validate Cardholder Name
-    if (!name || name.length < 3) {
-      window.toast('Validation Error', 'Cardholder Name must be at least 3 characters.');
-      document.getElementById('connects-card-name').focus();
-      return;
-    }
-    if (!/^[a-zA-Z\s]+$/.test(name)) {
-      window.toast('Validation Error', 'Cardholder Name must contain only letters and spaces.');
-      document.getElementById('connects-card-name').focus();
-      return;
-    }
-    
-    // 2. Validate Card Number (15 to 16 digits)
-    if (!/^\d{15,16}$/.test(num)) {
-      window.toast('Validation Error', 'Card Number must be exactly 15 or 16 digits.');
-      document.getElementById('connects-card-number').focus();
-      return;
-    }
-    
-    // 3. Validate Expiry Date (MM/YY)
-    if (!/^(0[1-9]|1[0-2])\/([0-9]{2})$/.test(exp)) {
-      window.toast('Validation Error', 'Expiry Date must be in MM/YY format.');
-      document.getElementById('connects-card-expiry').focus();
-      return;
-    }
-    
-    const parts = exp.split('/');
-    const expMonth = parseInt(parts[0], 10);
-    const expYear = parseInt('20' + parts[1], 10);
-    const now = new Date();
-    const currentMonth = now.getMonth() + 1;
-    const currentYear = now.getFullYear();
-    
-    if (expYear < currentYear || (expYear === currentYear && expMonth < currentMonth)) {
-      window.toast('Validation Error', 'The credit card has expired.');
-      document.getElementById('connects-card-expiry').focus();
-      return;
-    }
-    
-    // 4. Validate CVV (3 or 4 digits)
-    if (!/^\d{3,4}$/.test(cvv)) {
-      window.toast('Validation Error', 'CVV must be 3 or 4 digits.');
-      document.getElementById('connects-card-cvv').focus();
-      return;
-    }
-  }
-  
   const btn = document.getElementById('btn-buy-connects-submit');
   const originalText = btn.innerText;
   btn.disabled = true;
-  btn.innerText = 'Processing Payment...';
+  btn.innerText = method === 'card' ? 'Redirecting to Paystack...' : 'Processing Payment...';
   
   fetch(BASE_URL + 'freelancer/api/buy-connects.php', {
     method: 'POST',
@@ -2713,6 +2706,12 @@ window.submitConnectsPurchase = function() {
   .then(res => res.json())
   .then(data => {
     if (data.success) {
+      if (data.redirect && data.authorization_url) {
+        window.toast('Redirecting...', 'Taking you to Paystack secure payment page');
+        window.location.href = data.authorization_url;
+        return;
+      }
+      
       window.toast('Success! 🎉', data.message);
       
       // Update sidebar connects counters instantly
@@ -2725,10 +2724,6 @@ window.submitConnectsPurchase = function() {
       // Reset inputs & fields
       document.getElementById('custom-connects-qty').value = '';
       document.getElementById('connects-purchase-summary').textContent = '0 Connects = $0.00';
-      document.getElementById('connects-card-name').value = '';
-      document.getElementById('connects-card-number').value = '';
-      document.getElementById('connects-card-expiry').value = '';
-      document.getElementById('connects-card-cvv').value = '';
       
       // Reload stats and history
       loadConnectsPageData();

@@ -17,8 +17,17 @@ try {
     $uStmt->execute([$user['id']]);
     $uData = $uStmt->fetch(PDO::FETCH_ASSOC);
 
-    // Get recent activity
-    $stmt = $db->prepare("SELECT * FROM connects_history WHERE user_id = ? ORDER BY created_at DESC LIMIT 10");
+    // Get recent activity with payment method joined
+    $stmt = $db->prepare("
+        SELECT c.*, p.payment_method 
+        FROM connects_history c 
+        LEFT JOIN payments p ON p.payer_id = c.user_id 
+            AND p.status = 'completed'
+            AND ABS(TIMESTAMPDIFF(SECOND, p.created_at, c.created_at)) < 300
+        WHERE c.user_id = ? 
+        ORDER BY c.created_at DESC 
+        LIMIT 10
+    ");
     $stmt->execute([$user['id']]);
     $history = $stmt->fetchAll(PDO::FETCH_ASSOC);
 

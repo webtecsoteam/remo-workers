@@ -56,33 +56,80 @@ function handleChargeSuccess($data) {
         return;
     }
 
+    $type = $metadata->type ?? 'deposit';
+
     try {
         $db->beginTransaction();
 
-        // 1. Update User Balance
-        $stmt = $db->prepare("UPDATE users SET balance = balance + ? WHERE id = ?");
-        $stmt->execute([$amount, $userId]);
+        if ($type === 'connects') {
+            $connectsAmount = intval($metadata->connects_amount ?? 0);
 
-        // 2. Record/Update Payment
-        // Check if a pending record exists
-        $stmt = $db->prepare("SELECT id FROM payments WHERE transaction_id = ?");
-        $stmt->execute([$reference]);
-        $existing = $stmt->fetch();
+            // 1. Update User Connects
+            $stmt = $db->prepare("UPDATE users SET connects = connects + ? WHERE id = ?");
+            $stmt->execute([$connectsAmount, $userId]);
 
-        if ($existing) {
-            $stmt = $db->prepare("UPDATE payments SET status = 'completed', amount = ? WHERE transaction_id = ?");
-            $stmt->execute([$amount, $reference]);
-        } else {
-            $stmt = $db->prepare("INSERT INTO payments (transaction_id, payer_id, payee_id, amount, currency, payment_method, status) VALUES (?, ?, ?, ?, ?, ?, ?)");
+            // 2. Add Connects History
+            $stmt = $db->prepare("
+                INSERT INTO connects_history (user_id, action, description, amount) 
+                VALUES (?, 'purchase', ?, ?)
+            ");
             $stmt->execute([
-                $reference,
                 $userId,
-                $userId,
-                $amount,
-                $data->currency,
-                'paystack',
-                'completed'
+                'Purchased ' . $connectsAmount . ' Connects Pack',
+                $connectsAmount
             ]);
+
+            // 3. Record/Update Payment
+            $stmt = $db->prepare("SELECT id FROM payments WHERE transaction_id = ?");
+            $stmt->execute([$reference]);
+            $existing = $stmt->fetch();
+
+            if ($existing) {
+                $stmt = $db->prepare("UPDATE payments SET status = 'completed', amount = ?, description = ? WHERE transaction_id = ?");
+                $stmt->execute([
+                    $amount,
+                    'Purchased ' . $connectsAmount . ' Connects (Paystack completed)',
+                    $reference
+                ]);
+            } else {
+                $stmt = $db->prepare("
+                    INSERT INTO payments (transaction_id, payer_id, payee_id, amount, currency, payment_method, status, description, platform_fee) 
+                    VALUES (?, ?, ?, ?, ?, 'paystack', 'completed', ?, 0.0)
+                ");
+                $stmt->execute([
+                    $reference,
+                    $userId,
+                    1, // System
+                    $amount,
+                    $data->currency,
+                    'Purchased ' . $connectsAmount . ' Connects (Paystack completed)'
+                ]);
+            }
+        } else {
+            // 1. Update User Balance (Client Deposit)
+            $stmt = $db->prepare("UPDATE users SET balance = balance + ? WHERE id = ?");
+            $stmt->execute([$amount, $userId]);
+
+            // 2. Record/Update Payment
+            $stmt = $db->prepare("SELECT id FROM payments WHERE transaction_id = ?");
+            $stmt->execute([$reference]);
+            $existing = $stmt->fetch();
+
+            if ($existing) {
+                $stmt = $db->prepare("UPDATE payments SET status = 'completed', amount = ? WHERE transaction_id = ?");
+                $stmt->execute([$amount, $reference]);
+            } else {
+                $stmt = $db->prepare("INSERT INTO payments (transaction_id, payer_id, payee_id, amount, currency, payment_method, status) VALUES (?, ?, ?, ?, ?, ?, ?)");
+                $stmt->execute([
+                    $reference,
+                    $userId,
+                    $userId,
+                    $amount,
+                    $data->currency,
+                    'paystack',
+                    'completed'
+                ]);
+            }
         }
 
         $db->commit();

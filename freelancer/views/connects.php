@@ -93,26 +93,11 @@
         </div>
       </div>
 
-      <!-- Card Information Form (Hidden initially) -->
-      <div id="connects-card-form" style="display:none;background:var(--off);border:1px solid var(--border);border-radius:10px;padding:15px;margin-bottom:20px">
-        <div style="margin-bottom:12px">
-          <label style="display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:5px">Cardholder Name</label>
-          <input type="text" id="connects-card-name" placeholder="John Doe" style="width:100%;padding:9px;border:1.5px solid var(--border);border-radius:6px;font-size:13px">
-        </div>
-        <div style="margin-bottom:12px">
-          <label style="display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:5px">Card Number</label>
-          <input type="text" id="connects-card-number" placeholder="4111 2222 3333 4444" maxlength="19" style="width:100%;padding:9px;border:1.5px solid var(--border);border-radius:6px;font-size:13px">
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-          <div>
-            <label style="display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:5px">Expiry Date</label>
-            <input type="text" id="connects-card-expiry" placeholder="MM/YY" maxlength="5" style="width:100%;padding:9px;border:1.5px solid var(--border);border-radius:6px;font-size:13px">
-          </div>
-          <div>
-            <label style="display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:5px">CVV</label>
-            <input type="password" id="connects-card-cvv" placeholder="•••" maxlength="4" style="width:100%;padding:9px;border:1.5px solid var(--border);border-radius:6px;font-size:13px">
-          </div>
-        </div>
+      <!-- Card Information Form (Hidden initially, replaced with secure check notice) -->
+      <div id="connects-card-form" style="display:none;background:#f8fafc;border:1.5px dashed var(--border);border-radius:10px;padding:16px;margin-bottom:20px;text-align:center">
+        <div style="font-size:24px;margin-bottom:8px">🔒</div>
+        <div style="font-size:13.5px;font-weight:700;color:var(--dark);margin-bottom:4px">Secure Paystack Checkout</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.5">You will be securely redirected to Paystack to complete your purchase. All major debit/credit cards and online methods are supported.</div>
       </div>
 
       <button id="btn-buy-connects-submit" class="btn btn-g" onclick="submitConnectsPurchase()" style="width:100%;justify-content:center;padding:14px;font-weight:800;font-size:14px" disabled>Buy Connects Pack</button>
