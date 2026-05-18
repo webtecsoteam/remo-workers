@@ -1,16 +1,16 @@
 # Graph Report - upwork project  (2026-05-18)
 
 ## Corpus Check
-- 208 files · ~555,246 words
+- 210 files · ~560,764 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1103 nodes · 1353 edges · 274 communities (249 shown, 25 thin omitted)
+- 1104 nodes · 1353 edges · 275 communities (250 shown, 25 thin omitted)
 - Extraction: 92% EXTRACTED · 8% INFERRED · 0% AMBIGUOUS · INFERRED: 105 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `65879678`
+- Built from commit: `b537228c`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -93,7 +93,7 @@
 - `validateAndGoStep3()` --calls--> `toast()`  [INFERRED]
   scratch/verification_test_linter.js → freelancer/includes/footer_test.js
 
-## Communities (274 total, 25 thin omitted)
+## Communities (275 total, 25 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.12
@@ -218,9 +218,9 @@ _Questions this graph is uniquely positioned to answer:_
 - **Why does `empty` connect `Community 174` to `Community 5`, `Community 166`, `Community 6`, `Community 263`, `Community 169`, `Community 173`, `Community 175`, `Community 178`, `Community 181`, `Community 182`?**
   _High betweenness centrality (0.127) - this node is a cross-community bridge._
 - **Why does `now` connect `Community 2` to `Community 7`?**
-  _High betweenness centrality (0.113) - this node is a cross-community bridge._
+  _High betweenness centrality (0.112) - this node is a cross-community bridge._
 - **Why does `PHPMailer` connect `Community 166` to `Community 263`, `Community 172`, `Community 173`, `Community 174`, `Community 178`, `Community 181`, `Community 182`?**
-  _High betweenness centrality (0.091) - this node is a cross-community bridge._
+  _High betweenness centrality (0.094) - this node is a cross-community bridge._
 - **Are the 34 inferred relationships involving `empty` (e.g. with `getFreelancerStats()` and `.isEmailVerified()`) actually correct?**
   _`empty` has 34 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `phpmailer/phpmailer`, `vFiles`, `JOBS` to the rest of the system?**
