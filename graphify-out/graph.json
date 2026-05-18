@@ -114,16 +114,16 @@
     {
       "label": "config.php",
       "file_type": "code",
-      "source_file": "/Volumes/MyData/WEB/upwork-project/includes/config.php",
+      "source_file": "includes/config.php",
       "source_location": "L1",
-      "id": "volumes_mydata_web_upwork_project_includes_config_php",
+      "id": "includes_config_php",
       "community": 5,
       "norm_label": "config.php"
     },
     {
       "label": "loadEnv()",
       "file_type": "code",
-      "source_file": "/Volumes/MyData/WEB/upwork-project/includes/config.php",
+      "source_file": "includes/config.php",
       "source_location": "L10",
       "id": "includes_config_loadenv",
       "community": 5,
@@ -132,7 +132,7 @@
     {
       "label": "env()",
       "file_type": "code",
-      "source_file": "/Volumes/MyData/WEB/upwork-project/includes/config.php",
+      "source_file": "includes/config.php",
       "source_location": "L41",
       "id": "includes_config_env",
       "community": 5,
@@ -141,17 +141,44 @@
     {
       "label": "getDB()",
       "file_type": "code",
-      "source_file": "/Volumes/MyData/WEB/upwork-project/includes/config.php",
+      "source_file": "includes/config.php",
       "source_location": "L80",
       "id": "includes_config_getdb",
       "community": 5,
       "norm_label": "getdb()"
     },
     {
+      "label": "getCountryName()",
+      "file_type": "code",
+      "source_file": "includes/config.php",
+      "source_location": "L101",
+      "id": "includes_config_getcountryname",
+      "community": 174,
+      "norm_label": "getcountryname()"
+    },
+    {
+      "label": "encodeJobId()",
+      "file_type": "code",
+      "source_file": "includes/config.php",
+      "source_location": "L133",
+      "id": "includes_config_encodejobid",
+      "community": 5,
+      "norm_label": "encodejobid()"
+    },
+    {
+      "label": "decodeJobId()",
+      "file_type": "code",
+      "source_file": "includes/config.php",
+      "source_location": "L141",
+      "id": "includes_config_decodejobid",
+      "community": 5,
+      "norm_label": "decodejobid()"
+    },
+    {
       "label": "ensureFreelancerSchema()",
       "file_type": "code",
-      "source_file": "/Volumes/MyData/WEB/upwork-project/includes/config.php",
-      "source_location": "L101",
+      "source_file": "includes/config.php",
+      "source_location": "L155",
       "id": "includes_config_ensurefreelancerschema",
       "community": 5,
       "norm_label": "ensurefreelancerschema()"
@@ -159,8 +186,8 @@
     {
       "label": "ensurePlatformSettingsTable()",
       "file_type": "code",
-      "source_file": "/Volumes/MyData/WEB/upwork-project/includes/config.php",
-      "source_location": "L148",
+      "source_file": "includes/config.php",
+      "source_location": "L202",
       "id": "includes_config_ensureplatformsettingstable",
       "community": 5,
       "norm_label": "ensureplatformsettingstable()"
@@ -168,8 +195,8 @@
     {
       "label": "getPlatformSetting()",
       "file_type": "code",
-      "source_file": "/Volumes/MyData/WEB/upwork-project/includes/config.php",
-      "source_location": "L209",
+      "source_file": "includes/config.php",
+      "source_location": "L263",
       "id": "includes_config_getplatformsetting",
       "community": 5,
       "norm_label": "getplatformsetting()"
@@ -177,8 +204,8 @@
     {
       "label": "baseUrl()",
       "file_type": "code",
-      "source_file": "/Volumes/MyData/WEB/upwork-project/includes/config.php",
-      "source_location": "L223",
+      "source_file": "includes/config.php",
+      "source_location": "L277",
       "id": "includes_config_baseurl",
       "community": 5,
       "norm_label": "baseurl()"
@@ -186,8 +213,8 @@
     {
       "label": "redirect()",
       "file_type": "code",
-      "source_file": "/Volumes/MyData/WEB/upwork-project/includes/config.php",
-      "source_location": "L228",
+      "source_file": "includes/config.php",
+      "source_location": "L282",
       "id": "includes_config_redirect",
       "community": 5,
       "norm_label": "redirect()"
@@ -195,8 +222,8 @@
     {
       "label": "isRoute()",
       "file_type": "code",
-      "source_file": "/Volumes/MyData/WEB/upwork-project/includes/config.php",
-      "source_location": "L234",
+      "source_file": "includes/config.php",
+      "source_location": "L288",
       "id": "includes_config_isroute",
       "community": 5,
       "norm_label": "isroute()"
@@ -204,8 +231,8 @@
     {
       "label": "getFreelancerStats()",
       "file_type": "code",
-      "source_file": "/Volumes/MyData/WEB/upwork-project/includes/config.php",
-      "source_location": "L240",
+      "source_file": "includes/config.php",
+      "source_location": "L294",
       "id": "includes_config_getfreelancerstats",
       "community": 5,
       "norm_label": "getfreelancerstats()"
@@ -259,7 +286,7 @@
       "label": ".login()",
       "file_type": "code",
       "source_file": "includes/classes/Auth.php",
-      "source_location": "L20",
+      "source_location": "L66",
       "id": "classes_auth_auth_login",
       "community": 5,
       "norm_label": ".login()"
@@ -268,7 +295,7 @@
       "label": ".logout()",
       "file_type": "code",
       "source_file": "includes/classes/Auth.php",
-      "source_location": "L43",
+      "source_location": "L89",
       "id": "classes_auth_auth_logout",
       "community": 5,
       "norm_label": ".logout()"
@@ -277,7 +304,7 @@
       "label": ".user()",
       "file_type": "code",
       "source_file": "includes/classes/Auth.php",
-      "source_location": "L55",
+      "source_location": "L101",
       "id": "classes_auth_auth_user",
       "community": 2,
       "norm_label": ".user()"
@@ -286,7 +313,7 @@
       "label": ".check()",
       "file_type": "code",
       "source_file": "includes/classes/Auth.php",
-      "source_location": "L64",
+      "source_location": "L110",
       "id": "classes_auth_auth_check",
       "community": 5,
       "norm_label": ".check()"
@@ -295,7 +322,7 @@
       "label": ".isEmailVerified()",
       "file_type": "code",
       "source_file": "includes/classes/Auth.php",
-      "source_location": "L68",
+      "source_location": "L114",
       "id": "classes_auth_auth_isemailverified",
       "community": 5,
       "norm_label": ".isemailverified()"
@@ -304,7 +331,7 @@
       "label": ".isIdentityVerified()",
       "file_type": "code",
       "source_file": "includes/classes/Auth.php",
-      "source_location": "L74",
+      "source_location": "L120",
       "id": "classes_auth_auth_isidentityverified",
       "community": 5,
       "norm_label": ".isidentityverified()"
@@ -313,7 +340,7 @@
       "label": ".canApplyToJobs()",
       "file_type": "code",
       "source_file": "includes/classes/Auth.php",
-      "source_location": "L80",
+      "source_location": "L126",
       "id": "classes_auth_auth_canapplytojobs",
       "community": 5,
       "norm_label": ".canapplytojobs()"
@@ -322,7 +349,7 @@
       "label": ".verifyEmailByToken()",
       "file_type": "code",
       "source_file": "includes/classes/Auth.php",
-      "source_location": "L86",
+      "source_location": "L132",
       "id": "classes_auth_auth_verifyemailbytoken",
       "community": 5,
       "norm_label": ".verifyemailbytoken()"
@@ -331,7 +358,7 @@
       "label": ".resendEmailVerification()",
       "file_type": "code",
       "source_file": "includes/classes/Auth.php",
-      "source_location": "L103",
+      "source_location": "L149",
       "id": "classes_auth_auth_resendemailverification",
       "community": 5,
       "norm_label": ".resendemailverification()"
@@ -340,7 +367,7 @@
       "label": ".emailVerificationUrl()",
       "file_type": "code",
       "source_file": "includes/classes/Auth.php",
-      "source_location": "L113",
+      "source_location": "L159",
       "id": "classes_auth_auth_emailverificationurl",
       "community": 5,
       "norm_label": ".emailverificationurl()"
@@ -2661,10 +2688,10 @@
     {
       "label": "index.php",
       "file_type": "code",
-      "source_file": "/Volumes/MyData/WEB/upwork-project/client/index.php",
+      "source_file": "client/index.php",
       "source_location": "L1",
-      "id": "volumes_mydata_web_upwork_project_client_index_php",
-      "community": 278,
+      "id": "client_index_php",
+      "community": 56,
       "norm_label": "index.php"
     },
     {
@@ -5661,7 +5688,7 @@
       "source_file": "vendor/composer/ClassLoader.php",
       "source_location": "L115",
       "id": "composer_classloader_classloader_getprefixes",
-      "community": 174,
+      "community": 170,
       "norm_label": ".getprefixes()"
     },
     {
@@ -7402,6 +7429,24 @@
       "norm_label": "security notices relating to phpmailer"
     },
     {
+      "label": "config.php",
+      "file_type": "code",
+      "source_file": "/Volumes/MyData/WEB/upwork-project/includes/config.php",
+      "source_location": "L1",
+      "community": 5,
+      "norm_label": "config.php",
+      "id": "volumes_mydata_web_upwork_project_includes_config_php"
+    },
+    {
+      "label": "index.php",
+      "file_type": "code",
+      "source_file": "/Volumes/MyData/WEB/upwork-project/client/index.php",
+      "source_location": "L1",
+      "community": 278,
+      "norm_label": "index.php",
+      "id": "volumes_mydata_web_upwork_project_client_index_php"
+    },
+    {
       "label": "check_kennedy.php",
       "file_type": "code",
       "source_file": "check_kennedy.php",
@@ -7429,15 +7474,6 @@
       "id": "actions_add_funds_php"
     },
     {
-      "label": "index.php",
-      "file_type": "code",
-      "source_file": "client/index.php",
-      "source_location": "L1",
-      "community": 56,
-      "norm_label": "index.php",
-      "id": "client_index_php"
-    },
-    {
       "label": "simulate_verify.php",
       "file_type": "code",
       "source_file": "scratch/simulate_verify.php",
@@ -7454,15 +7490,6 @@
       "community": 39,
       "norm_label": "repair_db.php",
       "id": "repair_db_php"
-    },
-    {
-      "label": "config.php",
-      "file_type": "code",
-      "source_file": "includes/config.php",
-      "source_location": "L1",
-      "community": 5,
-      "norm_label": "config.php",
-      "id": "includes_config_php"
     },
     {
       "label": "footer.php",
@@ -10009,111 +10036,141 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "/Volumes/MyData/WEB/upwork-project/includes/config.php",
-      "source_location": "L10",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "volumes_mydata_web_upwork_project_includes_config_php",
-      "target": "includes_config_loadenv"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "/Volumes/MyData/WEB/upwork-project/includes/config.php",
-      "source_location": "L41",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "volumes_mydata_web_upwork_project_includes_config_php",
-      "target": "includes_config_env"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "/Volumes/MyData/WEB/upwork-project/includes/config.php",
-      "source_location": "L80",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "volumes_mydata_web_upwork_project_includes_config_php",
-      "target": "includes_config_getdb"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "/Volumes/MyData/WEB/upwork-project/includes/config.php",
-      "source_location": "L101",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "volumes_mydata_web_upwork_project_includes_config_php",
-      "target": "includes_config_ensurefreelancerschema"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "/Volumes/MyData/WEB/upwork-project/includes/config.php",
-      "source_location": "L148",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "volumes_mydata_web_upwork_project_includes_config_php",
-      "target": "includes_config_ensureplatformsettingstable"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "/Volumes/MyData/WEB/upwork-project/includes/config.php",
-      "source_location": "L209",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "volumes_mydata_web_upwork_project_includes_config_php",
-      "target": "includes_config_getplatformsetting"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "/Volumes/MyData/WEB/upwork-project/includes/config.php",
-      "source_location": "L223",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "volumes_mydata_web_upwork_project_includes_config_php",
-      "target": "includes_config_baseurl"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "/Volumes/MyData/WEB/upwork-project/includes/config.php",
-      "source_location": "L228",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "volumes_mydata_web_upwork_project_includes_config_php",
-      "target": "includes_config_redirect"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "/Volumes/MyData/WEB/upwork-project/includes/config.php",
-      "source_location": "L234",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "volumes_mydata_web_upwork_project_includes_config_php",
-      "target": "includes_config_isroute"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "/Volumes/MyData/WEB/upwork-project/includes/config.php",
-      "source_location": "L240",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "volumes_mydata_web_upwork_project_includes_config_php",
-      "target": "includes_config_getfreelancerstats"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
       "source_file": "includes/config.php",
       "source_location": "L10",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "includes_config_php",
+      "target": "includes_config_loadenv"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "includes/config.php",
+      "source_location": "L41",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "includes_config_php",
+      "target": "includes_config_env"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "includes/config.php",
+      "source_location": "L80",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "includes_config_php",
+      "target": "includes_config_getdb"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "includes/config.php",
+      "source_location": "L101",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "includes_config_php",
+      "target": "includes_config_getcountryname"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "includes/config.php",
+      "source_location": "L133",
+      "weight": 1.0,
+      "source": "includes_config_php",
+      "target": "includes_config_encodejobid",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "includes/config.php",
+      "source_location": "L141",
+      "weight": 1.0,
+      "source": "includes_config_php",
+      "target": "includes_config_decodejobid",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "includes/config.php",
+      "source_location": "L101",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "includes_config_php",
+      "target": "includes_config_ensurefreelancerschema"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "includes/config.php",
+      "source_location": "L117",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "includes_config_php",
+      "target": "includes_config_ensureplatformsettingstable"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "includes/config.php",
+      "source_location": "L154",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "includes_config_php",
+      "target": "includes_config_getplatformsetting"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "includes/config.php",
+      "source_location": "L117",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "includes_config_php",
+      "target": "includes_config_baseurl"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "includes/config.php",
+      "source_location": "L122",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "includes_config_php",
+      "target": "includes_config_redirect"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "includes/config.php",
+      "source_location": "L128",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "includes_config_php",
+      "target": "includes_config_isroute"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "includes/config.php",
+      "source_location": "L209",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "includes_config_php",
+      "target": "includes_config_getfreelancerstats"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "/Volumes/MyData/WEB/upwork-project/includes/config.php",
+      "source_location": "L10",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "volumes_mydata_web_upwork_project_includes_config_php",
       "target": "includes_config_loadenv"
     },
     {
@@ -10151,11 +10208,11 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "includes/config.php",
+      "source_file": "/Volumes/MyData/WEB/upwork-project/includes/config.php",
       "source_location": "L41",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "includes_config_php",
+      "source": "volumes_mydata_web_upwork_project_includes_config_php",
       "target": "includes_config_env"
     },
     {
@@ -10170,44 +10227,44 @@
     },
     {
       "relation": "calls",
+      "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "includes/config.php",
       "source_location": "L104",
       "weight": 1.0,
-      "context": "call",
       "confidence_score": 1.0,
       "source": "includes_config_ensurefreelancerschema",
       "target": "includes_config_getdb"
     },
     {
       "relation": "calls",
+      "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "includes/config.php",
       "source_location": "L121",
       "weight": 1.0,
-      "context": "call",
       "confidence_score": 1.0,
       "source": "includes_config_ensureplatformsettingstable",
       "target": "includes_config_getdb"
     },
     {
       "relation": "calls",
+      "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "includes/config.php",
       "source_location": "L157",
       "weight": 1.0,
-      "context": "call",
       "confidence_score": 1.0,
       "source": "includes_config_getplatformsetting",
       "target": "includes_config_getdb"
     },
     {
       "relation": "calls",
+      "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "includes/config.php",
       "source_location": "L210",
       "weight": 1.0,
-      "context": "call",
       "confidence_score": 1.0,
       "source": "includes_config_getfreelancerstats",
       "target": "includes_config_getdb"
@@ -10281,11 +10338,11 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "includes/config.php",
+      "source_file": "/Volumes/MyData/WEB/upwork-project/includes/config.php",
       "source_location": "L80",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "includes_config_php",
+      "source": "volumes_mydata_web_upwork_project_includes_config_php",
       "target": "includes_config_getdb"
     },
     {
@@ -10297,6 +10354,17 @@
       "confidence_score": 1.0,
       "source": "users_chiraglimbachiya_sites_upwork_upwork_project_includes_config_php",
       "target": "includes_config_getdb"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "includes/config.php",
+      "source_location": "L102",
+      "weight": 1.0,
+      "source": "includes_config_getcountryname",
+      "target": "scratch_simulated_footer_empty"
     },
     {
       "relation": "calls",
@@ -10345,20 +10413,20 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "includes/config.php",
+      "source_file": "/Volumes/MyData/WEB/upwork-project/includes/config.php",
       "source_location": "L101",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "includes_config_php",
+      "source": "volumes_mydata_web_upwork_project_includes_config_php",
       "target": "includes_config_ensurefreelancerschema"
     },
     {
       "relation": "calls",
+      "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "includes/config.php",
       "source_location": "L156",
       "weight": 1.0,
-      "context": "call",
       "confidence_score": 1.0,
       "source": "includes_config_getplatformsetting",
       "target": "includes_config_ensureplatformsettingstable"
@@ -10366,31 +10434,31 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "includes/config.php",
-      "source_location": "L117",
+      "source_file": "/Volumes/MyData/WEB/upwork-project/includes/config.php",
+      "source_location": "L148",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "includes_config_php",
+      "source": "volumes_mydata_web_upwork_project_includes_config_php",
       "target": "includes_config_ensureplatformsettingstable"
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "includes/config.php",
-      "source_location": "L154",
+      "source_file": "/Volumes/MyData/WEB/upwork-project/includes/config.php",
+      "source_location": "L209",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "includes_config_php",
+      "source": "volumes_mydata_web_upwork_project_includes_config_php",
       "target": "includes_config_getplatformsetting"
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "includes/config.php",
-      "source_location": "L117",
+      "source_file": "/Volumes/MyData/WEB/upwork-project/includes/config.php",
+      "source_location": "L223",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "includes_config_php",
+      "source": "volumes_mydata_web_upwork_project_includes_config_php",
       "target": "includes_config_baseurl"
     },
     {
@@ -10417,11 +10485,11 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "includes/config.php",
-      "source_location": "L122",
+      "source_file": "/Volumes/MyData/WEB/upwork-project/includes/config.php",
+      "source_location": "L228",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "includes_config_php",
+      "source": "volumes_mydata_web_upwork_project_includes_config_php",
       "target": "includes_config_redirect"
     },
     {
@@ -10437,11 +10505,11 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "includes/config.php",
-      "source_location": "L128",
+      "source_file": "/Volumes/MyData/WEB/upwork-project/includes/config.php",
+      "source_location": "L234",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "includes_config_php",
+      "source": "volumes_mydata_web_upwork_project_includes_config_php",
       "target": "includes_config_isroute"
     },
     {
@@ -10468,11 +10536,11 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "includes/config.php",
-      "source_location": "L209",
+      "source_file": "/Volumes/MyData/WEB/upwork-project/includes/config.php",
+      "source_location": "L240",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "includes_config_php",
+      "source": "volumes_mydata_web_upwork_project_includes_config_php",
       "target": "includes_config_getfreelancerstats"
     },
     {
@@ -10594,6 +10662,17 @@
       "confidence_score": 1.0,
       "source": "classes_auth_auth",
       "target": "classes_auth_auth_emailverificationurl"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "includes/classes/Auth.php",
+      "source_location": "L16",
+      "weight": 1.0,
+      "source": "classes_auth_auth_register",
+      "target": "scratch_simulated_footer_empty"
     },
     {
       "relation": "calls",
@@ -23957,5 +24036,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "1af3956e668fbaabbce699b61126669be134ab1f"
+  "built_at_commit": "4c227a164e5207aca885184896905ab17de8b3cd"
 }

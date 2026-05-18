@@ -1,16 +1,16 @@
-# Graph Report - upwork project  (2026-05-18)
+# Graph Report - upwork project  (2026-05-19)
 
 ## Corpus Check
-- 210 files · ~560,758 words
+- 210 files · ~563,626 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1109 nodes · 1354 edges · 279 communities (253 shown, 26 thin omitted)
-- Extraction: 92% EXTRACTED · 8% INFERRED · 0% AMBIGUOUS · INFERRED: 105 edges (avg confidence: 0.8)
+- 1112 nodes · 1359 edges · 279 communities (253 shown, 26 thin omitted)
+- Extraction: 92% EXTRACTED · 8% INFERRED · 0% AMBIGUOUS · INFERRED: 107 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `1af3956e`
+- Built from commit: `4c227a16`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -73,7 +73,7 @@
 ## God Nodes (most connected - your core abstractions)
 1. `PHPMailer` - 130 edges
 2. `SMTP` - 44 edges
-3. `empty` - 35 edges
+3. `empty` - 37 edges
 4. `ClassLoader` - 26 edges
 5. `toast()` - 18 edges
 6. `InstalledVersions` - 16 edges
@@ -83,6 +83,8 @@
 10. `job` - 13 edges
 
 ## Surprising Connections (you probably didn't know these)
+- `handleChargeSuccess()` --calls--> `getDB()`  [INFERRED]
+  /Volumes/MyData/WEB/upwork-project/actions/paystack_webhook.php → includes/config.php
 - `sendMsg()` --calls--> `toast()`  [INFERRED]
   scratch/simulated_footer.js → freelancer/includes/footer_test.js
 - `requestMilestone()` --calls--> `toast()`  [INFERRED]
@@ -90,8 +92,6 @@
 - `switchVStep()` --calls--> `toast()`  [INFERRED]
   scratch/verification_test_linter.js → freelancer/includes/footer_test.js
 - `handleVFileInput()` --calls--> `toast()`  [INFERRED]
-  scratch/verification_test_linter.js → freelancer/includes/footer_test.js
-- `validateAndGoStep3()` --calls--> `toast()`  [INFERRED]
   scratch/verification_test_linter.js → freelancer/includes/footer_test.js
 
 ## Communities (279 total, 26 thin omitted)
@@ -117,7 +117,7 @@ Cohesion: 0.05
 Nodes (21): addNewBalEl, addTotalEl, backdrop, balEl, btn, c, cardSection, current (+13 more)
 
 ### Community 5 - "Community 5"
-Cohesion: 0.1
+Cohesion: 0.09
 Nodes (14): handleChargeSuccess(), Auth, Mailer, Paystack, baseUrl(), ensureFreelancerSchema(), ensurePlatformSettingsTable(), env() (+6 more)
 
 ### Community 6 - "Community 6"
@@ -216,14 +216,14 @@ Nodes (3): autoload-dev, psr-4, PHPMailer\\Test\\
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `empty` connect `Community 174` to `Community 5`, `Community 166`, `Community 6`, `Community 263`, `Community 169`, `Community 173`, `Community 175`, `Community 178`, `Community 181`, `Community 182`?**
-  _High betweenness centrality (0.119) - this node is a cross-community bridge._
+- **Why does `empty` connect `Community 174` to `Community 5`, `Community 166`, `Community 6`, `Community 263`, `Community 169`, `Community 170`, `Community 173`, `Community 175`, `Community 178`, `Community 181`, `Community 182`?**
+  _High betweenness centrality (0.117) - this node is a cross-community bridge._
 - **Why does `now` connect `Community 2` to `Community 7`?**
-  _High betweenness centrality (0.111) - this node is a cross-community bridge._
+  _High betweenness centrality (0.106) - this node is a cross-community bridge._
 - **Why does `PHPMailer` connect `Community 166` to `Community 263`, `Community 172`, `Community 173`, `Community 174`, `Community 178`, `Community 181`, `Community 182`?**
   _High betweenness centrality (0.103) - this node is a cross-community bridge._
-- **Are the 34 inferred relationships involving `empty` (e.g. with `getFreelancerStats()` and `.isEmailVerified()`) actually correct?**
-  _`empty` has 34 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 36 inferred relationships involving `empty` (e.g. with `getCountryName()` and `getFreelancerStats()`) actually correct?**
+  _`empty` has 36 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `phpmailer/phpmailer`, `vFiles`, `JOBS` to the rest of the system?**
   _265 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**

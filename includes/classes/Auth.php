@@ -10,11 +10,57 @@ class Auth {
         $token = bin2hex(random_bytes(32));
         $connects = ($role === 'freelancer') ? self::FREELANCER_WELCOME_CONNECTS : 0;
 
+        // Auto detect country based on IP and headers
+        $country = 'United States'; // standard default fallback
+        $ip = $_SERVER['REMOTE_ADDR'] ?? '';
+        if (!empty($_SERVER['HTTP_CF_CONNECTING_IP'])) {
+            $ip = $_SERVER['HTTP_CF_CONNECTING_IP'];
+        } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            $ips = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
+            $ip = trim($ips[0]);
+        }
+
+        if (!empty($ip) && $ip !== '127.0.0.1' && $ip !== '::1') {
+            try {
+                $ctx = stream_context_create(['http' => ['timeout' => 1.5]]);
+                $res = @file_get_contents("http://ip-api.com/json/" . $ip, false, $ctx);
+                if ($res) {
+                    $geo = json_decode($res, true);
+                    if (!empty($geo['country'])) {
+                        $country = $geo['country'];
+                    }
+                }
+            } catch (Exception $e) {
+                // ignore
+            }
+        } else {
+            // Check language headers for localhost/dev testing
+            if (isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
+                $lang = strtolower(substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2));
+                $lang_map = [
+                    'en' => 'United States',
+                    'uk' => 'United Kingdom',
+                    'gb' => 'United Kingdom',
+                    'ca' => 'Canada',
+                    'in' => 'India',
+                    'au' => 'Australia',
+                    'de' => 'Germany',
+                    'fr' => 'France',
+                    'es' => 'Spain',
+                    'it' => 'Italy',
+                    'nl' => 'Netherlands',
+                ];
+                if (isset($lang_map[$lang])) {
+                    $country = $lang_map[$lang];
+                }
+            }
+        }
+
         $stmt = $db->prepare("
-            INSERT INTO users (name, email, password, role, connects, email_verification_token)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO users (name, email, password, role, connects, email_verification_token, country)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
         ");
-        return $stmt->execute([$name, $email, $hashedPassword, $role, $connects, $token]);
+        return $stmt->execute([$name, $email, $hashedPassword, $role, $connects, $token, $country]);
     }
 
     public static function login($email, $password) {

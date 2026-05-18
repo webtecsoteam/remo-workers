@@ -44,7 +44,7 @@ $allReviews = $reviewsQuery->fetchAll(PDO::FETCH_ASSOC);
                 <span style="color:var(--border);font-size:13px">·</span>
                 <span id="field-rate" style="font-size:13.5px;color:var(--muted)">$<?php echo number_format($user['hourly_rate'] ?: 0, 2); ?>/hr</span>
                 <span style="color:var(--border);font-size:13px">·</span>
-                <span id="field-location" style="font-size:13.5px;color:var(--muted)"><?php echo htmlspecialchars($user['country'] ?: 'Global'); ?></span>
+                <span id="field-location" style="font-size:13.5px;color:var(--muted)"><?php echo htmlspecialchars(getCountryName($user['country'] ?? 'Global')); ?></span>
               </div>
               <div style="display:flex;gap:6px;flex-wrap:wrap">
                 <?php 
@@ -202,7 +202,7 @@ $allReviews = $reviewsQuery->fetchAll(PDO::FETCH_ASSOC);
             </div>
             <div style="display:flex;justify-content:space-between;font-size:13px">
               <span style="color:var(--muted)">Location</span>
-              <span style="color:var(--dark);font-weight:600"><?php echo htmlspecialchars($user['country'] ?: 'Global'); ?></span>
+              <span style="color:var(--dark);font-weight:600"><?php echo htmlspecialchars(getCountryName($user['country'] ?? 'Global')); ?></span>
             </div>
             <div style="display:flex;justify-content:space-between;font-size:13px">
               <span style="color:var(--muted)">Member since</span>

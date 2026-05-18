@@ -273,6 +273,9 @@ document.querySelectorAll('.hiw-c,.tc,.test-c,.cat-c,.pc-c,.blog-c,.em,.wf,.af')
 setTimeout(()=>showToast('Welcome to Remoworkers! 🎉','Click anything to explore — everything is interactive'),1800);
 
 const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.has('show_login')) {
+    openModal('login');
+}
 if (urlParams.has('error')) {
     const err = urlParams.get('error');
     if (err === 'login_failed') showToast('Login Failed','Invalid email or password');

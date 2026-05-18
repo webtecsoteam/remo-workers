@@ -495,11 +495,97 @@
 
   function formatClientSpent(amount) {
     const n = parseFloat(amount) || 0;
+    if (n >= 1000000) {
+      const formatted = (n / 1000000).toFixed(1).replace(/\.0$/, '');
+      return '$' + formatted + 'M';
+    }
+    if (n >= 1000) {
+      const formatted = (n / 1000).toFixed(1).replace(/\.0$/, '');
+      return '$' + formatted + 'K';
+    }
     return '$' + n.toLocaleString('en-US', { maximumFractionDigits: 0, minimumFractionDigits: 0 });
   }
 
+  function getCountryName(val) {
+    if (!val) return 'United States';
+    val = val.trim();
+    if (val.length === 2) {
+      const countries = {
+        'AF': 'Afghanistan', 'AX': 'Åland Islands', 'AL': 'Albania', 'DZ': 'Algeria', 'AS': 'American Samoa', 'AD': 'Andorra', 'AO': 'Angola', 'AI': 'Anguilla', 'AQ': 'Antarctica', 'AG': 'Antigua and Barbuda', 'AR': 'Argentina', 'AM': 'Armenia', 'AW': 'Aruba', 'AU': 'Australia', 'AT': 'Austria', 'AZ': 'Azerbaijan',
+        'BS': 'Bahamas', 'BH': 'Bahrain', 'BD': 'Bangladesh', 'BB': 'Barbados', 'BY': 'Belarus', 'BE': 'Belgium', 'BZ': 'Belize', 'BJ': 'Benin', 'BM': 'Bermuda', 'BT': 'Bhutan', 'BO': 'Bolivia', 'BA': 'Bosnia and Herzegovina', 'BW': 'Botswana', 'BV': 'Bouvet Island', 'BR': 'Brazil', 'IO': 'British Indian Ocean Territory',
+        'BN': 'Brunei Darussalam', 'BG': 'Bulgaria', 'BF': 'Burkina Faso', 'BI': 'Burundi', 'KH': 'Cambodia', 'CM': 'Cameroon', 'CA': 'Canada', 'CV': 'Cape Verde', 'KY': 'Cayman Islands', 'CF': 'Central African Republic', 'TD': 'Chad', 'CL': 'Chile', 'CN': 'China', 'CX': 'Christmas Island', 'CC': 'Cocos (Keeling) Islands',
+        'CO': 'Colombia', 'KM': 'Comoros', 'CG': 'Congo', 'CD': 'Congo, Democratic Republic', 'CK': 'Cook Islands', 'CR': 'Costa Rica', 'CI': 'Cote D\'Ivoire', 'HR': 'Croatia', 'CU': 'Cuba', 'CY': 'Cyprus', 'CZ': 'Czech Republic', 'DK': 'Denmark', 'DJ': 'Djibouti', 'DM': 'Dominica', 'DO': 'Dominican Republic',
+        'EC': 'Ecuador', 'EG': 'Egypt', 'SV': 'El Salvador', 'GQ': 'Equatorial Guinea', 'ER': 'Eritrea', 'EE': 'Estonia', 'ET': 'Ethiopia', 'FK': 'Falkland Islands', 'FO': 'Faroe Islands', 'FJ': 'Fiji', 'FI': 'Finland', 'FR': 'France', 'GF': 'French Guiana', 'PF': 'French Polynesia', 'TF': 'French Southern Territories',
+        'GA': 'Gabon', 'GM': 'Gambia', 'GE': 'Georgia', 'DE': 'Germany', 'GH': 'Ghana', 'GI': 'Gibraltar', 'GR': 'Greece', 'GL': 'Greenland', 'GD': 'Grenada', 'GP': 'Guadeloupe', 'GU': 'Guam', 'GT': 'Guatemala', 'GG': 'Guernsey', 'GN': 'Guinea', 'GW': 'Guinea-Bissau', 'GY': 'Guyana', 'HT': 'Haiti',
+        'HM': 'Heard Island and McDonald Islands', 'VA': 'Holy See (Vatican City State)', 'HN': 'Honduras', 'HK': 'Hong Kong', 'HU': 'Hungary', 'IS': 'Iceland', 'IN': 'India', 'ID': 'Indonesia', 'IR': 'Iran', 'IQ': 'Iraq', 'IE': 'Ireland', 'IM': 'Isle of Man', 'IL': 'Israel', 'IT': 'Italy', 'JM': 'Jamaica',
+        'JP': 'Japan', 'JE': 'Jersey', 'JO': 'Jordan', 'KZ': 'Kazakhstan', 'KE': 'Kenya', 'KI': 'Kiribati', 'KP': 'Korea, Democratic People\'s Republic of', 'KR': 'Korea, Republic of', 'KW': 'Kuwait', 'KG': 'Kyrgyzstan', 'LA': 'Lao People\'s Democratic Republic', 'LV': 'Latvia', 'LB': 'Lebanon', 'LS': 'Lesotho',
+        'LR': 'Liberia', 'LY': 'Libyan Arab Jamahiriya', 'LI': 'Liechtenstein', 'LT': 'Lithuania', 'LU': 'Luxembourg', 'MO': 'Macao', 'MK': 'Macedonia', 'MG': 'Madagascar', 'MW': 'Malawi', 'MY': 'Malaysia', 'MV': 'Maldives', 'ML': 'Mali', 'MT': 'Malta', 'MH': 'Marshall Islands', 'MQ': 'Martinique',
+        'MR': 'Mauritania', 'MU': 'Mauritius', 'YT': 'Mayotte', 'MX': 'Mexico', 'FM': 'Micronesia', 'MD': 'Moldova', 'MC': 'Monaco', 'MN': 'Mongolia', 'ME': 'Montenegro', 'MS': 'Montserrat', 'MA': 'Morocco', 'MZ': 'Mozambique', 'MM': 'Myanmar', 'NA': 'Namibia', 'NR': 'Nauru', 'NP': 'Nepal', 'NL': 'Netherlands',
+        'AN': 'Netherlands Antilles', 'NC': 'New Caledonia', 'NZ': 'New Zealand', 'NI': 'Nicaragua', 'NE': 'Niger', 'NG': 'Nigeria', 'NU': 'Niue', 'NF': 'Norfolk Island', 'MP': 'Northern Mariana Islands', 'NO': 'Norway', 'OM': 'Oman', 'PK': 'Pakistan', 'PW': 'Palau', 'PS': 'Palestinian Territory, Occupied',
+        'PA': 'Panama', 'PG': 'Papua New Guinea', 'PY': 'Paraguay', 'PE': 'Peru', 'PH': 'Philippines', 'PN': 'Pitcairn', 'PL': 'Poland', 'PT': 'Portugal', 'PR': 'Puerto Rico', 'QA': 'Qatar', 'RE': 'Reunion', 'RO': 'Romania', 'RU': 'Russian Federation', 'RW': 'Rwanda', 'SH': 'Saint Helena',
+        'KN': 'Saint Kitts and Nevis', 'LC': 'Saint Lucia', 'PM': 'Saint Pierre and Miquelon', 'VC': 'Saint Vincent and the Grenadines', 'WS': 'Samoa', 'SM': 'San Marino', 'ST': 'Sao Tome and Principe', 'SA': 'Saudi Arabia', 'SN': 'Senegal', 'RS': 'Serbia', 'SC': 'Seychelles', 'SL': 'Sierra Leone',
+        'SG': 'Singapore', 'SK': 'Slovakia', 'SI': 'Slovenia', 'SB': 'Solomon Islands', 'SO': 'Somalia', 'ZA': 'South Africa', 'GS': 'South Georgia and the South Sandwich Islands', 'ES': 'Spain', 'LK': 'Sri Lanka', 'SD': 'Sudan', 'SR': 'Suriname', 'SJ': 'Svalbard and Jan Mayen', 'SZ': 'Swaziland',
+        'SE': 'Sweden', 'CH': 'Switzerland', 'SY': 'Syrian Arab Republic', 'TW': 'Taiwan', 'TJ': 'Tajikistan', 'TZ': 'Tanzania', 'TH': 'Thailand', 'TL': 'Timor-Leste', 'TG': 'Togo', 'TK': 'Tokelau', 'TO': 'Tonga', 'TT': 'Trinidad and Tobago', 'TN': 'Tunisia', 'TR': 'Turkey', 'TM': 'Turkmenistan',
+        'TC': 'Turks and Caicos Islands', 'TV': 'Tuvalu', 'UG': 'Uganda', 'UA': 'Ukraine', 'AE': 'United Arab Emirates', 'GB': 'United Kingdom', 'US': 'United States', 'UM': 'United States Minor Outlying Islands', 'UY': 'Uruguay', 'UZ': 'Uzbekistan', 'VU': 'Vanuatu', 'VE': 'Venezuela',
+        'VN': 'Viet Nam', 'VG': 'Virgin Islands, British', 'VI': 'Virgin Islands, U.S.', 'WF': 'Wallis and Futuna', 'EH': 'Western Sahara', 'YE': 'Yemen', 'ZM': 'Zambia', 'ZW': 'Zimbabwe'
+      };
+      const upper = val.toUpperCase();
+      if (countries[upper]) return countries[upper];
+    }
+    let cleaned = val.replace(/\b[a-z]/g, function(char) {
+      return char.toUpperCase();
+    });
+    cleaned = cleaned.replace(/Kingdon/i, 'Kingdom');
+    return cleaned;
+  }
+
+  function parseSkills(skillsField) {
+    if (!skillsField) return ['Web Design', 'PHP', 'MySQL'];
+    try {
+      if (typeof skillsField === 'string') {
+        let trimmed = skillsField.trim();
+        if (trimmed.startsWith('[')) {
+          let parsed = JSON.parse(trimmed);
+          if (Array.isArray(parsed)) {
+            return parsed.map(s => String(s).replace(/[\[\]"']/g, '').trim()).filter(Boolean);
+          }
+        }
+        return trimmed.split(',').map(s => s.replace(/[\[\]"']/g, '').trim()).filter(Boolean);
+      } else if (Array.isArray(skillsField)) {
+        return skillsField.map(s => String(s).replace(/[\[\]"']/g, '').trim()).filter(Boolean);
+      }
+    } catch(e) {
+      console.warn("Error parsing skills:", e);
+    }
+    return String(skillsField).split(',').map(s => s.replace(/[\[\]"']/g, '').trim()).filter(Boolean);
+  }
+
+  window.encodeJobId = function(id) {
+    const xor = parseInt(id, 10) ^ 958273;
+    const str = String(xor);
+    const encoded = btoa(str);
+    return encoded.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  };
+
+  window.decodeJobId = function(encoded) {
+    try {
+      let base64 = encoded.replace(/-/g, '+').replace(/_/g, '/');
+      while (base64.length % 4) {
+        base64 += '=';
+      }
+      const decoded = atob(base64);
+      const xor = parseInt(decoded, 10);
+      const original = xor ^ 958273;
+      return (original > 0 && original < 10000000) ? original : 0;
+    } catch(e) {
+      return 0;
+    }
+  };
+
   function clientLocation(job) {
-    return job.client_country || job.location || 'Remote';
+    const loc = job.client_country || job.location || '';
+    if (!loc) return 'Remote';
+    return getCountryName(loc);
   }
 
   function clientHiresLabel(job) {
@@ -607,7 +693,7 @@
             <div style="border-top:1px solid var(--border);padding-top:25px;margin-bottom:30px">
               <h4 style="margin-bottom:15px;font-size:15px;font-weight:700">Skills and Expertise</h4>
               <div style="display:flex;gap:8px;flex-wrap:wrap">
-                ${(job.skills_required || 'Web Design, PHP, MySQL').split(',').map(s => `<span class="badge b-gray" style="padding:6px 14px;font-size:12.5px;background:#f3f4f6;border:none">${s.trim()}</span>`).join('')}
+                ${parseSkills(job.skills_required).map(s => `<span class="badge b-gray" style="padding:6px 14px;font-size:12.5px;background:#f3f4f6;border:none;border-radius:20px;font-weight:500;color:var(--dark)">${s}</span>`).join('')}
               </div>
             </div>
 
@@ -648,8 +734,11 @@
             </div>
 
             <div style="border-top:1px solid var(--border);padding-top:20px">
-              <div style="font-size:13px;font-weight:700;margin-bottom:8px">Job Link</div>
-              <input type="text" value="remoworkers.com/j/${job.id}" readonly style="width:100%;font-size:11px;padding:8px;border:1px solid var(--border);border-radius:4px;background:#fff">
+              <h4 style="font-size:14px;margin-bottom:12px;font-weight:700">Job Link</h4>
+              <div style="display:flex;gap:8px;align-items:center">
+                <input type="text" readonly value="${BASE_URL}j/${encodeJobId(job.id)}" style="width:100%;padding:10px 12px;font-size:13px;border:1.5px solid var(--border);border-radius:8px;background:#f9fafb;color:var(--dark);outline:none;font-family:inherit;cursor:pointer" onclick="this.select();document.execCommand('copy');toast('Copied!','Job link copied to clipboard')">
+                <button class="btn btn-w" style="padding:10px;height:38px;border-radius:8px;border:1.5px solid var(--border);flex-shrink:0;cursor:pointer" onclick="navigator.clipboard.writeText('${BASE_URL}j/${encodeJobId(job.id)}');toast('Copied!','Job link copied to clipboard')" title="Copy Link">📋</button>
+              </div>
             </div>
           </div>
         </div>
@@ -712,6 +801,16 @@
         </div>
 
         <div style="margin-bottom:20px">
+          <label style="display:block;font-weight:700;margin-bottom:8px;font-size:14px">Estimated Duration</label>
+          <select id="prop-duration" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-size:14px;background:#fff">
+            <option value="30">Less than 1 month</option>
+            <option value="90">1 to 3 months</option>
+            <option value="180">3 to 6 months</option>
+            <option value="365">More than 6 months</option>
+          </select>
+        </div>
+
+        <div style="margin-bottom:20px">
           <label style="display:block;font-weight:700;margin-bottom:8px;font-size:14px">Cover Letter *</label>
           <textarea id="prop-letter" style="width:100%;height:150px;padding:12px;border:1px solid var(--border);border-radius:8px;font-size:14px;line-height:1.6" placeholder="Write your proposal here..."></textarea>
         </div>
@@ -765,6 +864,8 @@
 
   window.submitProposalForm = function(jobId) {
     const rate = document.getElementById('prop-rate').value;
+    const durationInput = document.getElementById('prop-duration');
+    const days = durationInput ? parseInt(durationInput.value, 10) : 30;
     const letter = document.getElementById('prop-letter').value;
     const attach = document.getElementById('prop-attach').value;
 
@@ -774,7 +875,7 @@
     const payload = {
         job_id: jobId,
         bid_amount: parseFloat(rate || 0),
-        estimated_days: 7,
+        estimated_days: days,
         cover_letter: letter,
         attachments: attach,
         milestones: []
@@ -2421,6 +2522,16 @@
     const params = new URLSearchParams(window.location.search);
     if (params.get('verified') === 'email') {
       toast('Email verified', 'You can now apply to jobs after identity verification.');
+    }
+    if (params.has('job_id')) {
+      const jobId = parseInt(params.get('job_id'), 10);
+      if (jobId > 0) {
+        setTimeout(() => {
+          if (typeof openJobDetail === 'function') {
+            openJobDetail(jobId);
+          }
+        }, 400);
+      }
     }
     
     // Handle Paystack payment callbacks

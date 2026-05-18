@@ -953,7 +953,7 @@ window.closeModal = function() {
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:8px">
                   <div>
                     <h4 style="margin:0 0 4px 0;font-size:13.5px;color:var(--uw-black);font-weight:700"><?php echo htmlspecialchars($cr['job_title']); ?></h4>
-                    <div style="font-size:11.5px;color:var(--uw-gray)">Rated by <?php echo htmlspecialchars($cr['freelancer_name']); ?> · <?php echo htmlspecialchars($cr['freelancer_country'] ?: 'Global'); ?></div>
+                    <div style="font-size:11.5px;color:var(--uw-gray)">Rated by <?php echo htmlspecialchars($cr['freelancer_name']); ?> · <?php echo htmlspecialchars(getCountryName($cr['freelancer_country'] ?? 'Global')); ?></div>
                   </div>
                   <span style="font-size:13px;font-weight:700;color:#d97706;background:#fef3c7;padding:4px 8px;border-radius:8px;white-space:nowrap">
                     <?php echo $stars; ?> <?php echo number_format($cr['rating'], 1); ?>
@@ -1010,7 +1010,7 @@ window.closeModal = function() {
                       </div>
                       <div>
                         <div style="font-weight:600"><?php echo htmlspecialchars($t['name']); ?></div>
-                        <div style="font-size:11px;color:var(--uw-gray)"><?php echo htmlspecialchars($t['country'] ?? 'Unknown'); ?></div>
+                        <div style="font-size:11px;color:var(--uw-gray)"><?php echo htmlspecialchars(getCountryName($t['country'] ?? 'Unknown')); ?></div>
                       </div>
                     </div>
                   </td>
@@ -1055,7 +1055,7 @@ window.closeModal = function() {
                       </div>
                       <div>
                         <div style="font-weight:600"><?php echo htmlspecialchars($t['name']); ?></div>
-                        <div style="font-size:11px;color:var(--uw-gray)"><?php echo htmlspecialchars($t['country'] ?? 'Unknown'); ?></div>
+                        <div style="font-size:11px;color:var(--uw-gray)"><?php echo htmlspecialchars(getCountryName($t['country'] ?? 'Unknown')); ?></div>
                       </div>
                     </div>
                   </td>
@@ -1094,7 +1094,7 @@ window.closeModal = function() {
                       </div>
                       <div>
                         <div style="font-weight:600"><?php echo htmlspecialchars($t['name']); ?></div>
-                        <div style="font-size:11px;color:var(--uw-gray)"><?php echo htmlspecialchars($t['country'] ?? 'Unknown'); ?></div>
+                        <div style="font-size:11px;color:var(--uw-gray)"><?php echo htmlspecialchars(getCountryName($t['country'] ?? 'Unknown')); ?></div>
                       </div>
                     </div>
                   </td>
@@ -1162,7 +1162,7 @@ window.closeModal = function() {
               <div style="display:flex;gap:15px;font-size:13px;color:var(--uw-gray);margin-bottom:15px">
                 <div><strong>$<?php echo number_format($t['hourly_rate'] ?? 0); ?></strong> / hr</div>
                 <div><strong>$<?php echo number_format($fStats['total_earned']); ?>+</strong> earned</div>
-                <div>📍 <?php echo htmlspecialchars($t['country'] ?? 'Global'); ?></div>
+                <div>📍 <?php echo htmlspecialchars(getCountryName($t['country'] ?? 'Global')); ?></div>
               </div>
               <div style="display:flex;gap:10px">
                 <button class="btn btn-g btn-sm" style="flex:1;justify-content:center">Hire Now</button>

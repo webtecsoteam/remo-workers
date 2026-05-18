@@ -194,6 +194,78 @@ switch ($action) {
         }
         break;
 
+    case 'get_jobs':
+        try {
+            $stmt = $db->query("
+                SELECT j.id, j.title, j.budget, j.budget_type as job_type, j.status, j.created_at, u.name as client_name, u.email as client_email
+                FROM jobs j
+                LEFT JOIN users u ON j.client_id = u.id
+                ORDER BY j.created_at DESC
+            ");
+            $jobs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            echo json_encode(['success' => true, 'data' => $jobs]);
+        } catch (PDOException $e) {
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+        break;
+
+    case 'delete_job':
+        try {
+            $jobId = isset($_GET['job_id']) ? (int)$_GET['job_id'] : 0;
+            if (!$jobId) {
+                throw new Exception("Invalid Job ID");
+            }
+
+            // 1. Temporarily disable foreign key checks
+            $db->exec("SET FOREIGN_KEY_CHECKS = 0;");
+
+            $db->beginTransaction();
+
+            // 2. Delete reviews associated with contracts of this job
+            $db->prepare("DELETE FROM reviews WHERE contract_id IN (SELECT id FROM contracts WHERE job_id = ?)")->execute([$jobId]);
+
+            // 3. Delete work logs associated with contracts of this job
+            $db->prepare("DELETE FROM work_logs WHERE contract_id IN (SELECT id FROM contracts WHERE job_id = ?)")->execute([$jobId]);
+
+            // 4. Delete milestones associated with contracts or proposals of this job
+            $db->prepare("DELETE FROM milestones WHERE proposal_id IN (SELECT id FROM proposals WHERE job_id = ?) OR contract_id IN (SELECT id FROM contracts WHERE job_id = ?)")->execute([$jobId, $jobId]);
+
+            // 5. Delete contracts associated with this job
+            $db->prepare("DELETE FROM contracts WHERE job_id = ?")->execute([$jobId]);
+
+            // 6. Delete proposals associated with this job
+            $db->prepare("DELETE FROM proposals WHERE job_id = ?")->execute([$jobId]);
+
+            // 7. Delete saved jobs (optional, catch error if table doesn't exist)
+            try {
+                $db->prepare("DELETE FROM saved_jobs WHERE job_id = ?")->execute([$jobId]);
+            } catch (PDOException $ex) {
+                // Table saved_jobs might not exist
+            }
+
+            // 8. Set job_id of messages to NULL to preserve chat history
+            $db->prepare("UPDATE messages SET job_id = NULL WHERE job_id = ?")->execute([$jobId]);
+
+            // 9. Delete the job itself
+            $stmt = $db->prepare("DELETE FROM jobs WHERE id = ?");
+            $stmt->execute([$jobId]);
+
+            $db->commit();
+
+            // 10. Re-enable foreign key checks
+            $db->exec("SET FOREIGN_KEY_CHECKS = 1;");
+
+            echo json_encode(['success' => true, 'message' => 'Job deleted successfully']);
+        } catch (Exception $e) {
+            if ($db->inTransaction()) {
+                $db->rollBack();
+            }
+            // Always ensure foreign key checks are re-enabled in case of exception
+            $db->exec("SET FOREIGN_KEY_CHECKS = 1;");
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+        break;
+
     default:
         echo json_encode(['success' => false, 'message' => 'Invalid action']);
         break;

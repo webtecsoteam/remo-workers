@@ -31,6 +31,21 @@ switch ($section) {
         include __DIR__ . '/home/index.php';
         break;
 
+    case 'j':
+        $jobId = decodeJobId($page);
+        if ($jobId > 0) {
+            require_once __DIR__ . '/includes/classes/Auth.php';
+            if (!Auth::check()) {
+                $_SESSION['redirect_to'] = 'j/' . htmlspecialchars($page);
+                redirect(baseUrl('?show_login=1'));
+            } else {
+                redirect(baseUrl('remoworkers-dashboard?job_id=' . $jobId));
+            }
+        } else {
+            redirect(baseUrl('remoworkers-dashboard'));
+        }
+        break;
+
     case 'login':
         include __DIR__ . '/actions/login.php';
         break;

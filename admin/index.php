@@ -347,7 +347,14 @@ if (!$user || $user['role'] !== 'admin') {
       </div>
     </div>
 
-    <div class="page" id="page-jobs"><div class="card"><div class="card-body">Jobs Management (Coming Soon)</div></div></div>
+    <div class="page" id="page-jobs">
+      <div class="card">
+        <div class="card-header"><span class="card-title">Jobs &amp; Listings Management</span></div>
+        <div class="table-wrapper" id="jobsTable">
+          <div class="loading"><span class="spinner"></span>Loading jobs…</div>
+        </div>
+      </div>
+    </div>
     <div class="page" id="page-payments"><div class="card"><div class="card-body">Payments Management (Coming Soon)</div></div></div>
 
   </div>
@@ -397,6 +404,7 @@ function refreshPage(name) {
   const active = name || document.querySelector('.page.active')?.id?.replace('page-', '');
   if (active === 'dashboard') loadDashboard();
   if (active === 'users') loadUsers();
+  if (active === 'jobs') loadJobs();
   if (active === 'verifications') loadVerifications();
   if (active === 'settings') loadSettings();
 }
@@ -616,6 +624,55 @@ async function saveSettings(e) {
     setTimeout(() => { status.innerHTML = ''; }, 3000);
   } else {
     status.innerHTML = `<span class="error">${res.message}</span>`;
+  }
+}
+
+async function loadJobs() {
+  const table = document.getElementById('jobsTable');
+  table.innerHTML = '<div class="loading"><span class="spinner"></span>Loading jobs…</div>';
+  
+  const data = await apiFetch('get_jobs');
+  if (data.success) {
+    const jobs = data.data;
+    if (!jobs.length) {
+      table.innerHTML = '<div class="loading">No jobs found on the platform.</div>';
+      return;
+    }
+    table.innerHTML = `<table>
+      <thead><tr><th>Job Details</th><th>Client</th><th>Budget</th><th>Type</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody>
+        ${jobs.map(j => `<tr>
+          <td>
+            <div style="font-weight:600; color:var(--accent); font-size:14px;">${j.title}</div>
+            <small style="color:var(--text-3);">Posted: ${new Date(j.created_at).toLocaleDateString()}</small>
+          </td>
+          <td>
+            <strong>${j.client_name || 'System / Client'}</strong><br>
+            <small style="color:var(--text-2);">${j.client_email || ''}</small>
+          </td>
+          <td><strong>$${parseFloat(j.budget || 0).toLocaleString()}</strong></td>
+          <td><span class="badge badge-gray">${j.job_type || 'fixed'}</span></td>
+          <td><span class="badge ${j.status === 'open' ? 'badge-green' : 'badge-amber'}">${j.status}</span></td>
+          <td>
+            <button class="btn btn-danger btn-sm" onclick="deleteJob(${j.id})">Delete</button>
+          </td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
+  } else {
+    table.innerHTML = `<div class="loading" style="color:var(--red);">${data.message}</div>`;
+  }
+}
+
+async function deleteJob(id) {
+  if (!confirm("Are you sure you want to permanently delete this job post? This will also remove any related proposals and contracts!")) {
+    return;
+  }
+  const res = await apiFetch('delete_job', { job_id: id });
+  if (res.success) {
+    refreshPage('jobs');
+  } else {
+    alert("Error: " + res.message);
   }
 }
 

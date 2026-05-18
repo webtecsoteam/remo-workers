@@ -12,7 +12,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $user = Auth::user();
             
             $targetUrl = baseUrl();
-            if ($user['role'] === 'admin') {
+            if (!empty($_SESSION['redirect_to'])) {
+                $targetUrl = baseUrl($_SESSION['redirect_to']);
+                unset($_SESSION['redirect_to']);
+            } elseif ($user['role'] === 'admin') {
                 $targetUrl = baseUrl('admin');
             } elseif ($user['role'] === 'client') {
                 $targetUrl = baseUrl('client');
