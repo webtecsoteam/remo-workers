@@ -110,7 +110,103 @@ function ensureFreelancerSchema() {
     foreach ($alters as $sql) {
         try { $db->exec($sql); } catch (PDOException $e) { /* column may already exist */ }
     }
+    
+    // Self-healing reviews table initialization
+    try {
+        $db->exec("
+            CREATE TABLE IF NOT EXISTS reviews (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                contract_id INT NOT NULL,
+                reviewer_id INT NOT NULL,
+                reviewee_id INT NOT NULL,
+                rating DECIMAL(3, 2) NOT NULL,
+                feedback TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (contract_id) REFERENCES contracts(id) ON DELETE CASCADE,
+                FOREIGN KEY (reviewer_id) REFERENCES users(id) ON DELETE CASCADE,
+                FOREIGN KEY (reviewee_id) REFERENCES users(id) ON DELETE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+        ");
+    } catch (PDOException $e) {
+        // Silently continue if table already exists or has engine mismatch
+    }
+    
     $done = true;
+}
+
+/** Ensure platform dynamic settings table exists and has defaults. */
+function ensurePlatformSettingsTable() {
+    static $initialized = false;
+    if ($initialized) return;
+    
+    $db = getDB();
+    
+    // Check if table exists first using SHOW TABLES (does not cause implicit commit in MySQL)
+    $stmt = $db->prepare("SHOW TABLES LIKE 'platform_settings'");
+    $stmt->execute();
+    $tableExists = (bool)$stmt->fetch();
+    
+    if (!$tableExists) {
+        $sql = "CREATE TABLE IF NOT EXISTS platform_settings (
+            setting_key VARCHAR(64) PRIMARY KEY,
+            setting_value VARCHAR(255) NOT NULL,
+            description TEXT,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+        $db->exec($sql);
+    }
+    
+    // Seed default settings if they do not exist
+    $defaults = [
+        'freelancer_fee_fixed' => ['10.00', 'Platform fee percentage charged to freelancers for Fixed Price contracts.'],
+        'freelancer_fee_hourly' => ['10.00', 'Platform fee percentage charged to freelancers for Hourly contracts.'],
+        'freelancer_fee_monthly' => ['10.00', 'Platform fee percentage charged to freelancers for Monthly contracts.'],
+        'client_fee_fixed' => ['0.00', 'Platform fee percentage charged to clients for Fixed Price contracts.'],
+        'client_fee_hourly' => ['0.00', 'Platform fee percentage charged to clients for Hourly contracts.'],
+        'client_fee_monthly' => ['0.00', 'Platform fee percentage charged to clients for Monthly contracts.']
+    ];
+    
+    $checkStmt = $db->prepare("SELECT COUNT(*) FROM platform_settings WHERE setting_key = ?");
+    $insertStmt = $db->prepare("INSERT INTO platform_settings (setting_key, setting_value, description) VALUES (?, ?, ?)");
+    
+    foreach ($defaults as $key => $info) {
+        $checkStmt->execute([$key]);
+        if ($checkStmt->fetchColumn() == 0) {
+            $insertStmt->execute([$key, $info[0], $info[1]]);
+        }
+    }
+
+    // Ensure contracts table supports 'paused' status (using SHOW COLUMNS first to avoid implicit DDL commits)
+    static $statusSchemaChecked = false;
+    if (!$statusSchemaChecked) {
+        try {
+            $stmt = $db->query("SHOW COLUMNS FROM contracts LIKE 'status'");
+            $col = $stmt->fetch();
+            if ($col && strpos($col['Type'], "'paused'") === false) {
+                // The status ENUM doesn't support 'paused' yet, run DDL alter
+                $db->exec("ALTER TABLE contracts MODIFY COLUMN status ENUM('active', 'paused', 'completed', 'cancelled', 'disputed') DEFAULT 'active'");
+            }
+        } catch (PDOException $e) {
+            // Table or columns may not exist yet
+        }
+        $statusSchemaChecked = true;
+    }
+    
+    $initialized = true;
+}
+
+/** Get a dynamic platform setting value. */
+function getPlatformSetting($key, $default = 0) {
+    try {
+        ensurePlatformSettingsTable();
+        $db = getDB();
+        $stmt = $db->prepare("SELECT setting_value FROM platform_settings WHERE setting_key = ?");
+        $stmt->execute([$key]);
+        $val = $stmt->fetchColumn();
+        return $val !== false ? (float)$val : (float)$default;
+    } catch (PDOException $e) {
+        return (float)$default;
+    }
 }
 
 // Helper: Get base URL
@@ -128,4 +224,137 @@ function redirect($url) {
 function isRoute($route) {
     $currentRoute = $_GET['route'] ?? '';
     return $currentRoute === $route || strpos($currentRoute, $route) === 0;
+}
+
+// Helper: Calculate Freelancer JSS, Profile Completeness, and Upwork badges dynamically
+function getFreelancerStats($freelancerId) {
+    $db = getDB();
+    
+    // 1. Fetch completed, active, cancelled, disputed contracts count
+    $stmt = $db->prepare("SELECT COUNT(*) FROM contracts WHERE freelancer_id = ? AND status = 'completed'");
+    $stmt->execute([$freelancerId]);
+    $completedCount = (int)$stmt->fetchColumn();
+
+    $stmt = $db->prepare("SELECT COUNT(*) FROM contracts WHERE freelancer_id = ? AND status = 'active'");
+    $stmt->execute([$freelancerId]);
+    $activeCount = (int)$stmt->fetchColumn();
+
+    $stmt = $db->prepare("SELECT COUNT(*) FROM contracts WHERE freelancer_id = ? AND status = 'cancelled'");
+    $stmt->execute([$freelancerId]);
+    $cancelledCount = (int)$stmt->fetchColumn();
+
+    $stmt = $db->prepare("SELECT COUNT(*) FROM contracts WHERE freelancer_id = ? AND status = 'disputed'");
+    $stmt->execute([$freelancerId]);
+    $disputedCount = (int)$stmt->fetchColumn();
+
+    // 2. Fetch total earned
+    $stmt = $db->prepare("SELECT SUM(amount) FROM payments WHERE payee_id = ? AND status = 'completed' AND transaction_id NOT LIKE 'ESC-%'");
+    $stmt->execute([$freelancerId]);
+    $totalEarned = (float)$stmt->fetchColumn() ?: 0.0;
+
+    // 3. Fetch user details for profile completeness
+    $stmt = $db->prepare("SELECT * FROM users WHERE id = ?");
+    $stmt->execute([$freelancerId]);
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$user) {
+        return [
+            'total_earned' => 0.0,
+            'completed_contracts' => 0,
+            'active_contracts' => 0,
+            'jss' => 'N/A',
+            'jss_val' => null,
+            'completeness' => 0,
+            'badge' => null,
+            'badge_label' => '',
+            'rating' => '0.0',
+            'reviews_count' => 0
+        ];
+    }
+
+    // 4. Profile completeness
+    $completeness = 40; // Base
+    if (!empty($user['bio'])) $completeness += 20;
+    $skills = !empty($user['skills']) ? json_decode($user['skills'], true) : [];
+    if (!empty($skills)) $completeness += 20;
+    if (!empty($user['title']) && (float)($user['hourly_rate'] ?? 0) > 0) $completeness += 10;
+    if (!empty($user['avatar_url'])) $completeness += 10;
+    $completeness = min(100, $completeness);
+
+    // 5. Fetch received reviews count and average rating from reviews table
+    $stmt = $db->prepare("SELECT COUNT(*), AVG(rating) FROM reviews WHERE reviewee_id = ?");
+    $stmt->execute([$freelancerId]);
+    $revRow = $stmt->fetch(PDO::FETCH_NUM);
+    $reviewsCount = (int)$revRow[0];
+    $avgRating = $revRow[1] !== null ? number_format((float)$revRow[1], 1) : '0.0';
+
+    // 6. Job Success Score (JSS) based on client satisfaction reviews
+    $totalClosed = $completedCount + $cancelledCount + $disputedCount;
+    if ($reviewsCount > 0) {
+        // Satisfied reviews are those with rating >= 4.0 stars
+        $stmt = $db->prepare("SELECT COUNT(*) FROM reviews WHERE reviewee_id = ? AND rating >= 4.0");
+        $stmt->execute([$freelancerId]);
+        $satisfiedCount = (int)$stmt->fetchColumn();
+        
+        $jssVal = round(($satisfiedCount / $reviewsCount) * 100);
+        $jssVal = max(60, min(100, $jssVal));
+        $jss = $jssVal . '%';
+    } else {
+        // Fallback to contract status if no explicit reviews yet
+        if ($totalClosed === 0) {
+            $jssVal = null;
+            $jss = 'N/A';
+        } else {
+            $jssVal = round(($completedCount / $totalClosed) * 100);
+            $jssVal = max(60, min(100, $jssVal));
+            $jss = $jssVal . '%';
+        }
+    }
+
+    // 7. Dynamic badge
+    $badge = null;
+    $badge_label = '';
+    if ($completeness === 100) {
+        if ($jssVal === null || $totalClosed === 0) {
+            if ($totalEarned < 1000) {
+                $badge = 'rising_talent';
+                $badge_label = 'Rising Talent';
+            }
+        } else {
+            if ($jssVal >= 90) {
+                if ($totalEarned >= 10000) {
+                    $badge = 'expert_vetted';
+                    $badge_label = 'Expert Vetted';
+                } elseif ($totalEarned >= 5000) {
+                    $badge = 'top_rated_plus';
+                    $badge_label = 'Top Rated Plus';
+                } elseif ($totalEarned >= 1000) {
+                    $badge = 'top_rated';
+                    $badge_label = 'Top Rated';
+                } else {
+                    $badge = 'rising_talent';
+                    $badge_label = 'Rising Talent';
+                }
+            }
+        }
+    }
+
+    // 8. Rating and reviews mapping
+    $rating = $reviewsCount > 0 ? $avgRating : '0.0';
+    if ($reviewsCount === 0 && $completedCount > 0) {
+        $rating = '5.0'; // Historical fallback
+    }
+
+    return [
+        'total_earned' => $totalEarned,
+        'completed_contracts' => $completedCount,
+        'active_contracts' => $activeCount,
+        'jss' => $jss,
+        'jss_val' => $jssVal,
+        'completeness' => $completeness,
+        'badge' => $badge,
+        'badge_label' => $badge_label,
+        'rating' => $rating,
+        'reviews_count' => $reviewsCount > 0 ? $reviewsCount : $completedCount
+    ];
 }

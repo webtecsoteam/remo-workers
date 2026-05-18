@@ -42,7 +42,7 @@ try {
     // 2. Add amount to freelancer balance
     $amount = (float)$payment['amount'];
     // Deduct platform fee (mock fee of 10% or from row if present)
-    $fee = isset($payment['platform_fee']) ? (float)$payment['platform_fee'] : ($amount * 0.10);
+    $fee = isset($payment['platform_fee']) ? (float)$payment['platform_fee'] : ($amount * (getPlatformSetting('freelancer_fee_fixed', 10) / 100));
     $netAmount = $amount - $fee;
 
     $uStmt = $db->prepare("UPDATE users SET balance = balance + ? WHERE id = ?");

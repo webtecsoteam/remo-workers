@@ -3,6 +3,7 @@
 
 <script>
 let availableBalance = <?php echo (float)($user['balance'] ?? 0); ?>;
+let clientFeePercent = <?php echo getPlatformSetting('client_fee_fixed', 0); ?>;
 let selectedCVType = null;
 let selectedCVFile = null;
 
@@ -695,7 +696,7 @@ function viewProposalDetails(p) {
             <h3 style="margin:0; font-size:18px">${p.freelancer_name}</h3>
             <span class="badge b-${p.status==='shortlisted'?'blue':(p.status==='archived'?'gray':'green')}" style="font-size:10px">${p.status.charAt(0).toUpperCase() + p.status.slice(1)}</span>
           </div>
-          <div style="font-size:13px; color:var(--uw-gray)">${p.freelancer_title || 'Freelancer'} · 0 reviews · ★ 0.0 · $${parseFloat(p.freelancer_hourly_rate || 0).toFixed(2)}/hr</div>
+          <div style="font-size:13px; color:var(--uw-gray)">${p.freelancer_title || 'Freelancer'} · ★ ${p.freelancer_rating || '0.0'} (${p.freelancer_reviews_count || 0} reviews) · JSS: ${p.freelancer_jss || 'N/A'} ${p.freelancer_badge ? `· <span style="color:var(--uw-green); font-weight:700">${p.freelancer_badge}</span>` : ''} · $${parseFloat(p.freelancer_hourly_rate || 0).toFixed(2)}/hr</div>
         </div>
         <div style="text-align:right">
           <div style="font-size:24px; font-weight:800; color:var(--uw-black)">$${new Intl.NumberFormat().format(p.bid_amount)}</div>
@@ -1256,13 +1257,59 @@ async function updateProposalStatus(propId, newStatus) {
   }
 }
 
-async function completeJob(propId) {
-  if(!confirm('Are you sure you want to mark this job as completed? This will close the job and complete the contract.')) return;
-  
-  toast('Processing...', 'Marking job as completed');
-  const formData = new FormData();
-  formData.append('proposal_id', propId);
+function completeJob(propId) {
+  MODALS['complete-job-form'] = {
+    t: '✅ Complete Contract & Leave Feedback',
+    b: `
+      <form id="complete-job-form-el" onsubmit="submitCompleteJob(event, ${propId})" style="display:flex;flex-direction:column;gap:16px">
+        <p style="color:var(--uw-gray);font-size:13.5px;line-height:1.6">
+          Congratulations on completing this project! Please take a moment to rate the freelancer's performance and provide feedback. This will help calculate their JSS badge dynamically.
+        </p>
+        
+        <div class="fg">
+          <label style="font-weight:700;font-size:13px;display:block;margin-bottom:6px">Performance Rating</label>
+          <div style="display:flex;gap:12px;align-items:center;margin-bottom:4px">
+            <select name="rating" style="width:100%;padding:10px;border:1.5px solid var(--uw-border);border-radius:8px;font-size:14px;outline:none" required>
+              <option value="5.0">⭐⭐⭐⭐⭐ Excellent (5.0 / 5.0)</option>
+              <option value="4.0">⭐⭐⭐⭐ Good (4.0 / 5.0)</option>
+              <option value="3.0">⭐⭐⭐ Average (3.0 / 5.0)</option>
+              <option value="2.0">⭐⭐ Fair (2.0 / 5.0)</option>
+              <option value="1.0">⭐ Poor (1.0 / 5.0)</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="fg">
+          <label style="font-weight:700;font-size:13px;display:block;margin-bottom:6px">Public Review Feedback</label>
+          <textarea name="feedback" placeholder="Share your experience working with this freelancer. What did they do well? What could be improved?" style="width:100%;min-height:100px;padding:12px;border:1.5px solid var(--uw-border);border-radius:8px;font-size:13.5px;font-family:inherit;outline:none;resize:vertical" required></textarea>
+        </div>
+        
+        <div style="display:flex;gap:12px;margin-top:10px">
+          <button type="submit" class="btn btn-g" style="flex:1;justify-content:center;padding:12px">
+            Submit Feedback & Complete Job
+          </button>
+          <button type="button" class="btn btn-w" onclick="closeModal()" style="justify-content:center;padding:12px">
+            Cancel
+          </button>
+        </div>
+      </form>
+    `
+  };
+  openModal('complete-job-form');
+}
 
+async function submitCompleteJob(event, propId) {
+  event.preventDefault();
+  const form = event.target;
+  const submitBtn = form.querySelector('button[type="submit"]');
+  const originalText = submitBtn.innerText;
+  
+  submitBtn.disabled = true;
+  submitBtn.innerText = 'Processing...';
+  
+  const formData = new FormData(form);
+  formData.append('proposal_id', propId);
+  
   try {
     const res = await fetch(BASE_URL + 'actions/complete_job.php', {
       method: 'POST',
@@ -1271,12 +1318,17 @@ async function completeJob(propId) {
     const result = await res.json();
     if(result.success) {
       toast('Success! 🎉', result.message);
+      closeModal();
       setTimeout(() => location.reload(), 1500);
     } else {
       toast('Error', result.error || 'Failed to complete job');
+      submitBtn.disabled = false;
+      submitBtn.innerText = originalText;
     }
   } catch(err) {
-    toast('Error', 'An unexpected error occurred.');
+    toast('Error', 'Communication failed');
+    submitBtn.disabled = false;
+    submitBtn.innerText = originalText;
   }
 }
 
@@ -1697,7 +1749,7 @@ function showChatWithFreelancer(id, name) {
     let foundEl = null;
     items.forEach(item => {
       const oc = item.getAttribute('onclick') || '';
-      if (oc.includes(id.toString())) {
+      if (oc.includes('loadChat(' + id + ',')) {
         foundEl = item;
       }
     });
@@ -2033,16 +2085,26 @@ window.openFundMilestoneModal = function(milestoneId, amount, description, contr
   document.getElementById('mh-title').innerText = 'Fund Milestone';
   modal.style.maxWidth = '500px';
   
-  const isWalletDisabled = availableBalance < amount;
+  const clientFee = amount * (clientFeePercent / 100);
+  const totalAmount = amount + clientFee;
+  const isWalletDisabled = availableBalance < totalAmount;
   
   mc.innerHTML = `
     <div style="padding:20px">
       <div style="background:var(--uw-bg); border:1px solid var(--uw-border); border-radius:10px; padding:15px; margin-bottom:20px">
         <div style="font-size:12px; color:var(--uw-gray); margin-bottom:4px; font-weight:600; text-transform:uppercase">Milestone Description</div>
         <div style="font-size:14px; font-weight:700; color:var(--uw-black); margin-bottom:12px">${description}</div>
-        <div style="display:flex; justify-content:space-between; align-items:center">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 6px;">
           <span style="font-size:13px; color:var(--uw-gray)">Funding Amount:</span>
-          <span style="font-size:18px; font-weight:800; color:var(--uw-green)">$${parseFloat(amount).toLocaleString()}</span>
+          <span style="font-size:14px; font-weight:700; color:var(--uw-black)">$${parseFloat(amount).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 6px;">
+          <span style="font-size:13px; color:var(--uw-gray)">Service Fee (${clientFeePercent}%):</span>
+          <span style="font-size:14px; font-weight:700; color:var(--uw-black)">$${clientFee.toFixed(2)}</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; border-top: 1px dashed var(--uw-border); padding-top: 8px;">
+          <span style="font-size:13px; color:var(--uw-gray); font-weight:700">Total Charge:</span>
+          <span style="font-size:18px; font-weight:800; color:var(--uw-green)">$${totalAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
         </div>
       </div>
       

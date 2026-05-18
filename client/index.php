@@ -117,6 +117,11 @@ if (!empty($allProposals)) {
     
     foreach ($allProposals as &$p) {
         $p['milestones'] = $allMilestones[$p['id']] ?? [];
+        $fStats = getFreelancerStats($p['freelancer_id']);
+        $p['freelancer_rating'] = $fStats['rating'];
+        $p['freelancer_reviews_count'] = $fStats['reviews_count'];
+        $p['freelancer_jss'] = $fStats['jss'];
+        $p['freelancer_badge'] = $fStats['badge_label'] ?: '';
     }
     unset($p);
 }
@@ -204,9 +209,12 @@ for ($i = 6; $i >= 0; $i--) {
     if ($amt > $maxSpend) $maxSpend = $amt;
 }
 
-// Avg Rating Given (Placeholder logic as reviews table doesn't exist yet)
-$stats['avg_rating'] = "0.0"; 
-$stats['review_count'] = 0;
+// Avg Rating Given Dynamically
+$stmt = $db->prepare("SELECT COUNT(*), AVG(rating) FROM reviews WHERE reviewer_id = ?");
+$stmt->execute([$user['id']]);
+$revRow = $stmt->fetch(PDO::FETCH_NUM);
+$stats['review_count'] = (int)$revRow[0];
+$stats['avg_rating'] = $revRow[1] !== null ? number_format((float)$revRow[1], 1) : '0.0';
 
 // 11. Pending Work Logs for Review (Excluded for hourly since weekly cron bills them automatically)
 $pendingWorkLogs = [];
@@ -257,15 +265,27 @@ $talentCounts = [
 // 11. Reports Data
 $reportStatsStmt = $db->prepare("
     SELECT 
-        (SELECT SUM(amount) FROM payments WHERE payer_id = ? AND status = 'completed') as total_spent_all_time,
-        COUNT(DISTINCT id) as total_jobs_posted,
+        (SELECT COALESCE(SUM(amount + COALESCE(platform_fee, 0)), 0) FROM payments WHERE payer_id = ? AND payment_method != 'Escrow Release') as total_spent_all_time,
+        (SELECT COUNT(DISTINCT id) FROM jobs WHERE client_id = ?) as total_jobs_posted,
         (SELECT COUNT(DISTINCT freelancer_id) FROM contracts WHERE client_id = ?) as freelancers_hired,
-        (SELECT COUNT(*) FROM contracts WHERE client_id = ? AND status = 'completed') as contracts_completed
-    FROM jobs 
-    WHERE client_id = ?
+        (SELECT COUNT(*) FROM contracts WHERE client_id = ? AND status = 'completed') as contracts_completed,
+        (SELECT COALESCE(SUM(wl.hours), 0) FROM work_logs wl JOIN contracts c ON wl.contract_id = c.id WHERE c.client_id = ?) as total_hours_tracked,
+        (SELECT COUNT(*) FROM contracts WHERE client_id = ? AND status = 'disputed') as disputes_filed
 ");
-$reportStatsStmt->execute([$user['id'], $user['id'], $user['id'], $user['id']]);
+$reportStatsStmt->execute([$user['id'], $user['id'], $user['id'], $user['id'], $user['id'], $user['id']]);
 $reportStats = $reportStatsStmt->fetch(PDO::FETCH_ASSOC);
+
+// Fetch dynamic Spend by Category
+$categorySpendStmt = $db->prepare("
+    SELECT j.category, SUM(p.amount + COALESCE(p.platform_fee, 0)) as total_spent
+    FROM payments p
+    JOIN jobs j ON p.job_id = j.id
+    WHERE p.payer_id = ? AND p.payment_method != 'Escrow Release'
+    GROUP BY j.category
+    ORDER BY total_spent DESC
+");
+$categorySpendStmt->execute([$user['id']]);
+$categorySpendList = $categorySpendStmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -634,7 +654,18 @@ window.closeModal = function() {
                   <h4 style="margin:0"><?php echo htmlspecialchars($p['freelancer_name']); ?></h4>
                   <span class="badge b-<?php echo ($p['status']==='shortlisted'?'blue':($p['status']==='archived'?'gray':'green')); ?>" style="font-size:9px;padding:2px 6px"><?php echo ucfirst($p['status']); ?></span>
                 </div>
-                <p><?php echo htmlspecialchars($p['freelancer_title'] ?: 'Freelancer'); ?> · 0 reviews · ★ 0.0 · $<?php echo number_format($p['freelancer_hourly_rate'] ?: 0, 2); ?>/hr</p>
+                <?php 
+                  $fInfo = getFreelancerStats($p['freelancer_id']);
+                ?>
+                <p>
+                  <?php echo htmlspecialchars($p['freelancer_title'] ?: 'Freelancer'); ?> 
+                  · ★ <?php echo $fInfo['rating']; ?> (<?php echo $fInfo['reviews_count']; ?> reviews)
+                  · JSS: <?php echo $fInfo['jss']; ?> 
+                  · $<?php echo number_format($p['freelancer_hourly_rate'] ?: 0, 2); ?>/hr
+                  <?php if ($fInfo['badge_label']): ?>
+                    · <strong style="color:var(--uw-green)"><?php echo $fInfo['badge_label']; ?></strong>
+                  <?php endif; ?>
+                </p>
               </div>
               <div style="margin-left:auto;text-align:right;flex-shrink:0">
                 <div class="prop-rate">$<?php echo number_format($p['bid_amount']); ?></div>
@@ -885,6 +916,57 @@ window.closeModal = function() {
             <button class="btn btn-g" style="padding:12px 30px;font-size:15px" onclick="saveClientProfile(this)">Save Profile Changes</button>
         </div>
       </div>
+
+      <!-- Client Reviews and Ratings Feed -->
+      <?php
+      $clientReviewsStmt = $db->prepare("
+          SELECT r.*, j.title as job_title, u.name as freelancer_name, u.country as freelancer_country
+          FROM reviews r
+          JOIN contracts c ON r.contract_id = c.id
+          JOIN jobs j ON c.job_id = j.id
+          JOIN users u ON r.reviewer_id = u.id
+          WHERE r.reviewee_id = ?
+          ORDER BY r.created_at DESC
+      ");
+      $clientReviewsStmt->execute([$user['id']]);
+      $clientReviews = $clientReviewsStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+      ?>
+      <div class="card" style="padding:32px;border-radius:16px;box-shadow:var(--sh);max-width:800px;margin-top:24px">
+        <h3 style="font-size:17px;font-weight:800;color:var(--uw-black);margin-bottom:16px;border-bottom:1.5px solid var(--uw-border);padding-bottom:12px">
+          ⭐ Reviews & Ratings from Freelancers (<?php echo count($clientReviews); ?>)
+        </h3>
+        
+        <?php if (empty($clientReviews)): ?>
+          <div style="text-align:center;padding:40px 20px;color:var(--uw-gray)">
+            <div style="font-size:40px;margin-bottom:12px">🤝</div>
+            <strong style="color:var(--uw-black);font-size:14px">No reviews from freelancers yet</strong>
+            <p style="font-size:12.5px;color:var(--uw-gray);margin-top:4px;line-height:1.5">Completed contracts with feedback left by freelancers will be showcased here.</p>
+          </div>
+        <?php else: ?>
+          <div style="display:flex;flex-direction:column;gap:16px">
+            <?php foreach ($clientReviews as $cr): 
+              $stars = str_repeat('★', (int)round($cr['rating'])) . str_repeat('☆', 5 - (int)round($cr['rating']));
+              $dateStr = date('M d, Y', strtotime($cr['created_at']));
+            ?>
+              <div style="padding:20px;border:1px solid var(--uw-border);border-radius:12px;background:#fcfdfc;transition:transform .2s">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:8px">
+                  <div>
+                    <h4 style="margin:0 0 4px 0;font-size:13.5px;color:var(--uw-black);font-weight:700"><?php echo htmlspecialchars($cr['job_title']); ?></h4>
+                    <div style="font-size:11.5px;color:var(--uw-gray)">Rated by <?php echo htmlspecialchars($cr['freelancer_name']); ?> · <?php echo htmlspecialchars($cr['freelancer_country'] ?: 'Global'); ?></div>
+                  </div>
+                  <span style="font-size:13px;font-weight:700;color:#d97706;background:#fef3c7;padding:4px 8px;border-radius:8px;white-space:nowrap">
+                    <?php echo $stars; ?> <?php echo number_format($cr['rating'], 1); ?>
+                  </span>
+                </div>
+                <p style="margin:0;font-size:13px;line-height:1.6;color:#374151;font-style:italic">
+                  "<?php echo htmlspecialchars($cr['feedback'] ?: 'No comment provided.'); ?>"
+                </p>
+                <div style="font-size:11px;color:var(--uw-gray);text-align:right;margin-top:8px">Reviewed on <?php echo $dateStr; ?></div>
+              </div>
+            <?php endforeach; ?>
+          </div>
+        <?php endif; ?>
+      </div>
     </div>
 
     <!-- ══ TALENT PAGE ══ -->
@@ -1050,8 +1132,9 @@ window.closeModal = function() {
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px" id="talent-grid">
         <?php foreach($allTalent as $t): 
           $initials = strtoupper(substr($t['name'], 0, 1) . substr(explode(' ', $t['name'])[1] ?? '', 0, 1));
-          $rating = "0.0";
-          $reviews = 0;
+          $fStats = getFreelancerStats($t['id']);
+          $rating = $fStats['rating'];
+          $reviews = $fStats['reviews_count'];
         ?>
           <div class="card talent-card" style="margin-bottom:0;transition:transform .2s, border-color .2s;cursor:pointer" onclick="openModal('hire-freelancer-<?php echo $t['id']; ?>')" onmouseover="this.style.borderColor='var(--uw-green)'" onmouseout="this.style.borderColor='var(--uw-border)'">
             <div class="card-body">
@@ -1066,12 +1149,18 @@ window.closeModal = function() {
                 <div style="flex:1;min-width:0">
                   <div style="font-weight:700;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><?php echo htmlspecialchars($t['name']); ?></div>
                   <div style="font-size:13px;color:var(--uw-green);font-weight:600"><?php echo htmlspecialchars($t['title'] ?? 'Freelancer'); ?></div>
-                  <div style="font-size:12px;color:var(--uw-gray);margin-top:2px">★ <?php echo $rating; ?> (<?php echo $reviews; ?> reviews)</div>
+                  <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--uw-gray);margin-top:2px;flex-wrap:wrap">
+                    <span>★ <?php echo $rating; ?> (<?php echo $reviews; ?> reviews)</span>
+                    <?php if ($fStats['badge_label']): ?>
+                      <span style="color:var(--uw-green);font-weight:700">· <?php echo $fStats['badge_label']; ?></span>
+                    <?php endif; ?>
+                    <span>· JSS: <?php echo $fStats['jss']; ?></span>
+                  </div>
                 </div>
               </div>
               <div style="display:flex;gap:15px;font-size:13px;color:var(--uw-gray);margin-bottom:15px">
                 <div><strong>$<?php echo number_format($t['hourly_rate'] ?? 0); ?></strong> / hr</div>
-                <div><strong>$<?php echo number_format(rand(1000, 50000)); ?>+</strong> earned</div>
+                <div><strong>$<?php echo number_format($fStats['total_earned']); ?>+</strong> earned</div>
                 <div>📍 <?php echo htmlspecialchars($t['country'] ?? 'Global'); ?></div>
               </div>
               <div style="display:flex;gap:10px">
@@ -1176,21 +1265,29 @@ window.closeModal = function() {
         
         <div class="desk-only">
           <table class="tbl">
-            <thead><tr><th>Date</th><th>Description</th><th>Freelancer / Source</th><th>Type</th><th>Amount</th><th>Status</th></tr></thead>
+            <thead><tr><th>Date</th><th>Description</th><th>Freelancer / Source</th><th>Type</th><th>Amount</th><th>Platform Fee</th><th>Total Charge</th><th>Status</th></tr></thead>
             <tbody>
               <?php if(empty($clientTransactions)): ?>
-                  <tr><td colspan="6" style="text-align:center;padding:20px;color:var(--uw-gray)">No transactions found.</td></tr>
+                  <tr><td colspan="8" style="text-align:center;padding:20px;color:var(--uw-gray)">No transactions found.</td></tr>
               <?php else: ?>
                   <?php foreach($clientTransactions as $ct): 
                       $isDeposit = ($ct['payee_id'] == $user['id']);
+                      $fee = (float)($ct['platform_fee'] ?? 0);
+                      $total = (float)$ct['amount'] + ($isDeposit ? 0 : $fee);
                   ?>
                   <tr>
                     <td><?php echo date('M j, Y', strtotime($ct['created_at'])); ?></td>
                     <td><?php echo $isDeposit ? 'Add Funds (Deposit)' : 'Payment for contract'; ?></td>
                     <td><?php echo $ct['freelancer_name'] ?: ($isDeposit ? 'Self (Deposit)' : 'System'); ?></td>
                     <td><span class="badge <?php echo $isDeposit ? 'b-blue' : 'b-purple'; ?>"><?php echo $isDeposit ? 'Deposit' : 'Fixed'; ?></span></td>
+                    <td style="font-weight:600;color:<?php echo $isDeposit ? 'var(--uw-green)' : 'var(--uw-dark)'; ?>">
+                      <?php echo $isDeposit ? '+' : ''; ?>$<?php echo number_format($ct['amount'], 2); ?>
+                    </td>
+                    <td style="color:#dc2626;font-weight:600">
+                      $<?php echo number_format($fee, 2); ?>
+                    </td>
                     <td style="font-weight:700;color:<?php echo $isDeposit ? 'var(--uw-green)' : '#dc2626'; ?>">
-                      <?php echo $isDeposit ? '+' : '−'; ?>$<?php echo number_format($ct['amount'], 2); ?>
+                      <?php echo $isDeposit ? '+' : '−'; ?>$<?php echo number_format($total, 2); ?>
                     </td>
                     <td><span class="badge b-green"><?php echo ucfirst($ct['status']); ?></span></td>
                   </tr>
@@ -1207,6 +1304,8 @@ window.closeModal = function() {
             <?php else: ?>
                 <?php foreach($clientTransactions as $ct): 
                     $isDeposit = ($ct['payee_id'] == $user['id']);
+                    $fee = (float)($ct['platform_fee'] ?? 0);
+                    $total = (float)$ct['amount'] + ($isDeposit ? 0 : $fee);
                 ?>
                 <div style="padding:15px 0;border-bottom:1px solid var(--uw-border);display:flex;justify-content:space-between;align-items:flex-start">
                   <div style="flex:1;min-width:0">
@@ -1214,14 +1313,17 @@ window.closeModal = function() {
                     <div style="font-size:11.5px;color:var(--uw-gray);margin-bottom:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
                       <?php echo $ct['freelancer_name'] ?: ($isDeposit ? 'Self (Deposit)' : 'System'); ?>
                     </div>
-                    <div style="display:flex;gap:8px;align-items:center">
+                    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
                       <span class="badge <?php echo $isDeposit ? 'b-blue' : 'b-purple'; ?>" style="font-size:9px;padding:1px 6px"><?php echo $isDeposit ? 'Deposit' : 'Fixed'; ?></span>
                       <span style="font-size:11px;color:var(--uw-gray2)"><?php echo date('M j, Y', strtotime($ct['created_at'])); ?></span>
+                      <?php if ($fee > 0): ?>
+                        <span style="font-size:10px;color:#dc2626;background:#fef2f2;padding:1px 6px;border-radius:4px;font-weight:600">Fee: $<?php echo number_format($fee, 2); ?></span>
+                      <?php endif; ?>
                     </div>
                   </div>
                   <div style="text-align:right;flex-shrink:0">
                     <div style="font-weight:700;font-size:15px;color:<?php echo $isDeposit ? 'var(--uw-green)' : '#dc2626'; ?>;margin-bottom:4px">
-                      <?php echo $isDeposit ? '+' : '−'; ?>$<?php echo number_format($ct['amount'], 2); ?>
+                      <?php echo $isDeposit ? '+' : '−'; ?>$<?php echo number_format($total, 2); ?>
                     </div>
                     <span class="badge b-green" style="font-size:9px;padding:2px 6px"><?php echo ucfirst($ct['status']); ?></span>
                   </div>
@@ -1250,7 +1352,16 @@ window.closeModal = function() {
       <div class="g3" style="margin-bottom:18px">
         <div class="report-metric"><div class="rm-lbl">Total Spent (All Time)</div><div class="rm-val">$<?php echo number_format($reportStats['total_spent_all_time'] ?? 0); ?></div></div>
         <div class="report-metric"><div class="rm-lbl">Contracts Completed</div><div class="rm-val"><?php echo $reportStats['contracts_completed']; ?></div></div>
-        <div class="report-metric"><div class="rm-lbl">Avg Spend / Contract</div><div class="rm-val">$<?php echo $reportStats['contracts_completed'] > 0 ? number_format($reportStats['total_spent_all_time'] / $reportStats['contracts_completed']) : 0; ?></div></div>
+        <div class="report-metric">
+          <div class="rm-lbl">Avg Spend / Contract</div>
+          <div class="rm-val">
+            <?php 
+              $contracts_count = $reportStats['contracts_completed'] ?: ($reportStats['freelancers_hired'] ?: 1);
+              $avgSpendContract = $reportStats['total_spent_all_time'] / $contracts_count;
+            ?>
+            $<?php echo number_format($avgSpendContract); ?>
+          </div>
+        </div>
       </div>
 
       <div class="g2">
@@ -1258,10 +1369,32 @@ window.closeModal = function() {
           <div class="card-head"><h3>Spend by Category</h3></div>
           <div class="card-body">
             <div style="display:flex;flex-direction:column;gap:12px">
-              <div><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>Engineering</span><span style="font-weight:700">$18,200</span></div><div class="progress-bar" style="height:8px"><div class="progress-fill" style="width:75%"></div></div></div>
-              <div><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>Design</span><span style="font-weight:700">$10,500</span></div><div class="progress-bar" style="height:8px"><div class="progress-fill" style="width:43%"></div></div></div>
-              <div><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>Marketing / SEO</span><span style="font-weight:700">$6,350</span></div><div class="progress-bar" style="height:8px"><div class="progress-fill" style="width:26%"></div></div></div>
-              <div><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>AI / ML</span><span style="font-weight:700">$3,400</span></div><div class="progress-bar" style="height:8px"><div class="progress-fill" style="width:14%"></div></div></div>
+              <?php
+              $displayCategories = [
+                  'Engineering' => 0.0,
+                  'Design' => 0.0,
+                  'Marketing / SEO' => 0.0,
+                  'AI / ML' => 0.0
+              ];
+              foreach ($categorySpendList as $cs) {
+                  $displayCategories[$cs['category']] = (float)$cs['total_spent'];
+              }
+              arsort($displayCategories);
+              $maxVal = max(1.0, (float)current($displayCategories));
+              foreach ($displayCategories as $cat => $spent):
+                  $pct = round(($spent / $maxVal) * 100);
+                  if ($spent > 0 && $pct < 3) $pct = 3;
+              ?>
+                <div>
+                  <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px">
+                    <span><?php echo htmlspecialchars($cat); ?></span>
+                    <span style="font-weight:700">$<?php echo number_format($spent); ?></span>
+                  </div>
+                  <div class="progress-bar" style="height:8px">
+                    <div class="progress-fill" style="width:<?php echo $pct; ?>%"></div>
+                  </div>
+                </div>
+              <?php endforeach; ?>
             </div>
           </div>
         </div>
@@ -1273,8 +1406,8 @@ window.closeModal = function() {
               <tr><td style="color:var(--uw-gray)">Freelancers hired</td><td><strong><?php echo $reportStats['freelancers_hired']; ?></strong></td></tr>
               <tr><td style="color:var(--uw-gray)">Contracts completed</td><td><strong><?php echo $reportStats['contracts_completed']; ?></strong></td></tr>
               <tr><td style="color:var(--uw-gray)">Total spent (all time)</td><td><strong>$<?php echo number_format($reportStats['total_spent_all_time'] ?? 0); ?></strong></td></tr>
-              <tr><td style="color:var(--uw-gray)">Total hours tracked</td><td><strong>0 hrs</strong></td></tr>
-              <tr><td style="color:var(--uw-gray)">Disputes filed</td><td><strong style="color:var(--uw-green)">0</strong></td></tr>
+              <tr><td style="color:var(--uw-gray)">Total hours tracked</td><td><strong><?php echo number_format($reportStats['total_hours_tracked'], 1); ?> hrs</strong></td></tr>
+              <tr><td style="color:var(--uw-gray)">Disputes filed</td><td><strong style="color:<?php echo $reportStats['disputes_filed'] > 0 ? '#ef4444' : 'var(--uw-green)'; ?>"><?php echo $reportStats['disputes_filed']; ?></strong></td></tr>
             </table>
           </div>
         </div>

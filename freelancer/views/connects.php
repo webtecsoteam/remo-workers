@@ -8,7 +8,7 @@
         <h3 style="font-size:16px;font-weight:800;color:var(--dark);margin:0">Available Balance</h3>
         <span style="font-size:24px">💼</span>
       </div>
-      <div style="font-size:32px;font-weight:900;color:var(--g);margin-bottom:8px" id="connects-page-balance">$<?php echo number_format($user['balance'], 2); ?></div>
+      <div style="font-size:32px;font-weight:900;color:var(--g);margin-bottom:8px" id="connects-page-balance">$<?php echo number_format((float)($user['balance'] ?? 0), 2); ?></div>
       <div style="font-size:13px;color:var(--muted);margin-bottom:25px">Your available balance can be used to purchase connects instantly.</div>
       
       <hr style="border:0;border-top:1px solid var(--border);margin-bottom:20px">
@@ -17,12 +17,12 @@
         <h3 style="font-size:16px;font-weight:800;color:var(--dark);margin:0">Available Connects</h3>
         <span style="font-size:24px">🔗</span>
       </div>
-      <div style="font-size:32px;font-weight:900;color:var(--dark);margin-bottom:8px" id="connects-page-count"><?php echo $user['connects'] ?? 0; ?> Connects</div>
+      <div style="font-size:32px;font-weight:900;color:var(--dark);margin-bottom:8px" id="connects-page-count"><?php echo (int)($user['connects'] ?? 0); ?> Connects</div>
       <div style="background:var(--border);border-radius:8px;height:12px;overflow:hidden;margin-bottom:10px">
-        <div id="connects-page-progress" style="height:100%;background:linear-gradient(90deg, var(--g), #10b981);width:<?php echo min((($user['connects'] ?? 0) / 200) * 100, 100); ?>%"></div>
+        <div id="connects-page-progress" style="height:100%;background:linear-gradient(90deg, var(--g), #10b981);width:<?php echo min(((int)($user['connects'] ?? 0) / 200) * 100, 100); ?>%"></div>
       </div>
       <div style="font-size:13.5px;color:var(--muted);display:flex;justify-content:space-between" id="connects-page-max-info">
-        <span><?php echo $user['connects'] ?? 0; ?> of 200 max connects</span>
+        <span><?php echo (int)($user['connects'] ?? 0); ?> of 200 max connects</span>
         <span>Monthly Refresh: +10</span>
       </div>
     </div>

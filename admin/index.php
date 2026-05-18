@@ -186,6 +186,10 @@ if (!$user || $user['role'] !== 'admin') {
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
         Security
       </div>
+      <div class="nav-item" onclick="showPage('settings', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Platform Settings
+      </div>
       <div class="nav-item" onclick="showPage('migrations', this)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
         Migrations
@@ -277,6 +281,47 @@ if (!$user || $user['role'] !== 'admin') {
       </div>
     </div>
 
+    <!-- SETTINGS -->
+    <div class="page" id="page-settings">
+      <div class="card" style="max-width: 600px;">
+        <div class="card-header"><span class="card-title">Dynamic Platform Charges &amp; Fees</span></div>
+        <div class="card-body">
+          <form id="settingsForm" onsubmit="saveSettings(event)">
+            <h3 style="font-size: 14px; margin-bottom: 12px; color: var(--accent); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Freelancer Service Fees (%)</h3>
+            <div style="margin-bottom: 16px;">
+              <label style="display:block; font-size:12px; margin-bottom:6px; color:var(--text-2);">Fixed Price Contract Fee (%)</label>
+              <input type="number" step="0.01" id="set_freelancer_fee_fixed" name="freelancer_fee_fixed" required style="width:100%; padding:10px; border:1px solid var(--border); border-radius:8px; outline:none;">
+            </div>
+            <div style="margin-bottom: 16px;">
+              <label style="display:block; font-size:12px; margin-bottom:6px; color:var(--text-2);">Hourly Contract Fee (%)</label>
+              <input type="number" step="0.01" id="set_freelancer_fee_hourly" name="freelancer_fee_hourly" required style="width:100%; padding:10px; border:1px solid var(--border); border-radius:8px; outline:none;">
+            </div>
+            <div style="margin-bottom: 16px;">
+              <label style="display:block; font-size:12px; margin-bottom:6px; color:var(--text-2);">Monthly Contract Fee (%)</label>
+              <input type="number" step="0.01" id="set_freelancer_fee_monthly" name="freelancer_fee_monthly" required style="width:100%; padding:10px; border:1px solid var(--border); border-radius:8px; outline:none;">
+            </div>
+
+            <h3 style="font-size: 14px; margin-top: 24px; margin-bottom: 12px; color: var(--blue); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Client Service Fees (%)</h3>
+            <div style="margin-bottom: 16px;">
+              <label style="display:block; font-size:12px; margin-bottom:6px; color:var(--text-2);">Fixed Price Contract Fee (%)</label>
+              <input type="number" step="0.01" id="set_client_fee_fixed" name="client_fee_fixed" required style="width:100%; padding:10px; border:1px solid var(--border); border-radius:8px; outline:none;">
+            </div>
+            <div style="margin-bottom: 16px;">
+              <label style="display:block; font-size:12px; margin-bottom:6px; color:var(--text-2);">Hourly Contract Fee (%)</label>
+              <input type="number" step="0.01" id="set_client_fee_hourly" name="client_fee_hourly" required style="width:100%; padding:10px; border:1px solid var(--border); border-radius:8px; outline:none;">
+            </div>
+            <div style="margin-bottom: 20px;">
+              <label style="display:block; font-size:12px; margin-bottom:6px; color:var(--text-2);">Monthly Contract Fee (%)</label>
+              <input type="number" step="0.01" id="set_client_fee_monthly" name="client_fee_monthly" required style="width:100%; padding:10px; border:1px solid var(--border); border-radius:8px; outline:none;">
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;">Save Changes</button>
+          </form>
+          <div id="settingsStatus" style="margin-top: 15px; font-size: 13px;"></div>
+        </div>
+      </div>
+    </div>
+
     <!-- SECURITY -->
     <div class="page" id="page-security">
       <div class="card" style="max-width: 500px;">
@@ -353,6 +398,7 @@ function refreshPage(name) {
   if (active === 'dashboard') loadDashboard();
   if (active === 'users') loadUsers();
   if (active === 'verifications') loadVerifications();
+  if (active === 'settings') loadSettings();
 }
 
 async function loadDashboard() {
@@ -517,6 +563,59 @@ async function runMigrations() {
     output.innerHTML += `<span class="success">${data.message.replace(/\n/g, '<br>')}</span>`;
   } else {
     output.innerHTML += `<span class="error">Error: ${data.message}</span>`;
+  }
+}
+
+async function loadSettings() {
+  const status = document.getElementById('settingsStatus');
+  status.innerHTML = '<span class="info">Loading settings…</span>';
+  
+  const res = await apiFetch('get_settings');
+  if (res.success) {
+    status.innerHTML = '';
+    const s = res.data;
+    document.getElementById('set_freelancer_fee_fixed').value = s.freelancer_fee_fixed ? s.freelancer_fee_fixed.value : 10;
+    document.getElementById('set_freelancer_fee_hourly').value = s.freelancer_fee_hourly ? s.freelancer_fee_hourly.value : 10;
+    document.getElementById('set_freelancer_fee_monthly').value = s.freelancer_fee_monthly ? s.freelancer_fee_monthly.value : 10;
+    
+    document.getElementById('set_client_fee_fixed').value = s.client_fee_fixed ? s.client_fee_fixed.value : 0;
+    document.getElementById('set_client_fee_hourly').value = s.client_fee_hourly ? s.client_fee_hourly.value : 0;
+    document.getElementById('set_client_fee_monthly').value = s.client_fee_monthly ? s.client_fee_monthly.value : 0;
+  } else {
+    status.innerHTML = `<span class="error">Failed to load settings: ${res.message}</span>`;
+  }
+}
+
+async function saveSettings(e) {
+  e.preventDefault();
+  const form = e.target;
+  const status = document.getElementById('settingsStatus');
+  status.innerHTML = '<span class="info">Saving changes…</span>';
+  
+  const payload = {
+    freelancer_fee_fixed: document.getElementById('set_freelancer_fee_fixed').value,
+    freelancer_fee_hourly: document.getElementById('set_freelancer_fee_hourly').value,
+    freelancer_fee_monthly: document.getElementById('set_freelancer_fee_monthly').value,
+    client_fee_fixed: document.getElementById('set_client_fee_fixed').value,
+    client_fee_hourly: document.getElementById('set_client_fee_hourly').value,
+    client_fee_monthly: document.getElementById('set_client_fee_monthly').value
+  };
+  
+  // Call API using POST method or JSON payload.
+  const url = new URL(API, window.location.href);
+  url.searchParams.append('action', 'save_settings');
+  
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  }).then(r => r.json());
+  
+  if (res.success) {
+    status.innerHTML = `<span class="success" style="color:var(--accent); font-weight: 500;">${res.message}</span>`;
+    setTimeout(() => { status.innerHTML = ''; }, 3000);
+  } else {
+    status.innerHTML = `<span class="error">${res.message}</span>`;
   }
 }
 

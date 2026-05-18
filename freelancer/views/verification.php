@@ -1,17 +1,23 @@
 <?php
 $db = getDB();
-$userId = $user['id'];
-$emailVerified = Auth::isEmailVerified($user);
+$userId = $user['id'] ?? null;
+$emailVerified = !empty($user) && Auth::isEmailVerified($user);
 
 // Get user documents
-$stmt = $db->prepare("SELECT * FROM user_documents WHERE user_id = ? ORDER BY created_at DESC");
-$stmt->execute([$userId]);
-$docs = $stmt->fetchAll();
+$docs = [];
+if ($userId) {
+    $stmt = $db->prepare("SELECT * FROM user_documents WHERE user_id = ? ORDER BY created_at DESC");
+    $stmt->execute([$userId]);
+    $docs = $stmt->fetchAll();
+}
 
 // Get user verification status from users table
-$uStmt = $db->prepare("SELECT is_verified, status, email_verified_at FROM users WHERE id = ?");
-$uStmt->execute([$userId]);
-$userData = $uStmt->fetch();
+$userData = null;
+if ($userId) {
+    $uStmt = $db->prepare("SELECT is_verified, status, email_verified_at FROM users WHERE id = ?");
+    $uStmt->execute([$userId]);
+    $userData = $uStmt->fetch();
+}
 
 $isVerified = (bool)($userData['is_verified'] ?? false);
 $hasPending = false;
@@ -219,7 +225,7 @@ elseif ($hasPending) $vStatus = 'pending';
             <div style="background:var(--off);border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:24px">
               <div style="font-size:13.5px;font-weight:700;margin-bottom:14px;color:var(--dark)">Confirm Details</div>
               <div class="g2" style="gap:15px">
-                <div class="fg" style="margin-bottom:0"><label>Full Legal Name</label><input type="text" value="<?php echo htmlspecialchars($user['name']); ?>" id="vlegal-name"></div>
+                <div class="fg" style="margin-bottom:0"><label>Full Legal Name</label><input type="text" value="<?php echo htmlspecialchars($user['name'] ?? ''); ?>" id="vlegal-name"></div>
                 <div class="fg" style="margin-bottom:0"><label>Nationality</label><input type="text" placeholder="e.g. United Kingdom" id="vnationality"></div>
                 <div class="fg" style="margin-bottom:0"><label>Date of Birth</label><input type="date" id="vdob"></div>
                 <div class="fg" style="margin-bottom:0"><label>Document ID Number</label><input type="text" placeholder="e.g. G12345678" id="vdoc-number"></div>

@@ -24,8 +24,12 @@
 
     // Update mobile bottom nav sync
     document.querySelectorAll('.mob-nav-item').forEach(i => i.classList.remove('active'));
-    const mobItem = document.querySelector(`.mob-nav-item[onclick*="'${id}'"]`);
-    if(mobItem) mobItem.classList.add('active');
+    try {
+      const mobItem = document.querySelector(`.mob-nav-item[onclick*="'${id}'"]`);
+      if(mobItem) mobItem.classList.add('active');
+    } catch(e) {
+      console.warn("Mobile nav selector error:", e);
+    }
     
     // Update title
     const titles = {
@@ -499,8 +503,10 @@
   }
 
   function clientHiresLabel(job) {
+    const rating = parseFloat(job.client_rating) || 0.0;
     const hires = parseInt(job.client_hires, 10) || 0;
-    return hires === 1 ? '1 hire' : hires + ' hires';
+    const ratingText = rating > 0 ? rating.toFixed(1) : 'No reviews';
+    return `${ratingText} (${hires} ${hires === 1 ? 'hire' : 'hires'})`;
   }
 
   function isClientVerified(job) {
@@ -952,6 +958,17 @@
             </div>
           </div>
 
+          ${c.status === 'completed' ? `
+            <div id="contract-feedback-section" style="border:1.5px solid #bfdbfe;background:#f0f7ff;padding:20px;border-radius:12px;margin-bottom:30px">
+              <h3 style="font-size:15px;margin:0 0 10px 0;font-weight:700;color:#1e40af;display:flex;align-items:center;gap:6px">
+                📝 Double-Sided Reviews & Feedback
+              </h3>
+              <div id="freelancer-review-status-box">
+                <div style="text-align:center;padding:10px;font-size:13px;color:#666">Loading feedback status...</div>
+              </div>
+            </div>
+          ` : ''}
+
           <!-- Milestones Section (for Fixed Price) -->
           <div id="milestones-section-detail" style="margin-bottom:30px; display: ${c.contract_type === 'fixed' ? 'block' : 'none'}">
             <h3 style="font-size:16px;margin-bottom:15px;font-weight:700">Contract Milestones</h3>
@@ -1067,7 +1084,9 @@
           <!-- Footer Buttons -->
           <div style="display:flex;gap:15px;border-top:1px solid #eee;padding-top:25px">
             <button class="btn" style="flex:1;justify-content:center;border:1px solid #ddd;background:white;color:#333;font-weight:600;padding:12px;border-radius:8px" onclick="showPage('messages');closeModal()">Message Client</button>
-            <button class="btn" id="btn-pause-contract" style="flex:1;justify-content:center;background:#f3f4f6;color:#333;font-weight:600;padding:12px;border-radius:8px;display:none" onclick="toast('Status','Contract is active')">Contract Settings</button>
+            ${c.status === 'active' || c.status === 'paused' ? `
+              <button class="btn btn-g" style="flex:1;justify-content:center;padding:12px;font-weight:700" onclick="event.stopPropagation();openFreelancerCompleteModal(${c.id})">Mark as Completed</button>
+            ` : ''}
             <button class="btn btn-w" style="flex:1;justify-content:center;padding:12px" onclick="closeModal()">Close</button>
           </div>
         </div>
@@ -1079,6 +1098,9 @@
       setTimeout(() => {
         loadWorkDiary(c.id);
         initializeTimerUI();
+        if (c.status === 'completed') {
+          loadReviewStatus(c.id);
+        }
         
         // Auto-configure the manual log date limits based on contract start_date
         const dateInput = document.getElementById('work-date-manual');
@@ -2399,7 +2421,7 @@
     });
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
+  function initPage() {
     if (typeof restoreActiveTracker === 'function') {
       restoreActiveTracker();
     }
@@ -2409,7 +2431,13 @@
     }
     const hash = window.location.hash.replace('#', '');
     showPage(hash || 'home');
-  });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => setTimeout(initPage, 0));
+  } else {
+    setTimeout(initPage, 0);
+  }
 
   window.addEventListener('hashchange', () => {
     const hash = window.location.hash.replace('#', '');
@@ -2956,6 +2984,225 @@ window.submitNewMilestone = async function(clientId) {
     btn.innerText = 'Propose Milestone →';
   }
 }
+
+async function loadReviewStatus(contractId) {
+  const container = document.getElementById('freelancer-review-status-box');
+  if (!container) return;
+
+  try {
+    const res = await fetch(BASE_URL + 'freelancer/api/get-review-status.php?contract_id=' + contractId);
+    const data = await res.json();
+    
+    if (data.success) {
+      let html = '';
+      
+      // Client review to Freelancer
+      if (data.client_review) {
+        const ratingStars = '⭐'.repeat(Math.round(data.client_review.rating));
+        html += `
+          <div style="background:white; border:1px solid #ddd; padding:15px; border-radius:10px; margin-bottom:15px">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px">
+              <span style="font-weight:700; font-size:13px; color:var(--dark)">Feedback Given By Client</span>
+              <span style="font-size:12px; font-weight:700; color:#b45309">${ratingStars} ${data.client_review.rating} / 5.0</span>
+            </div>
+            <p style="font-size:12.5px; color:#4b5563; margin:0; line-height:1.5; font-style:italic">
+              "${data.client_review.feedback || 'No written feedback left.'}"
+            </p>
+          </div>
+        `;
+      } else {
+        html += `
+          <div style="background:#fffbeb; border:1px solid #fde68a; padding:12px; border-radius:8px; margin-bottom:15px; font-size:12px; color:#b45309; text-align:center">
+            ⏳ Client hasn't left feedback for you yet.
+          </div>
+        `;
+      }
+
+      // Freelancer review to Client
+      if (data.freelancer_review) {
+        const ratingStars = '⭐'.repeat(Math.round(data.freelancer_review.rating));
+        html += `
+          <div style="background:#f0fdf4; border:1px solid #bbf7d0; padding:15px; border-radius:10px">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px">
+              <span style="font-weight:700; font-size:13px; color:#166534">Your Feedback for Client</span>
+              <span style="font-size:12px; font-weight:700; color:#166534">${ratingStars} ${data.freelancer_review.rating} / 5.0</span>
+            </div>
+            <p style="font-size:12.5px; color:#15803d; margin:0; line-height:1.5; font-style:italic">
+              "${data.freelancer_review.feedback}"
+            </p>
+          </div>
+        `;
+      } else {
+        html += `
+          <form id="freelancer-review-form" onsubmit="submitFreelancerReview(event, ${contractId})" style="display:flex; flex-direction:column; gap:12px; background:white; border:1px solid #ddd; padding:15px; border-radius:10px">
+            <div style="font-weight:700; font-size:13px; color:var(--dark); margin-bottom:4px">Rate Your Experience with ${data.client_name}</div>
+            
+            <div style="display:flex; flex-direction:column; gap:10px">
+              <div>
+                <select name="rating" style="width:100%; padding:10px; border:1.5px solid #ccc; border-radius:8px; font-size:13px; outline:none" required>
+                  <option value="5.0">⭐⭐⭐⭐⭐ 5.0 - Great experience</option>
+                  <option value="4.0">⭐⭐⭐⭐ 4.0 - Good</option>
+                  <option value="3.0">⭐⭐⭐ 3.0 - Satisfactory</option>
+                  <option value="2.0">⭐⭐ 2.0 - Difficult</option>
+                  <option value="1.0">⭐ 1.0 - Unacceptable</option>
+                </select>
+              </div>
+              <div>
+                <textarea name="feedback" placeholder="Write public feedback about this client..." style="width:100%; min-height:80px; padding:12px; border:1.5px solid #ccc; border-radius:8px; font-size:13px; font-family:inherit; outline:none; resize:vertical" required></textarea>
+              </div>
+            </div>
+            
+            <button type="submit" class="btn btn-g" style="align-self:flex-start; padding:10px 20px; font-size:13px; font-weight:700; border-radius:8px">
+              Submit Review Feedback
+            </button>
+          </form>
+        `;
+      }
+
+      container.innerHTML = html;
+    } else {
+      container.innerHTML = `<div style="color:red; font-size:12px; text-align:center">${data.error || 'Failed to load status'}</div>`;
+    }
+  } catch(err) {
+    container.innerHTML = `<div style="color:red; font-size:12px; text-align:center">Error loading reviews</div>`;
+  }
+}
+
+async function submitFreelancerReview(event, contractId) {
+  event.preventDefault();
+  const form = event.target;
+  const btn = form.querySelector('button[type="submit"]');
+  const originalText = btn.innerText;
+  
+  btn.disabled = true;
+  btn.innerText = 'Submitting...';
+  
+  const formData = new FormData(form);
+  formData.append('contract_id', contractId);
+  
+  try {
+    const res = await fetch(BASE_URL + 'freelancer/api/submit-review.php', {
+      method: 'POST',
+      body: formData
+    });
+    const data = await res.json();
+    if (data.success) {
+      toast('Success! 🎉', data.message);
+      loadReviewStatus(contractId);
+    } else {
+      toast('Error', data.error || 'Submission failed');
+      btn.disabled = false;
+      btn.innerText = originalText;
+    }
+  } catch(err) {
+    toast('Error', 'Communication failed');
+    btn.disabled = false;
+    btn.innerText = originalText;
+  }
+}
+
+window.openFreelancerCompleteModal = function(contractId) {
+  const c = CONTRACTS.find(ct => ct.id == contractId);
+  if (!c) return;
+
+  const modal = document.getElementById('modal');
+  const mc = document.getElementById('mc-body');
+  
+  document.getElementById('mh-title').innerText = "End Contract & Rate Client";
+  modal.style.maxWidth = '550px';
+
+  mc.innerHTML = `
+    <div style="padding:25px">
+      <div style="text-align:center;margin-bottom:20px">
+        <div style="font-size:36px;margin-bottom:8px">🎉</div>
+        <h3 style="font-size:18px;font-weight:700;color:var(--dark);margin-bottom:6px">Congratulations on finishing your project!</h3>
+        <p style="font-size:13px;color:var(--muted2);line-height:1.5">Completing this contract changes its status to "completed" and archives it. Please rate your experience with <strong>${c.client_name}</strong> to finalize.</p>
+      </div>
+
+      <form id="freelancer-complete-form" onsubmit="submitFreelancerComplete(event, ${contractId})">
+        <!-- Star Selection -->
+        <div style="margin-bottom:20px;text-align:center">
+          <label style="display:block;font-size:12.5px;font-weight:700;color:var(--dark);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">Your Rating for Client</label>
+          <div style="display:inline-flex;flex-direction:row-reverse;justify-content:center;gap:8px" class="star-rating-selector">
+            <input type="radio" id="star5" name="rating" value="5" required style="display:none" checked><label for="star5" onclick="setSelectStars(5)" style="font-size:32px;color:#fbbf24;cursor:pointer;transition:transform .15s">★</label>
+            <input type="radio" id="star4" name="rating" value="4" style="display:none"><label for="star4" onclick="setSelectStars(4)" style="font-size:32px;color:#fbbf24;cursor:pointer;transition:transform .15s">★</label>
+            <input type="radio" id="star3" name="rating" value="3" style="display:none"><label for="star3" onclick="setSelectStars(3)" style="font-size:32px;color:#fbbf24;cursor:pointer;transition:transform .15s">★</label>
+            <input type="radio" id="star2" name="rating" value="2" style="display:none"><label for="star2" onclick="setSelectStars(2)" style="font-size:32px;color:#fbbf24;cursor:pointer;transition:transform .15s">★</label>
+            <input type="radio" id="star1" name="rating" value="1" style="display:none"><label for="star1" onclick="setSelectStars(1)" style="font-size:32px;color:#fbbf24;cursor:pointer;transition:transform .15s">★</label>
+          </div>
+          <div id="star-desc" style="font-size:12.5px;font-weight:600;color:#b45309;margin-top:6px">Excellent (5.0 / 5.0)</div>
+        </div>
+
+        <!-- Feedback comment -->
+        <div class="fg" style="margin-bottom:20px">
+          <label style="display:block;font-size:13px;font-weight:700;margin-bottom:8px;color:var(--dark)">Write a Public Review for Client</label>
+          <textarea name="feedback" required placeholder="Share your experience working with this client. Was communication clear? Were requirements defined and milestones funded promptly?" style="width:100%;padding:12px;border:1.5px solid var(--border);border-radius:10px;font-family:inherit;font-size:13.5px;outline:none;min-height:100px;resize:vertical" onfocus="this.style.borderColor='var(--g)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+        </div>
+
+        <div style="display:flex;gap:12px;margin-top:25px">
+          <button type="submit" id="btn-submit-complete" class="btn btn-g" style="flex:1.5;justify-content:center;padding:12px;font-size:14.5px;font-weight:700">Submit Review & End Contract</button>
+          <button type="button" class="btn btn-w" onclick="closeModal()" style="flex:1;justify-content:center;padding:12px;font-size:14.5px">Cancel</button>
+        </div>
+      </form>
+    </div>
+  `;
+
+  if (!document.getElementById('star-selector-style')) {
+    const s = document.createElement('style');
+    s.id = 'star-selector-style';
+    s.innerHTML = `
+      .star-rating-selector label:hover {
+        transform: scale(1.25);
+      }
+    `;
+    document.head.appendChild(s);
+  }
+};
+
+window.setSelectStars = function(stars) {
+  const labels = ['Waste of time', 'Poor experience', 'Average experience', 'Great to work with!', 'Excellent'];
+  const desc = document.getElementById('star-desc');
+  if (desc) {
+    desc.innerText = `${labels[stars - 1]} (${stars}.0 / 5.0)`;
+  }
+};
+
+window.submitFreelancerComplete = async function(event, contractId) {
+  event.preventDefault();
+  const btn = document.getElementById('btn-submit-complete');
+  const form = document.getElementById('freelancer-complete-form');
+  if (!btn || !form) return;
+
+  const originalText = btn.innerText;
+  btn.disabled = true;
+  btn.innerText = 'Closing contract...';
+
+  const formData = new FormData(form);
+  formData.append('contract_id', contractId);
+
+  try {
+    const res = await fetch(BASE_URL + 'freelancer/api/complete-contract.php', {
+      method: 'POST',
+      body: formData
+    });
+    const data = await res.json();
+    if (data.success) {
+      toast('Contract Ended! 🎓', data.message);
+      closeModal();
+      setTimeout(() => {
+        window.location.reload();
+      }, 1200);
+    } else {
+      toast('Error', data.error || 'Failed to complete contract');
+      btn.disabled = false;
+      btn.innerText = originalText;
+    }
+  } catch(err) {
+    toast('Error', 'Communication failed');
+    btn.disabled = false;
+    btn.innerText = originalText;
+  }
+};
 </script>
 </body>
 </html>

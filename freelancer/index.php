@@ -22,7 +22,8 @@ try {
         SELECT j.*, u.name as client_name, u.country as client_country, u.is_verified as client_verified,
         COALESCE((SELECT SUM(amount) FROM payments WHERE payer_id = j.client_id AND status = 'completed'), 0) as client_total_spent,
         COALESCE((SELECT COUNT(*) FROM contracts WHERE client_id = j.client_id), 0) as client_hires,
-        COALESCE((SELECT COUNT(*) FROM proposals WHERE job_id = j.id), 0) as proposal_count
+        COALESCE((SELECT COUNT(*) FROM proposals WHERE job_id = j.id), 0) as proposal_count,
+        COALESCE((SELECT AVG(rating) FROM reviews WHERE reviewee_id = j.client_id), 0.0) as client_rating
         FROM jobs j
         JOIN users u ON j.client_id = u.id
         WHERE j.status = 'open'
@@ -128,15 +129,11 @@ try {
     $completedStmt->execute([$user['id']]);
     $fStats['completed_contracts'] = (int)$completedStmt->fetchColumn() ?: 0;
 
-    // Calculate JSS (Simple logic for now: if no completed jobs, show N/A)
-    if ($fStats['completed_contracts'] === 0) {
-        $fStats['jss'] = 'N/A';
-        $fStats['is_top_rated'] = false;
-    } else {
-        // Dummy calculation for now, but could be based on ratings table later
-        $fStats['jss'] = '100%'; 
-        $fStats['is_top_rated'] = ($fStats['total_earned'] >= 1000);
-    }
+    // Calculate JSS and badge dynamically using global helper
+    $dynStats = getFreelancerStats($user['id']);
+    $fStats['jss'] = $dynStats['jss'];
+    $fStats['badge'] = $dynStats['badge'];
+    $fStats['is_top_rated'] = ($dynStats['badge'] === 'top_rated' || $dynStats['badge'] === 'top_rated_plus' || $dynStats['badge'] === 'expert_vetted');
 
     // Transactions (Payments) with virtual type and description
     $transactionsStmt = $db->prepare("
@@ -309,7 +306,13 @@ include __DIR__ . '/includes/header.php';
       </div>
       <div style="min-width:0">
         <div class="sb-name"><?php echo htmlspecialchars($user['name'] ?? 'Chirag'); ?></div>
-        <div class="sb-role">Freelancer</div>
+        <div class="sb-role">
+          <?php if (!empty($fStats['badge'])): ?>
+            <span style="color:#c8f135;font-weight:700;font-size:10px">✦ <?php echo htmlspecialchars($dynStats['badge_label']); ?></span>
+          <?php else: ?>
+            Freelancer
+          <?php endif; ?>
+        </div>
       </div>
     </div>
     <div class="sb-stats">

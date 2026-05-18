@@ -65,7 +65,12 @@ try {
         }
 
         $grossAmount = $totalHours * $hourlyRate;
-        $platformFee = $grossAmount * 0.10; // 10% standard fee
+        $freelancerFeePercent = getPlatformSetting('freelancer_fee_hourly', 10);
+        $clientFeePercent = getPlatformSetting('client_fee_hourly', 0);
+        
+        $clientFee = $grossAmount * ($clientFeePercent / 100);
+        $totalClientCharge = $grossAmount + $clientFee;
+        $platformFee = $grossAmount * ($freelancerFeePercent / 100);
         $netAmount = $grossAmount - $platformFee;
 
         if ($grossAmount <= 0) {
@@ -73,7 +78,7 @@ try {
         }
 
         // Check if client has sufficient balance
-        if ($contract['client_balance'] < $grossAmount) {
+        if ($contract['client_balance'] < $totalClientCharge) {
             // Insufficient Balance - Pause contract and notify! (Just like Upwork)
             $pauseStmt = $db->prepare("UPDATE contracts SET status = 'paused' WHERE id = ?");
             $pauseStmt->execute([$contractId]);
@@ -84,6 +89,7 @@ try {
                 'client_id' => $clientId,
                 'logged_hours' => $totalHours,
                 'gross_amount' => $grossAmount,
+                'total_client_charge' => $totalClientCharge,
                 'message' => 'Contract paused due to client billing issues.'
             ];
             continue;
@@ -91,7 +97,7 @@ try {
 
         // 3. Charge the client's wallet balance
         $chargeStmt = $db->prepare("UPDATE users SET balance = balance - ? WHERE id = ?");
-        $chargeStmt->execute([$grossAmount, $clientId]);
+        $chargeStmt->execute([$totalClientCharge, $clientId]);
 
         // 4. Create transaction log with status = 'pending' (moves to freelancer's Processing hold card)
         $transactionId = 'TXN-' . strtoupper(uniqid());
@@ -99,7 +105,7 @@ try {
             INSERT INTO payments (transaction_id, payer_id, payee_id, job_id, amount, platform_fee, status, payment_method, description) 
             VALUES (?, ?, ?, ?, ?, ?, 'pending', 'Hourly Billing', ?)
         ");
-        $description = sprintf("Hourly payment for %s (%.2f hrs tracked)", $contract['freelancer_name'], $totalHours);
+        $description = sprintf("Hourly payment for %s (%.2f hrs tracked) + service fee", $contract['freelancer_name'], $totalHours);
         $pStmt->execute([
             $transactionId,
             $clientId,

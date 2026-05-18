@@ -61,7 +61,8 @@ try {
     // 2. Create payment record for the freelancer with status 'pending' (security hold) and deduct fee
     $transactionId = 'TXN-' . strtoupper(uniqid());
     $amount = (float)$milestone['amount'];
-    $fee = $amount * 0.10; // 10% platform fee
+    $feePercent = getPlatformSetting('freelancer_fee_fixed', 10);
+    $fee = $amount * ($feePercent / 100);
     $netAmount = $amount - $fee;
 
     $pStmt = $db->prepare("
@@ -79,6 +80,19 @@ try {
 
     // 3. Do NOT credit available balance immediately. Funds will sit in security hold (pending) 
     // until freelancer or admin clears the hold.
+
+    // 4. Send automated chat message to the freelancer
+    $msgText = "AUTOMATED MESSAGE: The client has accepted and approved your milestone **" . htmlspecialchars($milestone['description']) . "** ($" . number_format($amount, 2) . "). Payment has been released.";
+    $sendMsgStmt = $db->prepare("
+        INSERT INTO messages (sender_id, receiver_id, job_id, message, is_read)
+        VALUES (?, ?, ?, ?, 0)
+    ");
+    $sendMsgStmt->execute([
+        $user['id'], 
+        $milestone['freelancer_id'], 
+        $milestone['job_id'], 
+        $msgText
+    ]);
 
     $db->commit();
     echo json_encode(['success' => true, 'message' => 'Milestone approved! Payments released to security hold (Pending).']);

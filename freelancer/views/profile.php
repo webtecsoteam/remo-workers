@@ -1,3 +1,18 @@
+<?php
+// Query all reviews given to this freelancer from the database dynamically
+$db = getDB();
+$reviewsQuery = $db->prepare("
+    SELECT r.*, j.title as job_title, u.name as client_name, u.country as client_country
+    FROM reviews r
+    JOIN contracts c ON r.contract_id = c.id
+    JOIN jobs j ON c.job_id = j.id
+    JOIN users u ON r.reviewer_id = u.id
+    WHERE r.reviewee_id = ?
+    ORDER BY r.created_at DESC
+");
+$reviewsQuery->execute([$user['id']]);
+$allReviews = $reviewsQuery->fetchAll(PDO::FETCH_ASSOC);
+?>
 <!-- PROFILE -->
 <div class="page" id="page-profile">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
@@ -32,8 +47,17 @@
                 <span id="field-location" style="font-size:13.5px;color:var(--muted)"><?php echo htmlspecialchars($user['country'] ?: 'Global'); ?></span>
               </div>
               <div style="display:flex;gap:6px;flex-wrap:wrap">
-                <?php if ($fStats['is_top_rated']): ?>
+                <?php 
+                  $dynStats = getFreelancerStats($user['id']);
+                  if ($dynStats['badge'] === 'expert_vetted'): 
+                ?>
+                  <span class="badge b-purple">⭐ Expert Vetted</span>
+                <?php elseif ($dynStats['badge'] === 'top_rated_plus'): ?>
                   <span class="badge b-green">✦ Top Rated Plus</span>
+                <?php elseif ($dynStats['badge'] === 'top_rated'): ?>
+                  <span class="badge b-green">✦ Top Rated</span>
+                <?php elseif ($dynStats['badge'] === 'rising_talent'): ?>
+                  <span class="badge b-blue">↑ Rising Talent</span>
                 <?php endif; ?>
                 <span class="badge <?php echo $user['is_verified'] ? 'b-green' : 'b-gray'; ?>">✓ <?php echo $user['is_verified'] ? 'ID Verified' : 'Unverified'; ?></span>
                 
@@ -46,7 +70,7 @@
                   if ($avail === 'unavailable') { $availLabel = 'Unavailable'; $availDot = '🔴'; $availClass = 'b-gray'; }
                 ?>
                 <span class="badge <?php echo $availClass; ?>"><?php echo $availDot; ?> <?php echo $availLabel; ?></span>
-                <span class="badge b-gray">★ 0.0 · <?php echo $fStats['completed_contracts']; ?> reviews</span>
+                <span class="badge b-gray">★ <?php echo $dynStats['rating']; ?> · <?php echo $dynStats['reviews_count']; ?> reviews</span>
               </div>
             </div>
             <div style="display:flex;gap:12px;flex-shrink:0">
@@ -123,6 +147,45 @@
             <div style="font-size:11.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">✨ Suggested for you</div>
             <div id="suggested-skills-row" style="display:flex;flex-wrap:wrap;gap:8px"></div>
           </div>
+        </div>
+      </div>
+      <!-- Work History & Client Reviews -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-head" style="border-bottom:1px solid var(--border);padding-bottom:14px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <h3>Work History & Client Reviews (<?php echo count($allReviews); ?>)</h3>
+          </div>
+        </div>
+        <div class="card-body" style="padding:0">
+          <?php if (empty($allReviews)): ?>
+            <div style="text-align:center;padding:35px 20px;color:var(--muted);font-size:13.5px">
+              <div style="font-size:32px;margin-bottom:10px">⭐</div>
+              <strong>No client feedback recorded yet.</strong><br>
+              <span style="font-size:12px;color:var(--muted2);display:inline-block;margin-top:4px">Completed contracts with mutual ratings will appear here.</span>
+            </div>
+          <?php else: ?>
+            <div style="display:flex;flex-direction:column">
+              <?php foreach ($allReviews as $rev): 
+                $stars = str_repeat('★', (int)round($rev['rating'])) . str_repeat('☆', 5 - (int)round($rev['rating']));
+                $formattedDate = date('M d, Y', strtotime($rev['created_at']));
+              ?>
+                <div style="padding:20px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:8px">
+                  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+                    <h4 style="margin:0;font-size:14px;color:var(--dark);font-weight:700"><?php echo htmlspecialchars($rev['job_title']); ?></h4>
+                    <span style="font-size:13px;font-weight:700;color:#b45309;white-space:nowrap"><?php echo $stars; ?> <?php echo number_format($rev['rating'], 1); ?></span>
+                  </div>
+                  <p style="margin:0;font-size:13px;line-height:1.6;color:var(--dark3);font-style:italic">
+                    "<?php echo htmlspecialchars($rev['feedback'] ?: 'No comment provided.'); ?>"
+                  </p>
+                  <div style="display:flex;gap:10px;font-size:11.5px;color:var(--muted2)">
+                    <span>By <?php echo htmlspecialchars($rev['client_name']); ?> (📍 <?php echo htmlspecialchars($rev['client_country'] ?: 'Global'); ?>)</span>
+                    <span>·</span>
+                    <span><?php echo $formattedDate; ?></span>
+                  </div>
+                </div>
+              <?php endforeach; ?>
+            </div>
+          <?php endif; ?>
         </div>
       </div>
     </div>

@@ -42,10 +42,23 @@ try {
     $updateStmt->execute([$action, $log_id]);
 
     if ($action === 'approved') {
-        // Calculate platform fee (10%)
+        // Calculate platform fee
         $amount = (float)$log['amount'];
-        $fee = $amount * 0.10;
+        $freelancerFeePercent = getPlatformSetting('freelancer_fee_hourly', 10);
+        $clientFeePercent = getPlatformSetting('client_fee_hourly', 0);
+        
+        $clientFee = $amount * ($clientFeePercent / 100);
+        $totalClientCharge = $amount + $clientFee;
+        $fee = $amount * ($freelancerFeePercent / 100);
         $netAmount = $amount - $fee;
+
+        // Verify client balance
+        $balanceStmt = $db->prepare("SELECT balance FROM users WHERE id = ? FOR UPDATE");
+        $balanceStmt->execute([$log['client_id']]);
+        $clientBalance = (float)$balanceStmt->fetchColumn();
+        if ($clientBalance < $totalClientCharge) {
+            throw new Exception('Insufficient wallet balance. Required: $' . number_format($totalClientCharge, 2));
+        }
 
         // Create payment
         $payStmt = $db->prepare("
@@ -64,9 +77,9 @@ try {
         ]);
 
         // Update balances
-        // Deduct full amount from client
+        // Deduct total charge from client
         $dStmt = $db->prepare("UPDATE users SET balance = balance - ? WHERE id = ?");
-        $dStmt->execute([$amount, $log['client_id']]);
+        $dStmt->execute([$totalClientCharge, $log['client_id']]);
 
         // Add net amount to freelancer
         $fStmt = $db->prepare("UPDATE users SET balance = balance + ? WHERE id = ?");
