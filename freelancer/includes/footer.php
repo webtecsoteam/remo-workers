@@ -421,8 +421,8 @@
                       : `Fixed Price: $${parseFloat(j.budget || 0).toLocaleString()}`
                     )
                 }
-              </span>
               <span style="background:#f3f4f6;color:var(--dark3);font-size:11.5px;padding:3px 10px;border-radius:6px;font-weight:600">${parseInt(j.proposal_count, 10) || 0} proposal${(parseInt(j.proposal_count, 10) || 0) === 1 ? '' : 's'}</span>
+              <span style="background:#edf2f7;color:#2d3748;font-size:11.5px;padding:3px 10px;border-radius:6px;font-weight:600;display:inline-flex;align-items:center;gap:4px">🤝 ${parseInt(j.project_hires, 10) || 0} hired</span>
             </div>
           </div>
 
@@ -621,6 +621,18 @@
                 <span style="color:var(--g);font-weight:700">${userConnectsBalance} Connects</span>
               </div>
             </div>
+
+            <div style="background:#f8fafc;padding:20px;border-radius:12px;border:1px solid #e2e8f0;margin-top:15px">
+              <div style="font-weight:700;font-size:13.5px;color:var(--dark);margin-bottom:12px">Activity on this job</div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:10px;font-size:13px">
+                <span style="color:var(--muted2)">Proposals:</span>
+                <span style="font-weight:600;color:var(--dark)">${parseInt(job.proposal_count, 10) || 0}</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:13px">
+                <span style="color:var(--muted2)">Hired:</span>
+                <span style="font-weight:600;color:var(--dark)">${parseInt(job.project_hires, 10) || 0} freelancer${(parseInt(job.project_hires, 10) || 0) === 1 ? '' : 's'}</span>
+              </div>
+            </div>
           </div>
 
           <div style="padding:30px;background:#f9fafb">
@@ -696,29 +708,7 @@
 
         <div style="margin-bottom:20px">
           <label style="display:block;font-weight:700;margin-bottom:8px;font-size:14px">${labelText}</label>
-          <input type="number" id="prop-rate" value="${defaultRate || 0}" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-size:14px" oninput="updateMilestoneTotal()">
-        </div>
-
-        <div id="milestones-section" style="margin-bottom:25px;border:1px solid var(--border);padding:15px;border-radius:12px;background:#fafafa; display: ${showMilestones ? 'block' : 'none'}">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px">
-            <label style="font-weight:700;font-size:14px">Milestones</label>
-            <button class="btn btn-w btn-sm" onclick="addMilestoneRow()" style="font-size:12px;padding:4px 10px">+ Add Milestone</button>
-          </div>
-          <div id="milestones-list-container">
-            <div class="milestone-row" style="display:grid;grid-template-columns:1fr 100px 30px;gap:10px;margin-bottom:10px">
-              <input type="text" placeholder="Description (e.g. Initial Draft)" class="ms-desc" style="padding:8px;border:1px solid var(--border);border-radius:6px;font-size:13px">
-              <input type="number" placeholder="Amount" class="ms-amount" value="${defaultRate || 0}" style="padding:8px;border:1px solid var(--border);border-radius:6px;font-size:13px" oninput="updateMilestoneTotal()">
-              <button onclick="this.parentElement.remove();updateMilestoneTotal()" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:16px">×</button>
-            </div>
-          </div>
-          <div style="font-size:12px;color:var(--muted2);margin-top:10px;display:flex;justify-content:space-between">
-            <span>Total Milestone Amount: <strong id="ms-total-display">$${defaultRate || 0}</strong></span>
-          </div>
-        </div>
-
-        <div style="margin-bottom:20px">
-          <label style="display:block;font-weight:700;margin-bottom:8px;font-size:14px">Estimated Delivery (days)</label>
-          <input type="number" id="prop-days" value="7" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-size:14px">
+          <input type="number" id="prop-rate" value="${defaultRate || 0}" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-size:14px">
         </div>
 
         <div style="margin-bottom:20px">
@@ -775,42 +765,19 @@
 
   window.submitProposalForm = function(jobId) {
     const rate = document.getElementById('prop-rate').value;
-    const days = document.getElementById('prop-days').value;
     const letter = document.getElementById('prop-letter').value;
     const attach = document.getElementById('prop-attach').value;
 
+    if (!rate || parseFloat(rate) <= 0) return toast('Error', 'Please enter a valid rate');
     if (!letter) return toast('Error', 'Please write a cover letter');
-
-    const job = JOBS.find(j => j.id == jobId);
-    const isHourly = job && job.budget_type === 'hourly';
-
-    // Collect milestones (only if not hourly)
-    const milestones = [];
-    let msTotal = 0;
-    
-    if (!isHourly) {
-      const rows = document.querySelectorAll('.milestone-row');
-      rows.forEach(row => {
-        const desc = row.querySelector('.ms-desc').value.trim();
-        const amt = parseFloat(row.querySelector('.ms-amount').value || 0);
-        if (desc && amt > 0) {
-          milestones.push({ description: desc, amount: amt });
-          msTotal += amt;
-        }
-      });
-
-      if (milestones.length === 0) {
-        return toast('Error', 'Please add at least one milestone');
-      }
-    }
 
     const payload = {
         job_id: jobId,
-        bid_amount: isHourly ? parseFloat(rate || 0) : msTotal,
-        estimated_days: days,
+        bid_amount: parseFloat(rate || 0),
+        estimated_days: 7,
         cover_letter: letter,
         attachments: attach,
-        milestones: milestones
+        milestones: []
     };
     console.log('Submitting proposal:', payload);
 

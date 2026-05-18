@@ -23,10 +23,11 @@ try {
         COALESCE((SELECT SUM(amount) FROM payments WHERE payer_id = j.client_id AND status = 'completed'), 0) as client_total_spent,
         COALESCE((SELECT COUNT(*) FROM contracts WHERE client_id = j.client_id), 0) as client_hires,
         COALESCE((SELECT COUNT(*) FROM proposals WHERE job_id = j.id), 0) as proposal_count,
-        COALESCE((SELECT AVG(rating) FROM reviews WHERE reviewee_id = j.client_id), 0.0) as client_rating
+        COALESCE((SELECT AVG(rating) FROM reviews WHERE reviewee_id = j.client_id), 0.0) as client_rating,
+        COALESCE((SELECT COUNT(*) FROM contracts WHERE job_id = j.id), 0) as project_hires
         FROM jobs j
         JOIN users u ON j.client_id = u.id
-        WHERE j.status = 'open'
+        WHERE j.status IN ('open', 'in_progress')
         ORDER BY j.created_at DESC
     ");
     if ($allJobsStmt) {

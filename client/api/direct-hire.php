@@ -34,8 +34,8 @@ if (!$freelancer) {
     exit;
 }
 
-// 2. Verify job exists, is open and belongs to this client
-$jobStmt = $db->prepare("SELECT * FROM jobs WHERE id = ? AND client_id = ? AND status = 'open'");
+// 2. Verify job exists, is open/active and belongs to this client
+$jobStmt = $db->prepare("SELECT * FROM jobs WHERE id = ? AND client_id = ? AND status IN ('open', 'in_progress')");
 $jobStmt->execute([$jobId, $user['id']]);
 $job = $jobStmt->fetch();
 if (!$job) {
