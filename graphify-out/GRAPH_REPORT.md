@@ -1,16 +1,16 @@
 # Graph Report - upwork project  (2026-05-18)
 
 ## Corpus Check
-- 118 files · ~499,464 words
+- 200 files · ~548,422 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 663 nodes · 750 edges · 169 communities (157 shown, 12 thin omitted)
-- Extraction: 92% EXTRACTED · 8% INFERRED · 0% AMBIGUOUS · INFERRED: 60 edges (avg confidence: 0.8)
+- 1082 nodes · 1333 edges · 261 communities (236 shown, 25 thin omitted)
+- Extraction: 92% EXTRACTED · 8% INFERRED · 0% AMBIGUOUS · INFERRED: 103 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `fee55ca9`
+- Built from commit: `7e4064d0`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -45,22 +45,43 @@
 - [[_COMMUNITY_Community 160|Community 160]]
 - [[_COMMUNITY_Community 161|Community 161]]
 - [[_COMMUNITY_Community 166|Community 166]]
+- [[_COMMUNITY_Community 169|Community 169]]
+- [[_COMMUNITY_Community 170|Community 170]]
+- [[_COMMUNITY_Community 171|Community 171]]
+- [[_COMMUNITY_Community 174|Community 174]]
+- [[_COMMUNITY_Community 175|Community 175]]
+- [[_COMMUNITY_Community 176|Community 176]]
+- [[_COMMUNITY_Community 177|Community 177]]
+- [[_COMMUNITY_Community 178|Community 178]]
+- [[_COMMUNITY_Community 179|Community 179]]
+- [[_COMMUNITY_Community 180|Community 180]]
+- [[_COMMUNITY_Community 183|Community 183]]
+- [[_COMMUNITY_Community 184|Community 184]]
+- [[_COMMUNITY_Community 185|Community 185]]
+- [[_COMMUNITY_Community 186|Community 186]]
+- [[_COMMUNITY_Community 187|Community 187]]
+- [[_COMMUNITY_Community 188|Community 188]]
+- [[_COMMUNITY_Community 189|Community 189]]
+- [[_COMMUNITY_Community 190|Community 190]]
+- [[_COMMUNITY_Community 191|Community 191]]
+- [[_COMMUNITY_Community 192|Community 192]]
+- [[_COMMUNITY_Community 193|Community 193]]
+- [[_COMMUNITY_Community 194|Community 194]]
+- [[_COMMUNITY_Community 195|Community 195]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `toast()` - 18 edges
-2. `toast()` - 15 edges
-3. `job` - 13 edges
-4. `now` - 13 edges
-5. `Auth` - 12 edges
-6. `getDB()` - 11 edges
-7. `UserController` - 10 edges
-8. `ApiService` - 10 edges
-9. `JobController` - 8 edges
-10. `openModal()` - 8 edges
+1. `PHPMailer` - 130 edges
+2. `SMTP` - 44 edges
+3. `empty` - 35 edges
+4. `ClassLoader` - 26 edges
+5. `toast()` - 18 edges
+6. `InstalledVersions` - 16 edges
+7. `toast()` - 16 edges
+8. `PHPMailer – A full-featured email creation and transfer class for PHP` - 16 edges
+9. `job` - 13 edges
+10. `POP3` - 13 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `submitVerification()` --calls--> `toast()`  [INFERRED]
-  scratch/verification_test_linter.js → freelancer/includes/footer_test.js
 - `sendMsg()` --calls--> `toast()`  [INFERRED]
   scratch/simulated_footer.js → freelancer/includes/footer_test.js
 - `requestMilestone()` --calls--> `toast()`  [INFERRED]
@@ -69,20 +90,22 @@
   scratch/verification_test_linter.js → freelancer/includes/footer_test.js
 - `handleVFileInput()` --calls--> `toast()`  [INFERRED]
   scratch/verification_test_linter.js → freelancer/includes/footer_test.js
+- `validateAndGoStep3()` --calls--> `toast()`  [INFERRED]
+  scratch/verification_test_linter.js → freelancer/includes/footer_test.js
 
-## Communities (169 total, 12 thin omitted)
+## Communities (261 total, 25 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.12
 Nodes (34): activateUser(), api, ApiService, approveJob(), closeJob(), deleteJob(), deleteUser(), exportReport() (+26 more)
 
 ### Community 1 - "Community 1"
-Cohesion: 0.13
-Nodes (34): arr, checkAndApply(), checkPwMatch(), checkPwStrength(), CLIENTS, closeModal(), closeSkillSelector(), EARNINGS_INFO (+26 more)
+Cohesion: 0.09
+Nodes (45): arr, checkAndApply(), checkPwMatch(), checkPwStrength(), CLIENTS, closeModal(), closeSkillSelector(), EARNINGS_INFO (+37 more)
 
 ### Community 2 - "Community 2"
 Cohesion: 0.07
-Nodes (10): AuthController, DashboardController, JobController, PaymentController, ReportController, UserController, now, sendMsg() (+2 more)
+Nodes (9): AuthController, DashboardController, JobController, PaymentController, ReportController, UserController, now, sendMsg() (+1 more)
 
 ### Community 3 - "Community 3"
 Cohesion: 0.06
@@ -93,12 +116,12 @@ Cohesion: 0.05
 Nodes (21): addNewBalEl, addTotalEl, backdrop, balEl, btn, c, cardSection, current (+13 more)
 
 ### Community 5 - "Community 5"
-Cohesion: 0.14
-Nodes (12): Auth, baseUrl(), ensureFreelancerSchema(), ensurePlatformSettingsTable(), env(), getDB(), getFreelancerStats(), getPlatformSetting() (+4 more)
+Cohesion: 0.12
+Nodes (12): Auth, Mailer, baseUrl(), ensureFreelancerSchema(), ensurePlatformSettingsTable(), env(), getDB(), getFreelancerStats() (+4 more)
 
 ### Community 6 - "Community 6"
 Cohesion: 0.04
-Nodes (50): amounts, amt, badge, bioEl, btn, c, catCol, col (+42 more)
+Nodes (48): amounts, amt, badge, bioEl, btn, c, catCol, col (+40 more)
 
 ### Community 7 - "Community 7"
 Cohesion: 0.02
@@ -140,29 +163,69 @@ Nodes (4): closeModal(), confirmFundMilestone(), submitCompleteJob(), unlockBody
 Cohesion: 0.67
 Nodes (3): loadChat(), renderChatWindow(), startChatPolling()
 
-### Community 166 - "Community 166"
-Cohesion: 0.24
-Nodes (9): buildVReview(), checkVStep2Ready(), clearVFile(), handleVDrop(), handleVFileInput(), submitVerification(), switchVStep(), validateAndGoStep3() (+1 more)
+### Community 171 - "Community 171"
+Cohesion: 0.08
+Nodes (25): A Simple Example, Changelog, code:json ("phpmailer/phpmailer": "^7.0.0"), code:sh (composer require phpmailer/phpmailer), code:php (<?php), code:php (<?php), code:php (//To load the French version), code:sh (git remote set-url upstream https://github.com/PHPMailer/PHP) (+17 more)
+
+### Community 176 - "Community 176"
+Cohesion: 0.17
+Nodes (12): suggest, decomplexity/SendOauth2, directorytree/imapengine, ext-imap, ext-mbstring, ext-openssl, greew/oauth2-azure-provider, hayageek/oauth2-yahoo (+4 more)
+
+### Community 177 - "Community 177"
+Cohesion: 0.22
+Nodes (8): authors, description, funding, license, minimum-stability, name, prefer-stable, type
+
+### Community 180 - "Community 180"
+Cohesion: 0.25
+Nodes (8): require-dev, dealerdirect/phpcodesniffer-composer-installer, doctrine/annotations, php-parallel-lint/php-console-highlighter, php-parallel-lint/php-parallel-lint, phpcompatibility/php-compatibility, squizlabs/php_codesniffer, yoast/phpunit-polyfills
+
+### Community 183 - "Community 183"
+Cohesion: 0.29
+Nodes (6): A short history of UTF-8 in email, Background, code:block1 (Subject: =?utf-8?Q=Schr=C3=B6dinger=92s_Cat?=), Postfix gotcha, SMTPUTF8, SMTPUTF8 in PHPMailer
+
+### Community 184 - "Community 184"
+Cohesion: 0.33
+Nodes (6): scripts, check, coverage, lint, style, test
+
+### Community 186 - "Community 186"
+Cohesion: 0.4
+Nodes (5): require, ext-ctype, ext-filter, ext-hash, php
+
+### Community 188 - "Community 188"
+Cohesion: 0.5
+Nodes (3): dev, dev-package-names, packages
+
+### Community 189 - "Community 189"
+Cohesion: 0.5
+Nodes (4): dealerdirect/phpcodesniffer-composer-installer, config, allow-plugins, lock
+
+### Community 192 - "Community 192"
+Cohesion: 0.67
+Nodes (3): autoload, psr-4, PHPMailer\\PHPMailer\\
+
+### Community 193 - "Community 193"
+Cohesion: 0.67
+Nodes (3): autoload-dev, psr-4, PHPMailer\\Test\\
 
 ## Knowledge Gaps
-- **200 isolated node(s):** `vFiles`, `JOBS`, `SAVED_IDS`, `PROPOSALS`, `CONTRACTS` (+195 more)
+- **265 isolated node(s):** `phpmailer/phpmailer`, `vFiles`, `JOBS`, `SAVED_IDS`, `PROPOSALS` (+260 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **12 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **25 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
+- **Why does `empty` connect `Community 174` to `Community 5`, `Community 166`, `Community 6`, `Community 169`, `Community 172`, `Community 173`, `Community 175`, `Community 178`, `Community 181`, `Community 182`?**
+  _High betweenness centrality (0.119) - this node is a cross-community bridge._
 - **Why does `now` connect `Community 2` to `Community 7`?**
-  _High betweenness centrality (0.124) - this node is a cross-community bridge._
-- **Why does `job` connect `Community 2` to `Community 6`?**
-  _High betweenness centrality (0.082) - this node is a cross-community bridge._
-- **Why does `toast()` connect `Community 1` to `Community 166`, `Community 6`?**
-  _High betweenness centrality (0.040) - this node is a cross-community bridge._
-- **Are the 6 inferred relationships involving `toast()` (e.g. with `switchVStep()` and `handleVFileInput()`) actually correct?**
-  _`toast()` has 6 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 12 inferred relationships involving `job` (e.g. with `.stats()` and `.recentActivity()`) actually correct?**
-  _`job` has 12 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 11 inferred relationships involving `now` (e.g. with `.verify()` and `.revenueChart()`) actually correct?**
-  _`now` has 11 INFERRED edges - model-reasoned connections that need verification._
-- **What connects `vFiles`, `JOBS`, `SAVED_IDS` to the rest of the system?**
-  _200 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _High betweenness centrality (0.109) - this node is a cross-community bridge._
+- **Why does `PHPMailer` connect `Community 166` to `Community 172`, `Community 173`, `Community 174`, `Community 178`, `Community 181`, `Community 182`?**
+  _High betweenness centrality (0.084) - this node is a cross-community bridge._
+- **Are the 34 inferred relationships involving `empty` (e.g. with `getFreelancerStats()` and `.isEmailVerified()`) actually correct?**
+  _`empty` has 34 INFERRED edges - model-reasoned connections that need verification._
+- **What connects `phpmailer/phpmailer`, `vFiles`, `JOBS` to the rest of the system?**
+  _265 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Should `Community 0` be split into smaller, more focused modules?**
+  _Cohesion score 0.12 - nodes in this community are weakly interconnected._
+- **Should `Community 1` be split into smaller, more focused modules?**
+  _Cohesion score 0.09 - nodes in this community are weakly interconnected._

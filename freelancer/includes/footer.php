@@ -561,9 +561,8 @@
     })
     .then(function(res) { return res.json(); })
     .then(function(data) {
-      if (data.success && data.verify_url) {
-        toast('Verify your email', 'Opening verification link…');
-        window.open(data.verify_url, '_blank');
+      if (data.success) {
+        toast('Email Sent! 📧', data.message || 'Please check your inbox to verify.');
       } else if (data.already) {
         toast('Email verified', data.message);
         location.reload();
