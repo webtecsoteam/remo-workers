@@ -102,13 +102,23 @@ function ensureFreelancerSchema() {
     static $done = false;
     if ($done) return;
     $db = getDB();
-    $alters = [
-        "ALTER TABLE users ADD COLUMN IF NOT EXISTS connects INT NOT NULL DEFAULT 0",
-        "ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified_at TIMESTAMP NULL",
-        "ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verification_token VARCHAR(64) NULL",
-    ];
-    foreach ($alters as $sql) {
-        try { $db->exec($sql); } catch (PDOException $e) { /* column may already exist */ }
+    
+    try {
+        $cols = $db->query("DESCRIBE users")->fetchAll(PDO::FETCH_COLUMN);
+        
+        if (!in_array('connects', $cols)) {
+            $db->exec("ALTER TABLE users ADD COLUMN connects INT NOT NULL DEFAULT 50");
+        }
+        if (!in_array('email_verified_at', $cols)) {
+            $db->exec("ALTER TABLE users ADD COLUMN email_verified_at TIMESTAMP NULL");
+        }
+        if (!in_array('email_verification_token', $cols)) {
+            $db->exec("ALTER TABLE users ADD COLUMN email_verification_token VARCHAR(64) NULL");
+        }
+    } catch (PDOException $e) {
+        if (defined('APP_DEBUG') && APP_DEBUG) {
+            error_log("Freelancer Schema Check/Migration failed: " . $e->getMessage());
+        }
     }
     
     // Self-healing reviews table initialization

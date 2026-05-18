@@ -29,6 +29,16 @@ try {
         $db->exec("ALTER TABLE users ADD COLUMN connects INT NOT NULL DEFAULT 50 AFTER balance");
     }
 
+    if (!in_array('email_verified_at', $cols)) {
+        echo "Adding email_verified_at column to users...\n";
+        $db->exec("ALTER TABLE users ADD COLUMN email_verified_at TIMESTAMP NULL AFTER email");
+    }
+
+    if (!in_array('email_verification_token', $cols)) {
+        echo "Adding email_verification_token column to users...\n";
+        $db->exec("ALTER TABLE users ADD COLUMN email_verification_token VARCHAR(64) NULL AFTER email_verified_at");
+    }
+
     echo "Database repair completed successfully!\n";
 } catch (PDOException $e) {
     die("Database repair failed: " . $e->getMessage() . "\n");
