@@ -118,7 +118,7 @@ button{font-family:inherit;cursor:pointer}
 
 
 /* ── MAIN ── */
-.main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh;width:100%;max-width:100%}
+.main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh;width:calc(100% - var(--sidebar-w));max-width:calc(100% - var(--sidebar-w));min-width:0}
 
 
 /* ── TOPBAR ── */
@@ -312,8 +312,9 @@ button{font-family:inherit;cursor:pointer}
 .progress-fill{height:100%;background:var(--uw-green);border-radius:50px;transition:width .3s}
 
 /* ── TABS ── */
-.tab-bar{display:flex;gap:0;border-bottom:2px solid var(--uw-border);margin-bottom:18px}
-.tab{padding:9px 18px;font-size:13px;font-weight:600;color:var(--uw-gray);cursor:pointer;border-bottom:2.5px solid transparent;margin-bottom:-2px;transition:all .15s}
+.tab-bar{display:flex;gap:0;border-bottom:2px solid var(--uw-border);margin-bottom:18px;overflow-x:auto;-webkit-overflow-scrolling:touch;flex-wrap:nowrap;scrollbar-width:none}
+.tab-bar::-webkit-scrollbar{display:none}
+.tab{padding:9px 18px;font-size:13px;font-weight:600;color:var(--uw-gray);cursor:pointer;border-bottom:2.5px solid transparent;margin-bottom:-2px;transition:all .15s;white-space:nowrap}
 .tab:hover{color:var(--uw-dark)}
 .tab.on{color:var(--uw-green);border-bottom-color:var(--uw-green)}
 
@@ -663,7 +664,7 @@ body.modal-open{
 
 
   /* ── main fills full width ── */
-  .main{margin-left:0}
+  .main{margin-left:0;width:100%;max-width:100%}
 
   /* ── bottom nav visible ── */
   .mob-bottom-nav{display:block}

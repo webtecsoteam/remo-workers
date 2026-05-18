@@ -1,16 +1,16 @@
 # Graph Report - upwork project  (2026-05-18)
 
 ## Corpus Check
-- 117 files · ~499,483 words
+- 118 files · ~499,464 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 661 nodes · 749 edges · 168 communities (156 shown, 12 thin omitted)
+- 663 nodes · 750 edges · 169 communities (157 shown, 12 thin omitted)
 - Extraction: 92% EXTRACTED · 8% INFERRED · 0% AMBIGUOUS · INFERRED: 60 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `621f2959`
+- Built from commit: `fee55ca9`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -70,7 +70,7 @@
 - `handleVFileInput()` --calls--> `toast()`  [INFERRED]
   scratch/verification_test_linter.js → freelancer/includes/footer_test.js
 
-## Communities (168 total, 12 thin omitted)
+## Communities (169 total, 12 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.12

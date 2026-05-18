@@ -2209,6 +2209,24 @@
       "norm_label": "update_contract_status.php"
     },
     {
+      "label": "delete_job.php",
+      "file_type": "code",
+      "source_file": "actions/delete_job.php",
+      "source_location": "L1",
+      "id": "actions_delete_job_php",
+      "community": 168,
+      "norm_label": "delete_job.php"
+    },
+    {
+      "label": "json_response()",
+      "file_type": "code",
+      "source_file": "actions/delete_job.php",
+      "source_location": "L7",
+      "id": "actions_delete_job_json_response",
+      "community": 168,
+      "norm_label": "json_response()"
+    },
+    {
       "label": "register.php",
       "file_type": "code",
       "source_file": "actions/register.php",
@@ -9699,6 +9717,16 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "actions/delete_job.php",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "actions_delete_job_php",
+      "target": "actions_delete_job_json_response",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "actions/update_service.php",
       "source_location": "L7",
       "weight": 1.0,
@@ -13625,5 +13653,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "621f29598d9e20cf6ca8274c9c4930a80c571ca6"
+  "built_at_commit": "fee55ca9ddb5488b277b9d6065c46a1b25fbfb41"
 }

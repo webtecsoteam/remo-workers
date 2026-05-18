@@ -621,6 +621,8 @@ function viewJobDetails(job) {
     `;
   }
 
+  let deleteButton = `<button class="btn btn-w" style="flex:1;justify-content:center;color:#ef4444;border-color:#fecaca" onclick="deleteJob(${job.id})">🗑️ Delete</button>`;
+
   MODALS['view-job'] = {
     t: job.title,
     b: `
@@ -643,6 +645,7 @@ function viewJobDetails(job) {
       <div style="font-size:13px;color:#374151;line-height:1.7;margin-bottom:14px">${job.description}</div>
       <div style="display:flex;gap:8px;margin-top:16px;margin-bottom:24px">
         ${actionButtons}
+        ${deleteButton}
       </div>
     `
   };
@@ -747,6 +750,32 @@ async function toggleJobStatus(jobId, newStatus) {
       setTimeout(() => location.reload(), 1000);
     } else {
       toast('Error', result.error || 'Failed to update status');
+    }
+  } catch(err) {
+    toast('Error', 'An unexpected error occurred.');
+  }
+}
+
+async function deleteJob(jobId) {
+  if (!confirm("Are you sure you want to completely delete this job post? This will also remove any received proposals and cannot be undone.")) {
+    return;
+  }
+  toast('Deleting...', 'Removing job post...');
+  const formData = new FormData();
+  formData.append('job_id', jobId);
+
+  try {
+    const res = await fetch(BASE_URL + 'actions/delete_job.php', {
+      method: 'POST',
+      body: formData
+    });
+    const result = await res.json();
+    if(result.success) {
+      toast('Deleted! 🗑️', result.message);
+      closeModal();
+      setTimeout(() => location.reload(), 1000);
+    } else {
+      toast('Error', result.error || 'Failed to delete job post');
     }
   } catch(err) {
     toast('Error', 'An unexpected error occurred.');

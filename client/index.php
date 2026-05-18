@@ -560,8 +560,8 @@ window.closeModal = function() {
         <div class="tab" data-tab-status="cancelled" onclick="setTab(this)">Cancelled (<?php echo $jobCounts['cancelled']; ?>)</div>
       </div>
       <div class="desk-only">
-        <div class="card" style="margin-bottom:0;overflow:auto">
-          <table class="tbl">
+        <div class="card" style="margin-bottom:0;overflow-x:auto">
+          <table class="tbl" style="min-width: 950px;">
             <thead><tr><th>Job Title</th><th class="hide-mob">Category</th><th class="hide-mob">Subcategory</th><th>Budget</th><th>Type</th><th>Proposals</th><th class="hide-mob">Posted</th><th>Status</th><th>Action</th></tr></thead>
             <tbody>
               <?php if (empty($allJobs)): ?>
@@ -569,7 +569,7 @@ window.closeModal = function() {
               <?php else: ?>
                   <?php foreach ($allJobs as $aj): ?>
                   <tr data-status="<?php echo $aj['status']; ?>" <?php echo $aj['status'] !== 'open' ? 'style="display:none"' : ''; ?>>
-                    <td class="cl" onclick="toast('Job Details','Viewing <?php echo htmlspecialchars($aj['title']); ?>')"><?php echo htmlspecialchars($aj['title']); ?></td>
+                    <td class="cl" onclick="toast('Job Details','Viewing <?php echo htmlspecialchars($aj['title']); ?>')" title="<?php echo htmlspecialchars($aj['title']); ?>" style="max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><?php echo htmlspecialchars($aj['title']); ?></td>
                     <td class="hide-mob"><span class="badge b-gray"><?php echo htmlspecialchars($aj['category']); ?></span></td>
                     <td class="hide-mob"><span class="badge b-blue" style="font-size:11px"><?php echo htmlspecialchars($aj['subcategory'] ?? 'General'); ?></span></td>
                     <td>$<?php echo number_format($aj['budget']); ?></td>
@@ -721,8 +721,8 @@ window.closeModal = function() {
       </div>
 
       <div class="desk-only">
-        <div class="card" style="margin-bottom:0;overflow:auto">
-          <table class="tbl">
+        <div class="card" style="margin-bottom:0;overflow-x:auto">
+          <table class="tbl" style="min-width: 850px;">
             <thead><tr><th>Freelancer</th><th>Job Title</th><th class="hide-mob">Type</th><th>Budget</th><th class="hide-mob">Start Date</th><th>Status</th><th>Action</th></tr></thead>
             <tbody>
               <?php if (empty($allContracts)): ?>
@@ -731,7 +731,7 @@ window.closeModal = function() {
                   <?php foreach ($allContracts as $ac): ?>
                   <tr data-status="<?php echo $ac['status']; ?>" <?php echo $ac['status'] !== 'active' ? 'style="display:none"' : ''; ?>>
                     <td class="cl" style="color:var(--uw-green);font-weight:600;cursor:pointer" onclick="event.stopPropagation();showChatWithFreelancer(<?php echo $ac['freelancer_id']; ?>, '<?php echo addslashes($ac['freelancer_name']); ?>')"><?php echo htmlspecialchars($ac['freelancer_name']); ?></td>
-                    <td><?php echo htmlspecialchars($ac['job_title']); ?></td>
+                    <td title="<?php echo htmlspecialchars($ac['job_title']); ?>" style="max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><?php echo htmlspecialchars($ac['job_title']); ?></td>
                     <td class="hide-mob"><?php echo ucfirst($ac['contract_type']); ?></td>
                     <td>$<?php echo number_format($ac['amount']); ?></td>
                     <td class="hide-mob"><?php echo date('M j, Y', strtotime($ac['start_date'])); ?></td>
@@ -1263,8 +1263,8 @@ window.closeModal = function() {
       <div class="card">
         <div class="card-head"><h3>Transaction History</h3></div>
         
-        <div class="desk-only">
-          <table class="tbl">
+        <div class="desk-only" style="overflow-x:auto">
+          <table class="tbl" style="min-width: 900px;">
             <thead><tr><th>Date</th><th>Description</th><th>Freelancer / Source</th><th>Type</th><th>Amount</th><th>Platform Fee</th><th>Total Charge</th><th>Status</th></tr></thead>
             <tbody>
               <?php if(empty($clientTransactions)): ?>
