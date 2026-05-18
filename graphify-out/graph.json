@@ -85,6 +85,15 @@
       "norm_label": "index.php"
     },
     {
+      "label": "reset_password.php",
+      "file_type": "code",
+      "source_file": "home/reset_password.php",
+      "source_location": "L1",
+      "id": "home_reset_password_php",
+      "community": 281,
+      "norm_label": "reset_password.php"
+    },
+    {
       "label": "header.php",
       "file_type": "code",
       "source_file": "home/includes/header.php",
@@ -101,6 +110,15 @@
       "id": "home_includes_footer_php",
       "community": 128,
       "norm_label": "footer.php"
+    },
+    {
+      "label": "db_query_messages.php",
+      "file_type": "code",
+      "source_file": ".gemini/antigravity/brain/e64e77dc-6dee-4310-801b-a8c919f80979/scratch/db_query_messages.php",
+      "source_location": "L1",
+      "id": "gemini_antigravity_brain_e64e77dc_6dee_4310_801b_a8c919f80979_scratch_db_query_messages_php",
+      "community": 283,
+      "norm_label": "db_query_messages.php"
     },
     {
       "label": "404.php",
@@ -157,10 +175,19 @@
       "norm_label": "getcountryname()"
     },
     {
-      "label": "encodeJobId()",
+      "label": "getAllCountries()",
       "file_type": "code",
       "source_file": "includes/config.php",
       "source_location": "L133",
+      "id": "includes_config_getallcountries",
+      "community": 5,
+      "norm_label": "getallcountries()"
+    },
+    {
+      "label": "encodeJobId()",
+      "file_type": "code",
+      "source_file": "includes/config.php",
+      "source_location": "L164",
       "id": "includes_config_encodejobid",
       "community": 5,
       "norm_label": "encodejobid()"
@@ -169,7 +196,7 @@
       "label": "decodeJobId()",
       "file_type": "code",
       "source_file": "includes/config.php",
-      "source_location": "L141",
+      "source_location": "L172",
       "id": "includes_config_decodejobid",
       "community": 5,
       "norm_label": "decodejobid()"
@@ -178,7 +205,7 @@
       "label": "ensureFreelancerSchema()",
       "file_type": "code",
       "source_file": "includes/config.php",
-      "source_location": "L155",
+      "source_location": "L186",
       "id": "includes_config_ensurefreelancerschema",
       "community": 5,
       "norm_label": "ensurefreelancerschema()"
@@ -187,7 +214,7 @@
       "label": "ensurePlatformSettingsTable()",
       "file_type": "code",
       "source_file": "includes/config.php",
-      "source_location": "L202",
+      "source_location": "L239",
       "id": "includes_config_ensureplatformsettingstable",
       "community": 5,
       "norm_label": "ensureplatformsettingstable()"
@@ -196,7 +223,7 @@
       "label": "getPlatformSetting()",
       "file_type": "code",
       "source_file": "includes/config.php",
-      "source_location": "L263",
+      "source_location": "L300",
       "id": "includes_config_getplatformsetting",
       "community": 5,
       "norm_label": "getplatformsetting()"
@@ -205,7 +232,7 @@
       "label": "baseUrl()",
       "file_type": "code",
       "source_file": "includes/config.php",
-      "source_location": "L277",
+      "source_location": "L314",
       "id": "includes_config_baseurl",
       "community": 5,
       "norm_label": "baseurl()"
@@ -214,7 +241,7 @@
       "label": "redirect()",
       "file_type": "code",
       "source_file": "includes/config.php",
-      "source_location": "L282",
+      "source_location": "L319",
       "id": "includes_config_redirect",
       "community": 5,
       "norm_label": "redirect()"
@@ -223,7 +250,7 @@
       "label": "isRoute()",
       "file_type": "code",
       "source_file": "includes/config.php",
-      "source_location": "L288",
+      "source_location": "L325",
       "id": "includes_config_isroute",
       "community": 5,
       "norm_label": "isroute()"
@@ -232,7 +259,7 @@
       "label": "getFreelancerStats()",
       "file_type": "code",
       "source_file": "includes/config.php",
-      "source_location": "L294",
+      "source_location": "L331",
       "id": "includes_config_getfreelancerstats",
       "community": 5,
       "norm_label": "getfreelancerstats()"
@@ -2119,6 +2146,105 @@
       "norm_label": "fix_job_status.php"
     },
     {
+      "label": "check_syntax.js",
+      "file_type": "code",
+      "source_file": "scratch/check_syntax.js",
+      "source_location": "L1",
+      "id": "scratch_check_syntax_js",
+      "community": 182,
+      "norm_label": "check_syntax.js"
+    },
+    {
+      "label": "fs",
+      "file_type": "code",
+      "source_file": "scratch/check_syntax.js",
+      "source_location": "L1",
+      "id": "scratch_check_syntax_fs",
+      "community": 182,
+      "norm_label": "fs"
+    },
+    {
+      "label": "vm",
+      "file_type": "code",
+      "source_file": "scratch/check_syntax.js",
+      "source_location": "L2",
+      "id": "scratch_check_syntax_vm",
+      "community": 182,
+      "norm_label": "vm"
+    },
+    {
+      "label": "path",
+      "file_type": "code",
+      "source_file": "scratch/check_syntax.js",
+      "source_location": "L3",
+      "id": "scratch_check_syntax_path",
+      "community": 182,
+      "norm_label": "path"
+    },
+    {
+      "label": "filepath",
+      "file_type": "code",
+      "source_file": "scratch/check_syntax.js",
+      "source_location": "L5",
+      "id": "scratch_check_syntax_filepath",
+      "community": 182,
+      "norm_label": "filepath"
+    },
+    {
+      "label": "content",
+      "file_type": "code",
+      "source_file": "scratch/check_syntax.js",
+      "source_location": "L6",
+      "id": "scratch_check_syntax_content",
+      "community": 182,
+      "norm_label": "content"
+    },
+    {
+      "label": "scriptMatch",
+      "file_type": "code",
+      "source_file": "scratch/check_syntax.js",
+      "source_location": "L9",
+      "id": "scratch_check_syntax_scriptmatch",
+      "community": 182,
+      "norm_label": "scriptmatch"
+    },
+    {
+      "label": "lines",
+      "file_type": "code",
+      "source_file": "scratch/check_syntax.js",
+      "source_location": "L28",
+      "id": "scratch_check_syntax_lines",
+      "community": 182,
+      "norm_label": "lines"
+    },
+    {
+      "label": "lineNo",
+      "file_type": "code",
+      "source_file": "scratch/check_syntax.js",
+      "source_location": "L29",
+      "id": "scratch_check_syntax_lineno",
+      "community": 182,
+      "norm_label": "lineno"
+    },
+    {
+      "label": "errorLine",
+      "file_type": "code",
+      "source_file": "scratch/check_syntax.js",
+      "source_location": "L31",
+      "id": "scratch_check_syntax_errorline",
+      "community": 182,
+      "norm_label": "errorline"
+    },
+    {
+      "label": "i",
+      "file_type": "code",
+      "source_file": "scratch/check_syntax.js",
+      "source_location": "L33",
+      "id": "scratch_check_syntax_i",
+      "community": 182,
+      "norm_label": "i"
+    },
+    {
       "label": "fix_jobs_table.php",
       "file_type": "code",
       "source_file": "/Applications/MAMP/htdocs/upwork-project/scratch/fix_jobs_table.php",
@@ -2389,6 +2515,15 @@
       "norm_label": "edit_job.php"
     },
     {
+      "label": "forgot_password.php",
+      "file_type": "code",
+      "source_file": "actions/forgot_password.php",
+      "source_location": "L1",
+      "id": "actions_forgot_password_php",
+      "community": 279,
+      "norm_label": "forgot_password.php"
+    },
+    {
       "label": "update_contract_status.php",
       "file_type": "code",
       "source_file": "/Applications/MAMP/htdocs/upwork-project/actions/update_contract_status.php",
@@ -2423,6 +2558,15 @@
       "id": "actions_register_php",
       "community": 97,
       "norm_label": "register.php"
+    },
+    {
+      "label": "reset_password.php",
+      "file_type": "code",
+      "source_file": "actions/reset_password.php",
+      "source_location": "L1",
+      "id": "actions_reset_password_php",
+      "community": 280,
+      "norm_label": "reset_password.php"
     },
     {
       "label": "hire_freelancer.php",
@@ -2706,10 +2850,10 @@
     {
       "label": "footer.php",
       "file_type": "code",
-      "source_file": "/Volumes/MyData/WEB/upwork-project/client/includes/footer.php",
+      "source_file": "client/includes/footer.php",
       "source_location": "L1",
-      "id": "volumes_mydata_web_upwork_project_client_includes_footer_php",
-      "community": 266,
+      "id": "client_includes_footer_php",
+      "community": 89,
       "norm_label": "footer.php"
     },
     {
@@ -4104,7 +4248,7 @@
       "source_file": "vendor/phpmailer/phpmailer/src/PHPMailer.php",
       "source_location": "L1663",
       "id": "src_phpmailer_phpmailer_send",
-      "community": 182,
+      "community": 282,
       "norm_label": ".send()"
     },
     {
@@ -4113,7 +4257,7 @@
       "source_file": "vendor/phpmailer/phpmailer/src/PHPMailer.php",
       "source_location": "L1689",
       "id": "src_phpmailer_phpmailer_presend",
-      "community": 182,
+      "community": 282,
       "norm_label": ".presend()"
     },
     {
@@ -4374,7 +4518,7 @@
       "source_file": "vendor/phpmailer/phpmailer/src/PHPMailer.php",
       "source_location": "L3401",
       "id": "src_phpmailer_phpmailer_setmessagetype",
-      "community": 182,
+      "community": 282,
       "norm_label": ".setmessagetype()"
     },
     {
@@ -4554,7 +4698,7 @@
       "source_file": "vendor/phpmailer/phpmailer/src/PHPMailer.php",
       "source_location": "L4221",
       "id": "src_phpmailer_phpmailer_inlineimageexists",
-      "community": 182,
+      "community": 282,
       "norm_label": ".inlineimageexists()"
     },
     {
@@ -4563,7 +4707,7 @@
       "source_file": "vendor/phpmailer/phpmailer/src/PHPMailer.php",
       "source_location": "L4237",
       "id": "src_phpmailer_phpmailer_attachmentexists",
-      "community": 182,
+      "community": 282,
       "norm_label": ".attachmentexists()"
     },
     {
@@ -4572,7 +4716,7 @@
       "source_file": "vendor/phpmailer/phpmailer/src/PHPMailer.php",
       "source_location": "L4253",
       "id": "src_phpmailer_phpmailer_alternativeexists",
-      "community": 182,
+      "community": 282,
       "norm_label": ".alternativeexists()"
     },
     {
@@ -4716,7 +4860,7 @@
       "source_file": "vendor/phpmailer/phpmailer/src/PHPMailer.php",
       "source_location": "L4566",
       "id": "src_phpmailer_phpmailer_addresshasunicodelocalpart",
-      "community": 182,
+      "community": 282,
       "norm_label": ".addresshasunicodelocalpart()"
     },
     {
@@ -4725,7 +4869,7 @@
       "source_file": "vendor/phpmailer/phpmailer/src/PHPMailer.php",
       "source_location": "L4576",
       "id": "src_phpmailer_phpmailer_anyaddresshasunicodelocalpart",
-      "community": 182,
+      "community": 282,
       "norm_label": ".anyaddresshasunicodelocalpart()"
     },
     {
@@ -7429,6 +7573,15 @@
       "norm_label": "security notices relating to phpmailer"
     },
     {
+      "label": "footer.php",
+      "file_type": "code",
+      "source_file": "/Volumes/MyData/WEB/upwork-project/client/includes/footer.php",
+      "source_location": "L1",
+      "community": 266,
+      "norm_label": "footer.php",
+      "id": "volumes_mydata_web_upwork_project_client_includes_footer_php"
+    },
+    {
       "label": "config.php",
       "file_type": "code",
       "source_file": "/Volumes/MyData/WEB/upwork-project/includes/config.php",
@@ -7490,15 +7643,6 @@
       "community": 39,
       "norm_label": "repair_db.php",
       "id": "repair_db_php"
-    },
-    {
-      "label": "footer.php",
-      "file_type": "code",
-      "source_file": "client/includes/footer.php",
-      "source_location": "L1",
-      "community": 89,
-      "norm_label": "footer.php",
-      "id": "client_includes_footer_php"
     },
     {
       "label": "get-connects-activity.php",
@@ -10072,6 +10216,16 @@
       "confidence_score": 1.0,
       "source": "includes_config_php",
       "target": "includes_config_getcountryname"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "includes/config.php",
+      "source_location": "L132",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "includes_config_php",
+      "target": "includes_config_getallcountries"
     },
     {
       "relation": "contains",
@@ -14307,6 +14461,106 @@
       "weight": 1.0,
       "source": "scratch_simulated_footer_requestmilestone",
       "target": "includes_footer_test_toast"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scratch/check_syntax.js",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "scratch_check_syntax_js",
+      "target": "scratch_check_syntax_fs",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scratch/check_syntax.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "scratch_check_syntax_js",
+      "target": "scratch_check_syntax_vm",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scratch/check_syntax.js",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "scratch_check_syntax_js",
+      "target": "scratch_check_syntax_path",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scratch/check_syntax.js",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "scratch_check_syntax_js",
+      "target": "scratch_check_syntax_filepath",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scratch/check_syntax.js",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "scratch_check_syntax_js",
+      "target": "scratch_check_syntax_content",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scratch/check_syntax.js",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "scratch_check_syntax_js",
+      "target": "scratch_check_syntax_scriptmatch",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scratch/check_syntax.js",
+      "source_location": "L28",
+      "weight": 1.0,
+      "source": "scratch_check_syntax_js",
+      "target": "scratch_check_syntax_lines",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scratch/check_syntax.js",
+      "source_location": "L29",
+      "weight": 1.0,
+      "source": "scratch_check_syntax_js",
+      "target": "scratch_check_syntax_lineno",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scratch/check_syntax.js",
+      "source_location": "L31",
+      "weight": 1.0,
+      "source": "scratch_check_syntax_js",
+      "target": "scratch_check_syntax_errorline",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scratch/check_syntax.js",
+      "source_location": "L33",
+      "weight": 1.0,
+      "source": "scratch_check_syntax_js",
+      "target": "scratch_check_syntax_i",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -24036,5 +24290,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "40c08fde05430e90a17fc8ad01d7f8086b5e02a9"
+  "built_at_commit": "231ee740fb0b5b0859f8afb8c9495f9a26add918"
 }

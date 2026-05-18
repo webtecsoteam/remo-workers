@@ -333,7 +333,7 @@ window.closeModal = function() {
 
 <!-- ══ SIDEBAR ══ -->
 <aside class="sidebar">
-  <a class="sb-logo" href="<?php echo baseUrl(); ?>"><div class="sb-wordmark">Remo<em>Workers</em></div></a>
+  <a class="sb-logo" href="<?php echo baseUrl(); ?>" style="display:flex;align-items:center;gap:8px"><img src="<?php echo baseUrl('favicon.png'); ?>" style="width:24px;height:24px;object-fit:contain;border-radius:50%"><div class="sb-wordmark">Remo<em>Workers</em></div></a>
   <div class="sb-user" onclick="showPage('settings', document.querySelector('.sb-item[onclick*=\'settings\']'))" style="cursor:pointer">
     <div class="sb-av"><?php echo strtoupper(substr($user['name'], 0, 1)); ?></div>
     <div>
@@ -689,13 +689,13 @@ window.closeModal = function() {
               <div style="font-size:11.5px;color:var(--uw-gray)">Submitted <?php echo date('M j', strtotime($p['created_at'])); ?></div>
               <div class="prop-actions">
                 <?php if ($p['status'] === 'accepted'): ?>
-                  <button class="btn btn-w btn-sm" onclick="event.stopPropagation();showChatWithFreelancer(<?php echo $p['freelancer_id']; ?>, '<?php echo addslashes($p['freelancer_name']); ?>')">💬 Message</button>
+                  <button class="btn btn-w btn-sm" onclick="event.stopPropagation();showChatWithFreelancer(<?php echo $p['freelancer_id']; ?>, '<?php echo addslashes($p['freelancer_name']); ?>', '<?php echo $p['freelancer_avatar'] ?? ''; ?>')">💬 Message</button>
 
                   <button class="btn btn-w btn-sm" style="color:#ef4444" onclick="event.stopPropagation();cancelHiring(<?php echo $p['id']; ?>)">Cancel</button>
                 <?php else: ?>
                   <button class="btn btn-w btn-sm" onclick="event.stopPropagation();updateProposalStatus(<?php echo $p['id']; ?>, 'archived')"><?php echo $p['status']==='archived'?'Unarchive':'Archive'; ?></button>
                   <button class="btn btn-o btn-sm" onclick="event.stopPropagation();updateProposalStatus(<?php echo $p['id']; ?>, '<?php echo $p['status']==='shortlisted'?'pending':'shortlisted'; ?>')"><?php echo $p['status']==='shortlisted'?'Unshortlist':'Shortlist'; ?></button>
-                  <button class="btn btn-w btn-sm" onclick="event.stopPropagation();showChatWithFreelancer(<?php echo $p['freelancer_id']; ?>, '<?php echo addslashes($p['freelancer_name']); ?>')">💬 Message</button>
+                  <button class="btn btn-w btn-sm" onclick="event.stopPropagation();showChatWithFreelancer(<?php echo $p['freelancer_id']; ?>, '<?php echo addslashes($p['freelancer_name']); ?>', '<?php echo $p['freelancer_avatar'] ?? ''; ?>')">💬 Message</button>
                   <button class="btn btn-g btn-sm" onclick="event.stopPropagation();hireFreelancer(<?php echo $p['id']; ?>, <?php echo (float)$p['bid_amount']; ?>)">Hire →</button>
                 <?php endif; ?>
               </div>
@@ -731,7 +731,7 @@ window.closeModal = function() {
               <?php else: ?>
                   <?php foreach ($allContracts as $ac): ?>
                   <tr data-status="<?php echo $ac['status']; ?>" <?php echo $ac['status'] !== 'active' ? 'style="display:none"' : ''; ?>>
-                    <td class="cl" style="color:var(--uw-green);font-weight:600;cursor:pointer" onclick="event.stopPropagation();showChatWithFreelancer(<?php echo $ac['freelancer_id']; ?>, '<?php echo addslashes($ac['freelancer_name']); ?>')"><?php echo htmlspecialchars($ac['freelancer_name']); ?></td>
+                    <td class="cl" style="color:var(--uw-green);font-weight:600;cursor:pointer" onclick="event.stopPropagation();showChatWithFreelancer(<?php echo $ac['freelancer_id']; ?>, '<?php echo addslashes($ac['freelancer_name']); ?>', '<?php echo $ac['freelancer_avatar'] ?? ''; ?>')"><?php echo htmlspecialchars($ac['freelancer_name']); ?></td>
                     <td title="<?php echo htmlspecialchars($ac['job_title']); ?>" style="max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><?php echo htmlspecialchars($ac['job_title']); ?></td>
                     <td class="hide-mob"><?php echo ucfirst($ac['contract_type']); ?></td>
                     <td>$<?php echo number_format($ac['amount']); ?></td>
@@ -774,7 +774,7 @@ window.closeModal = function() {
               <div style="display:flex;justify-content:space-between;align-items:center;padding-top:10px;border-top:1px solid var(--uw-border)">
                 <div style="font-size:11px;color:var(--uw-gray)">Started <?php echo date('M j, Y', strtotime($ac['start_date'])); ?></div>
                 <div style="display:flex;gap:8px">
-                  <button class="btn btn-w btn-sm" onclick="event.stopPropagation();showChatWithFreelancer(<?php echo $ac['freelancer_id']; ?>, '<?php echo addslashes($ac['freelancer_name']); ?>')">💬</button>
+                  <button class="btn btn-w btn-sm" onclick="event.stopPropagation();showChatWithFreelancer(<?php echo $ac['freelancer_id']; ?>, '<?php echo addslashes($ac['freelancer_name']); ?>', '<?php echo $ac['freelancer_avatar'] ?? ''; ?>')">💬</button>
                   <button class="btn btn-g btn-sm" onclick="event.stopPropagation();manageContract(<?php echo htmlspecialchars(json_encode($ac)); ?>)">Manage</button>
                 </div>
               </div>
@@ -1210,9 +1210,10 @@ window.closeModal = function() {
                 <div class="msg-item <?php echo $isUnread ? 'unread' : ''; ?>" style="border-radius:0;margin:0;padding:12px 14px" onclick="loadChat(<?php echo $c['other_id']; ?>, '<?php echo addslashes($c['other_name']); ?>', '<?php echo $initials; ?>', this, '<?php echo $c['other_avatar'] ?? ''; ?>')">
                   <div class="av">
                     <?php if (!empty($c['other_avatar'])): ?>
-                      <img src="<?php echo baseUrl($c['other_avatar']); ?>" style="width:100%;height:100%;border-radius:50%;object-fit:cover">
+                      <img src="<?php echo baseUrl($c['other_avatar']); ?>" style="width:100%;height:100%;border-radius:50%;object-fit:cover" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                      <div style="display:none;background:var(--uw-green-light);color:var(--uw-green);width:100%;height:100%;display:flex;align-items:center;justify-content:center;border-radius:50%;font-weight:bold;font-size:13px"><?php echo $initials; ?></div>
                     <?php else: ?>
-                      <div style="background:var(--uw-green-light);color:var(--uw-green);width:100%;height:100%;display:flex;align-items:center;justify-content:center;border-radius:50%"><?php echo $initials; ?></div>
+                      <div style="background:var(--uw-green-light);color:var(--uw-green);width:100%;height:100%;display:flex;align-items:center;justify-content:center;border-radius:50%;font-weight:bold;font-size:13px"><?php echo $initials; ?></div>
                     <?php endif; ?>
                   </div>
                   <div class="msg-meta">

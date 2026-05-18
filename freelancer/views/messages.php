@@ -23,15 +23,20 @@
             $isUnread = ($c['is_read'] == 0 && $c['sender_id'] != $user['id']);
             $time = date('H:i', strtotime($c['last_time']));
           ?>
-            <div class="msg-item <?php echo $isUnread ? 'unread' : ''; ?>" style="padding:15px;border-bottom:1px solid var(--border);cursor:pointer;" onclick="loadChat(<?php echo $c['other_id']; ?>, '<?php echo addslashes($c['other_name']); ?>', '<?php echo $initials; ?>', this)">
-              <div style="display:flex;justify-content:space-between;margin-bottom:4px;align-items:center">
-                <div style="font-weight:700;font-size:13.5px;display:flex;align-items:center;gap:8px">
-                  <?php echo htmlspecialchars($c['other_name']); ?>
-                  <?php if($isUnread): ?><span style="width:8px;height:8px;background:var(--g);border-radius:50%"></span><?php endif; ?>
-                </div>
-                <div style="font-size:11px;color:var(--muted)"><?php echo $time; ?></div>
+            <div class="msg-item <?php echo $isUnread ? 'unread' : ''; ?>" style="border-radius:0;margin:0;padding:12px 14px;display:flex;gap:12px;align-items:center;border-bottom:1px solid var(--border);cursor:pointer" onclick="loadChat(<?php echo $c['other_id']; ?>, '<?php echo addslashes($c['other_name']); ?>', '<?php echo $initials; ?>', this, '<?php echo $c['other_avatar'] ?? ''; ?>')">
+              <div class="av" style="width:40px;height:40px;position:relative;flex-shrink:0;display:flex;align-items:center;justify-content:center;border-radius:50%">
+                <?php if (!empty($c['other_avatar'])): ?>
+                  <img src="<?php echo baseUrl($c['other_avatar']); ?>" style="width:100%;height:100%;border-radius:50%;object-fit:cover" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                  <div style="display:none;background:var(--gl);color:var(--forest);width:100%;height:100%;align-items:center;justify-content:center;border-radius:50%;font-weight:bold;font-size:13px"><?php echo $initials; ?></div>
+                <?php else: ?>
+                  <div style="background:var(--gl);color:var(--forest);width:100%;height:100%;display:flex;align-items:center;justify-content:center;border-radius:50%;font-weight:bold;font-size:13px"><?php echo $initials; ?></div>
+                <?php endif; ?>
               </div>
-              <div style="font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><?php echo htmlspecialchars($c['last_message']); ?></div>
+              <div class="msg-meta" style="flex:1;min-width:0">
+                <div class="msg-name" style="display:flex;justify-content:space-between;font-weight:700;font-size:13.5px;color:var(--dark)"><?php echo htmlspecialchars($c['other_name']); ?><span class="msg-time" style="font-size:11px;color:var(--muted);font-weight:400"><?php echo $time; ?></span></div>
+                <div class="msg-text" style="font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px"><?php echo htmlspecialchars($c['last_message']); ?></div>
+              </div>
+              <?php if($isUnread): ?><div class="msg-dot" style="width:8px;height:8px;background:var(--g);border-radius:50%;flex-shrink:0"></div><?php endif; ?>
             </div>
           <?php endforeach; ?>
         <?php endif; ?>

@@ -224,7 +224,7 @@ try {
     // Conversations for Messages Page
     $conversationsStmt = $db->prepare("
         SELECT 
-            u.id as other_id, u.name as other_name, 
+            u.id as other_id, u.name as other_name, u.avatar_url as other_avatar,
             m1.message as last_message, m1.created_at as last_time, m1.is_read, m1.sender_id
         FROM users u
         JOIN (
@@ -295,6 +295,7 @@ include __DIR__ . '/includes/header.php';
 <div class="mob-sidebar-overlay" id="mob-overlay" onclick="toggleSidebar()"></div>
 
 <aside class="sidebar" id="main-sidebar">
+  <a class="sb-logo" href="<?php echo baseUrl(); ?>" style="display:flex;align-items:center;gap:8px;padding:16px 20px 14px;border-bottom:1px solid rgba(255,255,255,.08);text-decoration:none"><img src="<?php echo baseUrl('favicon.png'); ?>" style="width:24px;height:24px;object-fit:contain;border-radius:50%"><div class="sb-logo-wordmark" style="display:flex;flex-direction:column;gap:0px;line-height:1"><span class="sb-logo-text" style="font-size:17px;font-weight:800;color:#fff;letter-spacing:-.4px;line-height:1">Remo<em style="color:#c8f135;font-style:normal">Workers</em></span><span class="sb-logo-tagline" style="font-size:9px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-top:2px">Freelancer Portal</span></div></a>
   
   <div class="sb-user" onclick="showPage('profile')">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">

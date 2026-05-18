@@ -128,20 +128,12 @@ const M={
       <div class="form-group"><label>Password</label><input type="password" name="password" required placeholder="Min. 8 characters"></div>
       <div class="form-group"><label>Country</label>
         <select name="country" required style="width:100%;padding:12px;border:1.5px solid #dce8d8;border-radius:8px;outline:none;background:#fff;color:var(--dark);font-size:14px;font-family:inherit">
-          <option value="United Kingdom">United Kingdom</option>
-          <option value="United States">United States</option>
-          <option value="Canada">Canada</option>
-          <option value="Australia">Australia</option>
-          <option value="India">India</option>
-          <option value="Germany">Germany</option>
-          <option value="France">France</option>
-          <option value="Spain">Spain</option>
-          <option value="Italy">Italy</option>
-          <option value="Netherlands">Netherlands</option>
-          <option value="South Africa">South Africa</option>
-          <option value="United Arab Emirates">United Arab Emirates</option>
-          <option value="Singapore">Singapore</option>
-          <option value="New Zealand">New Zealand</option>
+          <?php
+          foreach (getAllCountries() as $c) {
+              $sel = ($c === 'United Kingdom') ? 'selected' : '';
+              echo "<option value=\"" . htmlspecialchars($c) . "\" $sel>" . htmlspecialchars($c) . "</option>";
+          }
+          ?>
         </select>
       </div>
       <div class="form-group"><label>I want to...</label>
@@ -168,12 +160,28 @@ const M={
     <div id="login-error" style="display:none; background:rgba(239,68,68,0.1); color:#ef4444; padding:10px; border-radius:8px; font-size:13px; margin-bottom:16px; border:1px solid rgba(239,68,68,0.2); text-align:center;"></div>
     <form id="login-form" onsubmit="handleLogin(event)">
       <div class="form-group"><label>Email Address</label><input type="email" name="email" required placeholder="name@company.com"></div>
-      <div class="form-group"><label>Password</label><input type="password" name="password" required placeholder="••••••••"></div>
+      <div class="form-group" style="position:relative">
+        <label>Password</label>
+        <input type="password" name="password" required placeholder="••••••••">
+        <a onclick="openModal('forgot_password')" style="position:absolute;right:0;top:0;font-size:12.5px;color:var(--g);cursor:pointer;font-weight:600">Forgot?</a>
+      </div>
       <button type="submit" class="btn btn-green btn-full btn-lg" id="login-btn">
         <span class="btn-text">Log In</span>
         <span class="btn-loader" style="display:none;"><svg class="spinner" viewBox="0 0 50 50" style="width:20px;height:20px;"><circle cx="25" cy="25" r="20" fill="none" stroke="currentColor" stroke-width="5"></circle></svg></span>
       </button>
       <div style="text-align:center;margin-top:16px;font-size:13px;color:var(--muted)">Don't have an account? <a onclick="openModal('signup')" style="color:var(--g);font-weight:600;cursor:pointer">Sign up free</a></div>
+    </form>`},
+  'forgot_password':{t:'Reset your password',b:`
+    <div id="forgot-error" style="display:none; background:rgba(239,68,68,0.1); color:#ef4444; padding:10px; border-radius:8px; font-size:13px; margin-bottom:16px; border:1px solid rgba(239,68,68,0.2); text-align:center;"></div>
+    <div id="forgot-success" style="display:none; background:rgba(20,168,0,0.1); color:var(--g); padding:12px; border-radius:8px; font-size:13.5px; margin-bottom:16px; border:1px solid rgba(20,168,0,0.2); text-align:center; line-height:1.5;"></div>
+    <form id="forgot-form" onsubmit="handleForgotPassword(event)">
+      <p style="font-size:13px;color:#617a5a;margin-bottom:20px;line-height:1.5">Enter your email address and we'll send you a secure link to reset your password.</p>
+      <div class="form-group"><label>Email Address</label><input type="email" name="email" required placeholder="name@company.com"></div>
+      <button type="submit" class="btn btn-green btn-full btn-lg" id="forgot-btn">
+        <span class="btn-text">Send Reset Link</span>
+        <span class="btn-loader" style="display:none;"><svg class="spinner" viewBox="0 0 50 50" style="width:20px;height:20px;"><circle cx="25" cy="25" r="20" fill="none" stroke="currentColor" stroke-width="5"></circle></svg></span>
+      </button>
+      <div style="text-align:center;margin-top:16px;font-size:13px;color:var(--muted)">Remember password? <a onclick="openModal('login')" style="color:var(--g);font-weight:600;cursor:pointer">Back to Login</a></div>
     </form>`},
 'prof-anika':{t:'Anika Nkosi',b:`<div class="prof-header"><div class="prof-av" style="background:#d1fae5;color:#065f46">AN</div><div class="prof-info"><h3>Anika Nkosi</h3><p>🇩🇪 Berlin, Germany · Member since 2020 · Online now</p><div class="prof-badges"><span class="pbadge pb-g">✦ Top Rated Plus</span><span class="pbadge pb-g">✓ ID Verified</span><span class="pbadge pb-g">📋 Available now</span></div></div></div><div class="prof-stats"><div class="ps"><span class="ps-val">★ 5.0</span><div class="ps-lbl">Rating</div></div><div class="ps"><span class="ps-val">127</span><div class="ps-lbl">Reviews</div></div><div class="ps"><span class="ps-val">98%</span><div class="ps-lbl">Job Success</div></div><div class="ps"><span class="ps-val">$90</span><div class="ps-lbl">Per Hour</div></div></div><div class="prof-section"><h4>About</h4><p>Senior UI/UX Designer with 8+ years crafting user-centered digital products for startups and Fortune 500 companies. Specialized in design systems, mobile apps, and Webflow. I've helped companies like Stripe, Notion, and Figma build products loved by millions.</p></div><div class="prof-section"><h4>Skills</h4><div class="skill-tags"><span class="stag">Figma</span><span class="stag">Webflow</span><span class="stag">Prototyping</span><span class="stag">Design Systems</span><span class="stag">User Research</span><span class="stag">Framer</span><span class="stag">Motion Design</span></div></div><div class="prof-section"><h4>Portfolio</h4><div class="portfolio-grid"><div class="port-item" onclick="showToast('Finance app redesign','2025 — NPS went from 32 to 71')">💳</div><div class="port-item" onclick="showToast('SaaS design system','Built for 12-person product team')">📊</div><div class="port-item" onclick="showToast('E-commerce mobile app','3M+ downloads on launch week')">🛍️</div></div></div><div class="prof-section"><h4>Reviews</h4><div class="reviews-list"><div class="rev"><div class="rev-top"><div class="rev-av" style="background:#dbeafe;color:#1e40af">TM</div><div><div class="rev-name">TechMate Inc.</div><div class="rev-date">March 2026 · ★★★★★</div></div></div><div class="rev-text">"Anika completely transformed our product. Delivered a comprehensive design system in 2 weeks. Exceptional quality and communication throughout."</div></div><div class="rev"><div class="rev-top"><div class="rev-av" style="background:#fef3c7;color:#92400e">FP</div><div><div class="rev-name">FinPulse</div><div class="rev-date">February 2026 · ★★★★★</div></div></div><div class="rev-text">"Best designer I've ever worked with. She understood our users better than we did. Will hire again for our v2 redesign."</div></div></div></div><div class="modal-actions"><button class="btn btn-green btn-full" onclick="showToast('Message sent!','Anika will respond within 1 hour')">Message Anika</button><button class="btn btn-dark btn-full" onclick="showToast('Invite sent!','Anika has been invited to your job')">Invite to Job</button></div>`},
 'prof-james':{t:'James Kowalski',b:`<div class="prof-header"><div class="prof-av" style="background:#dbeafe;color:#1e40af">JK</div><div class="prof-info"><h3>James Kowalski</h3><p>🇨🇦 Toronto, Canada · Member since 2019 · Online now</p><div class="prof-badges"><span class="pbadge pb-b">★ Expert Vetted</span><span class="pbadge pb-g">✓ ID Verified</span><span class="pbadge pb-g">⚡ Fast Responder</span></div></div></div><div class="prof-stats"><div class="ps"><span class="ps-val">★ 4.9</span><div class="ps-lbl">Rating</div></div><div class="ps"><span class="ps-val">89</span><div class="ps-lbl">Reviews</div></div><div class="ps"><span class="ps-val">96%</span><div class="ps-lbl">Job Success</div></div><div class="ps"><span class="ps-val">$130</span><div class="ps-lbl">Per Hour</div></div></div><div class="prof-section"><h4>About</h4><p>Full Stack Engineer with 10+ years building scalable web applications. Specialized in React, Node.js, TypeScript, and AWS. Previously an engineering lead at a Series B fintech. I build fast, clean, maintainable code and communicate clearly throughout every project.</p></div><div class="prof-section"><h4>Skills</h4><div class="skill-tags"><span class="stag">React</span><span class="stag">TypeScript</span><span class="stag">Node.js</span><span class="stag">AWS</span><span class="stag">PostgreSQL</span><span class="stag">Docker</span><span class="stag">GraphQL</span><span class="stag">Next.js</span></div></div><div class="prof-section"><h4>Portfolio</h4><div class="portfolio-grid"><div class="port-item" onclick="showToast('Fintech payment API','Handles $2M/day in transactions')">💰</div><div class="port-item" onclick="showToast('Real-time chat platform','WebSocket architecture, 50K users')">💬</div><div class="port-item" onclick="showToast('E-commerce backend','Shopify + custom checkout, 99.9% uptime')">🏗️</div></div></div><div class="prof-section"><h4>Reviews</h4><div class="reviews-list"><div class="rev"><div class="rev-top"><div class="rev-av" style="background:#d1fae5;color:#065f46">NV</div><div><div class="rev-name">NexaVault</div><div class="rev-date">April 2026 · ★★★★★</div></div></div><div class="rev-text">"James delivered our entire backend in 3 weeks, ahead of schedule. Code is incredibly clean and well-documented. Highest recommendation."</div></div></div></div><div class="modal-actions"><button class="btn btn-green btn-full" onclick="showToast('Message sent!','James typically responds in under 1 hour')">Message James</button><button class="btn btn-dark btn-full" onclick="showToast('Invite sent!','James has been invited to your job')">Invite to Job</button></div>`},
@@ -301,6 +309,16 @@ if (urlParams.has('error')) {
     if (err === 'missing_fields') showToast('Missing Fields','Please fill all required fields');
     if (err === 'unauthorized') showToast('Access Denied','Please login as an Admin to access that section');
 }
+if (urlParams.has('reset')) {
+    const rState = urlParams.get('reset');
+    if (rState === 'success') {
+        showToast('Password Reset Successfully! 🎉', 'Please log in with your new password.');
+        openModal('login');
+    } else if (rState === 'invalid' || rState === 'expired') {
+        showToast('Invalid Reset Link ⚠️', 'The recovery link was invalid or has expired. Please try again.');
+        openModal('forgot_password');
+    }
+}
 
 // ─── NEW MODALS ───
 const NM = {
@@ -400,6 +418,49 @@ async function handleRegister(e) {
   } catch (err) {
     errorDiv.textContent = 'An error occurred. Please try again.';
     errorDiv.style.display = 'block';
+    btnText.style.display = 'inline-block';
+    btnLoader.style.display = 'none';
+    btn.disabled = false;
+  }
+}
+
+async function handleForgotPassword(e) {
+  e.preventDefault();
+  const form = e.target;
+  const btn = document.getElementById('forgot-btn');
+  const errorDiv = document.getElementById('forgot-error');
+  const successDiv = document.getElementById('forgot-success');
+  const btnText = btn.querySelector('.btn-text');
+  const btnLoader = btn.querySelector('.btn-loader');
+  
+  errorDiv.style.display = 'none';
+  successDiv.style.display = 'none';
+  btnText.style.display = 'none';
+  btnLoader.style.display = 'inline-block';
+  btn.disabled = true;
+
+  try {
+    const formData = new FormData(form);
+    const response = await fetch(`${APP_URL}actions/forgot_password.php`, {
+      method: 'POST',
+      body: formData,
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      successDiv.textContent = result.message || 'Reset link sent successfully!';
+      successDiv.style.display = 'block';
+      form.reset();
+    } else {
+      errorDiv.textContent = result.message || 'An error occurred.';
+      errorDiv.style.display = 'block';
+    }
+  } catch (err) {
+    errorDiv.textContent = 'An error occurred. Please try again.';
+    errorDiv.style.display = 'block';
+  } finally {
     btnText.style.display = 'inline-block';
     btnLoader.style.display = 'none';
     btn.disabled = false;

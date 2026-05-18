@@ -18,7 +18,7 @@
 <div class="topbar" id="topbar"><span>🚀 <strong>New:</strong> AI-powered talent matching — find the right freelancer in minutes</span><a onclick="openModal('ai-matching')">Try it free →</a><span class="topbar-close" onclick="this.parentElement.remove()">×</span></div>
 <!-- NAV -->
 <nav id="nav">
-  <a class="logo" href="<?php echo baseUrl(); ?>"><span class="logo-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3"/><path d="M6 20c0-4 2.7-7 6-7s6 3 6 7"/><path d="M19 8c1.5.8 2.5 2.4 2.5 4.2 0 1.5-.6 2.9-1.6 3.8"/><path d="M5 8C3.5 8.8 2.5 10.4 2.5 12.2c0 1.5.6 2.9 1.6 3.8"/></svg></span><span class="logo-remo">Remo</span><span class="logo-workers">workers</span></a>
+  <a class="logo" href="<?php echo baseUrl(); ?>"><img src="<?php echo baseUrl('favicon.png'); ?>" style="width:28px;height:28px;object-fit:contain;border-radius:50%;margin-right:6px"><span class="logo-remo">Remo</span><span class="logo-workers">workers</span></a>
   <div class="nav-sep"></div>
   <ul class="nl">
     <li>
@@ -96,7 +96,7 @@
 <!-- MOBILE MENU -->
 <div class="mobile-menu" id="mobileMenu">
     <div class="mm-head">
-        <a class="logo" href="<?php echo baseUrl(); ?>"><span class="logo-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3"/><path d="M6 20c0-4 2.7-7 6-7s6 3 6 7"/><path d="M19 8c1.5.8 2.5 2.4 2.5 4.2 0 1.5-.6 2.9-1.6 3.8"/><path d="M5 8C3.5 8.8 2.5 10.4 2.5 12.2c0 1.5.6 2.9 1.6 3.8"/></svg></span><span class="logo-remo">Remo</span><span class="logo-workers">workers</span></a>
+        <a class="logo" href="<?php echo baseUrl(); ?>"><img src="<?php echo baseUrl('favicon.png'); ?>" style="width:28px;height:28px;object-fit:contain;border-radius:50%;margin-right:6px"><span class="logo-remo">Remo</span><span class="logo-workers">workers</span></a>
         <button class="mm-close" onclick="toggleMobileMenu()">✕</button>
     </div>
     <div class="mm-body">

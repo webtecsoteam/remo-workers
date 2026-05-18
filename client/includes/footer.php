@@ -691,12 +691,12 @@
     let actionButtons = '';
     if (p.status === 'accepted') {
       actionButtons = `
-      <button class="btn btn-w" style="flex:1;justify-content:center;padding:12px" onclick="closeModal();showChatWithFreelancer(${p.freelancer_id}, '${p.freelancer_name.replace(/'/g, "\\'")}')">💬 Message</button>
+      <button class="btn btn-w" style="flex:1;justify-content:center;padding:12px" onclick="closeModal();showChatWithFreelancer(${p.freelancer_id}, '${p.freelancer_name.replace(/'/g, "\\'")}', '${p.freelancer_avatar || ''}')">💬 Message</button>
     `;
 
     } else {
       actionButtons = `
-      <button class="btn btn-w" style="flex:1;justify-content:center;padding:12px" onclick="closeModal();showChatWithFreelancer(${p.freelancer_id}, '${p.freelancer_name.replace(/'/g, "\\'")}')">💬 Message</button>
+      <button class="btn btn-w" style="flex:1;justify-content:center;padding:12px" onclick="closeModal();showChatWithFreelancer(${p.freelancer_id}, '${p.freelancer_name.replace(/'/g, "\\'")}', '${p.freelancer_avatar || ''}')">💬 Message</button>
       <button class="btn btn-o" style="flex:1;justify-content:center;padding:12px" onclick="closeModal();updateProposalStatus(${p.id}, '${p.status === 'shortlisted' ? 'pending' : 'shortlisted'}')">${p.status === 'shortlisted' ? 'Unshortlist' : 'Shortlist'}</button>
       <button class="btn btn-g" style="flex:1.5;justify-content:center;padding:12px" onclick="closeModal();hireFreelancer(${p.id}, ${p.bid_amount})">Hire Freelancer →</button>
     `;
@@ -976,6 +976,14 @@
     tt = setTimeout(() => el.classList.remove('show'), 3500);
   }
 
+  const getAvatarUrl = (avatar) => {
+    if (!avatar) return '';
+    if (avatar.startsWith('http://') || avatar.startsWith('https://')) return avatar;
+    const cleanBase = BASE_URL.replace(/\/+$/, '');
+    const cleanPath = avatar.replace(/^\/+/, '');
+    return cleanBase + '/' + cleanPath;
+  };
+
   let activeChatId = null;
 
   async function loadChat(otherId, name, initials, el, avatar = '') {
@@ -1034,7 +1042,7 @@
       <div style="display:flex;gap:10px;${isMe ? 'flex-direction:row-reverse' : ''}">
         <div class="av" style="width:30px;height:30px;font-size:10px">
           ${isMe ? '<div style="background:var(--uw-green);color:white;width:100%;height:100%;display:flex;align-items:center;justify-content:center;border-radius:50%">Me</div>' :
-          (avatar ? `<img src="${BASE_URL}${avatar}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">` :
+          (avatar ? `<div class="av" style="position:relative;width:100%;height:100%"><img src="${getAvatarUrl(avatar)}" style="width:100%;height:100%;border-radius:50%;object-fit:cover" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div style="display:none;background:var(--uw-green-light);color:var(--uw-green);width:100%;height:100%;align-items:center;justify-content:center;border-radius:50%;font-weight:700">${initials}</div></div>` :
             `<div style="background:var(--uw-green-light);color:var(--uw-green);width:100%;height:100%;display:flex;align-items:center;justify-content:center;border-radius:50%">${initials}</div>`)}
         </div>
         <div style="max-width:75%;${isMe ? 'text-align:right' : ''}">
@@ -1048,7 +1056,7 @@
     chatWindow.innerHTML = `
     <div style="padding:14px 18px;border-bottom:1px solid var(--uw-border);display:flex;align-items:center;gap:12px">
       <div class="av" style="width:36px;height:36px">
-        ${avatar ? `<img src="${BASE_URL}${avatar}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">` :
+        ${avatar ? `<div class="av" style="position:relative;width:100%;height:100%"><img src="${getAvatarUrl(avatar)}" style="width:100%;height:100%;border-radius:50%;object-fit:cover" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div style="display:none;background:var(--uw-green-light);color:var(--uw-green);width:100%;height:100%;align-items:center;justify-content:center;border-radius:50%;font-weight:700">${initials}</div></div>` :
         `<div style="background:var(--uw-green-light);color:var(--uw-green);width:100%;height:100%;display:flex;align-items:center;justify-content:center;border-radius:50%">${initials}</div>`}
       </div>
       <div><div style="font-weight:700;font-size:14px">${name}</div><div style="font-size:12px;color:var(--uw-green)">Online</div></div>
@@ -1181,7 +1189,7 @@
         newItem.onclick = function () { loadChat(id, name, initials, this, avatar); };
         newItem.innerHTML = `
         <div class="av">
-          ${avatar ? `<img src="${BASE_URL}${avatar}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">` :
+          ${avatar ? `<div class="av" style="position:relative;width:100%;height:100%"><img src="${getAvatarUrl(avatar)}" style="width:100%;height:100%;border-radius:50%;object-fit:cover" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div style="display:none;background:var(--uw-green-light);color:var(--uw-green);width:100%;height:100%;align-items:center;justify-content:center;border-radius:50%;font-weight:700">${initials}</div></div>` :
             `<div style="background:var(--uw-green-light);color:var(--uw-green);width:100%;height:100%;display:flex;align-items:center;justify-content:center;border-radius:50%">${initials}</div>`}
         </div>
         <div class="msg-meta">
@@ -1190,7 +1198,7 @@
         </div>
       `;
         list.prepend(newItem);
-        loadChat(id, name, initials, newItem);
+        loadChat(id, name, initials, newItem, avatar);
       }
     }, 150);
   }
@@ -1528,7 +1536,7 @@
       </div>
       
       <div style="display:grid;gap:12px">
-        <button class="btn btn-w" style="justify-content:center;padding:12px" onclick="closeModal();showChatWithFreelancer(${contract.freelancer_id}, '${contract.freelancer_name.replace(/'/g, "\\'")}')">
+        <button class="btn btn-w" style="justify-content:center;padding:12px" onclick="closeModal();showChatWithFreelancer(${contract.freelancer_id}, '${contract.freelancer_name.replace(/'/g, "\\'")}', '${contract.freelancer_avatar || ''}')">
           💬 Message Freelancer
         </button>
         
@@ -1782,7 +1790,7 @@
       if (el) el.style.display = (k === v) ? 'block' : 'none';
     });
   }
-  function showChatWithFreelancer(id, name) {
+  function showChatWithFreelancer(id, name, avatar = '') {
     const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
     showPage('messages', document.querySelector('[onclick*=messages]'));
 
@@ -1806,16 +1814,19 @@
         const newItem = document.createElement('div');
         newItem.className = 'msg-item active';
         newItem.style.cssText = 'border-radius:0;margin:0;padding:12px 14px';
-        newItem.onclick = function () { loadChat(id, name, initials, this); };
+        newItem.onclick = function () { loadChat(id, name, initials, this, avatar); };
         newItem.innerHTML = `
-        <div class="av" style="background:var(--uw-green-light);color:var(--uw-green)">${initials}</div>
+        <div class="av">
+          ${avatar ? `<div class="av" style="position:relative;width:100%;height:100%"><img src="${getAvatarUrl(avatar)}" style="width:100%;height:100%;border-radius:50%;object-fit:cover" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div style="display:none;background:var(--uw-green-light);color:var(--uw-green);width:100%;height:100%;align-items:center;justify-content:center;border-radius:50%;font-weight:700">${initials}</div></div>` :
+            `<div style="background:var(--uw-green-light);color:var(--uw-green);width:100%;height:100%;display:flex;align-items:center;justify-content:center;border-radius:50%">${initials}</div>`}
+        </div>
         <div class="msg-meta">
           <div class="msg-name">${name}<span class="msg-time">Now</span></div>
           <div class="msg-text">Starting conversation...</div>
         </div>
       `;
         list.prepend(newItem);
-        loadChat(id, name, initials, newItem);
+        loadChat(id, name, initials, newItem, avatar);
       }
     }, 150);
   }

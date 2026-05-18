@@ -72,6 +72,10 @@ switch ($section) {
         include __DIR__ . '/actions/verify_email.php';
         break;
 
+    case 'reset-password':
+        include __DIR__ . '/home/reset_password.php';
+        break;
+
     // ------------------------------------------
     // Route 2: Client Section (/client/*)
     // ------------------------------------------
