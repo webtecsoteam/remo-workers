@@ -2308,21 +2308,21 @@
       btn.innerText = originalText;
     }
   }
+
+  // Handle Paystack callback status
+  window.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('payment') === 'success') {
+      const amount = urlParams.get('amount');
+      toast('Payment Successful! ✓', `$${amount} has been added to your balance.`);
+      // Clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (urlParams.get('payment') === 'failed') {
+      toast('Payment Failed', 'There was an issue processing your transaction.');
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  });
 </script>
 </body>
 
 </html>
-
-// Handle Paystack callback status
-window.addEventListener('DOMContentLoaded', () => {
-const urlParams = new URLSearchParams(window.location.search);
-if (urlParams.get('payment') === 'success') {
-const amount = urlParams.get('amount');
-toast('Payment Successful! ✓', `$${amount} has been added to your balance.`);
-// Clean up URL
-window.history.replaceState({}, document.title, window.location.pathname);
-} else if (urlParams.get('payment') === 'failed') {
-toast('Payment Failed', 'There was an issue processing your transaction.');
-window.history.replaceState({}, document.title, window.location.pathname);
-}
-});
