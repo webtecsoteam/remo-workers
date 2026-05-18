@@ -48,18 +48,20 @@ function handleChargeSuccess($data) {
 
     $db = getDB();
     
-    // Check if transaction already processed (idempotency)
-    $stmt = $db->prepare("SELECT id FROM payments WHERE transaction_id = ? AND status = 'completed'");
-    $stmt->execute([$reference]);
-    if ($stmt->fetch()) {
-        // Already processed
-        return;
-    }
-
     $type = $metadata->type ?? 'deposit';
 
     try {
         $db->beginTransaction();
+
+        // Check if transaction already processed (idempotency check with locking)
+        $stmt = $db->prepare("SELECT status FROM payments WHERE transaction_id = ? FOR UPDATE");
+        $stmt->execute([$reference]);
+        $existingStatus = $stmt->fetchColumn();
+
+        if ($existingStatus === 'completed') {
+            $db->commit();
+            return;
+        }
 
         if ($type === 'connects') {
             $connectsAmount = intval($metadata->connects_amount ?? 0);

@@ -38,6 +38,23 @@ if ($response['status'] && $response['data']['status'] === 'success') {
     try {
         $db->beginTransaction();
 
+        // 0. Idempotency check: check if the transaction is already completed (e.g. by Webhook)
+        $chkStatus = $db->prepare("SELECT status FROM payments WHERE transaction_id = ? FOR UPDATE");
+        $chkStatus->execute([$reference]);
+        $paymentStatus = $chkStatus->fetchColumn();
+
+        if ($paymentStatus === 'completed') {
+            $db->commit();
+            if ($type === 'connects') {
+                $connectsAmount = intval($metadata['connects_amount'] ?? 0);
+                $redirectUrl = baseUrl('remoworkers-dashboard?payment=success&connects=' . $connectsAmount);
+            } else {
+                $redirectUrl = baseUrl('client/index.php?payment=success&amount=' . $amount);
+            }
+            header("Location: $redirectUrl");
+            exit;
+        }
+
         if ($type === 'connects') {
             $connectsAmount = intval($metadata['connects_amount'] ?? 0);
 
