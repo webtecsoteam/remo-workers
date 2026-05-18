@@ -18,6 +18,7 @@ $error = $_GET['error'] ?? null;
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin Login - RemoWorkers</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" href="<?php echo baseUrl("favicon.png?v=1.0.0"); ?>">
 <style>
     :root {
         --bg: #0d1117;

@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Remoworkers – Where Great Work Gets Done</title>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="<?php echo baseUrl("home/css/style.css"); ?>">
+<link rel="stylesheet" href="<?php echo baseUrl("home/css/style.css?v=1.0.1"); ?>">
+<link rel="icon" type="image/png" href="<?php echo baseUrl("favicon.png?v=1.0.0"); ?>">
 <script>const APP_URL = '<?php echo baseUrl(); ?>';</script>
 </head>
 <body>
@@ -101,22 +102,27 @@
     <div class="mm-body">
         <div class="mm-section">
             <h4>For Clients</h4>
-            <a onclick="openModal('talent-marketplace')">Talent Marketplace</a>
-            <a onclick="openModal('project-catalog-modal')">Project Catalog</a>
-            <a onclick="openModal('talent-scout')">Talent Scout</a>
-            <a onclick="openModal('enterprise')">Enterprise</a>
+            <?php if (!empty($user) && $user['role'] === 'client'): ?>
+            <a href="<?php echo baseUrl('client'); ?>#post-job" onclick="toggleMobileMenu()">Post a Job</a>
+            <?php else: ?>
+            <a onclick="openModal('post-job');toggleMobileMenu()">Post a Job</a>
+            <?php endif; ?>
+            <a onclick="openModal('talent-marketplace');toggleMobileMenu()">Talent Marketplace</a>
+            <a onclick="openModal('project-catalog-modal');toggleMobileMenu()">Project Catalog</a>
+            <a onclick="openModal('talent-scout');toggleMobileMenu()">Talent Scout</a>
+            <a onclick="openModal('enterprise');toggleMobileMenu()">Enterprise</a>
         </div>
         <div class="mm-section">
             <h4>For Freelancers</h4>
-            <a onclick="openModal('browse-jobs')">Browse Jobs</a>
-            <a onclick="openModal('sell-services')">Sell Services</a>
-            <a onclick="openModal('certifications')">Skill Assessments</a>
+            <a onclick="openModal('browse-jobs');toggleMobileMenu()">Browse Jobs</a>
+            <a onclick="openModal('sell-services');toggleMobileMenu()">Sell Services</a>
+            <a onclick="openModal('certifications');toggleMobileMenu()">Skill Assessments</a>
         </div>
         <div class="mm-section">
             <h4>Company</h4>
-            <a onclick="openModal('trust-safety')">Trust & Safety</a>
-            <a onclick="openModal('blog-all')">Blog & Resources</a>
-            <a onclick="openModal('pricing')">Pricing</a>
+            <a onclick="openModal('trust-safety');toggleMobileMenu()">Trust & Safety</a>
+            <a onclick="openModal('blog-all');toggleMobileMenu()">Blog & Resources</a>
+            <a onclick="openModal('pricing');toggleMobileMenu()">Pricing</a>
         </div>
         <div class="mm-actions">
             <?php if ($user): ?>

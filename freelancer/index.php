@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/classes/Auth.php';
 
+ensureFreelancerSchema();
 $db = getDB();
 
 // Fetch real user from DB
@@ -17,7 +18,17 @@ if (!$user) {
 // Initial jobs fetch
 $allJobs = [];
 try {
-    $allJobsStmt = $db->query("SELECT j.*, u.name as client_name FROM jobs j JOIN users u ON j.client_id = u.id WHERE j.status = 'open' ORDER BY j.created_at DESC");
+    $allJobsStmt = $db->query("
+        SELECT j.*, u.name as client_name, u.country as client_country, u.is_verified as client_verified,
+        COALESCE((SELECT SUM(amount) FROM payments WHERE payer_id = j.client_id AND status = 'completed'), 0) as client_total_spent,
+        COALESCE((SELECT COUNT(*) FROM contracts WHERE client_id = j.client_id), 0) as client_hires,
+        COALESCE((SELECT COUNT(*) FROM proposals WHERE job_id = j.id), 0) as proposal_count,
+        COALESCE((SELECT AVG(rating) FROM reviews WHERE reviewee_id = j.client_id), 0.0) as client_rating
+        FROM jobs j
+        JOIN users u ON j.client_id = u.id
+        WHERE j.status = 'open'
+        ORDER BY j.created_at DESC
+    ");
     if ($allJobsStmt) {
         $allJobs = $allJobsStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
     }
@@ -41,35 +52,68 @@ $savedJobs = [];
 $totalProposals = 0;
 $totalContracts = 0;
 $unreadMessages = 0;
+$fullLedger = [];
+$bonusPayments = [];
+$earningsByClient = [];
+$weeklyEarnings = [];
+$conversations = [];
 
 // Fetch data with safety fallbacks
 try {
     // All Contracts with earnings (completed and pending)
     $allContractsStmt = $db->prepare("
         SELECT c.*, j.title as job_title, u.name as client_name,
-        (SELECT SUM(amount) FROM payments WHERE job_id = c.job_id AND payee_id = c.freelancer_id AND status = 'completed') as total_earned,
-        (SELECT SUM(amount) FROM payments WHERE job_id = c.job_id AND payee_id = c.freelancer_id AND status = 'pending') as pending_earned
+        (SELECT SUM(amount) FROM payments WHERE job_id = c.job_id AND payee_id = c.freelancer_id AND status = 'completed' AND transaction_id NOT LIKE 'ESC-%') as total_earned,
+        (SELECT SUM(amount) FROM payments WHERE job_id = c.job_id AND payee_id = c.freelancer_id AND status = 'pending' AND transaction_id NOT LIKE 'ESC-%') as pending_earned
         FROM contracts c 
-        JOIN jobs j ON c.job_id = j.id 
-        JOIN users u ON j.client_id = u.id 
+        LEFT JOIN jobs j ON c.job_id = j.id 
+        LEFT JOIN users u ON j.client_id = u.id 
         WHERE c.freelancer_id = ?
+        ORDER BY c.id DESC
     ");
     $allContractsStmt->execute([$user['id']]);
-    $allContracts = $allContractsStmt->fetchAll() ?: [];
+    $allContracts = $allContractsStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+
+    // Fetch milestones for contracts
+    if (!empty($allContracts)) {
+        $contractIds = array_column($allContracts, 'id');
+        $placeholders = implode(',', array_fill(0, count($contractIds), '?'));
+        $mStmt = $db->prepare("SELECT contract_id, milestones.* FROM milestones WHERE contract_id IN ($placeholders) ORDER BY id ASC");
+        $mStmt->execute($contractIds);
+        $allMilestones = $mStmt->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_ASSOC);
+        
+        foreach ($allContracts as &$c) {
+            $c['milestones'] = $allMilestones[$c['id']] ?? [];
+        }
+        unset($c);
+    }
+
     $activeContracts = array_filter($allContracts, fn($c) => $c['status'] === 'active');
 
+
     // Stats
-    $totalEarnedStmt = $db->prepare("SELECT SUM(amount) FROM payments WHERE payee_id = ? AND status = 'completed'");
+    $totalEarnedStmt = $db->prepare("SELECT SUM(amount) FROM payments WHERE payee_id = ? AND status = 'completed' AND transaction_id NOT LIKE 'ESC-%'");
     $totalEarnedStmt->execute([$user['id']]);
     $fStats['total_earned'] = (float)$totalEarnedStmt->fetchColumn() ?: 0;
     
-    $pendingEarnedStmt = $db->prepare("SELECT SUM(amount) FROM payments WHERE payee_id = ? AND status = 'pending'");
+    $pendingEarnedStmt = $db->prepare("SELECT SUM(amount) FROM payments WHERE payee_id = ? AND status = 'pending' AND transaction_id NOT LIKE 'ESC-%'");
     $pendingEarnedStmt->execute([$user['id']]);
     $fStats['pending_earnings'] = (float)$pendingEarnedStmt->fetchColumn() ?: 0;
 
     $wipStmt = $db->prepare("SELECT SUM(amount) FROM work_logs WHERE freelancer_id = ? AND status = 'pending'");
     $wipStmt->execute([$user['id']]);
-    $fStats['wip_earnings'] = (float)$wipStmt->fetchColumn() ?: 0;
+    
+    // Add funded milestones to WIP earnings
+    $fundedMilestonesStmt = $db->prepare("
+        SELECT SUM(m.amount) 
+        FROM milestones m 
+        JOIN contracts c ON m.contract_id = c.id 
+        WHERE c.freelancer_id = ? AND m.status = 'funded'
+    ");
+    $fundedMilestonesStmt->execute([$user['id']]);
+    $fundedMilestonesAmount = (float)$fundedMilestonesStmt->fetchColumn() ?: 0;
+
+    $fStats['wip_earnings'] = ((float)$wipStmt->fetchColumn() ?: 0) + $fundedMilestonesAmount;
 
     $fStats['active_contracts'] = count($activeContracts);
     
@@ -77,9 +121,19 @@ try {
     $pendingStmt->execute([$user['id']]);
     $fStats['pending_proposals'] = (int)$pendingStmt->fetchColumn() ?: 0;
     
-    $monthlyStmt = $db->prepare("SELECT SUM(amount) FROM payments WHERE payee_id = ? AND status = 'completed' AND MONTH(created_at) = MONTH(CURRENT_DATE()) AND YEAR(created_at) = YEAR(CURRENT_DATE())");
+    $monthlyStmt = $db->prepare("SELECT SUM(amount) FROM payments WHERE payee_id = ? AND status = 'completed' AND MONTH(created_at) = MONTH(CURRENT_DATE()) AND YEAR(created_at) = YEAR(CURRENT_DATE()) AND transaction_id NOT LIKE 'ESC-%'");
     $monthlyStmt->execute([$user['id']]);
     $fStats['monthly_earnings'] = (float)$monthlyStmt->fetchColumn() ?: 0;
+
+    $completedStmt = $db->prepare("SELECT COUNT(*) FROM contracts WHERE freelancer_id = ? AND status = 'completed'");
+    $completedStmt->execute([$user['id']]);
+    $fStats['completed_contracts'] = (int)$completedStmt->fetchColumn() ?: 0;
+
+    // Calculate JSS and badge dynamically using global helper
+    $dynStats = getFreelancerStats($user['id']);
+    $fStats['jss'] = $dynStats['jss'];
+    $fStats['badge'] = $dynStats['badge'];
+    $fStats['is_top_rated'] = ($dynStats['badge'] === 'top_rated' || $dynStats['badge'] === 'top_rated_plus' || $dynStats['badge'] === 'expert_vetted');
 
     // Transactions (Payments) with virtual type and description
     $transactionsStmt = $db->prepare("
@@ -88,7 +142,7 @@ try {
         CONCAT('Payment for ', IFNULL(j.title, 'Service')) as description
         FROM payments p
         LEFT JOIN jobs j ON p.job_id = j.id
-        WHERE (p.payer_id = ? OR p.payee_id = ?) 
+        WHERE (p.payer_id = ? OR p.payee_id = ?) AND p.transaction_id NOT LIKE 'ESC-%'
         ORDER BY p.created_at DESC LIMIT 10
     ");
     $transactionsStmt->execute([$user['id'], $user['id'], $user['id']]);
@@ -119,7 +173,7 @@ try {
         FROM payments p
         LEFT JOIN jobs j ON p.job_id = j.id
         LEFT JOIN users u ON p.payer_id = u.id
-        WHERE p.payee_id = ? OR p.payer_id = ?
+        WHERE (p.payee_id = ? OR p.payer_id = ?) AND p.transaction_id NOT LIKE 'ESC-%'
         ORDER BY p.created_at DESC
     ");
     $ledgerStmt->execute([$user['id'], $user['id']]);
@@ -130,7 +184,7 @@ try {
         SELECT u.name as client_name, SUM(p.amount) as total
         FROM payments p
         JOIN users u ON p.payer_id = u.id
-        WHERE p.payee_id = ? AND p.status = 'completed'
+        WHERE p.payee_id = ? AND p.status = 'completed' AND p.transaction_id NOT LIKE 'ESC-%'
         GROUP BY p.payer_id
         ORDER BY total DESC
     ");
@@ -188,7 +242,7 @@ try {
 
     // Submitted Proposals
     $proposalsStmt = $db->prepare("
-        SELECT p.*, j.title as job_title 
+        SELECT p.*, j.title as job_title, j.status as job_status 
         FROM proposals p 
         JOIN jobs j ON p.job_id = j.id 
         WHERE p.freelancer_id = ? 
@@ -240,19 +294,30 @@ include __DIR__ . '/includes/header.php';
 <div class="mob-sidebar-overlay" id="mob-overlay" onclick="toggleSidebar()"></div>
 
 <aside class="sidebar" id="main-sidebar">
-  <div class="sb-brand">RemoWorkers</div>
   
   <div class="sb-user" onclick="showPage('profile')">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
-      <div class="sb-av"><?php echo strtoupper(substr($user['name'] ?? 'CH', 0, 2)); ?></div>
+      <div class="sb-av">
+        <?php if (!empty($user['avatar_url'])): ?>
+          <img src="<?php echo baseUrl($user['avatar_url']); ?>" style="width:100%;height:100%;border-radius:50%;object-fit:cover">
+        <?php else: ?>
+          <?php echo strtoupper(substr($user['name'] ?? 'CH', 0, 2)); ?>
+        <?php endif; ?>
+      </div>
       <div style="min-width:0">
         <div class="sb-name"><?php echo htmlspecialchars($user['name'] ?? 'Chirag'); ?></div>
-        <div class="sb-role">Freelancer</div>
+        <div class="sb-role">
+          <?php if (!empty($fStats['badge'])): ?>
+            <span style="color:#c8f135;font-weight:700;font-size:10px">✦ <?php echo htmlspecialchars($dynStats['badge_label']); ?></span>
+          <?php else: ?>
+            Freelancer
+          <?php endif; ?>
+        </div>
       </div>
     </div>
     <div class="sb-stats">
-      <div class="sb-stat"><div class="sb-stat-val">96%</div><div class="sb-stat-lbl">Job Success</div></div>
-      <div class="sb-stat" onclick="openModal('connects')" style="cursor:pointer">
+      <div class="sb-stat"><div class="sb-stat-val"><?php echo $fStats['jss']; ?></div><div class="sb-stat-lbl">Job Success</div></div>
+      <div class="sb-stat" onclick="showPage('connects')" style="cursor:pointer">
         <div class="sb-stat-val" id="sb-connects-val"><?php echo $user['connects'] ?? 0; ?></div>
         <div class="sb-stat-lbl">Connects</div>
       </div>
@@ -279,7 +344,7 @@ include __DIR__ . '/includes/header.php';
     <div class="sb-section">Earnings</div>
     <div id="nav-earnings" class="sb-item" onclick="showPage('earnings')"><span class="sb-ico">💰</span>Earnings & Payments</div>
     <div id="nav-reports" class="sb-item" onclick="showPage('reports')"><span class="sb-ico">📊</span>Payment Reports</div>
-    <div id="nav-connects" class="sb-item" onclick="openModal('connects')"><span class="sb-ico">🔗</span>Connects (<?php echo $user['connects'] ?? 0; ?>)</div>
+    <div id="nav-connects" class="sb-item" onclick="showPage('connects')"><span class="sb-ico">🔗</span>Connects (<?php echo $user['connects'] ?? 0; ?>)</div>
     <div id="nav-catalog" class="sb-item" onclick="showPage('catalog')"><span class="sb-ico">📦</span>My Services</div>
     
     <div class="sb-section">Settings</div>
@@ -317,7 +382,13 @@ include __DIR__ . '/includes/header.php';
   <header class="top-bar" style="background:white;padding:0 20px;height:60px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)">
     <button class="mob-toggle" onclick="toggleSidebar()" style="background:none;border:none;font-size:20px;cursor:pointer">☰</button>
     <div class="tb-title" id="page-title" style="font-weight:700">Dashboard</div>
-    <div class="tb-av" style="width:34px;height:34px;border-radius:50%;background:var(--lime);color:var(--forest);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;cursor:pointer" onclick="showPage('profile')"><?php echo strtoupper(substr($user['name'] ?? 'CH', 0, 2)); ?></div>
+    <div class="tb-av" style="width:34px;height:34px;border-radius:50%;background:var(--lime);color:var(--forest);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;cursor:pointer;overflow:hidden" onclick="showPage('profile')">
+      <?php if (!empty($user['avatar_url'])): ?>
+        <img src="<?php echo baseUrl($user['avatar_url']); ?>" style="width:100%;height:100%;object-fit:cover">
+      <?php else: ?>
+        <?php echo strtoupper(substr($user['name'] ?? 'CH', 0, 2)); ?>
+      <?php endif; ?>
+    </div>
   </header>
 
   <div class="content">
@@ -333,8 +404,35 @@ include __DIR__ . '/includes/header.php';
     include __DIR__ . '/views/catalog.php';
     include __DIR__ . '/views/profile.php';
     include __DIR__ . '/views/verification.php';
+    include __DIR__ . '/views/connects.php';
     ?>
   </div>
 </main>
+
+<nav class="mob-nav">
+  <div class="mob-nav-inner">
+    <button class="mob-nav-item active" onclick="showPage('home')">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+      <span>Home</span>
+    </button>
+    <button class="mob-nav-item" onclick="showPage('find-work')">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+      <span>Find Work</span>
+    </button>
+    <button class="mob-nav-item" onclick="showPage('proposals')">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+      <span>Proposals</span>
+    </button>
+    <button class="mob-nav-item" onclick="showPage('messages')">
+      <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+      <span>Messages</span>
+      <?php if($unreadMessages > 0): ?><div class="mob-nav-badge"><?php echo $unreadMessages; ?></div><?php endif; ?>
+    </button>
+    <button class="mob-nav-item" onclick="showPage('profile')">
+      <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+      <span>Profile</span>
+    </button>
+  </div>
+</nav>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>

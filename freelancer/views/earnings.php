@@ -18,7 +18,7 @@
         <div style="font-size:11.5px;color:var(--muted);margin-top:5px">Review window</div>
       </div>
       <div style="padding:20px 22px;border-right:1px solid var(--border);cursor:pointer" onclick="showEarningsInfo('pending')">
-        <div style="display:flex;align-items:center;gap:5px;font-size:12.5px;color:var(--muted);margin-bottom:8px;font-weight:500">Pending <span title="5-day security hold" style="display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;border:1.5px solid var(--muted2);font-size:10px;color:var(--muted2);cursor:help;flex-shrink:0">?</span></div>
+        <div style="display:flex;align-items:center;gap:5px;font-size:12.5px;color:var(--muted);margin-bottom:8px;font-weight:500">Processing <span title="5-day security hold" style="display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;border:1.5px solid var(--muted2);font-size:10px;color:var(--muted2);cursor:help;flex-shrink:0">?</span></div>
         <div class="earn-val" style="font-size:26px;font-weight:700;color:var(--dark)">$<?php echo number_format($fStats['pending_earnings'] ?? 0, 2); ?></div>
         <div style="font-size:11.5px;color:var(--muted);margin-top:5px">Security hold</div>
       </div>
@@ -66,31 +66,61 @@
   </div>
   <div class="card">
     <div class="card-body" style="padding:0">
-      <table class="tbl">
-        <thead><tr><th>Date</th><th>Description</th><th>Gross</th><th>Fee</th><th>Net</th><th>Status</th></tr></thead>
-        <tbody>
-          <?php if(empty($transactions)): ?>
-            <tr><td colspan="6" style="text-align:center;padding:40px;color:var(--muted)">No transactions found yet.</td></tr>
-          <?php else: ?>
-            <?php foreach($transactions as $t): ?>
-              <tr>
-                <td><?php echo date('M j, Y', strtotime($t['created_at'])); ?></td>
-                <td><?php echo htmlspecialchars($t['description']); ?></td>
-                <td>$<?php echo number_format($t['amount'], 2); ?></td>
-                <td style="color:#ef4444">-$<?php echo number_format($t['platform_fee'], 2); ?></td>
-                <td style="font-weight:700;color:var(--g)">$<?php echo number_format($t['amount'] - $t['platform_fee'], 2); ?></td>
-                <td>
-                  <span class="badge <?php 
-                    echo $t['status'] === 'completed' ? 'b-green' : ($t['status'] === 'pending' ? 'b-blue' : 'b-gray'); 
-                  ?>">
-                    <?php echo ucfirst($t['status']); ?>
-                  </span>
-                </td>
-              </tr>
-            <?php endforeach; ?>
-          <?php endif; ?>
-        </tbody>
-      </table>
+      <!-- Desktop View -->
+      <div class="desk-only">
+        <table class="tbl">
+          <thead><tr><th>Date</th><th>Description</th><th>Gross</th><th class="hide-mob">Fee</th><th>Net</th><th class="hide-mob">Status</th></tr></thead>
+          <tbody>
+            <?php if(empty($transactions)): ?>
+              <tr><td colspan="6" style="text-align:center;padding:40px;color:var(--muted)">No transactions found yet.</td></tr>
+            <?php else: ?>
+              <?php foreach($transactions as $t): ?>
+                <tr>
+                  <td><?php echo date('M j, Y', strtotime($t['created_at'])); ?></td>
+                  <td><?php echo htmlspecialchars($t['description']); ?></td>
+                  <td>$<?php echo number_format($t['amount'], 2); ?></td>
+                  <td style="color:#ef4444">-$<?php echo number_format($t['platform_fee'], 2); ?></td>
+                  <td style="font-weight:700;color:var(--g)">$<?php echo number_format($t['amount'] - $t['platform_fee'], 2); ?></td>
+                  <td>
+                    <span class="badge <?php 
+                      echo $t['status'] === 'completed' ? 'b-green' : ($t['status'] === 'pending' ? 'b-blue' : 'b-gray'); 
+                    ?>">
+                      <?php echo $t['status'] === 'pending' ? 'Processing' : ucfirst($t['status']); ?>
+                    </span>
+
+                  </td>
+                </tr>
+              <?php endforeach; ?>
+            <?php endif; ?>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Mobile View -->
+      <div class="mob-only">
+        <?php if(empty($transactions)): ?>
+          <div style="text-align:center;padding:40px;color:var(--muted)">No transactions found yet.</div>
+        <?php else: ?>
+          <?php foreach($transactions as $t): ?>
+            <div style="padding:16px;border-bottom:1px solid #eee">
+              <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+                <div style="font-weight:700;font-size:14px;color:var(--dark)"><?php echo htmlspecialchars($t['description']); ?></div>
+                <div style="display:flex;align-items:center;gap:6px">
+                  <span class="badge <?php echo $t['status'] === 'completed' ? 'b-green' : 'b-blue'; ?>" style="font-size:10px"><?php echo $t['status'] === 'pending' ? 'Processing' : ucfirst($t['status']); ?></span>
+
+                </div>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:flex-end">
+                <div style="font-size:12px;color:var(--muted)"><?php echo date('M j, Y', strtotime($t['created_at'])); ?></div>
+                <div style="text-align:right">
+                  <div style="font-weight:700;font-size:15px;color:var(--g)">$<?php echo number_format($t['amount'] - $t['platform_fee'], 2); ?></div>
+                  <div style="font-size:10px;color:var(--muted2)">Net Amount</div>
+                </div>
+              </div>
+            </div>
+          <?php endforeach; ?>
+        <?php endif; ?>
+      </div>
     </div>
   </div>
 </div>

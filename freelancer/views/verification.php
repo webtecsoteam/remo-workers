@@ -1,16 +1,23 @@
 <?php
 $db = getDB();
-$userId = $user['id'];
+$userId = $user['id'] ?? null;
+$emailVerified = !empty($user) && Auth::isEmailVerified($user);
 
 // Get user documents
-$stmt = $db->prepare("SELECT * FROM user_documents WHERE user_id = ? ORDER BY created_at DESC");
-$stmt->execute([$userId]);
-$docs = $stmt->fetchAll();
+$docs = [];
+if ($userId) {
+    $stmt = $db->prepare("SELECT * FROM user_documents WHERE user_id = ? ORDER BY created_at DESC");
+    $stmt->execute([$userId]);
+    $docs = $stmt->fetchAll();
+}
 
 // Get user verification status from users table
-$uStmt = $db->prepare("SELECT is_verified, status FROM users WHERE id = ?");
-$uStmt->execute([$userId]);
-$userData = $uStmt->fetch();
+$userData = null;
+if ($userId) {
+    $uStmt = $db->prepare("SELECT is_verified, status, email_verified_at FROM users WHERE id = ?");
+    $uStmt->execute([$userId]);
+    $userData = $uStmt->fetch();
+}
 
 $isVerified = (bool)($userData['is_verified'] ?? false);
 $hasPending = false;
@@ -26,8 +33,8 @@ elseif ($hasPending) $vStatus = 'pending';
 
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
       <div>
-        <div style="font-size:24px;font-weight:800;color:var(--dark)">Identity Verification</div>
-        <div style="font-size:13.5px;color:var(--muted);margin-top:4px">Verify your identity to build trust and unlock full platform features.</div>
+        <div style="font-size:24px;font-weight:800;color:var(--dark)">Account Verification</div>
+        <div style="font-size:13.5px;color:var(--muted);margin-top:4px">Verify your email and identity before applying to jobs.</div>
       </div>
       <?php if ($vStatus === 'verified'): ?>
         <span class="badge b-green" style="font-size:12px;padding:6px 14px">✅ Verified</span>
@@ -63,6 +70,15 @@ elseif ($hasPending) $vStatus = 'pending';
         </div>
       </div>
     <?php else: ?>
+      <?php if (!$emailVerified): ?>
+      <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap">
+        <div>
+          <div style="font-weight:700;font-size:14.5px;color:#1e40af;margin-bottom:4px">Step 1: Verify your email</div>
+          <div style="font-size:13px;color:#1d4ed8">Click the button to open your verification link.</div>
+        </div>
+        <button class="btn" style="background:#2563eb;color:white;border:none" onclick="requestEmailVerification()">Verify Email →</button>
+      </div>
+      <?php endif; ?>
       <!-- UNVERIFIED FLOW -->
       <div id="v-flow-container">
         <!-- Why verify banner -->
@@ -209,7 +225,7 @@ elseif ($hasPending) $vStatus = 'pending';
             <div style="background:var(--off);border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:24px">
               <div style="font-size:13.5px;font-weight:700;margin-bottom:14px;color:var(--dark)">Confirm Details</div>
               <div class="g2" style="gap:15px">
-                <div class="fg" style="margin-bottom:0"><label>Full Legal Name</label><input type="text" value="<?php echo htmlspecialchars($user['name']); ?>" id="vlegal-name"></div>
+                <div class="fg" style="margin-bottom:0"><label>Full Legal Name</label><input type="text" value="<?php echo htmlspecialchars($user['name'] ?? ''); ?>" id="vlegal-name"></div>
                 <div class="fg" style="margin-bottom:0"><label>Nationality</label><input type="text" placeholder="e.g. United Kingdom" id="vnationality"></div>
                 <div class="fg" style="margin-bottom:0"><label>Date of Birth</label><input type="date" id="vdob"></div>
                 <div class="fg" style="margin-bottom:0"><label>Document ID Number</label><input type="text" placeholder="e.g. G12345678" id="vdoc-number"></div>

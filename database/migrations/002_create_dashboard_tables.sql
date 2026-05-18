@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS proposals (
     freelancer_id INT NOT NULL,
     bid_amount DECIMAL(12, 2) NOT NULL,
     cover_letter TEXT,
-    status ENUM('pending', 'accepted', 'rejected', 'withdrawn') DEFAULT 'pending',
+    status ENUM('pending', 'accepted', 'rejected', 'withdrawn', 'shortlisted', 'archived', 'interviewing') DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (job_id) REFERENCES jobs(id),

@@ -53,6 +53,10 @@ switch ($section) {
         include __DIR__ . '/actions/upload_doc.php';
         break;
 
+    case 'verify-email':
+        include __DIR__ . '/actions/verify_email.php';
+        break;
+
     // ------------------------------------------
     // Route 2: Client Section (/client/*)
     // ------------------------------------------

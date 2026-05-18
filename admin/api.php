@@ -141,6 +141,59 @@ switch ($action) {
         echo json_encode(['success' => true, 'message' => $output]);
         break;
 
+    case 'get_settings':
+        try {
+            ensurePlatformSettingsTable();
+            $stmt = $db->query("SELECT setting_key, setting_value, description FROM platform_settings");
+            $settings = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            // Format as key => value for easy consumption
+            $formatted = [];
+            foreach ($settings as $s) {
+                $formatted[$s['setting_key']] = [
+                    'value' => (float)$s['setting_value'],
+                    'description' => $s['description']
+                ];
+            }
+            
+            echo json_encode(['success' => true, 'data' => $formatted]);
+        } catch (PDOException $e) {
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+        break;
+
+    case 'save_settings':
+        try {
+            ensurePlatformSettingsTable();
+            $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
+            
+            if (!$input) {
+                throw new Exception("No settings data received");
+            }
+            
+            $stmt = $db->prepare("UPDATE platform_settings SET setting_value = ? WHERE setting_key = ?");
+            
+            $allowedKeys = [
+                'freelancer_fee_fixed',
+                'freelancer_fee_hourly',
+                'freelancer_fee_monthly',
+                'client_fee_fixed',
+                'client_fee_hourly',
+                'client_fee_monthly'
+            ];
+            
+            foreach ($allowedKeys as $key) {
+                if (isset($input[$key])) {
+                    $stmt->execute([number_format((float)$input[$key], 2, '.', ''), $key]);
+                }
+            }
+            
+            echo json_encode(['success' => true, 'message' => 'Platform settings saved successfully']);
+        } catch (Exception $e) {
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+        break;
+
     default:
         echo json_encode(['success' => false, 'message' => 'Invalid action']);
         break;
