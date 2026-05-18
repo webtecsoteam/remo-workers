@@ -579,6 +579,9 @@
     const job = JOBS.find(j => j.id == id);
     if (!job) return;
     const matchPercent = getMatchPercentage(job);
+    const isSaved = SAVED_IDS.includes(parseInt(job.id));
+    const saveBtnText = isSaved ? 'Saved' : 'Save Job';
+    const saveBtnStyle = isSaved ? 'background-color:#10b981;color:#fff;border-color:#10b981;' : '';
     
     document.getElementById('mh-title').textContent = 'Job Details';
     document.getElementById('mc-body').innerHTML = `
@@ -622,15 +625,14 @@
 
           <div style="padding:30px;background:#f9fafb">
             <button class="btn btn-g" style="width:100%;padding:14px;font-size:15px;font-weight:700;margin-bottom:12px;border-radius:8px" onclick="event.stopPropagation();openApplyModal(${job.id})">Apply Now</button>
-            <button class="btn btn-w" style="width:100%;padding:12px;font-size:14px;margin-bottom:25px;border:1px solid var(--border)" onclick="toggleSaveJob(${job.id}, null)">Save Job</button>
+            <button class="btn btn-w" style="width:100%;padding:12px;font-size:14px;margin-bottom:25px;border:1px solid var(--border);${saveBtnStyle}" onclick="toggleSaveJob(${job.id}, this)">${saveBtnText}</button>
 
             <div style="margin-bottom:25px">
               <h4 style="font-size:14px;margin-bottom:15px;font-weight:700">About the Client</h4>
               ${isClientVerified(job) ? '<div style="font-size:13px;color:var(--muted2);margin-bottom:10px">Payment verified ✅</div>' : ''}
-              <div style="font-size:13px;color:var(--muted2);margin-bottom:10px;font-weight:600">${job.client_name || 'Client'}</div>
               <div style="font-size:13px;color:var(--muted2);margin-bottom:10px">★ ${clientHiresLabel(job)}</div>
-              <div style="font-size:13px;color:var(--muted2);margin-bottom:10px">${clientLocation(job)}</div>
-              <div style="font-size:13px;color:var(--muted2)">${formatClientSpent(job.client_total_spent)} total spent</div>
+              <div style="font-size:13px;color:var(--muted2);margin-bottom:10px">${formatClientSpent(job.client_total_spent)} total spent</div>
+              <div style="font-size:13px;color:var(--muted2)">📍 ${clientLocation(job)}</div>
             </div>
 
             <div style="border-top:1px solid var(--border);padding-top:20px">
@@ -865,13 +867,62 @@
     .then(data => {
       if (data.success) {
         const idx = SAVED_IDS.indexOf(parseInt(id));
+        
+        // Find both card save button and modal save button to update both in sync!
+        const cardBtn = document.querySelector(`.save-btn[onclick*="toggleSaveJob(${id},"]`);
+        const modalBtn = document.querySelector(`button[onclick*="toggleSaveJob(${id},"][class*="btn-w"]`);
+
         if (data.action === 'unsaved') {
           if (idx > -1) SAVED_IDS.splice(idx, 1);
-          if(btn) { btn.textContent = '☆'; btn.classList.remove('active'); }
+          
+          if (cardBtn) {
+            cardBtn.textContent = '☆';
+            cardBtn.classList.remove('active');
+          }
+          if (modalBtn) {
+            modalBtn.textContent = 'Save Job';
+            modalBtn.style.backgroundColor = '#fff';
+            modalBtn.style.color = '#374151';
+            modalBtn.style.borderColor = 'var(--border)';
+          }
+          if (btn && btn !== cardBtn && btn !== modalBtn) {
+            if (btn.classList.contains('btn-w')) {
+              btn.textContent = 'Save Job';
+              btn.style.backgroundColor = '#fff';
+              btn.style.color = '#374151';
+              btn.style.borderColor = 'var(--border)';
+            } else {
+              btn.textContent = '☆';
+              btn.classList.remove('active');
+            }
+          }
+          
           toast('Saved', 'Job removed from favorites');
         } else {
           if (idx === -1) SAVED_IDS.push(parseInt(id));
-          if(btn) { btn.textContent = '★'; btn.classList.add('active'); }
+          
+          if (cardBtn) {
+            cardBtn.textContent = '★';
+            cardBtn.classList.add('active');
+          }
+          if (modalBtn) {
+            modalBtn.textContent = 'Saved';
+            modalBtn.style.backgroundColor = '#10b981';
+            modalBtn.style.color = '#fff';
+            modalBtn.style.borderColor = '#10b981';
+          }
+          if (btn && btn !== cardBtn && btn !== modalBtn) {
+            if (btn.classList.contains('btn-w')) {
+              btn.textContent = 'Saved';
+              btn.style.backgroundColor = '#10b981';
+              btn.style.color = '#fff';
+              btn.style.borderColor = '#10b981';
+            } else {
+              btn.textContent = '★';
+              btn.classList.add('active');
+            }
+          }
+          
           toast('Saved', 'Job saved to favorites');
         }
         renderJobs(document.querySelector('.tab.on')?.textContent.trim());

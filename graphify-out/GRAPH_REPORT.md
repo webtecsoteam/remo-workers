@@ -1,16 +1,16 @@
 # Graph Report - upwork project  (2026-05-18)
 
 ## Corpus Check
-- 210 files · ~560,764 words
+- 210 files · ~560,769 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1104 nodes · 1353 edges · 275 communities (250 shown, 25 thin omitted)
+- 1109 nodes · 1354 edges · 279 communities (253 shown, 26 thin omitted)
 - Extraction: 92% EXTRACTED · 8% INFERRED · 0% AMBIGUOUS · INFERRED: 105 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `b537228c`
+- Built from commit: `10e977d6`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -35,6 +35,7 @@
 - [[_COMMUNITY_Community 17|Community 17]]
 - [[_COMMUNITY_Community 19|Community 19]]
 - [[_COMMUNITY_Community 20|Community 20]]
+- [[_COMMUNITY_Community 21|Community 21]]
 - [[_COMMUNITY_Community 22|Community 22]]
 - [[_COMMUNITY_Community 23|Community 23]]
 - [[_COMMUNITY_Community 90|Community 90]]
@@ -93,7 +94,7 @@
 - `validateAndGoStep3()` --calls--> `toast()`  [INFERRED]
   scratch/verification_test_linter.js → freelancer/includes/footer_test.js
 
-## Communities (275 total, 25 thin omitted)
+## Communities (279 total, 26 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.12
@@ -210,17 +211,17 @@ Nodes (3): autoload-dev, psr-4, PHPMailer\\Test\\
 ## Knowledge Gaps
 - **265 isolated node(s):** `phpmailer/phpmailer`, `vFiles`, `JOBS`, `SAVED_IDS`, `PROPOSALS` (+260 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **25 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **26 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `empty` connect `Community 174` to `Community 5`, `Community 166`, `Community 6`, `Community 263`, `Community 169`, `Community 173`, `Community 175`, `Community 178`, `Community 181`, `Community 182`?**
-  _High betweenness centrality (0.127) - this node is a cross-community bridge._
+  _High betweenness centrality (0.119) - this node is a cross-community bridge._
 - **Why does `now` connect `Community 2` to `Community 7`?**
-  _High betweenness centrality (0.112) - this node is a cross-community bridge._
+  _High betweenness centrality (0.111) - this node is a cross-community bridge._
 - **Why does `PHPMailer` connect `Community 166` to `Community 263`, `Community 172`, `Community 173`, `Community 174`, `Community 178`, `Community 181`, `Community 182`?**
-  _High betweenness centrality (0.094) - this node is a cross-community bridge._
+  _High betweenness centrality (0.103) - this node is a cross-community bridge._
 - **Are the 34 inferred relationships involving `empty` (e.g. with `getFreelancerStats()` and `.isEmailVerified()`) actually correct?**
   _`empty` has 34 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `phpmailer/phpmailer`, `vFiles`, `JOBS` to the rest of the system?**
