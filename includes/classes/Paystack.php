@@ -24,6 +24,7 @@ class Paystack {
         $fields = [
             'email' => $email,
             'amount' => $amount * 100, // Paystack uses kobo/cents
+            'currency' => 'USD',
             'callback_url' => $callbackUrl,
             'metadata' => json_encode($metadata)
         ];
