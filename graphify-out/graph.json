@@ -286,7 +286,7 @@
       "label": ".login()",
       "file_type": "code",
       "source_file": "includes/classes/Auth.php",
-      "source_location": "L66",
+      "source_location": "L68",
       "id": "classes_auth_auth_login",
       "community": 5,
       "norm_label": ".login()"
@@ -295,7 +295,7 @@
       "label": ".logout()",
       "file_type": "code",
       "source_file": "includes/classes/Auth.php",
-      "source_location": "L89",
+      "source_location": "L91",
       "id": "classes_auth_auth_logout",
       "community": 5,
       "norm_label": ".logout()"
@@ -304,7 +304,7 @@
       "label": ".user()",
       "file_type": "code",
       "source_file": "includes/classes/Auth.php",
-      "source_location": "L101",
+      "source_location": "L103",
       "id": "classes_auth_auth_user",
       "community": 2,
       "norm_label": ".user()"
@@ -313,7 +313,7 @@
       "label": ".check()",
       "file_type": "code",
       "source_file": "includes/classes/Auth.php",
-      "source_location": "L110",
+      "source_location": "L112",
       "id": "classes_auth_auth_check",
       "community": 5,
       "norm_label": ".check()"
@@ -322,7 +322,7 @@
       "label": ".isEmailVerified()",
       "file_type": "code",
       "source_file": "includes/classes/Auth.php",
-      "source_location": "L114",
+      "source_location": "L116",
       "id": "classes_auth_auth_isemailverified",
       "community": 5,
       "norm_label": ".isemailverified()"
@@ -331,7 +331,7 @@
       "label": ".isIdentityVerified()",
       "file_type": "code",
       "source_file": "includes/classes/Auth.php",
-      "source_location": "L120",
+      "source_location": "L122",
       "id": "classes_auth_auth_isidentityverified",
       "community": 5,
       "norm_label": ".isidentityverified()"
@@ -340,7 +340,7 @@
       "label": ".canApplyToJobs()",
       "file_type": "code",
       "source_file": "includes/classes/Auth.php",
-      "source_location": "L126",
+      "source_location": "L128",
       "id": "classes_auth_auth_canapplytojobs",
       "community": 5,
       "norm_label": ".canapplytojobs()"
@@ -349,7 +349,7 @@
       "label": ".verifyEmailByToken()",
       "file_type": "code",
       "source_file": "includes/classes/Auth.php",
-      "source_location": "L132",
+      "source_location": "L134",
       "id": "classes_auth_auth_verifyemailbytoken",
       "community": 5,
       "norm_label": ".verifyemailbytoken()"
@@ -358,7 +358,7 @@
       "label": ".resendEmailVerification()",
       "file_type": "code",
       "source_file": "includes/classes/Auth.php",
-      "source_location": "L149",
+      "source_location": "L151",
       "id": "classes_auth_auth_resendemailverification",
       "community": 5,
       "norm_label": ".resendemailverification()"
@@ -367,7 +367,7 @@
       "label": ".emailVerificationUrl()",
       "file_type": "code",
       "source_file": "includes/classes/Auth.php",
-      "source_location": "L159",
+      "source_location": "L161",
       "id": "classes_auth_auth_emailverificationurl",
       "community": 5,
       "norm_label": ".emailverificationurl()"
@@ -10079,9 +10079,9 @@
       "source_file": "includes/config.php",
       "source_location": "L133",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "includes_config_php",
-      "target": "includes_config_encodejobid",
-      "confidence_score": 1.0
+      "target": "includes_config_encodejobid"
     },
     {
       "relation": "contains",
@@ -10089,9 +10089,9 @@
       "source_file": "includes/config.php",
       "source_location": "L141",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "includes_config_php",
-      "target": "includes_config_decodejobid",
-      "confidence_score": 1.0
+      "target": "includes_config_decodejobid"
     },
     {
       "relation": "contains",
@@ -24036,5 +24036,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "4c227a164e5207aca885184896905ab17de8b3cd"
+  "built_at_commit": "40c08fde05430e90a17fc8ad01d7f8086b5e02a9"
 }

@@ -1301,7 +1301,23 @@
           </div>
           <div class="g2">
             <div class="fg"><label>Hourly Rate ($/hr)</label><input type="number" id="edit-rate" value="<?php echo $user['hourly_rate'] ?? 0; ?>"></div>
-            <div class="fg"><label>Country / Location</label><input type="text" id="edit-location" value="<?php echo addslashes($user['country'] ?? ''); ?>" placeholder="e.g. Berlin, Germany"></div>
+            <div class="fg">
+              <label>Country / Location</label>
+              <select id="edit-location" style="width:100%;padding:12px;border:1.5px solid var(--border);border-radius:8px;outline:none;background:#fff;color:var(--dark);font-size:14px;font-family:inherit">
+                <?php
+                $currentCountry = $user['country'] ?? 'United Kingdom';
+                $countries = [
+                    'United Kingdom', 'United States', 'Canada', 'Australia', 'India', 
+                    'Germany', 'France', 'Spain', 'Italy', 'Netherlands', 
+                    'South Africa', 'United Arab Emirates', 'Singapore', 'New Zealand'
+                ];
+                foreach ($countries as $c) {
+                    $sel = (strcasecmp($currentCountry, $c) === 0) ? 'selected' : '';
+                    echo "<option value=\"" . htmlspecialchars($c) . "\" $sel>" . htmlspecialchars($c) . "</option>";
+                }
+                ?>
+              </select>
+            </div>
           </div>
           <div class="fg"><label>Bio / Overview</label><textarea id="edit-bio" style="min-height:130px"><?php echo addslashes($user['bio'] ?? ''); ?></textarea></div>
           <div class="fg"><label>Profile Photo</label><input type="file" id="edit-avatar" accept="image/*"></div>

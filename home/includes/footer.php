@@ -126,6 +126,24 @@ const M={
       <div class="form-group"><label>Full Name</label><input type="text" name="name" required placeholder="John Doe"></div>
       <div class="form-group"><label>Email Address</label><input type="email" name="email" required placeholder="jane@company.com"></div>
       <div class="form-group"><label>Password</label><input type="password" name="password" required placeholder="Min. 8 characters"></div>
+      <div class="form-group"><label>Country</label>
+        <select name="country" required style="width:100%;padding:12px;border:1.5px solid #dce8d8;border-radius:8px;outline:none;background:#fff;color:var(--dark);font-size:14px;font-family:inherit">
+          <option value="United Kingdom">United Kingdom</option>
+          <option value="United States">United States</option>
+          <option value="Canada">Canada</option>
+          <option value="Australia">Australia</option>
+          <option value="India">India</option>
+          <option value="Germany">Germany</option>
+          <option value="France">France</option>
+          <option value="Spain">Spain</option>
+          <option value="Italy">Italy</option>
+          <option value="Netherlands">Netherlands</option>
+          <option value="South Africa">South Africa</option>
+          <option value="United Arab Emirates">United Arab Emirates</option>
+          <option value="Singapore">Singapore</option>
+          <option value="New Zealand">New Zealand</option>
+        </select>
+      </div>
       <div class="form-group"><label>I want to...</label>
         <div class="budget-opts">
           <label class="budget-opt sel" style="cursor:pointer" onclick="this.parentElement.querySelectorAll('.budget-opt').forEach(b=>b.classList.remove('sel'));this.classList.add('sel')">

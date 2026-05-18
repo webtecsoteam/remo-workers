@@ -40,8 +40,8 @@
     "semantic_hash": ""
   },
   "/Users/chiraglimbachiya/Sites/upwork/upwork project/home/includes/footer.php": {
-    "mtime": 1779129631.9037778,
-    "ast_hash": "fa2d02b8ad244aecd914d2621f172fcd",
+    "mtime": 1779130521.87121,
+    "ast_hash": "2dd049754cc00d209c5cea080e0a5ee0",
     "semantic_hash": ""
   },
   "/Users/chiraglimbachiya/Sites/upwork/upwork project/database/migrations/003_add_profile_fields.sql": {
@@ -85,8 +85,8 @@
     "semantic_hash": ""
   },
   "/Users/chiraglimbachiya/Sites/upwork/upwork project/includes/classes/Auth.php": {
-    "mtime": 1779128917.986688,
-    "ast_hash": "b90fe6e04c05c04cecdf8019f5b5af59",
+    "mtime": 1779130414.3147726,
+    "ast_hash": "d28e0a5d74e1c66ee255e875d67521ae",
     "semantic_hash": ""
   },
   "/Users/chiraglimbachiya/Sites/upwork/upwork project/includes/classes/Mailer.php": {
@@ -335,8 +335,8 @@
     "semantic_hash": ""
   },
   "/Users/chiraglimbachiya/Sites/upwork/upwork project/actions/register.php": {
-    "mtime": 1778832589.0407817,
-    "ast_hash": "b98dd7e662724e1c6b7f505aa5b25630",
+    "mtime": 1779130418.7893593,
+    "ast_hash": "2ca4376f8d94fc326333ce96f5578ba6",
     "semantic_hash": ""
   },
   "/Users/chiraglimbachiya/Sites/upwork/upwork project/actions/hire_freelancer.php": {
@@ -425,8 +425,8 @@
     "semantic_hash": ""
   },
   "/Users/chiraglimbachiya/Sites/upwork/upwork project/client/index.php": {
-    "mtime": 1779129577.7161686,
-    "ast_hash": "483ea6c106e44c54171c31d403666b96",
+    "mtime": 1779130617.4796312,
+    "ast_hash": "042679a531d7481a2332ef9db4b91a23",
     "semantic_hash": ""
   },
   "/Users/chiraglimbachiya/Sites/upwork/upwork project/client/includes/header.php": {
@@ -880,8 +880,8 @@
     "semantic_hash": ""
   },
   "/Users/chiraglimbachiya/Sites/upwork/upwork project/freelancer/includes/footer.php": {
-    "mtime": 1779130266.9367266,
-    "ast_hash": "92effbbd50355a4966de475add704935",
+    "mtime": 1779130609.7737596,
+    "ast_hash": "00b07365a94f18e0584997f6912e40b2",
     "semantic_hash": ""
   },
   "/Users/chiraglimbachiya/Sites/upwork/upwork project/freelancer/includes/footer_test.js": {

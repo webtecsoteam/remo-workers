@@ -6,6 +6,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = $_POST['email'] ?? '';
     $password = $_POST['password'] ?? '';
     $role = $_POST['role'] ?? '';
+    $country = $_POST['country'] ?? '';
     
     $isAjax = (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest');
     
@@ -21,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
         try {
-            if (Auth::register($name, $email, $password, $role)) {
+            if (Auth::register($name, $email, $password, $role, $country)) {
                 Auth::login($email, $password);
                 $targetUrl = ($role === 'client') ? baseUrl('client') : baseUrl('remoworkers-dashboard');
                 

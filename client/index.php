@@ -904,7 +904,20 @@ window.closeModal = function() {
           </div>
           <div>
             <label style="display:block;font-size:13px;font-weight:700;margin-bottom:8px;color:var(--uw-black)">Country / Location</label>
-            <input type="text" id="client-country" value="<?php echo htmlspecialchars($user['country'] ?? ''); ?>" style="width:100%;padding:12px;border:1.5px solid var(--uw-border);border-radius:10px;outline:none" placeholder="e.g. United States">
+            <select id="client-country" style="width:100%;padding:12px;border:1.5px solid var(--uw-border);border-radius:10px;outline:none;background:#fff;color:var(--uw-black);font-size:14px;font-family:inherit">
+              <?php
+              $currentCountry = $user['country'] ?? 'United Kingdom';
+              $countries = [
+                  'United Kingdom', 'United States', 'Canada', 'Australia', 'India', 
+                  'Germany', 'France', 'Spain', 'Italy', 'Netherlands', 
+                  'South Africa', 'United Arab Emirates', 'Singapore', 'New Zealand'
+              ];
+              foreach ($countries as $c) {
+                  $sel = (strcasecmp($currentCountry, $c) === 0) ? 'selected' : '';
+                  echo "<option value=\"" . htmlspecialchars($c) . "\" $sel>" . htmlspecialchars($c) . "</option>";
+              }
+              ?>
+            </select>
           </div>
         </div>
 

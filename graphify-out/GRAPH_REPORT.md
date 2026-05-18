@@ -1,7 +1,7 @@
 # Graph Report - upwork project  (2026-05-19)
 
 ## Corpus Check
-- 210 files · ~563,626 words
+- 210 files · ~563,692 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `4c227a16`
+- Built from commit: `40c08fde`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 

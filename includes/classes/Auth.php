@@ -3,15 +3,16 @@ class Auth {
     public const CONNECTS_PER_APPLICATION = 5;
     public const FREELANCER_WELCOME_CONNECTS = 5;
 
-    public static function register($name, $email, $password, $role) {
+    public static function register($name, $email, $password, $role, $country = null) {
         ensureFreelancerSchema();
         $db = getDB();
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
         $token = bin2hex(random_bytes(32));
         $connects = ($role === 'freelancer') ? self::FREELANCER_WELCOME_CONNECTS : 0;
 
-        // Auto detect country based on IP and headers
-        $country = 'United States'; // standard default fallback
+        // Auto detect country based on IP and headers if not provided
+        if (empty($country)) {
+            $country = 'United States'; // standard default fallback
         $ip = $_SERVER['REMOTE_ADDR'] ?? '';
         if (!empty($_SERVER['HTTP_CF_CONNECTING_IP'])) {
             $ip = $_SERVER['HTTP_CF_CONNECTING_IP'];
@@ -55,6 +56,7 @@ class Auth {
                 }
             }
         }
+    }
 
         $stmt = $db->prepare("
             INSERT INTO users (name, email, password, role, connects, email_verification_token, country)
