@@ -430,16 +430,13 @@
       t: 'Add Funds to Balance', b: `
     <div class="balance-pill" id="add-funds-current-bal-pill">💰 Current Balance: $0.00</div>
     <div class="fg"><label>Amount to Add ($)</label><input type="number" placeholder="e.g. 500" min="1" id="add-funds-amount" oninput="updateAddFundsSummary(this)"></div>
-    <div class="fg"><label>Charge to</label></div>
-    <div class="pay-method selected" onclick="selectPayMethod(this)">
-      <div class="pay-method-icon">💳</div>
-      <div class="pay-method-info"><div class="pay-method-name">Visa ending in 4821</div><div class="pay-method-sub">Expires 09/27 · Primary</div></div>
-      <span class="pay-method-badge">PRIMARY</span>
+    
+    <div style="background:#f8fafc;border:1.5px dashed var(--uw-border);border-radius:10px;padding:16px;margin-bottom:20px;text-align:center;margin-top:16px">
+      <div style="font-size:24px;margin-bottom:6px">🔒</div>
+      <div style="font-size:13.5px;font-weight:700;color:var(--uw-black);margin-bottom:4px">Secure Paystack Checkout</div>
+      <div style="font-size:11.5px;color:var(--uw-gray);line-height:1.5">You will be securely redirected to Paystack to complete your deposit. All major debit/credit cards, bank transfers, and mobile money options are fully supported.</div>
     </div>
-    <div class="pay-method" onclick="selectPayMethod(this)">
-      <div class="pay-method-icon">🏦</div>
-      <div class="pay-method-info"><div class="pay-method-name">Mastercard ending in 3392</div><div class="pay-method-sub">Expires 03/26</div></div>
-    </div>
+
     <div class="fund-summary">
       <div class="fund-summary-row"><span style="color:var(--uw-gray)">Amount</span><span id="add-total">$0.00</span></div>
       <div class="fund-summary-row"><span style="color:var(--uw-gray)">Processing fee</span><span>$0.00</span></div>

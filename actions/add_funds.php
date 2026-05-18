@@ -3,6 +3,7 @@ ob_start();
 header('Content-Type: application/json');
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/classes/Auth.php';
+require_once __DIR__ . '/../includes/classes/Paystack.php';
 
 function json_response($data) {
     ob_end_clean();
@@ -16,7 +17,6 @@ if (!$user) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $db = getDB();
     $amount = floatval($_POST['amount'] ?? 0);
 
     if ($amount < 1) {
@@ -24,35 +24,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     try {
-        $db->beginTransaction();
+        $paystack = new Paystack();
+        $callbackUrl = baseUrl('actions/paystack_callback.php');
 
-        // 1. Update user balance
-        $stmt = $db->prepare("UPDATE users SET balance = balance + ? WHERE id = ?");
-        $stmt->execute([$amount, $user['id']]);
+        $metadata = [
+            'user_id' => $user['id'],
+            'type' => 'deposit'
+        ];
 
-        // 2. Insert payment record
-        $stmt = $db->prepare("
-            INSERT INTO payments (transaction_id, payer_id, payee_id, amount, platform_fee, currency, payment_method, status)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        ");
-        $txId = 'DEP-' . strtoupper(substr(uniqid(), -8));
-        $stmt->execute([
-            $txId,
-            NULL, // NULL for external deposit
-            $user['id'],
-            $amount,
-            0,
-            'USD',
-            $_POST['method'] ?? 'Visa',
-            'completed'
-        ]);
+        $response = $paystack->initialize($user['email'], $amount, $callbackUrl, $metadata);
 
-        $db->commit();
-        json_response(['success' => true, 'message' => 'Funds added successfully', 'new_balance' => $user['balance'] + $amount]);
+        if ($response['status'] && isset($response['data']['authorization_url'])) {
+            // Record pending transaction in database
+            $db = getDB();
+            $stmt = $db->prepare("INSERT INTO payments (transaction_id, payer_id, payee_id, amount, status, payment_method) VALUES (?, ?, ?, ?, ?, ?)");
+            $stmt->execute([
+                $response['data']['reference'],
+                $user['id'],
+                $user['id'],
+                $amount,
+                'pending',
+                'paystack'
+            ]);
+
+            json_response([
+                'success' => true,
+                'authorization_url' => $response['data']['authorization_url'],
+                'reference' => $response['data']['reference']
+            ]);
+        } else {
+            json_response([
+                'success' => false,
+                'error' => $response['message'] ?? 'Failed to initialize Paystack transaction'
+            ]);
+        }
 
     } catch (Exception $e) {
-        $db->rollBack();
-        json_response(['success' => false, 'error' => 'Database error: ' . $e->getMessage()]);
+        json_response(['success' => false, 'error' => 'Error initializing payment: ' . $e->getMessage()]);
     }
 } else {
     json_response(['success' => false, 'error' => 'Invalid request method']);

@@ -20,8 +20,8 @@ $openProposalsCount = $db->prepare("SELECT COUNT(*) FROM proposals p JOIN jobs j
 $openProposalsCount->execute([$user['id']]);
 $stats['open_proposals'] = $openProposalsCount->fetchColumn();
 
-$totalSpent = $db->prepare("SELECT SUM(amount) FROM payments WHERE payer_id = ? AND status = 'completed' AND MONTH(created_at) = MONTH(CURRENT_DATE())");
-$totalSpent->execute([$user['id']]);
+$totalSpent = $db->prepare("SELECT SUM(amount) FROM payments WHERE payer_id = ? AND payee_id != ? AND status = 'completed' AND MONTH(created_at) = MONTH(CURRENT_DATE())");
+$totalSpent->execute([$user['id'], $user['id']]);
 $stats['total_spent'] = $totalSpent->fetchColumn() ?: 0;
 
 // 2. Active Contracts List
@@ -173,18 +173,19 @@ foreach ($allContracts as $ac) {
 }
 // 9. Transaction History for Payments Page
 $clientTransactionsStmt = $db->prepare("
-    SELECT p.*, u.name as freelancer_name 
+    SELECT p.*, u.name as freelancer_name, j.title as job_title 
     FROM payments p 
     LEFT JOIN users u ON (p.payee_id = u.id AND p.payer_id = ?) OR (p.payer_id = u.id AND p.payee_id = ?)
-    WHERE (p.payer_id = ? OR p.payee_id = ?) AND p.payment_method != 'Escrow Release'
+    LEFT JOIN jobs j ON p.job_id = j.id
+    WHERE (p.payer_id = ? OR p.payee_id = ?) AND (p.payment_method != 'Escrow Release' OR p.payment_method IS NULL)
     ORDER BY p.created_at DESC LIMIT 50
 ");
 $clientTransactionsStmt->execute([$user['id'], $user['id'], $user['id'], $user['id']]);
 $clientTransactions = $clientTransactionsStmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Monthly spending comparison
-$lastMonthSpentStmt = $db->prepare("SELECT SUM(amount) FROM payments WHERE payer_id = ? AND status = 'completed' AND MONTH(created_at) = MONTH(CURRENT_DATE() - INTERVAL 1 MONTH)");
-$lastMonthSpentStmt->execute([$user['id']]);
+$lastMonthSpentStmt = $db->prepare("SELECT SUM(amount) FROM payments WHERE payer_id = ? AND payee_id != ? AND status = 'completed' AND MONTH(created_at) = MONTH(CURRENT_DATE() - INTERVAL 1 MONTH)");
+$lastMonthSpentStmt->execute([$user['id'], $user['id']]);
 $lastMonthSpent = $lastMonthSpentStmt->fetchColumn() ?: 0;
 $spendChange = 0;
 if ($lastMonthSpent > 0) {
@@ -192,8 +193,8 @@ if ($lastMonthSpent > 0) {
 }
 
 // Escrow calculation (pending payments)
-$escrowStmt = $db->prepare("SELECT SUM(amount) FROM payments WHERE payer_id = ? AND status = 'pending'");
-$escrowStmt->execute([$user['id']]);
+$escrowStmt = $db->prepare("SELECT SUM(amount) FROM payments WHERE payer_id = ? AND payee_id != ? AND status = 'pending'");
+$escrowStmt->execute([$user['id'], $user['id']]);
 $escrowAmount = $escrowStmt->fetchColumn() ?: 0;
 
 // Monthly spend for chart (last 7 months including current)
@@ -202,8 +203,8 @@ $maxSpend = 1; // Avoid division by zero
 for ($i = 6; $i >= 0; $i--) {
     $monthDate = date('Y-m-d', strtotime("-$i months"));
     $monthLabel = date('M', strtotime($monthDate));
-    $stmt = $db->prepare("SELECT SUM(amount) FROM payments WHERE payer_id = ? AND status = 'completed' AND MONTH(created_at) = MONTH(?) AND YEAR(created_at) = YEAR(?)");
-    $stmt->execute([$user['id'], $monthDate, $monthDate]);
+    $stmt = $db->prepare("SELECT SUM(amount) FROM payments WHERE payer_id = ? AND payee_id != ? AND status = 'completed' AND MONTH(created_at) = MONTH(?) AND YEAR(created_at) = YEAR(?)");
+    $stmt->execute([$user['id'], $user['id'], $monthDate, $monthDate]);
     $amt = (float)$stmt->fetchColumn() ?: 0;
     $monthlySpendData[] = ['label' => $monthLabel, 'amount' => $amt];
     if ($amt > $maxSpend) $maxSpend = $amt;
@@ -265,14 +266,14 @@ $talentCounts = [
 // 11. Reports Data
 $reportStatsStmt = $db->prepare("
     SELECT 
-        (SELECT COALESCE(SUM(amount + COALESCE(platform_fee, 0)), 0) FROM payments WHERE payer_id = ? AND payment_method != 'Escrow Release') as total_spent_all_time,
+        (SELECT COALESCE(SUM(amount + COALESCE(platform_fee, 0)), 0) FROM payments WHERE payer_id = ? AND payee_id != ? AND payment_method != 'Escrow Release') as total_spent_all_time,
         (SELECT COUNT(DISTINCT id) FROM jobs WHERE client_id = ?) as total_jobs_posted,
         (SELECT COUNT(DISTINCT freelancer_id) FROM contracts WHERE client_id = ?) as freelancers_hired,
         (SELECT COUNT(*) FROM contracts WHERE client_id = ? AND status = 'completed') as contracts_completed,
         (SELECT COALESCE(SUM(wl.hours), 0) FROM work_logs wl JOIN contracts c ON wl.contract_id = c.id WHERE c.client_id = ?) as total_hours_tracked,
         (SELECT COUNT(*) FROM contracts WHERE client_id = ? AND status = 'disputed') as disputes_filed
 ");
-$reportStatsStmt->execute([$user['id'], $user['id'], $user['id'], $user['id'], $user['id'], $user['id']]);
+$reportStatsStmt->execute([$user['id'], $user['id'], $user['id'], $user['id'], $user['id'], $user['id'], $user['id']]);
 $reportStats = $reportStatsStmt->fetch(PDO::FETCH_ASSOC);
 
 // Fetch dynamic Spend by Category
@@ -1229,7 +1230,6 @@ window.closeModal = function() {
           <div class="pg-sub">Billing balance, transaction history & payment methods</div>
         </div>
         <div style="display:flex;gap:10px">
-          <button class="btn btn-w" onclick="openModal('manage-cards')">Manage Cards</button>
           <button class="btn btn-g" onclick="openModal('add-funds')">+ Add Funds</button>
         </div>
       </div>
@@ -1277,8 +1277,8 @@ window.closeModal = function() {
                   ?>
                   <tr>
                     <td><?php echo date('M j, Y', strtotime($ct['created_at'])); ?></td>
-                    <td><?php echo $isDeposit ? 'Add Funds (Deposit)' : 'Payment for contract'; ?></td>
-                    <td><?php echo $ct['freelancer_name'] ?: ($isDeposit ? 'Self (Deposit)' : 'System'); ?></td>
+                    <td><?php echo $isDeposit ? 'Add Funds (Deposit)' : (!empty($ct['job_title']) ? 'Payment for: ' . htmlspecialchars($ct['job_title']) : 'Payment for contract'); ?></td>
+                    <td><?php echo $isDeposit ? (strcasecmp($ct['payment_method'] ?? '', 'paystack') === 0 ? 'Paystack' : ucfirst($ct['payment_method'] ?? 'Deposit')) : ($ct['freelancer_name'] ?: 'System'); ?></td>
                     <td><span class="badge <?php echo $isDeposit ? 'b-blue' : 'b-purple'; ?>"><?php echo $isDeposit ? 'Deposit' : 'Fixed'; ?></span></td>
                     <td style="font-weight:600;color:<?php echo $isDeposit ? 'var(--uw-green)' : 'var(--uw-dark)'; ?>">
                       <?php echo $isDeposit ? '+' : ''; ?>$<?php echo number_format($ct['amount'], 2); ?>
@@ -1309,9 +1309,9 @@ window.closeModal = function() {
                 ?>
                 <div style="padding:15px 0;border-bottom:1px solid var(--uw-border);display:flex;justify-content:space-between;align-items:flex-start">
                   <div style="flex:1;min-width:0">
-                    <div style="font-weight:700;font-size:14px;color:var(--uw-black);margin-bottom:2px"><?php echo $isDeposit ? 'Add Funds (Deposit)' : 'Payment for contract'; ?></div>
+                    <div style="font-weight:700;font-size:14px;color:var(--uw-black);margin-bottom:2px"><?php echo $isDeposit ? 'Add Funds (Deposit)' : (!empty($ct['job_title']) ? 'Payment for: ' . htmlspecialchars($ct['job_title']) : 'Payment for contract'); ?></div>
                     <div style="font-size:11.5px;color:var(--uw-gray);margin-bottom:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
-                      <?php echo $ct['freelancer_name'] ?: ($isDeposit ? 'Self (Deposit)' : 'System'); ?>
+                      <?php echo $isDeposit ? (strcasecmp($ct['payment_method'] ?? '', 'paystack') === 0 ? 'Paystack' : ucfirst($ct['payment_method'] ?? 'Deposit')) : ($ct['freelancer_name'] ?: 'System'); ?>
                     </div>
                     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
                       <span class="badge <?php echo $isDeposit ? 'b-blue' : 'b-purple'; ?>" style="font-size:9px;padding:1px 6px"><?php echo $isDeposit ? 'Deposit' : 'Fixed'; ?></span>
