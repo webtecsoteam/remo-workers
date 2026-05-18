@@ -1,16 +1,16 @@
 # Graph Report - upwork project  (2026-05-18)
 
 ## Corpus Check
-- 202 files · ~548,503 words
+- 208 files · ~555,246 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1084 nodes · 1333 edges · 263 communities (238 shown, 25 thin omitted)
-- Extraction: 92% EXTRACTED · 8% INFERRED · 0% AMBIGUOUS · INFERRED: 103 edges (avg confidence: 0.8)
+- 1103 nodes · 1353 edges · 274 communities (249 shown, 25 thin omitted)
+- Extraction: 92% EXTRACTED · 8% INFERRED · 0% AMBIGUOUS · INFERRED: 105 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `7c787a33`
+- Built from commit: `65879678`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -52,7 +52,6 @@
 - [[_COMMUNITY_Community 175|Community 175]]
 - [[_COMMUNITY_Community 176|Community 176]]
 - [[_COMMUNITY_Community 177|Community 177]]
-- [[_COMMUNITY_Community 178|Community 178]]
 - [[_COMMUNITY_Community 179|Community 179]]
 - [[_COMMUNITY_Community 180|Community 180]]
 - [[_COMMUNITY_Community 183|Community 183]]
@@ -68,6 +67,7 @@
 - [[_COMMUNITY_Community 193|Community 193]]
 - [[_COMMUNITY_Community 194|Community 194]]
 - [[_COMMUNITY_Community 195|Community 195]]
+- [[_COMMUNITY_Community 263|Community 263]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `PHPMailer` - 130 edges
@@ -78,8 +78,8 @@
 6. `InstalledVersions` - 16 edges
 7. `toast()` - 16 edges
 8. `PHPMailer – A full-featured email creation and transfer class for PHP` - 16 edges
-9. `job` - 13 edges
-10. `POP3` - 13 edges
+9. `getDB()` - 13 edges
+10. `job` - 13 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `sendMsg()` --calls--> `toast()`  [INFERRED]
@@ -93,7 +93,7 @@
 - `validateAndGoStep3()` --calls--> `toast()`  [INFERRED]
   scratch/verification_test_linter.js → freelancer/includes/footer_test.js
 
-## Communities (263 total, 25 thin omitted)
+## Communities (274 total, 25 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.12
@@ -116,8 +116,8 @@ Cohesion: 0.05
 Nodes (21): addNewBalEl, addTotalEl, backdrop, balEl, btn, c, cardSection, current (+13 more)
 
 ### Community 5 - "Community 5"
-Cohesion: 0.12
-Nodes (12): Auth, Mailer, baseUrl(), ensureFreelancerSchema(), ensurePlatformSettingsTable(), env(), getDB(), getFreelancerStats() (+4 more)
+Cohesion: 0.1
+Nodes (14): handleChargeSuccess(), Auth, Mailer, Paystack, baseUrl(), ensureFreelancerSchema(), ensurePlatformSettingsTable(), env() (+6 more)
 
 ### Community 6 - "Community 6"
 Cohesion: 0.04
@@ -215,12 +215,12 @@ Nodes (3): autoload-dev, psr-4, PHPMailer\\Test\\
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `empty` connect `Community 174` to `Community 5`, `Community 166`, `Community 6`, `Community 169`, `Community 172`, `Community 173`, `Community 175`, `Community 178`, `Community 181`, `Community 182`?**
-  _High betweenness centrality (0.121) - this node is a cross-community bridge._
+- **Why does `empty` connect `Community 174` to `Community 5`, `Community 166`, `Community 6`, `Community 263`, `Community 169`, `Community 173`, `Community 175`, `Community 178`, `Community 181`, `Community 182`?**
+  _High betweenness centrality (0.127) - this node is a cross-community bridge._
 - **Why does `now` connect `Community 2` to `Community 7`?**
-  _High betweenness centrality (0.118) - this node is a cross-community bridge._
-- **Why does `PHPMailer` connect `Community 166` to `Community 172`, `Community 173`, `Community 174`, `Community 178`, `Community 181`, `Community 182`?**
-  _High betweenness centrality (0.088) - this node is a cross-community bridge._
+  _High betweenness centrality (0.113) - this node is a cross-community bridge._
+- **Why does `PHPMailer` connect `Community 166` to `Community 263`, `Community 172`, `Community 173`, `Community 174`, `Community 178`, `Community 181`, `Community 182`?**
+  _High betweenness centrality (0.091) - this node is a cross-community bridge._
 - **Are the 34 inferred relationships involving `empty` (e.g. with `getFreelancerStats()` and `.isEmailVerified()`) actually correct?**
   _`empty` has 34 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `phpmailer/phpmailer`, `vFiles`, `JOBS` to the rest of the system?**

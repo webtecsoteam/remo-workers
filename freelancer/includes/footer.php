@@ -1463,35 +1463,11 @@
     .then(res => res.json())
     .then(data => {
       if (data.success) {
-        toast('Success', 'Profile updated successfully!');
-        if (data.avatar_url) {
-          // Update avatars in UI
-          const url = BASE_URL + data.avatar_url;
-          document.querySelectorAll('.sb-av, .tb-av, .profile-av').forEach(el => {
-            el.innerHTML = `<img src="${url}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`;
-          });
-          // Also update the large profile photo if it exists
-          const largeAv = document.querySelector('#page-profile [style*="width:68px"]');
-          if (largeAv) {
-            largeAv.innerHTML = `<img src="${url}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`;
-          }
-        }
+        toast('Success! 🎉', 'Profile updated successfully.');
         closeModal();
-        // Update UI manually to avoid reload
-        document.querySelector('#page-profile #field-title').textContent = title || 'Professional Specialist';
-        document.querySelector('#page-profile #field-rate').textContent = '$' + parseFloat(rate).toFixed(2) + '/hr';
-        document.querySelector('#page-profile #field-location').textContent = loc || 'Global';
-        document.querySelector('#page-profile .sb-name')?.forEach(el => el.textContent = name); // Update sidebar if visible
-        // Update sidebar user section too
-        const sbName = document.querySelector('.sb-name');
-        if(sbName) sbName.textContent = name;
-        const sbAv = document.querySelector('.sb-av');
-        if(sbAv) sbAv.textContent = name.substring(0,2).toUpperCase();
-        
-        // Also update the bio in the overview section
-        const bioEl = document.querySelector('#page-profile .card-body div[style*="line-height: 1.7"]');
-        if(bioEl) bioEl.innerHTML = bio.replace(/\n/g, '<br>');
-
+        setTimeout(() => {
+          location.reload();
+        }, 1000);
       } else {
         toast('Error', data.error);
       }
