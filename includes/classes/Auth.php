@@ -104,6 +104,14 @@ class Auth {
         if (!isset($_SESSION['user_id'])) return null;
         ensureFreelancerSchema();
         $db = getDB();
+        
+        // Update last_active_at at most once per minute to optimize database writes
+        $db->prepare("
+            UPDATE users 
+            SET last_active_at = NOW() 
+            WHERE id = ? AND (last_active_at IS NULL OR last_active_at < DATE_SUB(NOW(), INTERVAL 1 MINUTE))
+        ")->execute([$_SESSION['user_id']]);
+        
         $stmt = $db->prepare("SELECT * FROM users WHERE id = ?");
         $stmt->execute([$_SESSION['user_id']]);
         return $stmt->fetch();

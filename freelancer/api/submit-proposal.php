@@ -126,6 +126,14 @@ try {
         -$connectsCost
     ]);
 
+    // Automatically accept any pending invitation for this job
+    $acceptInvite = $db->prepare("
+        UPDATE job_invitations 
+        SET status = 'accepted' 
+        WHERE job_id = ? AND freelancer_id = ? AND status = 'pending'
+    ");
+    $acceptInvite->execute([$jobId, $user['id']]);
+
     $db->commit();
     ob_end_clean();
     echo json_encode([

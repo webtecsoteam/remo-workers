@@ -105,22 +105,48 @@ try {
     $freelancerName = $freelancerUser['name'] ?? 'Freelancer';
 
     if (!empty($freelancerEmail)) {
+        require_once __DIR__ . '/../../includes/classes/Mailer.php';
+        
         $subject = "Milestone Funded: " . $milestone['description'];
-        $body = "Hi " . $freelancerName . ",\n\n";
-        $body .= "Great news! The client (" . $user['name'] . ") has funded your milestone:\n";
-        $body .= "- Description: " . $milestone['description'] . "\n";
-        $body .= "- Amount: $" . number_format($amount, 2) . "\n\n";
-        $body .= "The funds are now held securely in escrow. You can start working on this milestone and submit your work when ready.\n\n";
-        $body .= "Best regards,\n";
-        $body .= "Remoworkers Support Team";
+        $dashboardUrl = baseUrl('remoworkers-dashboard');
+        $logoUrl = baseUrl('favicon.png');
         
-        $headers = "From: support@remoworkers.com\r\n" .
-                   "Reply-To: support@remoworkers.com\r\n" .
-                   "X-Mailer: PHP/" . phpversion();
-        
-        // Suppress warning in case mail configuration is missing
-        @mail($freelancerEmail, $subject, $body, $headers);
-        
+        $body = "
+        <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 25px; border: 1px solid #d5e0d5; border-radius: 12px; background-color: #ffffff;'>
+            <div style='text-align: center; margin-bottom: 25px;'>
+                <img src='" . $logoUrl . "' style='width: 32px; height: 32px; vertical-align: middle; margin-right: 8px;'>
+                <span style='color: #14a800; font-size: 24px; font-weight: 800; vertical-align: middle;'>RemoWorkers</span>
+            </div>
+            <div style='font-size: 15px; line-height: 1.6; color: #374151;'>
+                <p>Hello " . htmlspecialchars($freelancerName) . ",</p>
+                <p>Great news! The client (<strong>" . htmlspecialchars($user['name']) . "</strong>) has funded your milestone:</p>
+                <div style='background-color: #f4fbf4; border: 1px solid #d1ebd1; border-radius: 8px; padding: 16px; margin: 20px 0;'>
+                    <table style='width: 100%; border-collapse: collapse; font-size: 14.5px;'>
+                        <tr>
+                            <td style='padding: 6px 0; color: #6b7280; width: 100px;'>Description:</td>
+                            <td style='padding: 6px 0; font-weight: bold; color: #111827;'>" . htmlspecialchars($milestone['description']) . "</td>
+                        </tr>
+                        <tr>
+                            <td style='padding: 6px 0; color: #6b7280;'>Amount:</td>
+                            <td style='padding: 6px 0; font-weight: bold; color: #111827;'>$" . number_format($amount, 2) . "</td>
+                        </tr>
+                        <tr>
+                            <td style='padding: 6px 0; color: #6b7280;'>Status:</td>
+                            <td style='padding: 6px 0;'><span style='background-color: #d1f2d1; color: #14a800; padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;'>🛡️ Escrow Funded</span></td>
+                        </tr>
+                    </table>
+                </div>
+                <p>The funds are now held securely in escrow. You can start working on this milestone and submit your work when ready.</p>
+                <div style='text-align: center; margin: 35px 0;'>
+                    <a href='" . $dashboardUrl . "' style='background-color: #14a800; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 50px; font-weight: bold; display: inline-block; font-size: 15px; box-shadow: 0 4px 12px rgba(20,168,0,0.2);'>Start Working</a>
+                </div>
+                <hr style='border: 0; border-top: 1px solid #d5e0d5; margin: 30px 0;'>
+                <p style='font-size: 11px; color: #9ca3af;'>Best regards,<br><strong>The RemoWorkers Team</strong></p>
+            </div>
+        </div>";
+
+        Mailer::send($freelancerEmail, $subject, $body);
+
         // Write a copy to a local test log file for easy visibility
         $logDir = __DIR__ . '/../../scratch';
         if (!file_exists($logDir)) {
@@ -129,7 +155,7 @@ try {
         $logFile = $logDir . '/email_notifications.log';
         $logEntry = "[" . date('Y-m-d H:i:s') . "] EMAIL TO: " . $freelancerEmail . " (" . $freelancerName . ")\n";
         $logEntry .= "SUBJECT: " . $subject . "\n";
-        $logEntry .= "BODY:\n" . $body . "\n";
+        $logEntry .= "BODY (HTML):\n" . $body . "\n";
         $logEntry .= "--------------------------------------------------\n\n";
         file_put_contents($logFile, $logEntry, FILE_APPEND);
     }

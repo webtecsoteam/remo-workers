@@ -206,6 +206,9 @@ function ensureFreelancerSchema() {
         if (!in_array('password_reset_expires_at', $cols)) {
             $db->exec("ALTER TABLE users ADD COLUMN password_reset_expires_at TIMESTAMP NULL");
         }
+        if (!in_array('last_active_at', $cols)) {
+            $db->exec("ALTER TABLE users ADD COLUMN last_active_at TIMESTAMP NULL DEFAULT NULL");
+        }
     } catch (PDOException $e) {
         if (defined('APP_DEBUG') && APP_DEBUG) {
             error_log("Freelancer Schema Check/Migration failed: " . $e->getMessage());
@@ -230,6 +233,26 @@ function ensureFreelancerSchema() {
         ");
     } catch (PDOException $e) {
         // Silently continue if table already exists or has engine mismatch
+    }
+
+    // Self-healing job_invitations table initialization
+    try {
+        $db->exec("
+            CREATE TABLE IF NOT EXISTS job_invitations (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                job_id INT NOT NULL,
+                client_id INT NOT NULL,
+                freelancer_id INT NOT NULL,
+                message TEXT,
+                status ENUM('pending', 'accepted', 'declined') DEFAULT 'pending',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE CASCADE,
+                FOREIGN KEY (client_id) REFERENCES users(id) ON DELETE CASCADE,
+                FOREIGN KEY (freelancer_id) REFERENCES users(id) ON DELETE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+        ");
+    } catch (PDOException $e) {
+        // Silently continue
     }
     
     $done = true;

@@ -62,6 +62,7 @@
   const SERVER_TIME = "<?php echo date('Y-m-d H:i:s'); ?>";
   const SAVED_IDS = <?php echo json_encode(array_column($savedJobs ?? [], 'id'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?: '[]'; ?>;
   let PROPOSALS = <?php echo json_encode($submittedProposals ?? [], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?: '[]'; ?>;
+  let INVITATIONS = <?php echo json_encode($jobInvitations ?? [], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?: '[]'; ?>;
   const CONTRACTS = <?php echo json_encode($allContracts ?? [], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?: '[]'; ?>;
   const CONNECTS_PACKAGES = <?php
     try {
@@ -371,19 +372,91 @@
     }).join('');
   }
 
-  function renderProposals(filter = 'Active') {
+  window.acceptInvitation = function(inviteId, jobId) {
+    window.openApplyModal(jobId);
+  };
+
+  window.declineInvitation = function(inviteId, btn) {
+    if (!confirm('Are you sure you want to decline this invitation?')) return;
+    
+    btn.disabled = true;
+    btn.textContent = 'Declining...';
+    
+    fetch(BASE_URL + 'freelancer/api/decline-invite.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ invitation_id: inviteId })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        toast('Success', 'Invitation declined.');
+        // Remove from local array and re-render
+        INVITATIONS = INVITATIONS.filter(i => i.id != inviteId);
+        // Update count on tab
+        const inviteTab = document.querySelector('.tab-bar .tab:first-child');
+        if (inviteTab) {
+          inviteTab.textContent = `Invitations (${INVITATIONS.length})`;
+        }
+        renderProposals('Invitations');
+      } else {
+        toast('Error', data.message);
+        btn.disabled = false;
+        btn.textContent = 'Decline';
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      toast('Error', 'Failed to decline invitation.');
+      btn.disabled = false;
+      btn.textContent = 'Decline';
+    });
+  };
+
+  function renderProposals(filter = 'Invitations') {
     const list = document.getElementById('proposals-list');
     if (!list) return;
     
+    // Clean filter from count, e.g. "Invitations (1)" -> "Invitations"
+    let cleanFilter = filter.split(' ')[0].split('(')[0].trim();
+    
     const title = document.getElementById('proposals-list-title');
-    if (title) title.textContent = filter + ' Proposals';
+    if (title) title.textContent = cleanFilter + ' Proposals';
+
+    if (cleanFilter === 'Invitations') {
+      if (INVITATIONS.length === 0) {
+        list.innerHTML = `<div style="text-align:center;padding:60px;color:var(--muted)">
+          <div style="font-size:40px;margin-bottom:15px">✉️</div>
+          <div>No pending invitations found.</div>
+        </div>`;
+        return;
+      }
+      list.innerHTML = INVITATIONS.map(i => {
+        return `
+          <div class="contract-row" style="padding:22px;border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;align-items:center;gap:15px;justify-content:space-between">
+            <div style="flex:1;min-width:260px">
+              <div style="font-weight:700;font-size:16px;margin-bottom:6px;color:var(--dark)">${i.job_title}</div>
+              <div style="font-size:13px;color:var(--muted);margin-bottom:8px">Invited by <strong>${i.client_name}</strong> on ${new Date(i.created_at).toLocaleDateString()}</div>
+              <div style="background:#f9fafb;padding:10px 15px;border-radius:6px;font-size:13.5px;color:#4b5563;border-left:3px solid var(--primary);font-style:italic">
+                "${i.message || 'No message attached.'}"
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
+              <button class="btn btn-g btn-sm" onclick="acceptInvitation(${i.id}, ${i.job_id})">Apply Now</button>
+              <button class="btn btn-w btn-sm" onclick="declineInvitation(${i.id}, this)">Decline</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+      return;
+    }
 
     let filtered = [...PROPOSALS];
-    if (filter === 'Active') {
+    if (cleanFilter === 'Active') {
       filtered = PROPOSALS.filter(p => p.status === 'pending' || p.status === 'accepted' || p.status === 'interviewing');
-    } else if (filter === 'Submitted') {
+    } else if (cleanFilter === 'Submitted') {
       filtered = PROPOSALS.filter(p => p.status === 'pending');
-    } else if (filter === 'Archived') {
+    } else if (cleanFilter === 'Archived') {
       filtered = PROPOSALS.filter(p => p.status === 'rejected' || p.status === 'withdrawn');
     }
 

@@ -244,23 +244,53 @@ $savedTalentStmt = $db->prepare("SELECT u.* FROM users u JOIN saved_talent s ON 
 $savedTalentStmt->execute([$user['id']]);
 $savedTalent = $savedTalentStmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Previously Hired Talent
-$hiredTalentStmt = $db->prepare("
+// Active Hired Team
+$teamTalentStmt = $db->prepare("
     SELECT u.*, MAX(c.created_at) as last_hired_at, 
     (SELECT status FROM contracts WHERE freelancer_id = u.id AND client_id = ? ORDER BY created_at DESC LIMIT 1) as last_contract_status
     FROM users u 
     JOIN contracts c ON u.id = c.freelancer_id 
-    WHERE c.client_id = ? 
+    WHERE c.client_id = ? AND c.status IN ('active', 'paused')
     GROUP BY u.id 
     ORDER BY last_hired_at DESC
 ");
-$hiredTalentStmt->execute([$user['id'], $user['id']]);
-$hiredTalent = $hiredTalentStmt->fetchAll(PDO::FETCH_ASSOC);
+$teamTalentStmt->execute([$user['id'], $user['id']]);
+$teamTalent = $teamTalentStmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Previously Hired Talent (completed/closed)
+$previousTalentStmt = $db->prepare("
+    SELECT u.*, MAX(c.created_at) as last_hired_at, 
+    (SELECT status FROM contracts WHERE freelancer_id = u.id AND client_id = ? ORDER BY created_at DESC LIMIT 1) as last_contract_status,
+    COALESCE((SELECT SUM(amount) FROM payments WHERE payer_id = ? AND payee_id = u.id AND status = 'completed'), 0) as total_paid
+    FROM users u 
+    JOIN contracts c ON u.id = c.freelancer_id 
+    WHERE c.client_id = ? AND c.status NOT IN ('active', 'paused')
+      AND u.id NOT IN (
+          SELECT freelancer_id FROM contracts WHERE client_id = ? AND status IN ('active', 'paused')
+      )
+    GROUP BY u.id 
+    ORDER BY last_hired_at DESC
+");
+$previousTalentStmt->execute([$user['id'], $user['id'], $user['id'], $user['id']]);
+$previousTalent = $previousTalentStmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Invited Talent (freelancers who have pending invitations from this client)
+$invitedTalentStmt = $db->prepare("
+    SELECT u.*, i.created_at as invited_at, j.title as job_title, i.id as invitation_id
+    FROM users u
+    JOIN job_invitations i ON u.id = i.freelancer_id
+    JOIN jobs j ON i.job_id = j.id
+    WHERE i.client_id = ? AND i.status = 'pending'
+    ORDER BY i.created_at DESC
+");
+$invitedTalentStmt->execute([$user['id']]);
+$invitedTalent = $invitedTalentStmt->fetchAll(PDO::FETCH_ASSOC);
 
 $talentCounts = [
-    'all' => count($allTalent),
+    'team' => count($teamTalent),
+    'invited' => count($invitedTalent),
     'saved' => count($savedTalent),
-    'hired' => count($hiredTalent)
+    'previous' => count($previousTalent)
 ];
 
 // 11. Reports Data
@@ -994,22 +1024,24 @@ window.closeModal = function() {
       </div>
       
       <div class="tab-bar" style="margin-bottom:24px">
-        <div class="tab on" onclick="setTab(this, 'all-talent')">Team (<?php echo $talentCounts['all']; ?>)</div>
+        <div class="tab on" onclick="setTab(this, 'all-talent')">Team (<?php echo $talentCounts['team']; ?>)</div>
+        <div class="tab" onclick="setTab(this, 'invited-talent')">Invited (<?php echo $talentCounts['invited']; ?>)</div>
         <div class="tab" onclick="setTab(this, 'saved-talent')">Saved (<?php echo $talentCounts['saved']; ?>)</div>
-        <div class="tab" onclick="setTab(this, 'hired-talent')">Previous (<?php echo $talentCounts['hired']; ?>)</div>
+        <div class="tab" onclick="setTab(this, 'hired-talent')">Previous (<?php echo $talentCounts['previous']; ?>)</div>
       </div>
       
       <div class="card" style="margin-bottom:0;overflow:auto;border-radius:12px;box-shadow:var(--sh)">
         <table class="tbl talent-list" id="all-talent">
           <thead><tr><th>Freelancer</th><th class="hide-mob">Role</th><th class="hide-mob">Rating</th><th>Rate</th><th>Status</th><th class="hide-mob">Last Contract</th><th>Action</th></tr></thead>
           <tbody>
-            <?php if(empty($allTalent)): ?>
-              <tr><td colspan="7" style="text-align:center;padding:30px;color:var(--uw-gray)">No freelancers found.</td></tr>
+            <?php if(empty($teamTalent)): ?>
+              <tr><td colspan="7" style="text-align:center;padding:30px;color:var(--uw-gray)">You haven't hired any team members yet.</td></tr>
             <?php else: ?>
-              <?php foreach($allTalent as $t): 
+              <?php foreach($teamTalent as $t): 
                 $initials = strtoupper(substr($t['name'], 0, 1) . substr(explode(' ', $t['name'])[1] ?? '', 0, 1));
                 $isSaved = in_array($t['id'], array_column($savedTalent, 'id'));
-                $isHired = in_array($t['id'], array_column($hiredTalent, 'id'));
+                $statusLabel = ucfirst($t['last_contract_status'] ?? 'Active');
+                $badgeClass = ($t['last_contract_status'] === 'paused') ? 'b-gray' : 'b-green';
               ?>
                 <tr>
                   <td>
@@ -1031,16 +1063,49 @@ window.closeModal = function() {
                   <td>★ 0.0 (0)</td>
                   <td>$<?php echo number_format($t['hourly_rate'] ?? 0); ?>/hr</td>
                   <td>
-                    <?php if($isHired): ?>
-                      <span class="badge b-green">Hired</span>
-                    <?php elseif($isSaved): ?>
-                      <span class="badge b-gray">Saved</span>
-                    <?php else: ?>
-                      <span class="badge b-blue">New</span>
-                    <?php endif; ?>
+                    <span class="badge <?php echo $badgeClass; ?>"><?php echo $statusLabel; ?></span>
                   </td>
-                  <td class="hide-mob"><?php echo $isHired ? 'Active now' : 'Never'; ?></td>
+                  <td class="hide-mob">Active now</td>
                   <td><button class="btn btn-w btn-sm" onclick="event.stopPropagation();openChatWith(<?php echo $t['id']; ?>, '<?php echo addslashes($t['name']); ?>', '<?php echo $initials; ?>', '<?php echo $t['avatar_url'] ?? ''; ?>')">Message</button></td>
+                </tr>
+              <?php endforeach; ?>
+            <?php endif; ?>
+          </tbody>
+        </table>
+
+        <table class="tbl talent-list" id="invited-talent" style="display:none">
+          <thead><tr><th>Name</th><th class="hide-mob">Invited For</th><th class="hide-mob">Rating</th><th>Rate</th><th class="hide-mob">Date Invited</th><th>Action</th></tr></thead>
+          <tbody>
+            <?php if(empty($invitedTalent)): ?>
+              <tr><td colspan="6" style="text-align:center;padding:30px;color:var(--uw-gray)">You haven't invited any talent yet.</td></tr>
+            <?php else: ?>
+              <?php foreach($invitedTalent as $t): 
+                $initials = strtoupper(substr($t['name'], 0, 1) . substr(explode(' ', $t['name'])[1] ?? '', 0, 1));
+              ?>
+                <tr>
+                  <td>
+                    <div style="display:flex;align-items:center;gap:10px">
+                      <div class="av">
+                        <?php if (!empty($t['avatar_url'])): ?>
+                          <img src="<?php echo baseUrl($t['avatar_url']); ?>" style="width:100%;height:100%;border-radius:50%;object-fit:cover">
+                        <?php else: ?>
+                          <div style="background:var(--uw-green-light);color:var(--uw-green);width:100%;height:100%;display:flex;align-items:center;justify-content:center;border-radius:50%"><?php echo $initials; ?></div>
+                        <?php endif; ?>
+                      </div>
+                      <div>
+                        <div style="font-weight:600"><?php echo htmlspecialchars($t['name']); ?></div>
+                        <div style="font-size:11px;color:var(--uw-gray)"><?php echo htmlspecialchars(getCountryName($t['country'] ?? 'Unknown')); ?></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="hide-mob"><?php echo htmlspecialchars($t['job_title']); ?></td>
+                  <td class="hide-mob">★ 0.0 (0)</td>
+                  <td>$<?php echo number_format($t['hourly_rate'] ?? 0); ?>/hr</td>
+                  <td class="hide-mob"><?php echo date('M d, Y', strtotime($t['invited_at'])); ?></td>
+                  <td>
+                    <button class="btn btn-w btn-sm" onclick="event.stopPropagation();openChatWith(<?php echo $t['id']; ?>, '<?php echo addslashes($t['name']); ?>', '<?php echo $initials; ?>', '<?php echo $t['avatar_url'] ?? ''; ?>')">Message</button>
+                    <button class="btn btn-red-outline btn-sm" onclick="revokeInvitation(<?php echo $t['invitation_id']; ?>, this)">Revoke</button>
+                  </td>
                 </tr>
               <?php endforeach; ?>
             <?php endif; ?>
@@ -1078,7 +1143,7 @@ window.closeModal = function() {
                   <td class="hide-mob"><?php echo date('M d, Y', strtotime($t['created_at'])); ?></td>
                   <td>
                     <button class="btn btn-w btn-sm" onclick="event.stopPropagation();openChatWith(<?php echo $t['id']; ?>, '<?php echo addslashes($t['name']); ?>', '<?php echo $initials; ?>', '<?php echo $t['avatar_url'] ?? ''; ?>')">Message</button>
-                    <button class="btn btn-g btn-sm" onclick="toast('Invite','Invite sent to <?php echo htmlspecialchars($t['name']); ?>')">Invite</button>
+                    <button class="btn btn-g btn-sm" onclick="openModal('invite-freelancer-<?php echo $t['id']; ?>')">Invite</button>
                   </td>
                 </tr>
               <?php endforeach; ?>
@@ -1089,10 +1154,10 @@ window.closeModal = function() {
         <table class="tbl talent-list" id="hired-talent" style="display:none">
           <thead><tr><th>Name</th><th>Skill</th><th>Last Contract</th><th>Total Paid</th><th>Status</th><th>Action</th></tr></thead>
           <tbody>
-            <?php if(empty($hiredTalent)): ?>
+            <?php if(empty($previousTalent)): ?>
               <tr><td colspan="6" style="text-align:center;padding:30px;color:var(--uw-gray)">You haven't hired anyone yet.</td></tr>
             <?php else: ?>
-              <?php foreach($hiredTalent as $t): 
+              <?php foreach($previousTalent as $t): 
                 $initials = strtoupper(substr($t['name'], 0, 1) . substr(explode(' ', $t['name'])[1] ?? '', 0, 1));
               ?>
                 <tr>
@@ -1113,8 +1178,8 @@ window.closeModal = function() {
                   </td>
                   <td><?php echo htmlspecialchars($t['title'] ?? 'Freelancer'); ?></td>
                   <td><?php echo date('M d, Y', strtotime($t['last_hired_at'])); ?></td>
-                  <td>$<?php echo number_format(1500); // Dummy for now ?></td>
-                  <td><span class="badge b-green"><?php echo ucfirst($t['last_contract_status'] ?? 'Active'); ?></span></td>
+                  <td>$<?php echo number_format($t['total_paid']); ?></td>
+                  <td><span class="badge b-gray"><?php echo ucfirst($t['last_contract_status'] ?? 'Closed'); ?></span></td>
                   <td><button class="btn btn-w btn-sm" onclick="event.stopPropagation();openChatWith(<?php echo $t['id']; ?>, '<?php echo addslashes($t['name']); ?>', '<?php echo $initials; ?>', '<?php echo $t['avatar_url'] ?? ''; ?>')">Message</button></td>
                 </tr>
               <?php endforeach; ?>
@@ -1150,7 +1215,7 @@ window.closeModal = function() {
           $rating = $fStats['rating'];
           $reviews = $fStats['reviews_count'];
         ?>
-          <div class="card talent-card" style="margin-bottom:0;transition:transform .2s, border-color .2s;cursor:pointer" onclick="openModal('hire-freelancer-<?php echo $t['id']; ?>')" onmouseover="this.style.borderColor='var(--uw-green)'" onmouseout="this.style.borderColor='var(--uw-border)'">
+          <div class="card talent-card" style="margin-bottom:0;transition:transform .2s, border-color .2s" onmouseover="this.style.borderColor='var(--uw-green)'" onmouseout="this.style.borderColor='var(--uw-border)'">
             <div class="card-body">
               <div style="display:flex;gap:15px;margin-bottom:15px">
                 <div class="av" style="width:50px;height:50px">
@@ -1177,9 +1242,10 @@ window.closeModal = function() {
                 <div><strong>$<?php echo number_format($fStats['total_earned']); ?>+</strong> earned</div>
                 <div>📍 <?php echo htmlspecialchars(getCountryName($t['country'] ?? 'Global')); ?></div>
               </div>
-              <div style="display:flex;gap:10px">
-                <button class="btn btn-g btn-sm" style="flex:1;justify-content:center">Hire Now</button>
-                <button class="btn btn-w btn-sm" style="flex:1;justify-content:center" onclick="event.stopPropagation();openChatWith(<?php echo $t['id']; ?>, '<?php echo addslashes($t['name']); ?>', '<?php echo $initials; ?>', '<?php echo $t['avatar_url'] ?? ''; ?>')">Message</button>
+              <div style="display:flex;gap:6px">
+                <button class="btn btn-g btn-sm" style="flex:1.2;justify-content:center;font-size:12px;padding:6px 8px" onclick="openModal('invite-freelancer-<?php echo $t['id']; ?>')">Invite to Job</button>
+                <button class="btn btn-w btn-sm" style="flex:1;justify-content:center;font-size:12px;padding:6px 8px" onclick="openModal('hire-freelancer-<?php echo $t['id']; ?>')">Direct Hire</button>
+                <button class="btn btn-w btn-sm" style="flex:0.4;justify-content:center;font-size:12px;padding:6px 4px" title="Message Freelancer" onclick="openChatWith(<?php echo $t['id']; ?>, '<?php echo addslashes($t['name']); ?>', '<?php echo $initials; ?>', '<?php echo $t['avatar_url'] ?? ''; ?>')">💬</button>
               </div>
             </div>
           </div>
@@ -1634,6 +1700,47 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
       `
     };
+
+    MODALS['invite-freelancer-<?php echo $t['id']; ?>'] = {
+      t: 'Invite <?php echo addslashes(htmlspecialchars($t['name'])); ?> to Apply',
+      b: `
+        <div class="mc" style="padding:16px 20px calc(24px + env(safe-area-inset-bottom))">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:15px;padding-bottom:12px;border-bottom:1px solid var(--uw-border)">
+            <div class="av" style="width:40px;height:40px;background:var(--uw-green-light);color:var(--uw-green);font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;border-radius:50%">
+              <?php echo $initials; ?>
+            </div>
+            <div>
+              <div style="font-weight:700;font-size:15px;color:var(--uw-black)"><?php echo addslashes(htmlspecialchars($t['name'])); ?></div>
+              <div style="font-size:12px;color:var(--uw-green);font-weight:600"><?php echo addslashes(htmlspecialchars($t['title'] ?? 'Freelancer')); ?></div>
+            </div>
+          </div>
+          
+          <form id="invite-form-<?php echo $t['id']; ?>" onsubmit="submitJobInvite(event, <?php echo $t['id']; ?>)">
+            <div class="fg" style="margin-bottom:14px">
+              <label style="display:block;font-size:13px;font-weight:700;margin-bottom:6px;color:var(--uw-black)">Select Job to Invite For</label>
+              <select id="invite-job-id-<?php echo $t['id']; ?>" required style="width:100%;padding:10px;border:1.5px solid var(--uw-border);border-radius:8px;font-family:inherit;font-size:14px;outline:none">
+                <option value="">— Select an open job —</option>
+                <?php foreach($allOpenJobs as $j): ?>
+                  <option value="<?php echo $j['id']; ?>">
+                    <?php echo addslashes(htmlspecialchars($j['title'])); ?> ($<?php echo number_format($j['budget']); ?>)
+                  </option>
+                <?php endforeach; ?>
+              </select>
+            </div>
+
+            <div class="fg" style="margin-bottom:16px">
+              <label style="display:block;font-size:13px;font-weight:700;margin-bottom:6px;color:var(--uw-black)">Invitation Message</label>
+              <textarea id="invite-message-<?php echo $t['id']; ?>" placeholder="Write a personalized invitation message telling the freelancer why they are a good fit..." required style="width:100%;padding:10px;border:1.5px solid var(--uw-border);border-radius:8px;min-height:100px;font-family:inherit;font-size:13px;outline:none;resize:vertical"></textarea>
+            </div>
+
+            <div style="margin-top:20px;display:flex;gap:10px">
+              <button type="submit" class="btn btn-g" style="flex:1;justify-content:center;padding:12px;font-size:14px">Send Invitation</button>
+              <button type="button" class="btn btn-w" onclick="closeModal()" style="flex:1;justify-content:center;padding:12px;font-size:14px">Cancel</button>
+            </div>
+          </form>
+        </div>
+      `
+    };
   <?php endforeach; ?>
 });
 
@@ -1695,6 +1802,78 @@ function submitDirectHire(event, fid) {
   .catch(err => {
     console.error(err);
     toast('Error', 'Failed to submit hire request.');
+  });
+}
+
+function submitJobInvite(event, fid) {
+  event.preventDefault();
+  const jobVal = document.getElementById('invite-job-id-' + fid).value;
+  const messageVal = document.getElementById('invite-message-' + fid).value;
+
+  if (!jobVal) {
+    alert('Please select an open job first.');
+    return;
+  }
+
+  const submitBtn = event.target.querySelector('button[type="submit"]');
+  submitBtn.disabled = true;
+  submitBtn.innerText = 'Sending Invite...';
+
+  fetch(BASE_URL + 'client/api/send-invite.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      freelancer_id: fid,
+      job_id: jobVal,
+      message: messageVal
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      toast('Success 🎉', data.message);
+      closeModal();
+    } else {
+      toast('Error', data.message);
+      submitBtn.disabled = false;
+      submitBtn.innerText = 'Send Invitation';
+    }
+  })
+  .catch(err => {
+    console.error(err);
+    toast('Error', 'Failed to send invitation.');
+    submitBtn.disabled = false;
+    submitBtn.innerText = 'Send Invitation';
+  });
+}
+
+function revokeInvitation(inviteId, btn) {
+  if (!confirm('Are you sure you want to revoke this invitation?')) return;
+
+  btn.disabled = true;
+  btn.textContent = 'Revoking...';
+
+  fetch(BASE_URL + 'client/api/revoke-invite.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ invitation_id: inviteId })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      toast('Success 🎉', 'Invitation revoked successfully.');
+      setTimeout(() => location.reload(), 1000);
+    } else {
+      toast('Error', data.message);
+      btn.disabled = false;
+      btn.textContent = 'Revoke';
+    }
+  })
+  .catch(err => {
+    console.error(err);
+    toast('Error', 'Failed to revoke invitation.');
+    btn.disabled = false;
+    btn.textContent = 'Revoke';
   });
 }
 </script>

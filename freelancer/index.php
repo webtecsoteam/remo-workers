@@ -47,6 +47,7 @@ $fStats = ['total_earned'=>0, 'active_contracts'=>0, 'pending_proposals'=>0, 'mo
 $transactions = [];
 $recentMessages = [];
 $submittedProposals = [];
+$jobInvitations = [];
 $myServices = [];
 $workHistory = [];
 $savedJobs = [];
@@ -257,6 +258,18 @@ try {
     ");
     $proposalsStmt->execute([$user['id']]);
     $submittedProposals = $proposalsStmt->fetchAll() ?: [];
+
+    // Job Invitations
+    $invitationsStmt = $db->prepare("
+        SELECT i.*, j.title as job_title, j.budget, j.budget_type, u.name as client_name 
+        FROM job_invitations i
+        JOIN jobs j ON i.job_id = j.id
+        JOIN users u ON i.client_id = u.id
+        WHERE i.freelancer_id = ? AND i.status = 'pending'
+        ORDER BY i.created_at DESC
+    ");
+    $invitationsStmt->execute([$user['id']]);
+    $jobInvitations = $invitationsStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
     // Project Catalog (Services)
     $servicesStmt = $db->prepare("SELECT * FROM services WHERE freelancer_id = ?");

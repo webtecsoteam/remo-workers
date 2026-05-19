@@ -176,19 +176,35 @@ switch ($action) {
                 $db->prepare("UPDATE users SET is_verified = 1, verified_at = NOW() WHERE id = ?")->execute([$userId]);
                 
                 // Fetch user info to send congratulation email
-                $stmt = $db->prepare("SELECT name, email FROM users WHERE id = ?");
+                $stmt = $db->prepare("SELECT name, email, role FROM users WHERE id = ?");
                 $stmt->execute([$userId]);
                 $u = $stmt->fetch();
                 if ($u) {
                     require_once __DIR__ . '/../includes/classes/Mailer.php';
+                    $dashboardUrl = baseUrl($u['role'] === 'client' ? 'client' : 'remoworkers-dashboard');
+                    $logoUrl = baseUrl('favicon.png');
+                    
                     $subject = "Congratulations! Your account is verified";
                     $body = "
-                    <div style='font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px;border:1px solid #e5e7eb;border-radius:12px;'>
-                        <h2 style='color:#16281a;margin-bottom:20px;'>Hello " . htmlspecialchars($u['name']) . ",</h2>
-                        <p style='color:#374151;line-height:1.6;font-size:15px;'>Congratulations! Your identity has been successfully verified on Remoworkers.</p>
-                        <p style='color:#374151;line-height:1.6;font-size:15px;'>You now have a <strong>Verified</strong> badge on your profile, which builds instant trust with clients and allows you to fully access all platform features.</p>
-                        <br>
-                        <p style='color:#374151;line-height:1.6;font-size:15px;'>Best regards,<br><strong>The Remoworkers Team</strong></p>
+                    <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 25px; border: 1px solid #d5e0d5; border-radius: 12px; background-color: #ffffff;'>
+                        <div style='text-align: center; margin-bottom: 25px;'>
+                            <img src='" . $logoUrl . "' style='width: 32px; height: 32px; vertical-align: middle; margin-right: 8px;'>
+                            <span style='color: #14a800; font-size: 24px; font-weight: 800; vertical-align: middle;'>RemoWorkers</span>
+                        </div>
+                        <div style='font-size: 15px; line-height: 1.6; color: #374151;'>
+                            <p>Hello " . htmlspecialchars($u['name']) . ",</p>
+                            <p>Congratulations! Your identity has been successfully verified on Remoworkers.</p>
+                            <div style='background-color: #f4fbf4; border: 1px dashed #14a800; border-radius: 8px; padding: 15px; margin: 20px 0; text-align: center;'>
+                                <span style='font-size: 20px; margin-right: 6px; vertical-align: middle;'>🛡️</span>
+                                <strong style='color: #14a800; font-size: 16px; vertical-align: middle;'>Verified Badge Active</strong>
+                            </div>
+                            <p>You now have a <strong>Verified</strong> badge on your profile, which builds instant trust with clients and allows you to fully access all platform features.</p>
+                            <div style='text-align: center; margin: 35px 0;'>
+                                <a href='" . $dashboardUrl . "' style='background-color: #14a800; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 50px; font-weight: bold; display: inline-block; font-size: 15px; box-shadow: 0 4px 12px rgba(20,168,0,0.2);'>Go to Dashboard</a>
+                            </div>
+                            <hr style='border: 0; border-top: 1px solid #d5e0d5; margin: 30px 0;'>
+                            <p style='font-size: 11px; color: #9ca3af;'>Thank you for keeping our community safe and trusted.<br><br>Best regards,<br><strong>The Remoworkers Team</strong></p>
+                        </div>
                     </div>";
                     Mailer::send($u['email'], $subject, $body);
                 }

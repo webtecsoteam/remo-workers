@@ -6,7 +6,8 @@
   </div>
 
   <div class="tab-bar">
-    <div class="tab on" onclick="setTab(this)">Active</div>
+    <div class="tab on" onclick="setTab(this)">Invitations (<?php echo count($jobInvitations); ?>)</div>
+    <div class="tab" onclick="setTab(this)">Active</div>
     <div class="tab" onclick="setTab(this)">Submitted</div>
     <div class="tab" onclick="setTab(this)">Archived</div>
   </div>

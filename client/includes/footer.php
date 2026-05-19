@@ -1020,9 +1020,15 @@
   };
 
   let activeChatId = null;
+  let activeChatName = '';
+  let activeChatInitials = '';
+  let activeChatAvatar = '';
 
   async function loadChat(otherId, name, initials, el, avatar = '') {
     activeChatId = otherId;
+    activeChatName = name;
+    activeChatInitials = initials;
+    activeChatAvatar = avatar;
 
     // Highlight sidebar
     if (el) {
@@ -2420,14 +2426,9 @@
           }
         });
 
-        // Proactively send a system/chat message about the newly added milestone
-        const msg = `CREATED MILESTONE: I have created a new milestone of $${amount.toLocaleString()} for: "${desc}". You can start working on it now, or wait for me to fund it.`;
-        
-        // Populate and send message if chat is active
-        const input = document.getElementById('chat-input');
-        if (input) {
-          input.value = msg;
-          sendMsg();
+        // Refresh chat window if active to show the backend-inserted milestone message
+        if (activeChatId) {
+          loadChat(activeChatId, activeChatName, activeChatInitials, null, activeChatAvatar);
         }
       } else {
         toast('Error', result.message || 'Failed to create milestone.');

@@ -28,7 +28,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $html = "
     <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 25px; border: 1px solid #d5e0d5; border-radius: 12px; background-color: #ffffff;'>
         <div style='text-align: center; margin-bottom: 25px;'>
-            <h2 style='color: #14a800; margin: 0; font-size: 24px; font-weight: 800;'>RemoWorkers</h2>
+            <img src='" . baseUrl('favicon.png') . "' style='width: 32px; height: 32px; vertical-align: middle; margin-right: 8px;'>
+            <span style='color: #14a800; font-size: 24px; font-weight: 800; vertical-align: middle;'>RemoWorkers</span>
         </div>
         <div style='font-size: 15px; line-height: 1.6; color: #374151;'>
             <p>Hello " . htmlspecialchars($user['name']) . ",</p>
