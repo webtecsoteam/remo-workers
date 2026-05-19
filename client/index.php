@@ -468,7 +468,8 @@ window.closeModal = function() {
                 <div class="contract-row">
                   <div class="av">
                     <?php if (!empty($c['freelancer_avatar'])): ?>
-                      <img src="<?php echo baseUrl($c['freelancer_avatar']); ?>" style="width:100%;height:100%;border-radius:50%;object-fit:cover">
+                      <img src="<?php echo baseUrl($c['freelancer_avatar']); ?>" style="width:100%;height:100%;border-radius:50%;object-fit:cover" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                      <div style="display:none;background:var(--uw-green-light);color:var(--uw-green);width:100%;height:100%;display:flex;align-items:center;justify-content:center;border-radius:50%"><?php echo strtoupper(substr($c['freelancer_name'], 0, 2)); ?></div>
                     <?php else: ?>
                       <div style="background:var(--uw-green-light);color:var(--uw-green);width:100%;height:100%;display:flex;align-items:center;justify-content:center;border-radius:50%"><?php echo strtoupper(substr($c['freelancer_name'], 0, 2)); ?></div>
                     <?php endif; ?>
@@ -676,7 +677,8 @@ window.closeModal = function() {
             <div class="prop-top">
                 <div class="av" style="width:42px;height:42px">
                     <?php if (!empty($p['freelancer_avatar'])): ?>
-                      <img src="<?php echo baseUrl($p['freelancer_avatar']); ?>" style="width:100%;height:100%;border-radius:50%;object-fit:cover">
+                      <img src="<?php echo baseUrl($p['freelancer_avatar']); ?>" style="width:100%;height:100%;border-radius:50%;object-fit:cover" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                      <div style="display:none;background:var(--uw-green-light);color:var(--uw-green);width:100%;height:100%;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:13px"><?php echo strtoupper(substr($p['freelancer_name'], 0, 2)); ?></div>
                     <?php else: ?>
                       <div style="background:var(--uw-green-light);color:var(--uw-green);width:100%;height:100%;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:13px"><?php echo strtoupper(substr($p['freelancer_name'], 0, 2)); ?></div>
                     <?php endif; ?>
@@ -788,7 +790,8 @@ window.closeModal = function() {
               <div class="prop-top" style="margin-bottom:12px">
                 <div class="av" style="width:40px;height:40px">
                     <?php if (!empty($ac['freelancer_avatar'])): ?>
-                      <img src="<?php echo baseUrl($ac['freelancer_avatar']); ?>" style="width:100%;height:100%;border-radius:50%;object-fit:cover">
+                      <img src="<?php echo baseUrl($ac['freelancer_avatar']); ?>" style="width:100%;height:100%;border-radius:50%;object-fit:cover" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                      <div style="display:none;background:var(--uw-green-light);color:var(--uw-green);width:100%;height:100%;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:14px"><?php echo strtoupper(substr($ac['freelancer_name'], 0, 2)); ?></div>
                     <?php else: ?>
                       <div style="background:var(--uw-green-light);color:var(--uw-green);width:100%;height:100%;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:14px"><?php echo strtoupper(substr($ac['freelancer_name'], 0, 2)); ?></div>
                     <?php endif; ?>

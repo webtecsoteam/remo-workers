@@ -1357,7 +1357,7 @@
         if (item.tagName === 'TR') {
           item.style.display = 'table-row';
         } else {
-          item.style.display = (item.classList.contains('job-card') || item.classList.contains('prop-card')) ? 'flex' : 'block';
+          item.style.display = (item.classList.contains('job-card')) ? 'flex' : 'block';
         }
       } else {
         item.style.display = 'none';
