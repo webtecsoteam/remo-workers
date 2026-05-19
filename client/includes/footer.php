@@ -1309,50 +1309,106 @@
     window.scrollTo(0, 0);
   }
 
-  function setTab(el, targetId) {
+  function setTab(el, targetId, page = 1) {
     const tabBar = el.closest('.tab-bar');
+    if (!el.classList.contains('on')) {
+      page = 1;
+    }
     tabBar.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
     el.classList.add('on');
+
+    const limit = 10;
+    const isMob = window.innerWidth <= 900;
 
     if (targetId && targetId.includes('talent')) {
       document.querySelectorAll('.talent-list').forEach(l => l.style.display = 'none');
       const target = document.getElementById(targetId);
-      if (target) target.style.display = 'table';
+      if (target) {
+        target.style.display = 'table';
+        const rows = Array.from(target.querySelectorAll('tbody tr')).filter(tr => !tr.querySelector('td[colspan]'));
+        paginateArray(rows, page, limit, target.parentElement, el, targetId, '');
+      }
     } else {
-      // Logic for filtering rows/cards (e.g. My Job Posts, Proposals)
       const status = el.dataset.tabStatus || el.innerText.toLowerCase();
       const nextEl = tabBar.nextElementSibling;
-      // We might have a card wrapping the table, or cards directly
       const container = nextEl.classList.contains('card') ? nextEl : tabBar.parentElement;
 
-      const items = container.querySelectorAll('[data-status]');
-      items.forEach(item => {
-        if (status === 'all') {
-          item.style.display = item.tagName === 'TR' ? 'table-row' : 'block';
-        } else {
-          const show = (item.dataset.status === status);
-          item.style.display = show ? (item.tagName === 'TR' ? 'table-row' : 'block') : 'none';
-        }
+      const items = Array.from(container.querySelectorAll('[data-status]'));
+      const visibleItems = items.filter(item => {
+        const insideDesk = item.closest('.desk-only');
+        const insideMob = item.closest('.mob-only');
+        if (insideDesk && isMob) return false;
+        if (insideMob && !isMob) return false;
+        
+        return status === 'all' || item.dataset.status === status;
       });
-
-      // No results check
-      let noRes = container.querySelector('.no-results-msg');
-      const visibleItems = Array.from(items).filter(r => r.style.display !== 'none');
-
-      if (visibleItems.length === 0) {
-        if (!noRes) {
-          noRes = document.createElement('div');
-          noRes.className = 'no-results-msg';
-          noRes.style.cssText = 'text-align:center;padding:40px;color:var(--uw-gray);background:white;border-radius:8px;border:1.5px dashed var(--uw-border);margin-top:16px';
-          container.appendChild(noRes);
-        }
-        noRes.style.display = 'block';
-        noRes.innerText = `No ${status} items found.`;
-      } else if (noRes) {
-        noRes.style.display = 'none';
-      }
+      
+      items.forEach(item => item.style.display = 'none');
+      paginateArray(visibleItems, page, limit, container, el, targetId, status);
     }
   }
+
+  function paginateArray(items, page, limit, container, el, targetId, status) {
+    const start = (page - 1) * limit;
+    const end = start + limit;
+    
+    items.forEach((item, index) => {
+      if (index >= start && index < end) {
+        if (item.tagName === 'TR') {
+          item.style.display = 'table-row';
+        } else {
+          item.style.display = (item.classList.contains('job-card') || item.classList.contains('prop-card')) ? 'flex' : 'block';
+        }
+      } else {
+        item.style.display = 'none';
+      }
+    });
+
+    let noRes = container.querySelector('.no-results-msg');
+    if (items.length === 0) {
+      if (!noRes) {
+        noRes = document.createElement('div');
+        noRes.className = 'no-results-msg';
+        noRes.style.cssText = 'text-align:center;padding:40px;color:var(--uw-gray);background:white;border-radius:8px;border:1.5px dashed var(--uw-border);margin-top:16px';
+        container.appendChild(noRes);
+      }
+      noRes.style.display = 'block';
+      noRes.innerText = `No items found.`;
+    } else if (noRes) {
+      noRes.style.display = 'none';
+    }
+
+    let controls = container.querySelector('.paginator-controls');
+    if (!controls) {
+      controls = document.createElement('div');
+      controls.className = 'paginator-controls';
+      controls.style.cssText = 'display:flex;justify-content:center;gap:8px;margin-top:16px;padding:10px 0;';
+      container.appendChild(controls);
+    }
+
+    const totalPages = Math.ceil(items.length / limit);
+    if (totalPages <= 1) {
+      controls.style.display = 'none';
+    } else {
+      controls.style.display = 'flex';
+      controls.innerHTML = `
+        <button class="btn btn-outline btn-sm" ${page === 1 ? 'disabled style="opacity:0.5"' : ''} onclick="window.setTabPg(this, ${page - 1}, '${targetId || ''}')">Prev</button>
+        <span style="font-size:13px;align-self:center;color:var(--uw-gray)">Page ${page} of ${totalPages}</span>
+        <button class="btn btn-outline btn-sm" ${page === totalPages ? 'disabled style="opacity:0.5"' : ''} onclick="window.setTabPg(this, ${page + 1}, '${targetId || ''}')">Next</button>
+      `;
+    }
+  }
+
+  window.setTabPg = function(btn, page, targetId) {
+     const card = btn.closest('.card') || btn.closest('.page');
+     const tabBar = card ? card.querySelector('.tab-bar') : null;
+     if (tabBar) {
+        const activeTab = tabBar.querySelector('.tab.on');
+        if (activeTab) {
+           setTab(activeTab, targetId, page);
+        }
+     }
+  };
 
   async function updateProposalStatus(propId, newStatus) {
     toast('Updating...', 'Changing proposal status');
@@ -2221,6 +2277,24 @@
       openModal(window.__pendingModalId);
       window.__pendingModalId = null;
     }
+    
+    // Paginate client transactions
+    applyPagination('#page-payments .desk-only table', 'tbody tr', 10);
+    applyPagination('#page-payments .mob-only > div', '.tx-item', 10);
+
+    // Auto-initialize pagination on active tabs
+    document.querySelectorAll('.tab-bar').forEach(bar => {
+      const activeTab = bar.querySelector('.tab.on');
+      if (activeTab) {
+        const onClickAttr = activeTab.getAttribute('onclick');
+        let targetId = '';
+        if (onClickAttr && onClickAttr.includes("'")) {
+          const match = onClickAttr.match(/'([^']+)'/);
+          if (match) targetId = match[1];
+        }
+        setTab(activeTab, targetId);
+      }
+    });
   });
 
   setTimeout(() => toast('Welcome back, <?php echo addslashes(htmlspecialchars($user['name'])); ?>!', 'You have <?php echo (int) $unreadMessagesCount; ?> unread messages and <?php echo (int) $stats['open_proposals']; ?> new proposals'), 1000);

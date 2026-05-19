@@ -326,6 +326,7 @@ $categorySpendList = $categorySpendStmt->fetchAll(PDO::FETCH_ASSOC);
 <title>RemoWorkers – Client Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Neue+Haas+Grotesk+Display+Pro:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="<?php echo baseUrl("client/css/style.css"); ?>">
+<script src="<?php echo baseUrl('assets/js/pagination.js'); ?>"></script>
 <script>const BASE_URL = '<?php echo baseUrl(); ?>';</script>
 <script>
 window.openModal = function(id) {
@@ -1388,7 +1389,7 @@ window.closeModal = function() {
                     $fee = (float)($ct['platform_fee'] ?? 0);
                     $total = (float)$ct['amount'] + ($isDeposit ? 0 : $fee);
                 ?>
-                <div style="padding:15px 0;border-bottom:1px solid var(--uw-border);display:flex;justify-content:space-between;align-items:flex-start">
+                <div class="tx-item" style="padding:15px 0;border-bottom:1px solid var(--uw-border);display:flex;justify-content:space-between;align-items:flex-start">
                   <div style="flex:1;min-width:0">
                     <div style="font-weight:700;font-size:14px;color:var(--uw-black);margin-bottom:2px"><?php echo $isDeposit ? 'Add Funds (Deposit)' : (!empty($ct['job_title']) ? 'Payment for: ' . htmlspecialchars($ct['job_title']) : 'Payment for contract'); ?></div>
                     <div style="font-size:11.5px;color:var(--uw-gray);margin-bottom:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">

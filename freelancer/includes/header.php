@@ -10,6 +10,7 @@
 <script src="https://js.paystack.co/v1/inline.js"></script>
 <link rel="stylesheet" href="<?php echo baseUrl("freelancer/css/style.css?v=" . time()); ?>">
 <link rel="icon" type="image/png" href="<?php echo baseUrl("favicon.png?v=1.0.0"); ?>">
+<script src="<?php echo baseUrl('assets/js/pagination.js'); ?>"></script>
 <script>const BASE_URL = '<?php echo baseUrl(); ?>';</script>
 <script>
 window.showPage = function(id) {

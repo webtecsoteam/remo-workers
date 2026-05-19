@@ -174,7 +174,7 @@
         <div style="padding:40px;text-align:center;color:var(--muted)">No transactions found.</div>
       <?php else: ?>
         <?php foreach($fullLedger as $l): ?>
-          <div style="padding:16px;border-bottom:1px solid #eee">
+          <div class="tx-item" style="padding:16px;border-bottom:1px solid #eee">
             <div style="display:flex;justify-content:space-between;margin-bottom:8px">
               <div>
                 <div style="font-weight:700;font-size:14px;color:var(--dark)"><?php echo htmlspecialchars($l['description'] ?? 'Transaction'); ?></div>

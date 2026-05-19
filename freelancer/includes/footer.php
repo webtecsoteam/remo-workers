@@ -280,7 +280,7 @@
     .catch(err => toast('Error', 'Failed to update status'));
   }
 
-  function renderContracts(filter = 'Active') {
+  function renderContracts(filter = 'Active', page = 1) {
     const list = document.getElementById('contracts-list');
     if (!list) return;
 
@@ -304,10 +304,17 @@
     const isMob = window.innerWidth <= 900;
     if (filtered.length === 0) {
       list.innerHTML = `<div style="text-align:center;padding:60px;color:var(--muted)">No ${cleanFilter.toLowerCase()} contracts found.</div>`;
+      let controls = list.parentNode.querySelector('.paginator-controls');
+      if (controls) controls.style.display = 'none';
       return;
     }
 
-    list.innerHTML = filtered.map(c => {
+    const limit = 10;
+    const start = (page - 1) * limit;
+    const end = start + limit;
+    const paginated = filtered.slice(start, end);
+
+    list.innerHTML = paginated.map(c => {
       const typeLabel = c.contract_type === 'hourly' ? 'Hourly' : 'Fixed';
       const typeColor = c.contract_type === 'hourly' ? '#e0f2fe' : '#f3e8ff';
       const typeText = c.contract_type === 'hourly' ? '#0369a1' : '#7e22ce';
@@ -372,6 +379,8 @@
           <div><button class="btn btn-w btn-sm" style="padding:4px 10px;font-size:11px">Manage</button></div>
         </div>`;
     }).join('');
+    
+    addLocalPaginator(list, filtered.length, page, limit, (p) => renderContracts(filter, p));
   }
 
   window.acceptInvitation = function(inviteId, jobId) {
@@ -415,7 +424,7 @@
     });
   };
 
-  function renderProposals(filter = 'Invitations') {
+  function renderProposals(filter = 'Invitations', page = 1) {
     const list = document.getElementById('proposals-list');
     if (!list) return;
     
@@ -425,15 +434,22 @@
     const title = document.getElementById('proposals-list-title');
     if (title) title.textContent = cleanFilter + ' Proposals';
 
+    const limit = 10;
+
     if (cleanFilter === 'Invitations') {
       if (INVITATIONS.length === 0) {
         list.innerHTML = `<div style="text-align:center;padding:60px;color:var(--muted)">
           <div style="font-size:40px;margin-bottom:15px">✉️</div>
           <div>No pending invitations found.</div>
         </div>`;
+        let controls = list.parentNode.querySelector('.paginator-controls');
+        if (controls) controls.style.display = 'none';
         return;
       }
-      list.innerHTML = INVITATIONS.map(i => {
+      const start = (page - 1) * limit;
+      const end = start + limit;
+      const paginated = INVITATIONS.slice(start, end);
+      list.innerHTML = paginated.map(i => {
         return `
           <div class="contract-row" style="padding:22px;border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;align-items:center;gap:15px;justify-content:space-between">
             <div style="flex:1;min-width:260px">
@@ -450,6 +466,7 @@
           </div>
         `;
       }).join('');
+      addLocalPaginator(list, INVITATIONS.length, page, limit, (p) => renderProposals(filter, p));
       return;
     }
 
@@ -468,10 +485,16 @@
         <div style="font-size:40px;margin-bottom:15px">📄</div>
         <div>No ${filter.toLowerCase()} proposals found.</div>
       </div>`;
+      let controls = list.parentNode.querySelector('.paginator-controls');
+      if (controls) controls.style.display = 'none';
       return;
     }
 
-    list.innerHTML = filtered.map(p => {
+    const start = (page - 1) * limit;
+    const end = start + limit;
+    const paginated = filtered.slice(start, end);
+
+    list.innerHTML = paginated.map(p => {
       let displayStatus = p.status;
       let statusClass = p.status === 'accepted' ? 'b-green' : (p.status === 'rejected' ? 'b-red' : 'b-purple');
       
@@ -514,10 +537,10 @@
           </div>
         </div>`;
     }).join('');
-
+    addLocalPaginator(list, filtered.length, page, limit, (p) => renderProposals(filter, p));
   }
 
-  function renderJobs(filter = 'Best Matches') {
+  function renderJobs(filter = 'Best Matches', page = 1) {
     const flist = document.getElementById('findwork-job-list');
     const hlist = document.getElementById('home-job-list');
     
@@ -536,7 +559,12 @@
         jobs = JOBS.filter(j => SAVED_IDS.includes(parseInt(j.id)));
       }
       
-      flist.innerHTML = jobs.length ? jobs.map(j => {
+      const limit = 10;
+      const start = (page - 1) * limit;
+      const end = start + limit;
+      const paginated = jobs.slice(start, end);
+      
+      flist.innerHTML = paginated.length ? paginated.map(j => {
         const isSaved = SAVED_IDS.includes(parseInt(j.id));
         const matchPercent = getMatchPercentage(j);
         return `
@@ -584,6 +612,12 @@
           </div>
         </div>`;
       }).join('') : `<div style="padding:60px;text-align:center;color:var(--muted)">No jobs found.</div>`;
+      if (jobs.length) {
+        addLocalPaginator(flist, jobs.length, page, limit, (p) => renderJobs(filter, p));
+      } else {
+        let controls = flist.parentNode.querySelector('.paginator-controls');
+        if (controls) controls.style.display = 'none';
+      }
     }
   }
 
@@ -1177,6 +1211,32 @@
     setTimeout(() => t.classList.remove('show'), 3000);
   }
 
+  function addLocalPaginator(container, totalItems, currentPage, limit, onPageChange) {
+    let controls = container.parentNode.querySelector('.paginator-controls');
+    if (!controls) {
+      controls = document.createElement('div');
+      controls.className = 'paginator-controls';
+      controls.style.cssText = 'display:flex;justify-content:center;gap:8px;margin-top:16px;padding:10px 0;';
+      container.parentNode.appendChild(controls);
+    }
+    
+    const totalPages = Math.ceil(totalItems / limit);
+    if (totalPages <= 1) {
+      controls.style.display = 'none';
+      return;
+    }
+    
+    controls.style.display = 'flex';
+    controls.innerHTML = `
+      <button class="btn btn-outline btn-sm prev-btn" ${currentPage === 1 ? 'disabled style="opacity:0.5;cursor:not-allowed"' : ''}>Prev</button>
+      <span style="font-size:13px;align-self:center;color:var(--muted)">Page ${currentPage} of ${totalPages}</span>
+      <button class="btn btn-outline btn-sm next-btn" ${currentPage === totalPages ? 'disabled style="opacity:0.5;cursor:not-allowed"' : ''}>Next</button>
+    `;
+    
+    controls.querySelector('.prev-btn').onclick = () => onPageChange(currentPage - 1);
+    controls.querySelector('.next-btn').onclick = () => onPageChange(currentPage + 1);
+  }
+
   // window.showPage already defined at top
   window.setTab = function(el) {
     const p = el.parentElement;
@@ -1185,11 +1245,11 @@
     
     const filter = el.textContent.trim();
     if (document.getElementById('page-find-work').classList.contains('active')) {
-      renderJobs(filter);
+      renderJobs(filter, 1);
     } else if (document.getElementById('page-proposals').classList.contains('active')) {
-      renderProposals(filter);
+      renderProposals(filter, 1);
     } else if (document.getElementById('page-contracts').classList.contains('active')) {
-      renderContracts(filter);
+      renderContracts(filter, 1);
     }
   }
   window.toggleSidebar = function() {
@@ -2751,6 +2811,10 @@
       const hash = window.location.hash.replace('#', '');
       showPage(hash || 'home');
     }
+    
+    // Add pagination for freelancer reports page
+    applyPagination('#page-reports .desk-only table', 'tbody tr', 10);
+    applyPagination('#page-reports .mob-only', '.tx-item', 10);
   }
 
   if (document.readyState === 'loading') {
@@ -2835,9 +2899,9 @@ async function releasePendingPayment(paymentId, btn) {
 }
 
 // Dedicated Connects Page Helpers
-window.loadConnectsPageData = function() {
+window.loadConnectsPageData = function(page = 1) {
   const tbody = document.getElementById('connects-history-tbody');
-  if (tbody) {
+  if (tbody && page === 1) {
     tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--muted)">Loading connects history...</td></tr>`;
   }
   
@@ -2863,7 +2927,12 @@ window.loadConnectsPageData = function() {
         // Render history table
         if (tbody) {
           if (data.history && data.history.length > 0) {
-            tbody.innerHTML = data.history.map(item => {
+            const limit = 10;
+            const start = (page - 1) * limit;
+            const end = start + limit;
+            const paginated = data.history.slice(start, end);
+            
+            tbody.innerHTML = paginated.map(item => {
               const isPositive = item.amount > 0;
               const amtText = isPositive ? `+${item.amount}` : `${item.amount}`;
               const actionText = item.action.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
@@ -2899,8 +2968,12 @@ window.loadConnectsPageData = function() {
                 </tr>
               `;
             }).join('');
+            
+            addLocalPaginator(tbody, data.history.length, page, limit, (p) => window.loadConnectsPageData(p));
           } else {
             tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:40px;color:var(--muted);font-size:13.5px">No connects history recorded yet.</td></tr>`;
+            let controls = tbody.parentNode.parentNode.querySelector('.paginator-controls');
+            if (controls) controls.style.display = 'none';
           }
         }
       } else {

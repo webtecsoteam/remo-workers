@@ -16,6 +16,7 @@ if (!$user || $user['role'] !== 'admin') {
 <title>Admin Panel - RemoWorkers</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
 <link rel="icon" type="image/png" href="<?php echo baseUrl("favicon.png?v=1.0.0"); ?>">
+<script src="<?php echo baseUrl('assets/js/pagination.js'); ?>"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -617,6 +618,7 @@ async function loadVerifications() {
         </tr>`).join('')}
       </tbody>
     </table>`;
+    applyPagination('#verificationsTable', 'tbody tr', 10);
   }
 }
 
@@ -732,6 +734,7 @@ async function loadJobs() {
         </tr>`).join('')}
       </tbody>
     </table>`;
+    applyPagination('#jobsTable', 'tbody tr', 10);
   } else {
     table.innerHTML = `<div class="loading" style="color:var(--red);">${data.message}</div>`;
   }
@@ -764,6 +767,7 @@ async function loadUsers() {
   const data = await apiFetch('get_users', { role: currentUserTab });
   if (data.success) {
     table.innerHTML = renderUsersTable(data.data);
+    applyPagination('#usersTable', 'tbody tr', 10);
   } else {
     table.innerHTML = `<div class="loading" style="color:var(--red);">${data.message}</div>`;
   }
@@ -826,6 +830,7 @@ async function loadWithdrawals() {
   const data = await apiFetch('get_withdrawals');
   if (data.success) {
     table.innerHTML = renderWithdrawalsTable(data.data);
+    applyPagination('#withdrawalsTable', 'tbody tr', 10);
   } else {
     table.innerHTML = `<div class="loading" style="color:var(--red);">${data.message}</div>`;
   }
@@ -878,6 +883,7 @@ async function loadConnects() {
   const data = await apiFetch('get_connects_packages');
   if (data.success) {
     table.innerHTML = renderConnectsTable(data.data);
+    applyPagination('#connectsTable', 'tbody tr', 10);
   } else {
     table.innerHTML = `<div class="loading" style="color:var(--red);">${data.message}</div>`;
   }
