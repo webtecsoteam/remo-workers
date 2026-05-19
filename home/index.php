@@ -246,58 +246,6 @@
   </div>
 </section>
 
-<!-- UMA AI SECTION -->
-<section class="sec" style="background:linear-gradient(135deg,#16281a 0%,#1e3422 100%);position:relative;overflow:hidden">
-  <div style="position:absolute;top:-80px;right:-80px;width:400px;height:400px;border-radius:50%;background:rgba(200,241,53,.05)"></div>
-  <div style="position:absolute;bottom:-60px;left:-60px;width:300px;height:300px;border-radius:50%;background:rgba(200,241,53,.04)"></div>
-  <div style="max-width:900px;margin:0 auto;text-align:center;position:relative;z-index:2">
-    <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(200,241,53,.12);border:1px solid rgba(200,241,53,.25);color:#c8f135;font-size:12px;font-weight:700;padding:6px 16px;border-radius:20px;margin-bottom:20px;letter-spacing:.05em">✨ NEW — Spring 2026</div>
-    <h2 style="font-family:'Instrument Serif',serif;font-size:48px;color:white;letter-spacing:-1px;line-height:1.1;margin-bottom:16px;font-weight:400">Meet <em style="color:#c8f135;font-style:italic">Uma™</em> — Your AI work agent</h2>
-    <p style="font-size:17px;color:rgba(255,255,255,.6);line-height:1.75;margin-bottom:28px;max-width:580px;margin-left:auto;margin-right:auto">Uma scopes your project, shortlists the best talent, generates contracts from your meetings, and keeps every project moving — automatically.</p>
-    <div class="uma-grid">
-      <div class="uma-card" onclick="openModal('uma-scout')">
-        <div style="font-size:36px;margin-bottom:14px">🎯</div>
-        <h4 style="font-size:15px;font-weight:700;color:white;margin-bottom:8px">Uma Recruiter Shortlisting</h4>
-        <p style="font-size:13px;color:rgba(255,255,255,.5);line-height:1.65">Automatically identifies and surfaces the most relevant professionals for your project — available on all plans.</p>
-        <span class="uma-link">Learn more →</span>
-      </div>
-      <div class="uma-card" onclick="openModal('uma-history')">
-        <div style="font-size:36px;margin-bottom:14px">📋</div>
-        <h4 style="font-size:15px;font-weight:700;color:white;margin-bottom:8px">Work History Summaries</h4>
-        <p style="font-size:13px;color:rgba(255,255,255,.5);line-height:1.65">Uma synthesizes each freelancer's relevant past work into a clear, easy-to-scan summary — so you can compare candidates in seconds.</p>
-        <span class="uma-link">Learn more →</span>
-      </div>
-      <div class="uma-card" onclick="openModal('uma-contract')">
-        <div style="font-size:36px;margin-bottom:14px">📝</div>
-        <h4 style="font-size:15px;font-weight:700;color:white;margin-bottom:8px">In-Meeting Contract Generator</h4>
-        <p style="font-size:13px;color:rgba(255,255,255,.5);line-height:1.65">Key details from your video call are captured by Uma and used to auto-generate a contract draft — move from discussion to hire in minutes.</p>
-        <span class="uma-link">Learn more →</span>
-      </div>
-      <div class="uma-card" onclick="openModal('uma-diary')">
-        <div style="font-size:36px;margin-bottom:14px">⏱️</div>
-        <h4 style="font-size:15px;font-weight:700;color:white;margin-bottom:8px">Work Diary Summaries</h4>
-        <p style="font-size:13px;color:rgba(255,255,255,.5);line-height:1.65">Uma automatically summarizes hourly work activity into daily and weekly progress updates, so you always know what's happening.</p>
-        <span class="uma-link">Learn more →</span>
-      </div>
-      <div class="uma-card" onclick="openModal('uma-continuity')">
-        <div style="font-size:36px;margin-bottom:14px">🔄</div>
-        <h4 style="font-size:15px;font-weight:700;color:white;margin-bottom:8px">Project Continuity</h4>
-        <p style="font-size:13px;color:rgba(255,255,255,.5);line-height:1.65">If a hire isn't the right fit, Uma finds a replacement while preserving all project context — no disruption, no lost work.</p>
-        <span class="uma-link">Learn more →</span>
-      </div>
-      <div class="uma-card" style="position:relative;overflow:hidden" onclick="openModal('uma-chatgpt')">
-        <div style="position:absolute;top:12px;right:12px;background:#c8f135;color:#16281a;font-size:9.5px;font-weight:700;padding:2px 8px;border-radius:10px">NEW</div>
-        <div style="font-size:36px;margin-bottom:14px">🤖</div>
-        <h4 style="font-size:15px;font-weight:700;color:white;margin-bottom:8px">Remoworkers in ChatGPT</h4>
-        <p style="font-size:13px;color:rgba(255,255,255,.5);line-height:1.65">Describe your project in ChatGPT and discover relevant Remoworkers talent, draft job posts, and hire — without leaving ChatGPT.</p>
-        <span class="uma-link">Connect now →</span>
-      </div>
-    </div>
-    <a class="btn btn-lime btn-lg" onclick="openModal('uma-scout')" style="margin-right:12px">Try Uma™ Free</a>
-    <a class="btn" style="background:rgba(255,255,255,.1);color:white;padding:14px 32px;border-radius:40px;font-size:15px;border:1px solid rgba(255,255,255,.2)" onclick="openModal('uma-history')">See all Uma features</a>
-  </div>
-</section>
-
 <!-- WORK TYPES -->
 <section class="sec sec-alt">
   <div style="text-align:center;margin-bottom:22px">
