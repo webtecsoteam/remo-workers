@@ -254,6 +254,25 @@ function ensureFreelancerSchema() {
     } catch (PDOException $e) {
         // Silently continue
     }
+
+    // Self-healing disputes table initialization
+    try {
+        $db->exec("
+            CREATE TABLE IF NOT EXISTS disputes (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                contract_id INT NOT NULL,
+                raised_by INT NOT NULL,
+                reason TEXT NOT NULL,
+                status ENUM('open', 'resolved', 'closed') DEFAULT 'open',
+                resolution_notes TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (contract_id) REFERENCES contracts(id) ON DELETE CASCADE,
+                FOREIGN KEY (raised_by) REFERENCES users(id) ON DELETE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+        ");
+    } catch (PDOException $e) {
+        // Silently continue
+    }
     
     $done = true;
 }

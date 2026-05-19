@@ -295,6 +295,8 @@
       filtered = CONTRACTS.filter(c => (c.status || '').toLowerCase() === 'paused');
     } else if (cleanFilter === 'Cancelled') {
       filtered = CONTRACTS.filter(c => (c.status || '').toLowerCase() === 'cancelled');
+    } else if (cleanFilter === 'Disputed') {
+      filtered = CONTRACTS.filter(c => (c.status || '').toLowerCase() === 'disputed');
     } else if (cleanFilter === 'All') {
       filtered = [...CONTRACTS];
     }
@@ -752,7 +754,7 @@
     });
   }
 
-  function getApplyBlockReason() {
+  function getApplyBlockReason(hasInvite = false) {
     if (!USER_EMAIL_VERIFIED) {
       return {
         title: 'Verify your email',
@@ -774,7 +776,7 @@
         action: function() { showPage('profile'); }
       };
     }
-    if (userConnectsBalance < CONNECTS_PER_APPLICATION) {
+    if (!hasInvite && userConnectsBalance < CONNECTS_PER_APPLICATION) {
       return {
         title: 'Not enough Connects',
         message: 'Redirecting you to the Connects page. You need ' + CONNECTS_PER_APPLICATION + ' Connects but only have ' + userConnectsBalance + '.',
@@ -895,7 +897,8 @@
     const job = JOBS.find(j => j.id == id);
     if (!job) return;
 
-    const block = getApplyBlockReason();
+    const hasInvite = INVITATIONS.some(i => i.job_id == id);
+    const block = getApplyBlockReason(hasInvite);
     if (block) {
       toast(block.title, block.message);
       if (block.action) block.action();
@@ -931,12 +934,13 @@
     }
 
     const showMilestones = !isHourly && !isMonthly;
+    const connectsText = hasInvite ? `0 Connects (Invited)` : `${CONNECTS_PER_APPLICATION} Connects required`;
     
     document.getElementById('mh-title').textContent = 'Submit Proposal — ' + job.title;
     document.getElementById('mc-body').innerHTML = `
       <div style="padding:25px 25px 100px 25px">
         <div style="background:#f0f7ef;color:#14a800;padding:12px 18px;border-radius:8px;font-size:13.5px;margin-bottom:25px;border:1px solid #d4e8d4">
-          ${budgetDisplay} · ${CONNECTS_PER_APPLICATION} Connects required · You have ${userConnectsBalance}
+          ${budgetDisplay} · ${connectsText} · You have ${userConnectsBalance}
         </div>
 
         <div style="margin-bottom:20px">
@@ -966,7 +970,7 @@
 
         <div style="display:flex;gap:12px">
           <button class="btn btn-w" style="flex:1;padding:12px;font-size:14px" onclick="closeModal()">Cancel</button>
-          <button class="btn btn-g" style="flex:1.5;padding:12px;font-size:14px;font-weight:700" onclick="submitProposalForm(${job.id})">Submit Proposal →</button>
+          <button id="submit-proposal-btn" class="btn btn-g" style="flex:1.5;padding:12px;font-size:14px;font-weight:700" onclick="submitProposalForm(${job.id})">Submit Proposal →</button>
         </div>
       </div>
     `;
@@ -1016,6 +1020,19 @@
     if (!rate || parseFloat(rate) <= 0) return toast('Error', 'Please enter a valid rate');
     if (!letter) return toast('Error', 'Please write a cover letter');
 
+    const btn = document.getElementById('submit-proposal-btn');
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin" style="margin-right:6px"></i> Submitting...`;
+    }
+
+    const restoreBtn = () => {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = 'Submit Proposal →';
+      }
+    };
+
     const payload = {
         job_id: jobId,
         bid_amount: parseFloat(rate || 0),
@@ -1031,7 +1048,6 @@
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     })
-
     .then(res => {
       console.log('Response status:', res.status);
       return res.json();
@@ -1054,16 +1070,25 @@
           created_at: new Date().toISOString()
         });
         
+        // Remove from local INVITATIONS list if there was an invitation for this job
+        INVITATIONS = INVITATIONS.filter(i => i.job_id != jobId);
+        const inviteTab = document.querySelector('.tab-bar .tab:first-child');
+        if (inviteTab && inviteTab.textContent.includes('Invitations')) {
+          inviteTab.textContent = `Invitations (${INVITATIONS.length})`;
+        }
+
         toast('Success', data.message);
         closeModal();
         showPage('proposals');
       } else {
+        restoreBtn();
         toast('Error', data.message || data.error);
         if (data.code === 'email_unverified') requestEmailVerification();
         if (data.code === 'identity_unverified') showPage('verification');
       }
     })
     .catch(err => {
+      restoreBtn();
       console.error('Submission error:', err);
       toast('Error', 'Submission failed. Check console.');
     });
@@ -1231,6 +1256,17 @@
             </div>
           ` : ''}
 
+          ${c.status === 'disputed' ? `
+            <div style="background:#fef2f2;border:1.5px solid #fecaca;padding:20px;border-radius:12px;margin-bottom:30px;color:#991b1b;font-size:13.5px;line-height:1.6">
+              <h3 style="font-size:15px;margin:0 0 10px 0;font-weight:700;color:#991b1b;display:flex;align-items:center;gap:6px">
+                ⚠️ Contract Under Dispute
+              </h3>
+              <div>
+                This contract is currently locked under dispute. The arbitration team is reviewing chat logs, milestones, and tracked logs. Logging hours and requesting milestones are frozen during this time.
+              </div>
+            </div>
+          ` : ''}
+
           <!-- Milestones Section (for Fixed Price) -->
           <div id="milestones-section-detail" style="margin-bottom:30px; display: ${c.contract_type === 'fixed' ? 'block' : 'none'}">
             <h3 style="font-size:16px;margin-bottom:15px;font-weight:700">Contract Milestones</h3>
@@ -1277,7 +1313,7 @@
 
           <!-- Log Time Section (for Hourly) -->
           <div id="hourly-log-section" style="margin-bottom:30px; display: ${c.contract_type === 'hourly' ? 'block' : 'none'}">
-            ${(c.status === 'completed' || c.status === 'cancelled') ? `
+            ${(c.status === 'completed' || c.status === 'cancelled' || c.status === 'disputed') ? `
               <div style="background:#f3f4f6; border:1px solid #e5e7eb; border-radius:8px; padding:15px; font-size:13px; color:#4b5563; text-align:center">
                 🔒 This contract is ${c.status}. Logging time is disabled.
               </div>
@@ -1348,6 +1384,7 @@
             <button class="btn" style="flex:1;justify-content:center;border:1px solid #ddd;background:white;color:#333;font-weight:600;padding:12px;border-radius:8px" onclick="showPage('messages');closeModal()">Message Client</button>
             ${c.status === 'active' || c.status === 'paused' ? `
               <button class="btn btn-g" style="flex:1;justify-content:center;padding:12px;font-weight:700" onclick="event.stopPropagation();openFreelancerCompleteModal(${c.id})">Mark as Completed</button>
+              <button class="btn btn-w" style="flex:1;justify-content:center;padding:12px;color:#ef4444;border-color:#fecaca" onclick="event.stopPropagation();closeModal();openDisputeModal(${c.id})">⚠️ Dispute</button>
             ` : ''}
             <button class="btn btn-w" style="flex:1;justify-content:center;padding:12px" onclick="closeModal()">Close</button>
           </div>
@@ -1377,6 +1414,29 @@
           dateInput.value = today;
         }
       }, 50);
+    }
+    else if (type === 'file-dispute') {
+      const contractId = data;
+      document.getElementById('mh-title').innerText = 'File a Dispute';
+      modal.style.maxWidth = '500px';
+      mc.innerHTML = `
+      <div style="padding:25px">
+        <p style="font-size:13.5px;color:var(--muted2);line-height:1.5;margin-bottom:15px">
+          If you and the client cannot agree on milestone delivery, quality of work, or payment terms, you can file a dispute.
+          This will temporarily freeze all funds, and our support team will mediate.
+        </p>
+        <div style="margin-bottom:16px">
+          <label style="font-weight:700;font-size:12.5px;color:var(--dark);display:block;margin-bottom:8px">Reason for Dispute</label>
+          <textarea id="dispute-reason" style="width:100%;height:120px;padding:10px;border:1.5px solid var(--border);border-radius:10px;font-family:inherit;font-size:13px;outline:none;resize:none" placeholder="Please describe the disagreement in detail..."></textarea>
+        </div>
+        <div style="display:flex;gap:12px;margin-top:20px">
+          <button class="btn btn-w" style="flex:1;padding:12px;font-size:14px" onclick="closeModal()">Cancel</button>
+          <button class="btn btn-o" style="flex:1.5;padding:12px;font-size:14px;font-weight:700" onclick="submitDispute(${contractId})">Raise Dispute ⚠️</button>
+        </div>
+      </div>
+      `;
+      overlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
     }
     else if (type === 'add-milestone') {
       const clientId = data;
@@ -3433,6 +3493,55 @@ window.submitFreelancerComplete = async function(event, contractId) {
     btn.disabled = false;
     btn.innerText = originalText;
   }
+};
+
+window.openDisputeModal = function(contractId) {
+  openModal('file-dispute', contractId);
+};
+
+window.submitDispute = function(contractId) {
+  const reason = document.getElementById('dispute-reason').value.trim();
+  if (!reason) {
+    alert('Please enter a reason for the dispute.');
+    return;
+  }
+
+  const btn = document.querySelector('[onclick*="submitDispute"]');
+  if (btn) {
+    btn.disabled = true;
+    btn.innerText = 'Filing Dispute...';
+  }
+
+  const formData = new FormData();
+  formData.append('contract_id', contractId);
+  formData.append('reason', reason);
+
+  fetch(BASE_URL + 'actions/file_dispute.php', {
+    method: 'POST',
+    body: formData
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      toast('Success', data.message);
+      closeModal();
+      setTimeout(() => location.reload(), 1500);
+    } else {
+      alert(data.error || 'Failed to file dispute');
+      if (btn) {
+        btn.disabled = false;
+        btn.innerText = 'Raise Dispute ⚠️';
+      }
+    }
+  })
+  .catch(err => {
+    console.error(err);
+    alert('An error occurred. Check console.');
+    if (btn) {
+      btn.disabled = false;
+      btn.innerText = 'Raise Dispute ⚠️';
+    }
+  });
 };
 </script>
 </body>

@@ -1478,6 +1478,74 @@
     }
   }
 
+  window.openDisputeModal = function(contractId) {
+    MODALS['file-dispute'] = {
+      t: 'File a Dispute',
+      b: `
+      <div style="padding:10px 0">
+        <p style="font-size:13.5px;color:var(--uw-gray);line-height:1.5;margin-bottom:15px">
+          If you and the freelancer cannot agree on milestone delivery, quality of work, or payment terms, you can file a dispute.
+          This will temporarily freeze all funds, and our support team will mediate.
+        </p>
+        <div style="margin-bottom:16px">
+          <label style="font-weight:700;font-size:12.5px;color:var(--uw-black);display:block;margin-bottom:8px">Reason for Dispute</label>
+          <textarea id="dispute-reason" style="width:100%;height:120px;padding:10px;border:1.5px solid var(--uw-border);border-radius:10px;font-family:inherit;font-size:13px;outline:none;resize:none" placeholder="Please describe the disagreement in detail..."></textarea>
+        </div>
+      </div>
+      <div style="display:flex;gap:12px">
+        <button class="btn btn-w" style="flex:1;padding:12px;font-size:14px" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-o" style="flex:1.5;padding:12px;font-size:14px;font-weight:700" onclick="submitDispute(${contractId})">Raise Dispute ⚠️</button>
+      </div>
+      `
+    };
+    openModal('file-dispute');
+  };
+
+  window.submitDispute = function(contractId) {
+    const reason = document.getElementById('dispute-reason').value.trim();
+    if (!reason) {
+      alert('Please enter a reason for the dispute.');
+      return;
+    }
+
+    const btn = document.querySelector('[onclick*="submitDispute"]');
+    if (btn) {
+      btn.disabled = true;
+      btn.innerText = 'Filing Dispute...';
+    }
+
+    const formData = new FormData();
+    formData.append('contract_id', contractId);
+    formData.append('reason', reason);
+
+    fetch(BASE_URL + 'actions/file_dispute.php', {
+      method: 'POST',
+      body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        toast('Success', data.message);
+        closeModal();
+        setTimeout(() => location.reload(), 1500);
+      } else {
+        alert(data.error || 'Failed to file dispute');
+        if (btn) {
+          btn.disabled = false;
+          btn.innerText = 'Raise Dispute ⚠️';
+        }
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      alert('An error occurred. Check console.');
+      if (btn) {
+        btn.disabled = false;
+        btn.innerText = 'Raise Dispute ⚠️';
+      }
+    });
+  };
+
   window.manageContract = async function (contract) {
     let contractId = null;
     if (typeof contract === 'object' && contract !== null) {
@@ -1619,6 +1687,16 @@
           </button>
         ` : ''}
         
+        ${contract.status === 'disputed' ? `
+          <div style="background:#fef2f2;border:1px solid #fee2e2;border-radius:10px;padding:15px;color:#991b1b;font-size:13px;line-height:1.5;margin-bottom:12px;display:flex;align-items:flex-start;gap:8px">
+            <span style="font-size:16px">⚠️</span>
+            <div>
+              <strong>This contract is currently Disputed.</strong><br>
+              The escrow and milestones have been frozen. Our arbitration team is reviewing the case logs. We will contact both parties via email/chat soon.
+            </div>
+          </div>
+        ` : ''}
+
         ${(contract.status === 'active' || contract.status === 'paused') ? `
           <button class="btn btn-o" style="justify-content:center;padding:12px" onclick="closeModal();completeJob(${contract.proposal_id})">
             ✅ Mark Job as Completed
@@ -1626,6 +1704,10 @@
           
           <button class="btn btn-w" style="justify-content:center;padding:12px;color:#ef4444;border-color:#fecaca" onclick="closeModal();cancelHiring(${contract.proposal_id})">
             ❌ Cancel Hiring
+          </button>
+
+          <button class="btn btn-w" style="justify-content:center;padding:12px;color:#ef4444;border-color:#fecaca;margin-top:4px" onclick="closeModal();openDisputeModal(${contract.id})">
+            ⚠️ File a Dispute
           </button>
         ` : ''}
       </div>

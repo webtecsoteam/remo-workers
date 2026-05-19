@@ -22,7 +22,7 @@ $db = getDB();
 try {
     // Verify milestone belongs to freelancer
     $stmt = $db->prepare("
-        SELECT m.* FROM milestones m 
+        SELECT m.*, c.status as contract_status FROM milestones m 
         JOIN contracts c ON m.contract_id = c.id 
         WHERE m.id = ? AND c.freelancer_id = ?
     ");
@@ -31,6 +31,11 @@ try {
 
     if (!$milestone) {
         echo json_encode(['success' => false, 'message' => 'Milestone not found or unauthorized']);
+        exit;
+    }
+
+    if ($milestone['contract_status'] === 'disputed') {
+        echo json_encode(['success' => false, 'message' => 'Cannot submit work on a disputed contract.']);
         exit;
     }
 

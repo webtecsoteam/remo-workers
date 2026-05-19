@@ -165,7 +165,7 @@ if (!empty($allContracts)) {
 
 
 
-$contractCounts = ['active' => 0, 'completed' => 0, 'paused' => 0, 'cancelled' => 0];
+$contractCounts = ['active' => 0, 'completed' => 0, 'paused' => 0, 'cancelled' => 0, 'disputed' => 0];
 foreach ($allContracts as $ac) {
     if (isset($contractCounts[$ac['status']])) {
         $contractCounts[$ac['status']]++;
@@ -747,6 +747,7 @@ window.closeModal = function() {
         <div class="tab" data-tab-status="all" onclick="setTab(this)">All (<?php echo count($allContracts); ?>)</div>
         <div class="tab on" data-tab-status="active" onclick="setTab(this)">Active (<?php echo $contractCounts['active']; ?>)</div>
         <div class="tab" data-tab-status="paused" onclick="setTab(this)">Paused (<?php echo $contractCounts['paused']; ?>)</div>
+        <div class="tab" data-tab-status="disputed" onclick="setTab(this)">Disputed (<?php echo $contractCounts['disputed']; ?>)</div>
         <div class="tab" data-tab-status="completed" onclick="setTab(this)">Completed (<?php echo $contractCounts['completed']; ?>)</div>
         <div class="tab" data-tab-status="cancelled" onclick="setTab(this)">Cancelled (<?php echo $contractCounts['cancelled']; ?>)</div>
       </div>
@@ -766,7 +767,7 @@ window.closeModal = function() {
                     <td class="hide-mob"><?php echo ucfirst($ac['contract_type']); ?></td>
                     <td>$<?php echo number_format($ac['amount']); ?></td>
                     <td class="hide-mob"><?php echo date('M j, Y', strtotime($ac['start_date'])); ?></td>
-                    <td><span class="badge b-<?php echo ($ac['status'] === 'active' ? 'green' : 'gray'); ?>"><?php echo ucfirst($ac['status']); ?></span></td>
+                    <td><span class="badge <?php echo ($ac['status'] === 'active' ? 'b-green' : ($ac['status'] === 'disputed' ? 'b-red' : 'b-gray')); ?>"><?php echo ucfirst($ac['status']); ?></span></td>
                     <td><button class="btn btn-w btn-sm" onclick="event.stopPropagation();manageContract(<?php echo htmlspecialchars(json_encode($ac)); ?>)">Manage</button></td>
                   </tr>
                   <?php endforeach; ?>
@@ -797,7 +798,7 @@ window.closeModal = function() {
                 </div>
                 <div style="margin-left:auto;text-align:right">
                   <div class="prop-rate">$<?php echo number_format($ac['amount']); ?></div>
-                  <span class="badge b-<?php echo ($ac['status'] === 'active' ? 'green' : 'gray'); ?>" style="font-size:9px"><?php echo ucfirst($ac['status']); ?></span>
+                  <span class="badge <?php echo ($ac['status'] === 'active' ? 'b-green' : ($ac['status'] === 'disputed' ? 'b-red' : 'b-gray')); ?>" style="font-size:9px"><?php echo ucfirst($ac['status']); ?></span>
                 </div>
               </div>
               <div style="font-size:13.5px;font-weight:600;margin-bottom:10px;color:var(--uw-dark)"><?php echo htmlspecialchars($ac['job_title']); ?></div>

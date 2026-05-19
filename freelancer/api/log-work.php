@@ -37,6 +37,11 @@ try {
         exit;
     }
 
+    if ($contract['status'] === 'disputed') {
+        echo json_encode(['success' => false, 'message' => 'Time logging is disabled on disputed contracts.']);
+        exit;
+    }
+
     if ($contract['contract_type'] === 'hourly') {
         $amount = (float)$hours * (float)$contract['amount']; // contract['amount'] holds the hourly rate
     }

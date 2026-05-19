@@ -6,6 +6,7 @@
     $completedCount = count(array_filter($allContracts, fn($c) => ($c['status'] ?? '') === 'completed'));
     $pausedCount = count(array_filter($allContracts, fn($c) => ($c['status'] ?? '') === 'paused'));
     $cancelledCount = count(array_filter($allContracts, fn($c) => ($c['status'] ?? '') === 'cancelled'));
+    $disputedCount = count(array_filter($allContracts, fn($c) => ($c['status'] ?? '') === 'disputed'));
   ?>
   <div style="font-size:22px;font-weight:700;margin-bottom:20px;display:flex;align-items:center;gap:10px">
     My Contracts <span style="font-size:14px;color:var(--muted);font-weight:400">(<?php echo $activeCount; ?> active)</span>
@@ -15,6 +16,7 @@
     <div class="tab" onclick="setTab(this)" style="padding-bottom:10px;font-weight:600">All (<?php echo $allCount; ?>)</div>
     <div class="tab on" onclick="setTab(this)" style="padding-bottom:10px;font-weight:600">Active (<?php echo $activeCount; ?>)</div>
     <div class="tab" onclick="setTab(this)" style="padding-bottom:10px;font-weight:600">Paused (<?php echo $pausedCount; ?>)</div>
+    <div class="tab" onclick="setTab(this)" style="padding-bottom:10px;font-weight:600">Disputed (<?php echo $disputedCount; ?>)</div>
     <div class="tab" onclick="setTab(this)" style="padding-bottom:10px;font-weight:600">Completed (<?php echo $completedCount; ?>)</div>
     <div class="tab" onclick="setTab(this)" style="padding-bottom:10px;font-weight:600">Cancelled (<?php echo $cancelledCount; ?>)</div>
   </div>
