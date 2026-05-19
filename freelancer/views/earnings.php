@@ -38,10 +38,63 @@
       <div class="g2">
         <div>
           <div style="font-size:13px;font-weight:600;margin-bottom:8px">Available for Withdrawal: $<?php echo number_format($user['balance'] ?? 0, 2); ?></div>
-          <select id="withdraw-method" style="width:100%;padding:8px 11px;border:1px solid var(--border);border-radius:7px;font-size:13px;font-family:inherit;outline:none;margin-bottom:10px">
-            <option>Direct Bank Transfer (ACH)</option><option>PayPal</option><option>Payoneer</option><option>Wire Transfer</option>
+          <select id="saved-withdraw-method" onchange="toggleAddMethod()" style="width:100%;padding:8px 11px;border:1px solid var(--border);border-radius:7px;font-size:13px;font-family:inherit;outline:none;margin-bottom:10px">
+            <?php foreach($withdrawalMethods as $wm): 
+                $dets = json_decode($wm['details'], true);
+                $label = $wm['method_type'] . " - " . ($dets['email'] ?? "Acct ending in *" . substr($dets['accNum'] ?? '', -4));
+            ?>
+              <option value="<?php echo $wm['id']; ?>"><?php echo htmlspecialchars($label); ?></option>
+            <?php endforeach; ?>
+            <option value="new" <?php echo empty($withdrawalMethods) ? 'selected' : ''; ?>>+ Add New Withdrawal Method</option>
           </select>
-          <button class="btn btn-g" style="width:100%;justify-content:center;padding:10px" onclick="initiateWithdrawal(<?php echo $user['balance'] ?? 0; ?>)">Withdraw $<?php echo number_format($user['balance'] ?? 0, 2); ?> →</button>
+
+          <div id="new-method-form" style="<?php echo empty($withdrawalMethods) ? 'display:block' : 'display:none'; ?>">
+            <select id="new-withdraw-type" onchange="toggleWithdrawFields()" style="width:100%;padding:8px 11px;border:1px solid var(--border);border-radius:7px;font-size:13px;font-family:inherit;outline:none;margin-bottom:10px">
+              <option value="Direct Bank Transfer (ACH)">Direct Bank Transfer (ACH)</option>
+              <option value="PayPal">PayPal</option>
+              <option value="Payoneer">Payoneer</option>
+              <option value="Wire Transfer">Wire Transfer</option>
+            </select>
+            
+            <div id="withdraw-fields-email" style="display:none;margin-bottom:10px">
+              <input type="email" id="new-withdraw-email" placeholder="Enter Account Email" style="width:100%;padding:8px 11px;border:1px solid var(--border);border-radius:7px;font-size:13px;font-family:inherit;outline:none">
+            </div>
+            
+            <div id="withdraw-fields-bank" style="margin-bottom:10px">
+              <input type="text" id="new-withdraw-bank-name" placeholder="Bank Name (e.g. Chase)" style="width:100%;padding:8px 11px;border:1px solid var(--border);border-radius:7px;font-size:13px;font-family:inherit;outline:none;margin-bottom:8px">
+              <input type="text" id="new-withdraw-account-name" placeholder="Account Holder Name" style="width:100%;padding:8px 11px;border:1px solid var(--border);border-radius:7px;font-size:13px;font-family:inherit;outline:none;margin-bottom:8px">
+              <input type="text" id="new-withdraw-account-number" placeholder="Account Number" style="width:100%;padding:8px 11px;border:1px solid var(--border);border-radius:7px;font-size:13px;font-family:inherit;outline:none;margin-bottom:8px">
+              <input type="text" id="new-withdraw-routing" placeholder="Routing Number / SWIFT BIC" style="width:100%;padding:8px 11px;border:1px solid var(--border);border-radius:7px;font-size:13px;font-family:inherit;outline:none;margin-bottom:8px">
+            </div>
+            <button class="btn btn-outline" style="width:100%;justify-content:center;padding:8px;margin-bottom:10px" onclick="saveNewMethod()">Save Method</button>
+          </div>
+
+          <script>
+            function toggleAddMethod() {
+              const val = document.getElementById('saved-withdraw-method').value;
+              const withdrawBtn = document.getElementById('withdraw-btn');
+              if (val === 'new') {
+                document.getElementById('new-method-form').style.display = 'block';
+                if(withdrawBtn) withdrawBtn.style.display = 'none';
+              } else {
+                document.getElementById('new-method-form').style.display = 'none';
+                if(withdrawBtn) withdrawBtn.style.display = 'flex';
+              }
+            }
+            function toggleWithdrawFields() {
+              const val = document.getElementById('new-withdraw-type').value;
+              if (val === 'PayPal' || val === 'Payoneer') {
+                document.getElementById('withdraw-fields-email').style.display = 'block';
+                document.getElementById('withdraw-fields-bank').style.display = 'none';
+                document.getElementById('new-withdraw-email').placeholder = 'Enter ' + val + ' Email';
+              } else {
+                document.getElementById('withdraw-fields-email').style.display = 'none';
+                document.getElementById('withdraw-fields-bank').style.display = 'block';
+              }
+            }
+            document.addEventListener('DOMContentLoaded', toggleWithdrawFields);
+          </script>
+          <button id="withdraw-btn" class="btn btn-g" style="width:100%;justify-content:center;padding:10px; <?php echo empty($withdrawalMethods) ? 'display:none' : 'display:flex'; ?>" onclick="initiateWithdrawal(<?php echo $user['balance'] ?? 0; ?>)">Withdraw $<?php echo number_format($user['balance'] ?? 0, 2); ?> →</button>
         </div>
         <div style="background:var(--off);border-radius:9px;padding:14px">
           <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">Service Fees</div>

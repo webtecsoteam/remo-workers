@@ -37,8 +37,15 @@ switch ($action) {
 
     case 'get_users':
         try {
-            $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 50;
-            $stmt = $db->prepare("SELECT id, name, email, role, balance, status, created_at FROM users ORDER BY created_at DESC LIMIT :limit");
+            $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 1000;
+            $role = isset($_GET['role']) ? $_GET['role'] : '';
+            
+            if ($role) {
+                $stmt = $db->prepare("SELECT id, name, email, role, balance, status, created_at FROM users WHERE role = :role ORDER BY created_at DESC LIMIT :limit");
+                $stmt->bindValue(':role', $role, PDO::PARAM_STR);
+            } else {
+                $stmt = $db->prepare("SELECT id, name, email, role, balance, status, created_at FROM users ORDER BY created_at DESC LIMIT :limit");
+            }
             $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
             $stmt->execute();
             $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -64,6 +71,47 @@ switch ($action) {
 
             echo json_encode(['success' => true, 'message' => 'Balance updated successfully']);
         } catch (PDOException $e) {
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+        break;
+
+    case 'update_user_status':
+        try {
+            $userId = (int)($_GET['user_id'] ?? 0);
+            $status = $_GET['status'] ?? 'active'; // 'active', 'suspended', 'closed'
+            if (!in_array($status, ['active', 'suspended', 'closed'])) {
+                throw new Exception("Invalid status provided");
+            }
+            if ($userId === $user['id']) {
+                throw new Exception("Cannot change your own status");
+            }
+            $stmt = $db->prepare("UPDATE users SET status = ? WHERE id = ?");
+            $stmt->execute([$status, $userId]);
+            echo json_encode(['success' => true, 'message' => 'User status updated']);
+        } catch (Exception $e) {
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+        break;
+
+    case 'delete_user':
+        try {
+            $userId = (int)($_GET['user_id'] ?? 0);
+            if (!$userId) throw new Exception("Invalid user ID");
+            if ($userId === $user['id']) throw new Exception("Cannot delete yourself");
+            
+            // Note: In a real system, you might want soft deletes or to clean up all related records (jobs, proposals, etc.)
+            // To be safe, we will just hard delete if no foreign key constraints block it, or catch the exception
+            $stmt = $db->prepare("DELETE FROM users WHERE id = ?");
+            $stmt->execute([$userId]);
+            echo json_encode(['success' => true, 'message' => 'User deleted permanently']);
+        } catch (PDOException $e) {
+            // Check for foreign key constraint failure
+            if ($e->getCode() == 23000) {
+                echo json_encode(['success' => false, 'message' => 'Cannot delete user because they have associated records (jobs, proposals, etc). Please close or suspend their account instead.']);
+            } else {
+                echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+            }
+        } catch (Exception $e) {
             echo json_encode(['success' => false, 'message' => $e->getMessage()]);
         }
         break;
@@ -130,6 +178,67 @@ switch ($action) {
 
             echo json_encode(['success' => true, 'message' => 'Verification status updated']);
         } catch (PDOException $e) {
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+        break;
+
+    case 'get_withdrawals':
+        try {
+            $stmt = $db->query("
+                SELECT p.id, p.transaction_id, p.amount, p.payment_method, p.description, p.created_at, 
+                       u.name as user_name, u.email as user_email
+                FROM payments p
+                JOIN users u ON p.payee_id = u.id
+                WHERE p.status = 'pending' AND p.description LIKE 'Withdrawal%'
+                ORDER BY p.created_at DESC
+            ");
+            echo json_encode(['success' => true, 'data' => $stmt->fetchAll(PDO::FETCH_ASSOC)]);
+        } catch (PDOException $e) {
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+        break;
+
+    case 'approve_withdrawal':
+        try {
+            $id = $_POST['id'] ?? json_decode(file_get_contents('php://input'), true)['id'] ?? null;
+            if (!$id) throw new Exception("Invalid withdrawal ID");
+            
+            $stmt = $db->prepare("UPDATE payments SET status = 'completed' WHERE id = ? AND description LIKE 'Withdrawal%'");
+            $stmt->execute([$id]);
+            
+            echo json_encode(['success' => true, 'message' => 'Withdrawal approved']);
+        } catch (Exception $e) {
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+        break;
+
+    case 'reject_withdrawal':
+        try {
+            $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
+            $id = $input['id'] ?? null;
+            if (!$id) throw new Exception("Invalid withdrawal ID");
+            
+            $db->beginTransaction();
+            
+            // Get withdrawal amount and user
+            $stmt = $db->prepare("SELECT amount, payee_id FROM payments WHERE id = ? AND status = 'pending' AND description LIKE 'Withdrawal%' FOR UPDATE");
+            $stmt->execute([$id]);
+            $payment = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$payment) throw new Exception("Withdrawal not found or already processed");
+            
+            // Refund balance
+            $upd = $db->prepare("UPDATE users SET balance = balance + ? WHERE id = ?");
+            $upd->execute([$payment['amount'], $payment['payee_id']]);
+            
+            // Mark as failed
+            $stmt = $db->prepare("UPDATE payments SET status = 'failed' WHERE id = ?");
+            $stmt->execute([$id]);
+            
+            $db->commit();
+            echo json_encode(['success' => true, 'message' => 'Withdrawal rejected and refunded']);
+        } catch (Exception $e) {
+            if ($db->inTransaction()) $db->rollBack();
             echo json_encode(['success' => false, 'message' => $e->getMessage()]);
         }
         break;
@@ -262,6 +371,54 @@ switch ($action) {
             }
             // Always ensure foreign key checks are re-enabled in case of exception
             $db->exec("SET FOREIGN_KEY_CHECKS = 1;");
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+        break;
+
+    case 'get_connects_packages':
+        try {
+            $stmt = $db->query("SELECT * FROM connects_packages ORDER BY price ASC");
+            $pkgs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            echo json_encode(['success' => true, 'data' => $pkgs]);
+        } catch (PDOException $e) {
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+        break;
+
+    case 'save_connects_package':
+        try {
+            $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
+            $id = isset($input['id']) && $input['id'] ? (int)$input['id'] : null;
+            $amount = (int)($input['amount'] ?? 0);
+            $price = (float)($input['price'] ?? 0);
+            $badgeText = !empty($input['badge_text']) ? trim($input['badge_text']) : null;
+            $isActive = isset($input['is_active']) ? (int)$input['is_active'] : 1;
+
+            if ($amount <= 0 || $price <= 0) {
+                throw new Exception("Amount and Price must be greater than zero.");
+            }
+
+            if ($id) {
+                $stmt = $db->prepare("UPDATE connects_packages SET amount=?, price=?, badge_text=?, is_active=? WHERE id=?");
+                $stmt->execute([$amount, $price, $badgeText, $isActive, $id]);
+            } else {
+                $stmt = $db->prepare("INSERT INTO connects_packages (amount, price, badge_text, is_active) VALUES (?, ?, ?, ?)");
+                $stmt->execute([$amount, $price, $badgeText, $isActive]);
+            }
+
+            echo json_encode(['success' => true, 'message' => 'Package saved successfully']);
+        } catch (Exception $e) {
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+        break;
+
+    case 'delete_connects_package':
+        try {
+            $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+            if (!$id) throw new Exception("Invalid package ID");
+            $db->prepare("DELETE FROM connects_packages WHERE id = ?")->execute([$id]);
+            echo json_encode(['success' => true, 'message' => 'Package deleted']);
+        } catch (PDOException $e) {
             echo json_encode(['success' => false, 'message' => $e->getMessage()]);
         }
         break;

@@ -140,7 +140,7 @@ try {
     $transactionsStmt = $db->prepare("
         SELECT p.*, j.title as job_title,
         CASE WHEN p.payee_id = ? THEN 'credit' ELSE 'debit' END as type,
-        CONCAT('Payment for ', IFNULL(j.title, 'Service')) as description
+        COALESCE(NULLIF(p.description, ''), CONCAT('Payment for ', IFNULL(j.title, 'Service'))) as description
         FROM payments p
         LEFT JOIN jobs j ON p.job_id = j.id
         WHERE (p.payer_id = ? OR p.payee_id = ?) AND p.transaction_id NOT LIKE 'ESC-%'
@@ -165,11 +165,17 @@ try {
     $messagesStmt->execute([$user['id']]);
     $recentMessages = $messagesStmt->fetchAll() ?: [];
 
+    // Saved Withdrawal Methods
+    $wmStmt = $db->prepare("SELECT * FROM user_withdrawal_methods WHERE user_id = ? ORDER BY is_default DESC, created_at DESC");
+    $wmStmt->execute([$user['id']]);
+    $withdrawalMethods = $wmStmt->fetchAll() ?: [];
+
     // --- REPORT DATA ---
     // Full Transaction Ledger
     $ledgerStmt = $db->prepare("
         SELECT p.*, j.title as job_title, u.name as client_name,
         'payment' as ledger_type,
+        COALESCE(NULLIF(p.description, ''), CONCAT('Payment for ', IFNULL(j.title, 'Service'))) as description,
         CASE WHEN p.job_id IS NULL THEN 'bonus' ELSE 'hourly' END as p_type
         FROM payments p
         LEFT JOIN jobs j ON p.job_id = j.id

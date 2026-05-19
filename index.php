@@ -34,15 +34,10 @@ switch ($section) {
     case 'j':
         $jobId = decodeJobId($page);
         if ($jobId > 0) {
-            require_once __DIR__ . '/includes/classes/Auth.php';
-            if (!Auth::check()) {
-                $_SESSION['redirect_to'] = 'j/' . htmlspecialchars($page);
-                redirect(baseUrl('?show_login=1'));
-            } else {
-                redirect(baseUrl('remoworkers-dashboard?job_id=' . $jobId));
-            }
+            $_GET['id'] = $jobId;
+            include __DIR__ . '/home/job.php';
         } else {
-            redirect(baseUrl('remoworkers-dashboard'));
+            redirect(baseUrl());
         }
         break;
 

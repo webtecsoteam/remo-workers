@@ -37,30 +37,26 @@
       <div style="margin-bottom:20px">
         <label style="display:block;font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:10px">Select Connects Package</label>
         <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:10px;margin-bottom:12px">
-          <div class="connect-pack-btn" onclick="selectConnectPack(10, 1.50, this)" style="border:1px solid var(--border);border-radius:10px;padding:12px 6px;text-align:center;cursor:pointer;background:var(--off);transition:all 0.15s">
-            <div style="font-weight:800;font-size:14px">10</div>
-            <div style="font-size:11px;color:var(--muted);margin-top:2px">$1.50</div>
-          </div>
-          <div class="connect-pack-btn" onclick="selectConnectPack(20, 3.00, this)" style="border:1px solid var(--border);border-radius:10px;padding:12px 6px;text-align:center;cursor:pointer;background:var(--off);transition:all 0.15s">
-            <div style="font-weight:800;font-size:14px">20</div>
-            <div style="font-size:11px;color:var(--muted);margin-top:2px">$3.00</div>
-          </div>
-          <div class="connect-pack-btn" onclick="selectConnectPack(30, 4.50, this)" style="border:1px solid var(--border);border-radius:10px;padding:12px 6px;text-align:center;cursor:pointer;background:var(--off);transition:all 0.15s">
-            <div style="font-weight:800;font-size:14px">30</div>
-            <div style="font-size:11px;color:var(--muted);margin-top:2px">$4.50</div>
-          </div>
-          <div class="connect-pack-btn" onclick="selectConnectPack(50, 7.50, this)" style="border:1px solid var(--border);border-radius:10px;padding:12px 6px;text-align:center;cursor:pointer;background:var(--off);transition:all 0.15s">
-            <div style="font-weight:800;font-size:14px">50</div>
-            <div style="font-size:11px;color:var(--muted);margin-top:2px">$7.50</div>
-          </div>
-          <div class="connect-pack-btn" onclick="selectConnectPack(60, 9.00, this)" style="border:1px solid var(--border);border-radius:10px;padding:12px 6px;text-align:center;cursor:pointer;background:var(--off);transition:all 0.15s">
-            <div style="font-weight:800;font-size:14px">60</div>
-            <div style="font-size:11px;color:var(--muted);margin-top:2px">$9.00</div>
-          </div>
-          <div class="connect-pack-btn" onclick="selectConnectPack(100, 15.00, this)" style="border:1px solid var(--border);border-radius:10px;padding:12px 6px;text-align:center;cursor:pointer;background:var(--off);transition:all 0.15s">
-            <div style="font-weight:800;font-size:14px">100</div>
-            <div style="font-size:11px;color:var(--muted);margin-top:2px">$15.00</div>
-          </div>
+          <?php
+          try {
+              $db = getDB();
+              $stmt = $db->query("SELECT * FROM connects_packages WHERE is_active = 1 ORDER BY price ASC");
+              $packages = $stmt->fetchAll(PDO::FETCH_ASSOC);
+              foreach ($packages as $pkg) {
+                  $amount = (int)$pkg['amount'];
+                  $price = number_format((float)$pkg['price'], 2, '.', '');
+                  $badge = $pkg['badge_text'] ? '<div style="position:absolute;top:-8px;left:50%;transform:translateX(-50%);background:var(--g);color:white;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;white-space:nowrap;">' . htmlspecialchars($pkg['badge_text']) . '</div>' : '';
+                  $marginTop = $pkg['badge_text'] ? 'margin-top:6px;' : '';
+                  echo '<div class="connect-pack-btn" onclick="selectConnectPack(' . $amount . ', ' . $price . ', this)" style="border:1px solid var(--border);border-radius:10px;padding:12px 6px;text-align:center;cursor:pointer;background:var(--off);transition:all 0.15s;position:relative;">';
+                  echo $badge;
+                  echo '  <div style="font-weight:800;font-size:14px;' . $marginTop . '">' . $amount . '</div>';
+                  echo '  <div style="font-size:11px;color:var(--muted);margin-top:2px">$' . $price . '</div>';
+                  echo '</div>';
+              }
+          } catch (Exception $e) {
+              echo '<div style="color:var(--danger);font-size:12px;">Failed to load connects packages.</div>';
+          }
+          ?>
         </div>
 
         <!-- Custom Input -->

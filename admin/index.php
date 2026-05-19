@@ -179,6 +179,10 @@ if (!$user || $user['role'] !== 'admin') {
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
         Verifications
       </div>
+      <div class="nav-item" onclick="showPage('withdrawals', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Withdrawals
+      </div>
     </div>
     <div class="nav-section">
       <div class="nav-label">System</div>
@@ -248,9 +252,25 @@ if (!$user || $user['role'] !== 'admin') {
     <!-- USERS -->
     <div class="page" id="page-users">
       <div class="card">
-        <div class="card-header"><span class="card-title">User Management</span></div>
+        <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+          <span class="card-title">User Management</span>
+          <div style="display:flex; gap:10px;">
+            <button class="btn btn-primary btn-sm" id="tab-users-freelancer" onclick="switchUserTab('freelancer')">Freelancers</button>
+            <button class="btn btn-outline btn-sm" id="tab-users-client" onclick="switchUserTab('client')">Clients</button>
+          </div>
+        </div>
         <div class="table-wrapper" id="usersTable">
           <div class="loading"><span class="spinner"></span>Loading users…</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WITHDRAWALS -->
+    <div class="page" id="page-withdrawals">
+      <div class="card">
+        <div class="card-header"><span class="card-title">Pending Withdrawals</span></div>
+        <div class="table-wrapper" id="withdrawalsTable">
+          <div class="loading"><span class="spinner"></span>Loading withdrawals…</div>
         </div>
       </div>
     </div>
@@ -407,6 +427,7 @@ function refreshPage(name) {
   if (active === 'jobs') loadJobs();
   if (active === 'verifications') loadVerifications();
   if (active === 'settings') loadSettings();
+  if (active === 'withdrawals') loadWithdrawals();
 }
 
 async function loadDashboard() {
@@ -671,6 +692,129 @@ async function deleteJob(id) {
   const res = await apiFetch('delete_job', { job_id: id });
   if (res.success) {
     refreshPage('jobs');
+  } else {
+    alert("Error: " + res.message);
+  }
+}
+
+let currentUserTab = 'freelancer';
+
+function switchUserTab(role) {
+  currentUserTab = role;
+  document.getElementById('tab-users-freelancer').className = role === 'freelancer' ? 'btn btn-primary btn-sm' : 'btn btn-outline btn-sm';
+  document.getElementById('tab-users-client').className = role === 'client' ? 'btn btn-primary btn-sm' : 'btn btn-outline btn-sm';
+  loadUsers();
+}
+
+async function loadUsers() {
+  const table = document.getElementById('usersTable');
+  table.innerHTML = '<div class="loading"><span class="spinner"></span>Loading users…</div>';
+  const data = await apiFetch('get_users', { role: currentUserTab });
+  if (data.success) {
+    table.innerHTML = renderUsersTable(data.data);
+  } else {
+    table.innerHTML = `<div class="loading" style="color:var(--red);">${data.message}</div>`;
+  }
+}
+
+function renderUsersTable(users) {
+  if (!users.length) return '<div class="loading">No users found.</div>';
+  return `<table>
+    <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Balance</th><th>Actions</th></tr></thead>
+    <tbody>
+      ${users.map(u => `<tr>
+        <td style="color:var(--muted)">#${u.id}</td>
+        <td><strong>${u.name}</strong></td>
+        <td>${u.email}</td>
+        <td><span class="badge ${u.role === 'admin' ? 'badge-red' : 'badge-blue'}">${u.role}</span></td>
+        <td>
+          <select class="btn btn-outline btn-sm" onchange="updateUserStatus(${u.id}, this.value)" ${u.role === 'admin' ? 'disabled' : ''}>
+            <option value="active" ${u.status === 'active' ? 'selected' : ''}>Active</option>
+            <option value="suspended" ${u.status === 'suspended' ? 'selected' : ''}>Suspended</option>
+            <option value="closed" ${u.status === 'closed' ? 'selected' : ''}>Closed</option>
+          </select>
+        </td>
+        <td><strong>$${parseFloat(u.balance || 0).toFixed(2)}</strong></td>
+        <td style="display:flex; gap:6px;">
+          <button class="btn btn-outline btn-sm" onclick="openBalanceModal(${u.id}, '${u.name}', ${u.balance})">Balance</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteUser(${u.id})" ${u.role === 'admin' ? 'disabled' : ''}>Delete</button>
+        </td>
+      </tr>`).join('')}
+    </tbody>
+  </table>`;
+}
+
+async function updateUserStatus(userId, status) {
+  if (!confirm(`Are you sure you want to change this user's status to ${status}?`)) {
+    loadUsers(); // revert select UI
+    return;
+  }
+  const res = await apiFetch('update_user_status', { user_id: userId, status: status });
+  if (res.success) {
+    loadUsers();
+  } else {
+    alert("Error: " + res.message);
+    loadUsers();
+  }
+}
+
+async function deleteUser(userId) {
+  if (!confirm("Are you sure you want to permanently delete this user? This cannot be undone.")) return;
+  const res = await apiFetch('delete_user', { user_id: userId });
+  if (res.success) {
+    loadUsers();
+  } else {
+    alert("Error: " + res.message);
+  }
+}
+
+async function loadWithdrawals() {
+  const table = document.getElementById('withdrawalsTable');
+  table.innerHTML = '<div class="loading"><span class="spinner"></span>Loading withdrawals…</div>';
+  const data = await apiFetch('get_withdrawals');
+  if (data.success) {
+    table.innerHTML = renderWithdrawalsTable(data.data);
+  } else {
+    table.innerHTML = `<div class="loading" style="color:var(--red);">${data.message}</div>`;
+  }
+}
+
+function renderWithdrawalsTable(withdrawals) {
+  if (!withdrawals.length) return '<div class="loading">No pending withdrawals.</div>';
+  return `<table>
+    <thead><tr><th>Date</th><th>Freelancer</th><th>Amount</th><th>Method</th><th>Details</th><th>Actions</th></tr></thead>
+    <tbody>
+      ${withdrawals.map(w => `<tr>
+        <td>${new Date(w.created_at).toLocaleDateString()}</td>
+        <td><strong>${w.user_name}</strong><br><span style="font-size:11px;color:var(--muted)">${w.user_email}</span></td>
+        <td><strong>$${parseFloat(w.amount).toFixed(2)}</strong></td>
+        <td><span class="badge badge-gray">${w.payment_method}</span></td>
+        <td><div style="font-size:12px;color:var(--muted);max-width:300px;line-height:1.4">${w.description.replace('Withdrawal to ', '')}</div></td>
+        <td style="display:flex; gap:6px;">
+          <button class="btn btn-primary btn-sm" onclick="approveWithdrawal(${w.id}, '${w.transaction_id}')">Approve</button>
+          <button class="btn btn-danger btn-sm" onclick="rejectWithdrawal(${w.id}, '${w.transaction_id}')">Reject</button>
+        </td>
+      </tr>`).join('')}
+    </tbody>
+  </table>`;
+}
+
+async function approveWithdrawal(id, txnId) {
+  if (!confirm(`Are you sure you want to approve this withdrawal? (Ensure you have actually sent the funds manually)`)) return;
+  const res = await apiFetch('approve_withdrawal', { id: id, transaction_id: txnId });
+  if (res.success) {
+    loadWithdrawals();
+  } else {
+    alert("Error: " + res.message);
+  }
+}
+
+async function rejectWithdrawal(id, txnId) {
+  const reason = prompt("Enter a reason for rejection (The amount will be refunded to the freelancer):");
+  if (reason === null) return;
+  const res = await apiFetch('reject_withdrawal', { id: id, transaction_id: txnId, reason: reason });
+  if (res.success) {
+    loadWithdrawals();
   } else {
     alert("Error: " + res.message);
   }

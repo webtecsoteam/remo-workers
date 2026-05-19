@@ -63,6 +63,14 @@
   const SAVED_IDS = <?php echo json_encode(array_column($savedJobs ?? [], 'id'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?: '[]'; ?>;
   let PROPOSALS = <?php echo json_encode($submittedProposals ?? [], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?: '[]'; ?>;
   const CONTRACTS = <?php echo json_encode($allContracts ?? [], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?: '[]'; ?>;
+  const CONNECTS_PACKAGES = <?php
+    try {
+        $cp_stmt = getDB()->query("SELECT * FROM connects_packages WHERE is_active = 1 ORDER BY price ASC");
+        echo json_encode($cp_stmt->fetchAll(PDO::FETCH_ASSOC));
+    } catch(Exception $e) {
+        echo '[]';
+    }
+  ?>;
   const USER_CONNECTS = <?php echo (int)($user['connects'] ?? 0); ?>;
   const CONNECTS_PER_APPLICATION = <?php echo Auth::CONNECTS_PER_APPLICATION; ?>;
   const USER_EMAIL_VERIFIED = <?php echo Auth::isEmailVerified($user) ? 'true' : 'false'; ?>;
@@ -89,13 +97,76 @@
     panel.innerHTML = info[type] || '';
   }
 
+  window.saveNewMethod = function() {
+    const method = document.getElementById('new-withdraw-type').value;
+    let details = {};
+    
+    if (method === 'PayPal' || method === 'Payoneer') {
+      const email = document.getElementById('new-withdraw-email').value.trim();
+      if (!email) return toast('Error', 'Please enter your ' + method + ' email');
+      details = { email };
+    } else {
+      const bankName = document.getElementById('new-withdraw-bank-name').value.trim();
+      const accName = document.getElementById('new-withdraw-account-name').value.trim();
+      const accNum = document.getElementById('new-withdraw-account-number').value.trim();
+      const routing = document.getElementById('new-withdraw-routing').value.trim();
+      
+      if (!bankName || !accName || !accNum || !routing) {
+        return toast('Error', 'Please fill in all bank details');
+      }
+      details = { bankName, accName, accNum, routing };
+    }
+    
+    toast('Processing...', 'Saving method...');
+    fetch(BASE_URL + 'freelancer/api/add-withdrawal-method.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ method_type: method, details: details })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        toast('Success', 'Withdrawal method saved!');
+        setTimeout(() => location.reload(), 1500);
+      } else {
+        toast('Error', data.message || 'Failed to save method');
+      }
+    }).catch(err => {
+      console.error(err);
+      toast('Error', 'A network error occurred.');
+    });
+  }
+
   window.initiateWithdrawal = function(amount) {
     if (amount <= 0) return toast('Error', 'No funds available to withdraw');
-    const method = document.getElementById('withdraw-method').value;
+    const methodId = document.getElementById('saved-withdraw-method').value;
     
-    if (confirm(`Are you sure you want to withdraw $${parseFloat(amount).toFixed(2)} to ${method}?`)) {
-      toast('Success', 'Withdrawal initiated successfully!');
+    if (methodId === 'new' || !methodId) {
+      return toast('Error', 'Please save a withdrawal method first');
     }
+    
+    if (!confirm(`Are you sure you want to withdraw $${parseFloat(amount).toFixed(2)} to this saved account?`)) return;
+    
+    toast('Processing...', 'Initiating withdrawal...');
+    
+    fetch(BASE_URL + 'freelancer/api/withdraw.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ amount: amount, method_id: methodId })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        toast('Success', 'Withdrawal initiated successfully!');
+        setTimeout(() => location.reload(), 1500);
+      } else {
+        toast('Error', data.message || 'Failed to initiate withdrawal');
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      toast('Error', 'A network error occurred.');
+    });
   }
 
   window.buyConnects = function(amount, price) {
@@ -1440,14 +1511,13 @@
 
                 <div style="font-size:15px;font-weight:700;margin-bottom:12px">Buy Connects</div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:25px">
-                  <div style="border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;cursor:pointer" onclick="buyConnects(10, 1.50)">
-                    <div style="font-weight:700;font-size:14px">10 Connects</div>
-                    <div style="font-size:12px;color:var(--muted)">$1.50</div>
-                  </div>
-                  <div style="border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;cursor:pointer" onclick="buyConnects(20, 3.00)">
-                    <div style="font-weight:700;font-size:14px">20 Connects</div>
-                    <div style="font-size:12px;color:var(--muted)">$3.00</div>
-                  </div>
+                  ${CONNECTS_PACKAGES.map(pkg => `
+                    <div style="border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;cursor:pointer;position:relative" onclick="buyConnects(${pkg.amount}, ${pkg.price})">
+                      ${pkg.badge_text ? `<div style="position:absolute;top:-8px;left:50%;transform:translateX(-50%);background:var(--g);color:white;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;white-space:nowrap">${pkg.badge_text}</div>` : ''}
+                      <div style="font-weight:700;font-size:14px;margin-top:${pkg.badge_text ? '6px' : '0'}">${pkg.amount} Connects</div>
+                      <div style="font-size:12px;color:var(--muted)">$${parseFloat(pkg.price).toFixed(2)}</div>
+                    </div>
+                  `).join('')}
                 </div>
 
                 <div style="font-size:15px;font-weight:700;margin-bottom:12px">Recent Activity</div>
@@ -2471,7 +2541,16 @@
     }
     const params = new URLSearchParams(window.location.search);
     if (params.get('verified') === 'email') {
-      toast('Email verified', 'You can now apply to jobs after identity verification.');
+      <?php if(empty($user['is_verified'])): ?>
+        toast('Email verified', 'You can now apply to jobs after identity verification.');
+      <?php else: ?>
+        toast('Email verified', 'Your email has been successfully verified.');
+      <?php endif; ?>
+      
+      // Remove 'verified' param from URL to prevent showing on refresh
+      params.delete('verified');
+      const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+      window.history.replaceState({}, document.title, newUrl);
     }
     if (params.has('job_id')) {
       const jobId = parseInt(params.get('job_id'), 10);

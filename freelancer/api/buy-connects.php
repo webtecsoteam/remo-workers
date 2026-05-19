@@ -19,9 +19,29 @@ if ($amount <= 0 || $price <= 0) {
     exit;
 }
 
+$db = getDB();
+
+// Validate package from DB
+$pkgStmt = $db->prepare("SELECT price FROM connects_packages WHERE amount = ? AND is_active = 1");
+$pkgStmt->execute([$amount]);
+$validPrice = $pkgStmt->fetchColumn();
+
+// Allow predefined packages OR custom amounts at standard $0.15 rate
+if ($validPrice !== false) {
+    if (abs((float)$validPrice - $price) > 0.001) {
+        echo json_encode(['success' => false, 'message' => 'Invalid package price mismatch. Please refresh the page.']);
+        exit;
+    }
+} else {
+    $expectedPrice = round($amount * 0.15, 2);
+    if (abs($expectedPrice - $price) > 0.001) {
+        echo json_encode(['success' => false, 'message' => 'Invalid custom amount or price mismatch.']);
+        exit;
+    }
+}
+
 $paymentMethod = isset($data['payment_method']) ? trim($data['payment_method']) : 'wallet';
 
-$db = getDB();
 try {
     $db->beginTransaction();
 

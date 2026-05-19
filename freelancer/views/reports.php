@@ -156,7 +156,7 @@
             <tr>
               <td><?php echo date('M j, Y', strtotime($l['created_at'])); ?></td>
               <td><span class="badge <?php echo $l['p_type']==='bonus'?'b-blue':'b-gray'; ?>"><?php echo ucfirst($l['p_type']); ?></span></td>
-              <td><?php echo htmlspecialchars($l['job_title'] ?? $l['type'] ?? 'Transaction'); ?></td>
+              <td><?php echo htmlspecialchars($l['description'] ?? 'Transaction'); ?></td>
               <td><?php echo htmlspecialchars($l['client_name'] ?? '—'); ?></td>
               <td>$<?php echo number_format($l['amount'], 2); ?></td>
               <td style="color:#ef4444">-$<?php echo number_format($l['platform_fee'], 2); ?></td>
@@ -177,7 +177,7 @@
           <div style="padding:16px;border-bottom:1px solid #eee">
             <div style="display:flex;justify-content:space-between;margin-bottom:8px">
               <div>
-                <div style="font-weight:700;font-size:14px;color:var(--dark)"><?php echo htmlspecialchars($l['job_title'] ?? $l['type'] ?? 'Transaction'); ?></div>
+                <div style="font-weight:700;font-size:14px;color:var(--dark)"><?php echo htmlspecialchars($l['description'] ?? 'Transaction'); ?></div>
                 <div style="font-size:11px;color:var(--muted)"><?php echo htmlspecialchars($l['client_name'] ?? '—'); ?></div>
               </div>
               <span class="badge <?php echo $l['status']==='completed'?'b-green':'b-blue'; ?>" style="font-size:10px;align-self:start"><?php echo ucfirst($l['status']); ?></span>
