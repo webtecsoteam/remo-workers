@@ -174,6 +174,24 @@ switch ($action) {
                 $doc->execute([$id]);
                 $userId = $doc->fetchColumn();
                 $db->prepare("UPDATE users SET is_verified = 1, verified_at = NOW() WHERE id = ?")->execute([$userId]);
+                
+                // Fetch user info to send congratulation email
+                $stmt = $db->prepare("SELECT name, email FROM users WHERE id = ?");
+                $stmt->execute([$userId]);
+                $u = $stmt->fetch();
+                if ($u) {
+                    require_once __DIR__ . '/../includes/classes/Mailer.php';
+                    $subject = "Congratulations! Your account is verified";
+                    $body = "
+                    <div style='font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px;border:1px solid #e5e7eb;border-radius:12px;'>
+                        <h2 style='color:#16281a;margin-bottom:20px;'>Hello " . htmlspecialchars($u['name']) . ",</h2>
+                        <p style='color:#374151;line-height:1.6;font-size:15px;'>Congratulations! Your identity has been successfully verified on Remoworkers.</p>
+                        <p style='color:#374151;line-height:1.6;font-size:15px;'>You now have a <strong>Verified</strong> badge on your profile, which builds instant trust with clients and allows you to fully access all platform features.</p>
+                        <br>
+                        <p style='color:#374151;line-height:1.6;font-size:15px;'>Best regards,<br><strong>The Remoworkers Team</strong></p>
+                    </div>";
+                    Mailer::send($u['email'], $subject, $body);
+                }
             }
 
             echo json_encode(['success' => true, 'message' => 'Verification status updated']);
@@ -200,7 +218,7 @@ switch ($action) {
 
     case 'approve_withdrawal':
         try {
-            $id = $_POST['id'] ?? json_decode(file_get_contents('php://input'), true)['id'] ?? null;
+            $id = $_REQUEST['id'] ?? null;
             if (!$id) throw new Exception("Invalid withdrawal ID");
             
             $stmt = $db->prepare("UPDATE payments SET status = 'completed' WHERE id = ? AND description LIKE 'Withdrawal%'");
@@ -214,8 +232,7 @@ switch ($action) {
 
     case 'reject_withdrawal':
         try {
-            $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
-            $id = $input['id'] ?? null;
+            $id = $_REQUEST['id'] ?? null;
             if (!$id) throw new Exception("Invalid withdrawal ID");
             
             $db->beginTransaction();
@@ -385,9 +402,9 @@ switch ($action) {
         }
         break;
 
-    case 'save_connects_package':
+     case 'save_connects_package':
         try {
-            $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
+            $input = json_decode(file_get_contents('php://input'), true) ?: $_REQUEST;
             $id = isset($input['id']) && $input['id'] ? (int)$input['id'] : null;
             $amount = (int)($input['amount'] ?? 0);
             $price = (float)($input['price'] ?? 0);
@@ -414,7 +431,7 @@ switch ($action) {
 
     case 'delete_connects_package':
         try {
-            $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+            $id = isset($_REQUEST['id']) ? (int)$_REQUEST['id'] : 0;
             if (!$id) throw new Exception("Invalid package ID");
             $db->prepare("DELETE FROM connects_packages WHERE id = ?")->execute([$id]);
             echo json_encode(['success' => true, 'message' => 'Package deleted']);

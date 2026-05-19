@@ -3,6 +3,7 @@
 
 <script>
   let availableBalance = <?php echo (float) ($user['balance'] ?? 0); ?>;
+  const CONTRACTS = <?php echo json_encode($allContracts ?? [], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?: '[]'; ?>;
   let clientFeePercent = <?php echo getPlatformSetting('client_fee_fixed', 0); ?>;
   let selectedCVType = null;
   let selectedCVFile = null;
@@ -515,7 +516,41 @@
     window.scrollTo(0, _modalScrollY);
   }
 
-  function openModal(id) {
+  function openModal(id, param = null) {
+    if (id === 'add-milestone') {
+      const freelancerId = param;
+      const activeContracts = CONTRACTS.filter(c => c.freelancer_id == freelancerId && (c.status === 'active' || c.status === 'paused' || c.status === 'completed'));
+      if (activeContracts.length === 0) {
+        toast('Error', 'You must have an active, paused, or completed contract with this freelancer.');
+        return;
+      }
+      
+      const contract = activeContracts[0];
+      
+      MODALS['add-milestone'] = {
+        t: 'Create Milestone',
+        b: `
+        <div style="padding:10px 0">
+          <p style="font-size:13.5px; color:var(--uw-gray); margin-bottom:20px">
+            Add a new milestone to your contract: <strong>${contract.job_title}</strong> with <strong>${contract.freelancer_name}</strong>.
+          </p>
+          <div style="margin-bottom:16px">
+            <label style="display:block; font-weight:700; font-size:12.5px; margin-bottom:6px; color:var(--uw-black)">Milestone Description</label>
+            <input type="text" id="ms-desc" placeholder="e.g. Phase 2: React Native app build" style="width:100%; padding:10px; border:1.5px solid var(--uw-border); border-radius:8px; outline:none; font-family:inherit; font-size:13px">
+          </div>
+          <div style="margin-bottom:20px">
+            <label style="display:block; font-weight:700; font-size:12.5px; margin-bottom:6px; color:var(--uw-black)">Milestone Budget ($)</label>
+            <input type="number" id="ms-amount" placeholder="e.g. 500" style="width:100%; padding:10px; border:1.5px solid var(--uw-border); border-radius:8px; outline:none; font-family:inherit; font-size:13px">
+          </div>
+          <div style="display:flex; gap:10px">
+            <button class="btn btn-o" style="flex:1; justify-content:center" onclick="closeModal()">Cancel</button>
+            <button class="btn btn-g" style="flex:2; justify-content:center" id="btn-submit-ms" onclick="submitNewMilestone(${contract.id}, ${freelancerId})">Create Milestone →</button>
+          </div>
+        </div>
+        `
+      };
+    }
+
     const m = MODALS[id];
     if (!m) {
       toast('Unavailable', 'This action is not available yet.');
@@ -1036,6 +1071,19 @@
           <button class="btn btn-g btn-sm" onclick="showPage('contracts')" style="padding:4px 10px; font-size:11px; margin-top:4px">Review & Fund Milestone</button>
         </div>
       `;
+      } else if (isMe && m.message.startsWith('CREATED MILESTONE:')) {
+        bubbleContent = `
+        <div style="margin-bottom:10px">${m.message}</div>
+        <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:12px; margin-top:8px; display:flex; flex-direction:column; gap:8px; align-items:flex-start">
+          <div style="display:flex; align-items:center; gap:6px; color:#1e40af; font-weight:700; font-size:12px">
+            <span>💼</span> Created Milestone
+          </div>
+          <div style="font-size:11.5px; color:#1e3a8a; line-height:1.4">
+            You have added this milestone to the contract. You can fund it now.
+          </div>
+          <button class="btn btn-g btn-sm" onclick="showPage('contracts')" style="padding:4px 10px; font-size:11px; margin-top:4px">Fund Milestone</button>
+        </div>
+      `;
       }
 
       return `
@@ -1053,13 +1101,26 @@
     `;
     }).join('');
 
+    const hasContract = (typeof CONTRACTS !== 'undefined' && Array.isArray(CONTRACTS)) 
+      ? CONTRACTS.some(c => c.freelancer_id == activeChatId && (c.status === 'active' || c.status === 'paused' || c.status === 'completed'))
+      : false;
+      
+    const milestoneBtn = hasContract ? `
+      <button class="btn btn-g btn-sm" onclick="openModal('add-milestone', ${activeChatId})" style="padding:6px 12px;font-size:12.5px;display:flex;align-items:center;gap:6px;margin-left:auto">
+        <span>➕</span> Add Milestone
+      </button>
+    ` : '';
+
     chatWindow.innerHTML = `
-    <div style="padding:14px 18px;border-bottom:1px solid var(--uw-border);display:flex;align-items:center;gap:12px">
-      <div class="av" style="width:36px;height:36px">
-        ${avatar ? `<div class="av" style="position:relative;width:100%;height:100%"><img src="${getAvatarUrl(avatar)}" style="width:100%;height:100%;border-radius:50%;object-fit:cover" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div style="display:none;background:var(--uw-green-light);color:var(--uw-green);width:100%;height:100%;align-items:center;justify-content:center;border-radius:50%;font-weight:700">${initials}</div></div>` :
-        `<div style="background:var(--uw-green-light);color:var(--uw-green);width:100%;height:100%;display:flex;align-items:center;justify-content:center;border-radius:50%">${initials}</div>`}
+    <div style="padding:14px 18px;border-bottom:1px solid var(--uw-border);display:flex;align-items:center;gap:12px;justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="av" style="width:36px;height:36px">
+          ${avatar ? `<div class="av" style="position:relative;width:100%;height:100%"><img src="${getAvatarUrl(avatar)}" style="width:100%;height:100%;border-radius:50%;object-fit:cover" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div style="display:none;background:var(--uw-green-light);color:var(--uw-green);width:100%;height:100%;align-items:center;justify-content:center;border-radius:50%;font-weight:700">${initials}</div></div>` :
+          `<div style="background:var(--uw-green-light);color:var(--uw-green);width:100%;height:100%;display:flex;align-items:center;justify-content:center;border-radius:50%">${initials}</div>`}
+        </div>
+        <div><div style="font-weight:700;font-size:14px">${name}</div><div style="font-size:12px;color:var(--uw-green)">Online</div></div>
       </div>
-      <div><div style="font-weight:700;font-size:14px">${name}</div><div style="font-size:12px;color:var(--uw-green)">Online</div></div>
+      ${milestoneBtn}
     </div>
     <div style="flex:1;padding:18px;overflow-y:auto;display:flex;flex-direction:column;gap:12px" id="chat-messages-scroll">${msgHtml}</div>
     <div style="padding:14px 18px;border-top:1px solid var(--uw-border);display:flex;gap:10px">
@@ -2314,6 +2375,69 @@
       toast('Error', 'Payment processing failed.');
       btn.disabled = false;
       btn.innerText = originalText;
+    }
+  }
+  window.submitNewMilestone = async function(contractId, freelancerId) {
+    const descEl = document.getElementById('ms-desc');
+    const amtEl = document.getElementById('ms-amount');
+    const desc = descEl ? descEl.value.trim() : '';
+    const amount = amtEl ? parseFloat(amtEl.value) : 0;
+    const btn = document.getElementById('btn-submit-ms');
+
+    if (!desc) {
+      toast('Error', 'Please enter a description for the milestone.');
+      return;
+    }
+    if (amount <= 0 || isNaN(amount)) {
+      toast('Error', 'Please enter a valid amount greater than $0.');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerText = 'Creating...';
+
+    try {
+      const response = await fetch(BASE_URL + 'client/api/add-milestone.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contract_id: contractId,
+          description: desc,
+          amount: amount
+        })
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        toast('Success 🎉', result.message || 'Milestone added successfully.');
+        closeModal();
+
+        // Dynamically add the milestone to the local CONTRACTS list in memory
+        CONTRACTS.forEach(c => {
+          if (c.id == contractId) {
+            if (!c.milestones) c.milestones = [];
+            c.milestones.push(result.milestone);
+          }
+        });
+
+        // Proactively send a system/chat message about the newly added milestone
+        const msg = `CREATED MILESTONE: I have created a new milestone of $${amount.toLocaleString()} for: "${desc}". You can start working on it now, or wait for me to fund it.`;
+        
+        // Populate and send message if chat is active
+        const input = document.getElementById('chat-input');
+        if (input) {
+          input.value = msg;
+          sendMsg();
+        }
+      } else {
+        toast('Error', result.message || 'Failed to create milestone.');
+        btn.disabled = false;
+        btn.innerText = 'Create Milestone →';
+      }
+    } catch (err) {
+      btn.disabled = false;
+      btn.innerText = 'Create Milestone →';
+      toast('Error', 'Failed to create milestone.');
     }
   }
 

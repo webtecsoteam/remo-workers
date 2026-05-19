@@ -2422,6 +2422,36 @@
 
     const msgHtml = messages.map(m => {
       const isMe = (m.sender_id != activeChatId);
+      
+      let bubbleContent = m.message;
+      if (!isMe && m.message.startsWith('CREATED MILESTONE:')) {
+        bubbleContent = `
+          <div style="margin-bottom:10px">${m.message}</div>
+          <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:12px; margin-top:8px; display:flex; flex-direction:column; gap:8px; align-items:flex-start">
+            <div style="display:flex; align-items:center; gap:6px; color:#1e40af; font-weight:700; font-size:12px">
+              <span>💼</span> Created Milestone
+            </div>
+            <div style="font-size:11.5px; color:#1e3a8a; line-height:1.4">
+              The client has added a new milestone to your contract. Check the status on your earnings page.
+            </div>
+            <button class="btn btn-g btn-sm" onclick="showPage('earnings')" style="padding:4px 10px; font-size:11px; margin-top:4px">View Earnings</button>
+          </div>
+        `;
+      } else if (isMe && m.message.startsWith('PROPOSED MILESTONE:')) {
+        bubbleContent = `
+          <div style="margin-bottom:10px">${m.message}</div>
+          <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:12px; margin-top:8px; display:flex; flex-direction:column; gap:8px; align-items:flex-start">
+            <div style="display:flex; align-items:center; gap:6px; color:#1e40af; font-weight:700; font-size:12px">
+              <span>💼</span> Proposed Milestone
+            </div>
+            <div style="font-size:11.5px; color:#1e3a8a; line-height:1.4">
+              You proposed this milestone. Waiting for client to approve and fund it.
+            </div>
+            <button class="btn btn-g btn-sm" onclick="showPage('earnings')" style="padding:4px 10px; font-size:11px; margin-top:4px">View Earnings</button>
+          </div>
+        `;
+      }
+
       return `
         <div style="display:flex;gap:10px;${isMe ? 'flex-direction:row-reverse' : ''}">
           <div class="av" style="width:30px;height:30px;font-size:10px;background:${isMe ? 'var(--g)' : 'white'};color:${isMe ? 'white' : 'var(--muted)'};border:${isMe ? 'none' : '1px solid var(--border)'};flex-shrink:0;display:flex;align-items:center;justify-content:center;border-radius:50%">
@@ -2430,7 +2460,7 @@
               `<div style="background:var(--gl);color:var(--forest);width:100%;height:100%;display:flex;align-items:center;justify-content:center;border-radius:50%;font-weight:700;font-size:10px">${initials}</div>`)}
           </div>
           <div style="max-width:75%;${isMe ? 'text-align:right' : ''}">
-            <div style="background:${isMe ? 'var(--g)' : 'white'};color:${isMe ? 'white' : 'var(--forest)'};border-radius:12px;padding:10px 15px;font-size:13.5px;box-shadow:0 1px 2px rgba(0,0,0,.05);text-align:left">${m.message}</div>
+            <div style="background:${isMe ? 'var(--g)' : 'white'};color:${isMe ? 'white' : 'var(--forest)'};border-radius:12px;padding:10px 15px;font-size:13.5px;box-shadow:0 1px 2px rgba(0,0,0,.05);text-align:left">${bubbleContent}</div>
             <div style="font-size:11px;color:var(--muted);margin-top:4px">${new Date(m.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>
           </div>
         </div>

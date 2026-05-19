@@ -183,6 +183,10 @@ if (!$user || $user['role'] !== 'admin') {
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
         Withdrawals
       </div>
+      <div class="nav-item" onclick="showPage('connects', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+        Connects Packages
+      </div>
     </div>
     <div class="nav-section">
       <div class="nav-label">System</div>
@@ -271,6 +275,53 @@ if (!$user || $user['role'] !== 'admin') {
         <div class="card-header"><span class="card-title">Pending Withdrawals</span></div>
         <div class="table-wrapper" id="withdrawalsTable">
           <div class="loading"><span class="spinner"></span>Loading withdrawals…</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONNECTS PACKAGES -->
+    <div class="page" id="page-connects">
+      <div class="card">
+        <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+          <span class="card-title">Connects Packages</span>
+          <button class="btn btn-primary btn-sm" onclick="openConnectsModal()">+ Add Package</button>
+        </div>
+        <div class="table-wrapper" id="connectsTable">
+          <div class="loading"><span class="spinner"></span>Loading packages…</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Connects Modal -->
+    <div id="connectsModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:200; align-items:center; justify-content:center;">
+      <div class="card" style="width:100%; max-width:400px; margin:20px;">
+        <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+          <span class="card-title" id="connectsModalTitle">Add Connects Package</span>
+          <span onclick="closeModal('connectsModal')" style="cursor:pointer; font-size:24px; font-weight:700; color:var(--text-3)">&times;</span>
+        </div>
+        <div class="card-body">
+          <form id="connectsForm" onsubmit="saveConnectsPackage(event)">
+            <input type="hidden" id="connectsId" name="id">
+            <div style="margin-bottom:16px;">
+              <label style="display:block; font-size:12px; margin-bottom:6px; color:var(--text-2)">Amount (Connects)</label>
+              <input type="number" id="connectsAmount" name="amount" required style="width:100%; padding:10px; border:1px solid var(--border); border-radius:8px; outline:none;">
+            </div>
+            <div style="margin-bottom:16px;">
+              <label style="display:block; font-size:12px; margin-bottom:6px; color:var(--text-2)">Price ($)</label>
+              <input type="number" step="0.01" id="connectsPrice" name="price" required style="width:100%; padding:10px; border:1px solid var(--border); border-radius:8px; outline:none;">
+            </div>
+            <div style="margin-bottom:16px;">
+              <label style="display:block; font-size:12px; margin-bottom:6px; color:var(--text-2)">Badge Text (Optional)</label>
+              <input type="text" id="connectsBadge" name="badge_text" placeholder="e.g. Most Popular" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:8px; outline:none;">
+            </div>
+            <div style="margin-bottom:20px;">
+              <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-1)">
+                <input type="checkbox" id="connectsActive" name="is_active" value="1" checked>
+                Active / Visible to users
+              </label>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;">Save Package</button>
+          </form>
         </div>
       </div>
     </div>
@@ -428,6 +479,7 @@ function refreshPage(name) {
   if (active === 'verifications') loadVerifications();
   if (active === 'settings') loadSettings();
   if (active === 'withdrawals') loadWithdrawals();
+  if (active === 'connects') loadConnects();
 }
 
 async function loadDashboard() {
@@ -815,6 +867,95 @@ async function rejectWithdrawal(id, txnId) {
   const res = await apiFetch('reject_withdrawal', { id: id, transaction_id: txnId, reason: reason });
   if (res.success) {
     loadWithdrawals();
+  } else {
+    alert("Error: " + res.message);
+  }
+}
+
+async function loadConnects() {
+  const table = document.getElementById('connectsTable');
+  table.innerHTML = '<div class="loading"><span class="spinner"></span>Loading packages…</div>';
+  const data = await apiFetch('get_connects_packages');
+  if (data.success) {
+    table.innerHTML = renderConnectsTable(data.data);
+  } else {
+    table.innerHTML = `<div class="loading" style="color:var(--red);">${data.message}</div>`;
+  }
+}
+
+function renderConnectsTable(packages) {
+  if (!packages.length) return '<div class="loading">No connects packages defined.</div>';
+  return `<table>
+    <thead><tr><th>ID</th><th>Amount</th><th>Price</th><th>Badge</th><th>Status</th><th>Actions</th></tr></thead>
+    <tbody>
+      ${packages.map(p => {
+        // Escaping package data for attributes safely
+        const safePkg = JSON.stringify(p).replace(/'/g, "&apos;").replace(/"/g, "&quot;");
+        return `<tr>
+          <td style="color:var(--muted)">#${p.id}</td>
+          <td><strong>${p.amount} Connects</strong></td>
+          <td><strong>$${parseFloat(p.price).toFixed(2)}</strong></td>
+          <td>${p.badge_text ? `<span class="badge badge-blue">${p.badge_text}</span>` : '<span style="color:var(--muted); font-size:12px;">None</span>'}</td>
+          <td><span class="badge ${parseInt(p.is_active) ? 'badge-green' : 'badge-gray'}">${parseInt(p.is_active) ? 'Active' : 'Inactive'}</span></td>
+          <td style="display:flex; gap:6px;">
+            <button class="btn btn-outline btn-sm" onclick="openConnectsModal(${safePkg})">Edit</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteConnectsPackage(${p.id})">Delete</button>
+          </td>
+        </tr>`;
+      }).join('')}
+    </tbody>
+  </table>`;
+}
+
+function openConnectsModal(pkg = null) {
+  const modal = document.getElementById('connectsModal');
+  const title = document.getElementById('connectsModalTitle');
+  const form = document.getElementById('connectsForm');
+  
+  form.reset();
+  
+  if (pkg) {
+    title.textContent = 'Edit Connects Package';
+    document.getElementById('connectsId').value = pkg.id;
+    document.getElementById('connectsAmount').value = pkg.amount;
+    document.getElementById('connectsPrice').value = pkg.price;
+    document.getElementById('connectsBadge').value = pkg.badge_text || '';
+    document.getElementById('connectsActive').checked = !!parseInt(pkg.is_active);
+  } else {
+    title.textContent = 'Add Connects Package';
+    document.getElementById('connectsId').value = '';
+    document.getElementById('connectsActive').checked = true;
+  }
+  
+  modal.style.display = 'flex';
+}
+
+async function saveConnectsPackage(e) {
+  e.preventDefault();
+  const form = document.getElementById('connectsForm');
+  const formData = new FormData(form);
+  const params = {
+    id: formData.get('id'),
+    amount: formData.get('amount'),
+    price: formData.get('price'),
+    badge_text: formData.get('badge_text'),
+    is_active: formData.get('is_active') ? 1 : 0
+  };
+  
+  const res = await apiFetch('save_connects_package', params);
+  if (res.success) {
+    closeModal('connectsModal');
+    loadConnects();
+  } else {
+    alert("Error: " + res.message);
+  }
+}
+
+async function deleteConnectsPackage(id) {
+  if (!confirm("Are you sure you want to delete this package?")) return;
+  const res = await apiFetch('delete_connects_package', { id: id });
+  if (res.success) {
+    loadConnects();
   } else {
     alert("Error: " + res.message);
   }
