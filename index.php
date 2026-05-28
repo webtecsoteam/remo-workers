@@ -11,6 +11,10 @@
 
 require_once __DIR__ . '/includes/config.php';
 
+if (($_SERVER['REQUEST_METHOD'] ?? '') === 'OPTIONS') {
+    handleCorsPreflight();
+}
+
 // Get the current route
 $route = isset($_GET['route']) ? trim($_GET['route'], '/') : '';
 
@@ -41,8 +45,31 @@ switch ($section) {
         }
         break;
 
+    case 'f':
+        $freelancerId = decodeFreelancerId($page);
+        if ($freelancerId > 0) {
+            $_GET['id'] = $freelancerId;
+            include __DIR__ . '/home/freelancer-profile.php';
+        } else {
+            redirect(baseUrl());
+        }
+        break;
+
     case 'login':
         include __DIR__ . '/actions/login.php';
+        break;
+
+    case 'post-job':
+        require_once __DIR__ . '/includes/classes/Auth.php';
+        $viewer = Auth::user();
+        if (!$viewer) {
+            $_SESSION['post_job_after_login'] = true;
+            redirect(baseUrl('?login=1'));
+        }
+        if (($viewer['role'] ?? '') === 'client') {
+            redirect(baseUrl('client#post-job'));
+        }
+        redirect(baseUrl('remoworkers-dashboard'));
         break;
 
     case 'register':
@@ -53,6 +80,28 @@ switch ($section) {
         require_once __DIR__ . '/includes/classes/Auth.php';
         Auth::logout();
         redirect(baseUrl());
+        break;
+
+    case 'page':
+        $_GET['slug'] = $page;
+        include __DIR__ . '/home/page.php';
+        break;
+
+    case 'blog':
+        if ($page !== '' && ctype_digit($page)) {
+            $_GET['id'] = (int) $page;
+            include __DIR__ . '/home/blog-article.php';
+        } else {
+            include __DIR__ . '/home/blog.php';
+        }
+        break;
+
+    case 'jobs':
+        include __DIR__ . '/home/jobs.php';
+        break;
+
+    case 'talents':
+        include __DIR__ . '/home/talents.php';
         break;
 
     case 'verification':
@@ -96,6 +145,15 @@ switch ($section) {
     // Route 3: Freelancer Dashboard (/remoworkers-dashboard/*)
     // ------------------------------------------
     case 'remoworkers-dashboard':
+        if ($page === 'j' && !empty($segments[2])) {
+            $jobId = decodeJobId($segments[2]);
+            if ($jobId > 0) {
+                $_GET['id'] = $jobId;
+                include __DIR__ . '/freelancer/job.php';
+                break;
+            }
+            redirect(baseUrl('remoworkers-dashboard#find-work'));
+        }
         $freelancerPage = __DIR__ . '/freelancer/' . $page . '.php';
         if (file_exists($freelancerPage)) {
             include $freelancerPage;

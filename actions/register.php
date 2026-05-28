@@ -1,14 +1,20 @@
 <?php
+require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/classes/Auth.php';
 
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    handleCorsPreflight();
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    applyCorsHeaders();
     $name = $_POST['name'] ?? '';
     $email = $_POST['email'] ?? '';
     $password = $_POST['password'] ?? '';
     $role = $_POST['role'] ?? '';
     $country = $_POST['country'] ?? '';
     
-    $isAjax = (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest');
+    $isAjax = isAjaxRequest();
     
     if ($name && $email && $password && $role) {
         if ($role === 'admin') {

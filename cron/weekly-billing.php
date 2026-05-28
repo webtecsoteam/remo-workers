@@ -11,6 +11,8 @@
  * 5. Transfers net funds to freelancer's 'pending' processing hold.
  * 6. Marks work logs as 'approved' (billed).
  * 7. Automatically pauses the contract if the client has insufficient balance (billing issue).
+ *
+ * Pending holds are released manually by an admin (see admin Payment Holds).
  */
 
 require_once __DIR__ . '/../includes/config.php';
@@ -132,49 +134,12 @@ try {
         ];
     }
 
-    // 6. Automatically release pending holds older than 5 days (or release all if test parameter is set)
-    $releaseAll = isset($_GET['release_all']) && $_GET['release_all'] === 'true';
-    $holdDays = 5;
-
-    if ($releaseAll) {
-        $expiredHoldsStmt = $db->query("SELECT * FROM payments WHERE status = 'pending'");
-    } else {
-        $expiredHoldsStmt = $db->prepare("SELECT * FROM payments WHERE status = 'pending' AND created_at <= NOW() - INTERVAL ? DAY");
-        $expiredHoldsStmt->execute([$holdDays]);
-    }
-    $expiredHolds = $expiredHoldsStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
-
-    $releasedHolds = [];
-    foreach ($expiredHolds as $hold) {
-        $holdId = $hold['id'];
-        $payeeId = $hold['payee_id'];
-        $amount = (float)$hold['amount'];
-        $fee = (float)$hold['platform_fee'];
-        $netAmount = $amount - $fee;
-
-        // Update status to completed
-        $updateStmt = $db->prepare("UPDATE payments SET status = 'completed' WHERE id = ?");
-        $updateStmt->execute([$holdId]);
-
-        // Credit freelancer balance
-        $creditStmt = $db->prepare("UPDATE users SET balance = balance + ? WHERE id = ?");
-        $creditStmt->execute([$netAmount, $payeeId]);
-
-        $releasedHolds[] = [
-            'payment_id' => $holdId,
-            'freelancer_id' => $payeeId,
-            'gross_amount' => $amount,
-            'net_amount' => $netAmount,
-            'description' => $hold['description']
-        ];
-    }
-
     $db->commit();
     echo json_encode([
         'success' => true,
         'processed_at' => date('Y-m-d H:i:s'),
         'billing_results' => $results,
-        'released_holds' => $releasedHolds
+        'note' => 'Pending freelancer holds require admin approval in the admin panel.',
     ]);
 
 } catch (Exception $e) {

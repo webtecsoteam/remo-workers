@@ -612,10 +612,26 @@ body.modal-open{
   touch-action:manipulation;
   user-select:none;-webkit-user-select:none;
   outline:none;
+  position:relative;
 }
 .mob-nav-item .mn-ico{font-size:19px;line-height:1}
 .mob-nav-item.active{color:#6ee564}
 .mob-nav-item:active{color:white}
+
+.mob-nav-badge{
+  position:absolute;
+  top:7px;
+  right:calc(50% - 18px);
+  background:#e11d48;
+  color:white;
+  font-size:9px;
+  font-weight:700;
+  padding:1px 5px;
+  border-radius:8px;
+  min-width:16px;
+  text-align:center;
+  pointer-events:none;
+}
 
 /* ── VISIBILITY ── */
 .desk-only{display:block}

@@ -15,9 +15,13 @@ $allReviews = $reviewsQuery->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!-- PROFILE -->
 <div class="page" id="page-profile">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px">
     <div style="font-size:20px;font-weight:700">My Profile</div>
-    <button class="btn btn-w btn-sm" onclick="openModal('edit-profile')">✏️ Edit Profile</button>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button type="button" class="btn btn-w btn-sm" onclick="copyProfileShareLink(<?php echo (int)$user['id']; ?>)">🔗 Copy profile link</button>
+      <a href="<?php echo baseUrl('f/' . encodeFreelancerId($user['id'])); ?>" target="_blank" rel="noopener noreferrer" class="btn btn-w btn-sm" style="text-decoration:none">View public page</a>
+      <button class="btn btn-w btn-sm" onclick="openModal('edit-profile')">✏️ Edit Profile</button>
+    </div>
   </div>
 
   <!-- Profile header card -->
@@ -192,6 +196,18 @@ $allReviews = $reviewsQuery->fetchAll(PDO::FETCH_ASSOC);
 
     <!-- RIGHT -->
     <div>
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-head"><h3>Share profile</h3></div>
+        <div class="card-body">
+          <p style="font-size:12px;color:var(--muted);margin:0 0 12px;line-height:1.5">Share this link with clients or on social media. Anyone can view your public profile.</p>
+          <input type="text" readonly id="my-public-profile-url" value="<?php echo htmlspecialchars(baseUrl('f/' . encodeFreelancerId($user['id']))); ?>" style="width:100%;padding:10px 12px;font-size:12px;border:1.5px solid var(--border);border-radius:8px;background:#f9fafb;margin-bottom:10px;font-family:inherit" onclick="this.select()">
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button type="button" class="btn btn-g btn-sm" style="flex:1;min-width:100px" onclick="copyProfileShareLink(<?php echo (int)$user['id']; ?>)">Copy link</button>
+            <a href="<?php echo baseUrl('f/' . encodeFreelancerId($user['id'])); ?>" target="_blank" rel="noopener noreferrer" class="btn btn-w btn-sm" style="flex:1;min-width:100px;text-align:center;text-decoration:none">Preview</a>
+          </div>
+        </div>
+      </div>
+
       <div class="card" style="margin-bottom:14px">
         <div class="card-head"><h3>Profile Info</h3></div>
         <div class="card-body">

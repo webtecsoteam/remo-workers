@@ -5,12 +5,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Remoworkers – Freelancer Dashboard</title>
+<?php include __DIR__ . '/../../includes/google-analytics.php'; ?>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://js.paystack.co/v1/inline.js"></script>
 <link rel="stylesheet" href="<?php echo baseUrl("freelancer/css/style.css?v=" . time()); ?>">
+<link rel="stylesheet" href="<?php echo baseUrl('assets/css/ui-alerts.css'); ?>">
 <link rel="icon" type="image/png" href="<?php echo baseUrl("favicon.png?v=1.0.0"); ?>">
 <script src="<?php echo baseUrl('assets/js/pagination.js'); ?>"></script>
+<script src="<?php echo baseUrl('assets/js/ui-alerts.js'); ?>"></script>
 <script>const BASE_URL = '<?php echo baseUrl(); ?>';</script>
 <script>
 window.showPage = function(id) {

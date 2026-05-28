@@ -7,11 +7,12 @@ if (!$jobId) {
     redirect(baseUrl());
 }
 
+ensureFreelancerSchema();
 $db = getDB();
 $stmt = $db->prepare("
     SELECT j.*, u.name as client_name, u.country as client_country, u.is_verified as client_verified, u.created_at as client_since,
-    COALESCE((SELECT SUM(amount) FROM payments WHERE payer_id = j.client_id AND status = 'completed'), 0) as client_total_spent,
-    COALESCE((SELECT COUNT(*) FROM contracts WHERE client_id = j.client_id), 0) as client_hires,
+    COALESCE((SELECT SUM(amount) FROM payments WHERE payer_id = j.client_id AND status = 'completed'), 0) + COALESCE(u.admin_spent_offset, 0) as client_total_spent,
+    COALESCE((SELECT COUNT(*) FROM contracts WHERE client_id = j.client_id), 0) + COALESCE(u.admin_hires_offset, 0) as client_hires,
     COALESCE((SELECT COUNT(*) FROM proposals WHERE job_id = j.id), 0) as proposal_count,
     COALESCE((SELECT AVG(rating) FROM reviews WHERE reviewee_id = j.client_id), 0.0) as client_rating
     FROM jobs j
@@ -28,11 +29,19 @@ if (!$job) {
 }
 
 $user = Auth::user();
+$displayProposalCount = ((int) ($job['proposal_count'] ?? 0)) + 5;
 
 if (isset($_GET['apply_login'])) {
-    $_SESSION['redirect_to'] = 'remoworkers-dashboard?job_id=' . $jobId;
+    $_SESSION['redirect_to'] = 'remoworkers-dashboard/j/' . encodeJobId($jobId) . '?apply=1';
     redirect(baseUrl('?show_login=1'));
 }
+
+$jobDescPlain = trim(strip_tags((string) ($job['description'] ?? '')));
+$seoMeta = [
+    'title' => trim((string) ($job['title'] ?? '')) . ' | Remoworkers',
+    'description' => $jobDescPlain !== '' ? (mb_strlen($jobDescPlain) > 160 ? rtrim(mb_substr($jobDescPlain, 0, 157)) . '…' : $jobDescPlain) : '',
+    'canonical' => baseUrl('j/' . encodeJobId((int) $job['id'])),
+];
 
 include __DIR__ . '/includes/header.php';
 ?>
@@ -91,6 +100,10 @@ include __DIR__ . '/includes/header.php';
             </div>
         </div>
 
+        <?php if ($user): ?>
+        <p style="margin-bottom:20px"><a href="<?php echo $user['role'] === 'freelancer' ? baseUrl('remoworkers-dashboard/j/' . encodeJobId($job['id'])) : baseUrl('j/' . encodeJobId($job['id'])); ?>" style="font-size:13px;color:var(--g);font-weight:600;text-decoration:none">View full job page →</a></p>
+        <?php endif; ?>
+
         <div class="job-desc"><?php echo htmlspecialchars($job['description']); ?></div>
 
         <h4 style="font-size:15px;margin-bottom:12px">Required Skills</h4>
@@ -105,14 +118,14 @@ include __DIR__ . '/includes/header.php';
 
         <div style="padding-top:20px;border-top:1px solid var(--border);margin-top:20px;">
             <div style="font-size:13px;color:var(--muted);margin-bottom:10px">Activity on this job</div>
-            <div style="font-size:14px;color:var(--text)">Proposals: <strong><?php echo $job['proposal_count']; ?></strong></div>
+            <div style="font-size:14px;color:var(--text)">Proposals: <strong><?php echo $displayProposalCount; ?>+</strong></div>
         </div>
     </div>
 
     <div class="job-sidebar">
         <div class="side-sect" style="text-align:center">
             <?php if ($user && $user['role'] === 'freelancer'): ?>
-                <a href="<?php echo baseUrl('remoworkers-dashboard?job_id=' . $job['id']); ?>" class="btn btn-green btn-full btn-lg" style="margin-bottom:10px;font-size:15px">Apply Now</a>
+                <a href="<?php echo baseUrl('remoworkers-dashboard/j/' . encodeJobId($job['id']) . '?apply=1'); ?>" class="btn btn-green btn-full btn-lg" style="margin-bottom:10px;font-size:15px">Apply Now</a>
             <?php elseif ($user && $user['role'] === 'client'): ?>
                 <div style="background:#f3f4f6;color:var(--muted);padding:12px;border-radius:8px;font-size:13px">You are logged in as a Client. To apply, log in as a Freelancer.</div>
             <?php else: ?>
@@ -169,4 +182,5 @@ include __DIR__ . '/includes/header.php';
     </div>
 </div>
 
+<?php include __DIR__ . '/includes/site-footer.php'; ?>
 <?php include __DIR__ . '/includes/footer.php'; ?>

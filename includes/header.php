@@ -11,7 +11,8 @@ $pageTitle = $pageTitle ?? APP_NAME;
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="RemoWorkers - Connect with top remote talent worldwide">
     <title><?php echo htmlspecialchars($pageTitle); ?></title>
-    
+    <?php include __DIR__ . '/google-analytics.php'; ?>
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -49,7 +50,7 @@ $pageTitle = $pageTitle ?? APP_NAME;
                 <a href="<?php echo baseUrl('client'); ?>" class="nav-link <?php echo $section === 'client' ? 'active' : ''; ?>">
                     <i class="fas fa-briefcase"></i> Hire Talent
                 </a>
-                <a href="<?php echo baseUrl('remoworkers-dashboard'); ?>" class="nav-link <?php echo $section === 'remoworkers-dashboard' ? 'active' : ''; ?>">
+                <a href="<?php echo baseUrl('jobs'); ?>" class="nav-link <?php echo $section === 'jobs' ? 'active' : ''; ?>">
                     <i class="fas fa-laptop-code"></i> Find Work
                 </a>
             </div>

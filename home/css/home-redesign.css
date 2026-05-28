@@ -1,0 +1,77 @@
+.home-redesign {
+  background: #f6f9fd;
+}
+
+.home-redesign .section-heading__desc {
+  max-width: 720px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.home-redesign .category-item,
+.home-redesign .how-work-item,
+.home-redesign .freelancer-item,
+.home-redesign .blog-item {
+  cursor: pointer;
+}
+
+.home-redesign .category-item__thumb {
+  width: 72px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #f2f6ff;
+  font-size: 30px;
+}
+
+.home-redesign .best-freelancer {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
+}
+
+.home-redesign .freelancer-item__thumb {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin: 0 auto 16px;
+}
+
+.home-redesign .freelancer-item__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.home-redesign .freelancer-item__content {
+  text-align: center;
+}
+
+.home-redesign .freelancer-item {
+  background: #fff;
+  border: 1px solid rgba(6, 56, 98, 0.09);
+  border-radius: 16px;
+  padding: 24px 18px;
+  height: 100%;
+}
+
+.home-redesign .review-rating-list {
+  justify-content: center;
+}
+
+.home-redesign .skill-list {
+  justify-content: center;
+}
+
+.home-redesign .home-blog-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.home-redesign .blog-item__thumb {
+  aspect-ratio: 16 / 10;
+}

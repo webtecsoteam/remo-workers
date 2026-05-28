@@ -3,11 +3,18 @@ ob_start();
 header('Content-Type: application/json');
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/classes/Auth.php';
+require_once __DIR__ . '/../includes/message_attachments.php';
+require_once __DIR__ . '/../includes/client_blocks.php';
 
 function json_response($data) {
     ob_end_clean();
     echo json_encode($data);
     exit;
+}
+
+$suspendedError = Auth::suspendedClientError();
+if ($suspendedError) {
+    json_response(['success' => false, 'error' => $suspendedError]);
 }
 
 $user = Auth::user();
@@ -19,18 +26,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $receiver_id = intval($_POST['receiver_id'] ?? 0);
     $message = trim($_POST['message'] ?? '');
     $job_id = intval($_POST['job_id'] ?? 0);
+    $hasAttachment = !empty($_FILES['attachment']['name']);
 
-    if (!$receiver_id || !$message) {
-        json_response(['success' => false, 'error' => 'Receiver and message are required']);
+    if (!$receiver_id) {
+        json_response(['success' => false, 'error' => 'Receiver is required']);
+    }
+    if ($message === '' && !$hasAttachment) {
+        json_response(['success' => false, 'error' => 'Message or attachment is required']);
     }
 
     $db = getDB();
+    $blockError = clientBlockMessagingError($db, $user, $receiver_id);
+    if ($blockError) {
+        json_response(['success' => false, 'error' => $blockError]);
+    }
+
+    $attachmentPath = null;
+    $attachmentName = null;
+    $attachmentMime = null;
+
+    if ($hasAttachment) {
+        $stored = messageAttachmentStore($_FILES['attachment'], (int)$user['id']);
+        if (!$stored['ok']) {
+            json_response(['success' => false, 'error' => $stored['error']]);
+        }
+        $attachmentPath = $stored['path'];
+        $attachmentName = $stored['name'];
+        $attachmentMime = $stored['mime'];
+        if ($message === '') {
+            $message = null;
+        }
+    }
+
     try {
         $stmt = $db->prepare("
-            INSERT INTO messages (sender_id, receiver_id, job_id, message, is_read) 
-            VALUES (?, ?, ?, ?, 0)
+            INSERT INTO messages (sender_id, receiver_id, job_id, message, attachment_path, attachment_name, attachment_mime, is_read) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, 0)
         ");
-        $stmt->execute([$user['id'], $receiver_id, $job_id ?: null, $message]);
+        $stmt->execute([
+            $user['id'],
+            $receiver_id,
+            $job_id ?: null,
+            $message,
+            $attachmentPath,
+            $attachmentName,
+            $attachmentMime,
+        ]);
         $newMsgId = $db->lastInsertId();
         
         // Check if receiver is offline to send email notification
@@ -42,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $isAutomated = false;
             $automatedPrefixes = ['CREATED MILESTONE:', 'AUTOMATED MESSAGE:', 'PROPOSED MILESTONE:'];
             foreach ($automatedPrefixes as $prefix) {
-                if (strpos($message, $prefix) === 0) {
+                if ($message !== null && strpos($message, $prefix) === 0) {
                     $isAutomated = true;
                     break;
                 }
@@ -69,9 +110,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $dashboardUrl = baseUrl($receiver['role'] === 'client' ? 'client' : 'remoworkers-dashboard');
                     $logoUrl = baseUrl('favicon.png');
                     
-                    $msgPreview = htmlspecialchars($message);
-                    if (strlen($msgPreview) > 300) {
-                        $msgPreview = substr($msgPreview, 0, 300) . '...';
+                    if ($attachmentName && ($message === null || $message === '')) {
+                        $msgPreview = 'Sent an attachment: ' . htmlspecialchars($attachmentName);
+                    } else {
+                        $msgPreview = htmlspecialchars((string)$message);
+                        if (strlen($msgPreview) > 300) {
+                            $msgPreview = substr($msgPreview, 0, 300) . '...';
+                        }
                     }
                     
                     $body = "
@@ -111,7 +156,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
         
-        json_response(['success' => true, 'message_id' => $newMsgId]);
+        json_response([
+            'success' => true,
+            'message_id' => $newMsgId,
+            'attachment' => $attachmentPath ? [
+                'name' => $attachmentName,
+                'download_url' => messageAttachmentDownloadUrl((int)$newMsgId),
+            ] : null,
+        ]);
     } catch (Exception $e) {
         json_response(['success' => false, 'error' => 'Database error: ' . $e->getMessage()]);
     }

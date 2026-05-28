@@ -43,6 +43,17 @@ $allOpenJobsStmt->execute([$user['id']]);
 $allOpenJobs = $allOpenJobsStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
 // 4. Conversations for Messages Page
+require_once __DIR__ . '/../includes/client_blocks.php';
+$blockedFreelancersStmt = $db->prepare("
+    SELECT u.id, u.name, u.avatar_url, b.created_at as blocked_at
+    FROM client_blocked_freelancers b
+    JOIN users u ON u.id = b.freelancer_id
+    WHERE b.client_id = ?
+    ORDER BY b.created_at DESC
+");
+$blockedFreelancersStmt->execute([$user['id']]);
+$blockedFreelancers = $blockedFreelancersStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+
 $conversationsStmt = $db->prepare("
     SELECT 
         u.id as other_id, u.name as other_name, u.avatar_url as other_avatar,
@@ -57,9 +68,12 @@ $conversationsStmt = $db->prepare("
         GROUP BY other_user_id
     ) m2 ON u.id = m2.other_user_id
     JOIN messages m1 ON m1.id = m2.max_id
+    WHERE u.id NOT IN (
+        SELECT freelancer_id FROM client_blocked_freelancers WHERE client_id = ?
+    )
     ORDER BY m1.created_at DESC
 ");
-$conversationsStmt->execute([$user['id'], $user['id'], $user['id']]);
+$conversationsStmt->execute([$user['id'], $user['id'], $user['id'], $user['id']]);
 $conversations = $conversationsStmt->fetchAll(PDO::FETCH_ASSOC);
 $recentMessages = array_slice($conversations, 0, 5);
 // Map other_name to sender_name and match expected keys for consistency in the dashboard view
@@ -72,8 +86,14 @@ foreach($recentMessages as &$rm) {
 unset($rm);
 
 
-$unreadCount = $db->prepare("SELECT COUNT(*) FROM messages WHERE receiver_id = ? AND is_read = 0");
-$unreadCount->execute([$user['id']]);
+$unreadCount = $db->prepare("
+    SELECT COUNT(*) FROM messages m
+    WHERE m.receiver_id = ? AND m.is_read = 0
+    AND m.sender_id NOT IN (
+        SELECT freelancer_id FROM client_blocked_freelancers WHERE client_id = ?
+    )
+");
+$unreadCount->execute([$user['id'], $user['id']]);
 $unreadMessagesCount = $unreadCount->fetchColumn();
 
 // 5. All Jobs for Jobs Page
@@ -97,7 +117,7 @@ foreach ($allJobs as $aj) {
 }
 
 // 6. All Proposals for Proposals Page
-$proposalsStmt = $db->prepare("SELECT p.*, j.title as job_title, u.name as freelancer_name, u.email as freelancer_email, u.avatar_url as freelancer_avatar, u.title as freelancer_title, u.hourly_rate as freelancer_hourly_rate
+$proposalsStmt = $db->prepare("SELECT p.*, j.title as job_title, j.budget_type, u.name as freelancer_name, u.email as freelancer_email, u.avatar_url as freelancer_avatar, u.title as freelancer_title, u.hourly_rate as freelancer_hourly_rate
                                 FROM proposals p 
                                 JOIN jobs j ON p.job_id = j.id 
                                 JOIN users u ON p.freelancer_id = u.id 
@@ -234,8 +254,8 @@ $pendingMilestonesStmt->execute([$user['id']]);
 $pendingMilestones = $pendingMilestonesStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
 
-// All Freelancers
-$allFreelancersStmt = $db->prepare("SELECT * FROM users WHERE role = 'freelancer' AND status = 'active' ORDER BY created_at DESC");
+// All Freelancers (find-talent: identity-verified only)
+$allFreelancersStmt = $db->prepare("SELECT * FROM users WHERE role = 'freelancer' AND status = 'active' AND is_verified = 1 ORDER BY created_at DESC");
 $allFreelancersStmt->execute();
 $allTalent = $allFreelancersStmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -306,6 +326,10 @@ $reportStatsStmt = $db->prepare("
 $reportStatsStmt->execute([$user['id'], $user['id'], $user['id'], $user['id'], $user['id'], $user['id'], $user['id']]);
 $reportStats = $reportStatsStmt->fetch(PDO::FETCH_ASSOC);
 
+// Apply admin stat offsets for continuous accumulation from adjusted values
+$reportStats['total_spent_all_time'] += (float)($user['admin_spent_offset'] ?? 0);
+$reportStats['contracts_completed'] += (int)($user['admin_hires_offset'] ?? 0);
+
 // Fetch dynamic Spend by Category
 $categorySpendStmt = $db->prepare("
     SELECT j.category, SUM(p.amount + COALESCE(p.platform_fee, 0)) as total_spent
@@ -324,9 +348,12 @@ $categorySpendList = $categorySpendStmt->fetchAll(PDO::FETCH_ASSOC);
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>RemoWorkers – Client Dashboard</title>
+<?php include __DIR__ . '/../includes/google-analytics.php'; ?>
 <link href="https://fonts.googleapis.com/css2?family=Neue+Haas+Grotesk+Display+Pro:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="<?php echo baseUrl("client/css/style.css"); ?>">
+<link rel="stylesheet" href="<?php echo baseUrl('assets/css/ui-alerts.css'); ?>">
 <script src="<?php echo baseUrl('assets/js/pagination.js'); ?>"></script>
+<script src="<?php echo baseUrl('assets/js/ui-alerts.js'); ?>"></script>
 <script>const BASE_URL = '<?php echo baseUrl(); ?>';</script>
 <script>
 window.openModal = function(id) {
@@ -611,7 +638,10 @@ window.closeModal = function() {
                     <td class="hide-mob"><?php echo date('M j', strtotime($aj['created_at'])); ?></td>
                     <td><span class="badge b-<?php echo ($aj['status'] === 'open' ? 'green' : ($aj['status'] === 'paused' ? 'yellow' : 'gray')); ?>"><?php echo ($aj['status'] === 'in_progress' ? 'Active' : ucfirst($aj['status'])); ?></span></td>
 
-                    <td><button class="btn btn-w btn-sm" onclick="viewJobDetails(<?php echo htmlspecialchars(json_encode($aj)); ?>)">Manage</button></td>
+                    <td style="white-space:nowrap">
+                      <button class="btn btn-w btn-sm" onclick="viewJobDetails(<?php echo htmlspecialchars(json_encode($aj)); ?>)">Manage</button>
+                      <button class="btn btn-w btn-sm" title="Copy public job link" onclick="event.stopPropagation();copyJobShareLink(<?php echo (int)$aj['id']; ?>)">Share</button>
+                    </td>
                   </tr>
                   <?php endforeach; ?>
               <?php endif; ?>
@@ -643,8 +673,9 @@ window.closeModal = function() {
                   <br>Posted <?php echo date('M j, Y', strtotime($aj['created_at'])); ?>
                 </div>
               </div>
-              <div style="align-self:center;flex-shrink:0">
+              <div style="align-self:center;flex-shrink:0;display:flex;flex-direction:column;gap:6px">
                 <button class="btn btn-w btn-sm" onclick="event.stopPropagation();viewJobDetails(<?php echo htmlspecialchars(json_encode($aj)); ?>)">Manage</button>
+                <button class="btn btn-w btn-sm" onclick="event.stopPropagation();copyJobShareLink(<?php echo (int)$aj['id']; ?>)">Share link</button>
               </div>
             </div>
             <?php endforeach; ?>
@@ -729,7 +760,7 @@ window.closeModal = function() {
                   <button class="btn btn-w btn-sm" onclick="event.stopPropagation();updateProposalStatus(<?php echo $p['id']; ?>, 'archived')"><?php echo $p['status']==='archived'?'Unarchive':'Archive'; ?></button>
                   <button class="btn btn-o btn-sm" onclick="event.stopPropagation();updateProposalStatus(<?php echo $p['id']; ?>, '<?php echo $p['status']==='shortlisted'?'pending':'shortlisted'; ?>')"><?php echo $p['status']==='shortlisted'?'Unshortlist':'Shortlist'; ?></button>
                   <button class="btn btn-w btn-sm" onclick="event.stopPropagation();showChatWithFreelancer(<?php echo $p['freelancer_id']; ?>, '<?php echo addslashes($p['freelancer_name']); ?>', '<?php echo $p['freelancer_avatar'] ?? ''; ?>')">💬 Message</button>
-                  <button class="btn btn-g btn-sm" onclick="event.stopPropagation();hireFreelancer(<?php echo $p['id']; ?>, <?php echo (float)$p['bid_amount']; ?>)">Hire →</button>
+                  <button class="btn btn-g btn-sm" onclick="event.stopPropagation();hireFreelancer(<?php echo $p['id']; ?>, <?php echo (float)$p['bid_amount']; ?>, '<?php echo htmlspecialchars($p['budget_type'] ?? 'fixed', ENT_QUOTES); ?>')">Hire →</button>
                 <?php endif; ?>
               </div>
             </div>
@@ -940,18 +971,7 @@ window.closeModal = function() {
           <div>
             <label style="display:block;font-size:13px;font-weight:700;margin-bottom:8px;color:var(--uw-black)">Country / Location</label>
             <select id="client-country" style="width:100%;padding:12px;border:1.5px solid var(--uw-border);border-radius:10px;outline:none;background:#fff;color:var(--uw-black);font-size:14px;font-family:inherit">
-              <?php
-              $currentCountry = $user['country'] ?? 'United Kingdom';
-              $countries = [
-                  'United Kingdom', 'United States', 'Canada', 'Australia', 'India', 
-                  'Germany', 'France', 'Spain', 'Italy', 'Netherlands', 
-                  'South Africa', 'United Arab Emirates', 'Singapore', 'New Zealand'
-              ];
-              foreach ($countries as $c) {
-                  $sel = (strcasecmp($currentCountry, $c) === 0) ? 'selected' : '';
-                  echo "<option value=\"" . htmlspecialchars($c) . "\" $sel>" . htmlspecialchars($c) . "</option>";
-              }
-              ?>
+              <?php echo buildCountryOptionsHtml($user['country'] ?? 'United Kingdom'); ?>
             </select>
           </div>
         </div>
@@ -1296,6 +1316,31 @@ window.closeModal = function() {
               <?php endforeach; ?>
             <?php endif; ?>
           </div>
+          <?php if (!empty($blockedFreelancers)): ?>
+          <div style="border-top:1px solid var(--uw-border);padding:10px 14px 12px">
+            <div style="font-size:11px;font-weight:700;color:var(--uw-gray);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px">Blocked</div>
+            <div id="blocked-freelancers-list">
+              <?php foreach ($blockedFreelancers as $bf):
+                $bInitials = strtoupper(substr($bf['name'], 0, 1) . substr(explode(' ', $bf['name'])[1] ?? '', 0, 1));
+              ?>
+              <div class="blocked-freelancer-item" data-freelancer-id="<?php echo (int)$bf['id']; ?>" style="display:flex;align-items:center;gap:10px;padding:8px 0">
+                <div class="av" style="width:28px;height:28px;flex-shrink:0">
+                  <?php if (!empty($bf['avatar_url'])): ?>
+                    <img src="<?php echo baseUrl($bf['avatar_url']); ?>" style="width:100%;height:100%;border-radius:50%;object-fit:cover;opacity:.7" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                    <div style="display:none;background:#f3f4f6;color:var(--uw-gray);width:100%;height:100%;align-items:center;justify-content:center;border-radius:50%;font-weight:bold;font-size:11px"><?php echo $bInitials; ?></div>
+                  <?php else: ?>
+                    <div style="background:#f3f4f6;color:var(--uw-gray);width:100%;height:100%;display:flex;align-items:center;justify-content:center;border-radius:50%;font-weight:bold;font-size:11px"><?php echo $bInitials; ?></div>
+                  <?php endif; ?>
+                </div>
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:12.5px;font-weight:600;color:var(--uw-gray2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><?php echo htmlspecialchars($bf['name']); ?></div>
+                </div>
+                <button type="button" class="btn btn-sm" style="font-size:11px;padding:4px 10px;flex-shrink:0" onclick="unblockFreelancer(<?php echo (int)$bf['id']; ?>, '<?php echo addslashes($bf['name']); ?>', this)">Unblock</button>
+              </div>
+              <?php endforeach; ?>
+            </div>
+          </div>
+          <?php endif; ?>
         </div>
         <!-- Chat window -->
         <div style="flex:1;display:flex;flex-direction:column" id="chat-window">
@@ -1777,7 +1822,12 @@ function submitDirectHire(event, fid) {
   const messageVal = document.getElementById('hire-message-' + fid).value;
 
   if (!jobVal) {
-    alert('Please select an open job first.');
+    remoAlert('Please select an open job first.', 'Hire');
+    return;
+  }
+
+  if (typeVal === 'hourly' && (typeof availableBalance === 'undefined' || availableBalance < 1)) {
+    remoAlert('Add at least $1.00 to your account balance before starting an hourly contract.', 'Balance required');
     return;
   }
 
@@ -1816,7 +1866,7 @@ function submitJobInvite(event, fid) {
   const messageVal = document.getElementById('invite-message-' + fid).value;
 
   if (!jobVal) {
-    alert('Please select an open job first.');
+    remoAlert('Please select an open job first.', 'Invite');
     return;
   }
 
@@ -1852,8 +1902,8 @@ function submitJobInvite(event, fid) {
   });
 }
 
-function revokeInvitation(inviteId, btn) {
-  if (!confirm('Are you sure you want to revoke this invitation?')) return;
+async function revokeInvitation(inviteId, btn) {
+  if (!(await remoConfirm('This invitation will be cancelled.', 'Revoke invitation?'))) return;
 
   btn.disabled = true;
   btn.textContent = 'Revoking...';

@@ -1,5 +1,9 @@
 RewriteEngine On
 
+# Canonical host: www -> apex (must match APP_URL in .env, e.g. https://remoworkers.com/)
+RewriteCond %{HTTP_HOST} ^www\.remoworkers\.com$ [NC]
+RewriteRule ^ https://remoworkers.com%{REQUEST_URI} [L,R=301]
+
 # Redirect trailing slashes
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(.*)/$ $1 [L,R=301]

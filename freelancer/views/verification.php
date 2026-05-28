@@ -26,6 +26,28 @@ foreach($docs as $d) { if($d['status'] === 'pending') { $hasPending = true; brea
 $vStatus = 'unverified';
 if ($isVerified) $vStatus = 'verified';
 elseif ($hasPending) $vStatus = 'pending';
+
+$docTypeLabels = [
+    'passport' => 'Passport',
+    'national-id' => 'National ID',
+    'drivers' => "Driver's Licence",
+];
+$docsByStatus = ['pending' => [], 'verified' => [], 'rejected' => []];
+foreach ($docs as $doc) {
+    $bucket = $doc['status'] === 'approved' ? 'verified' : ($doc['status'] === 'rejected' ? 'rejected' : 'pending');
+    $docsByStatus[$bucket][] = $doc;
+}
+$hasAnyDocs = !empty($docs);
+$defaultDocTab = 'pending';
+if ($isVerified && count($docsByStatus['verified']) > 0) {
+    $defaultDocTab = 'verified';
+} elseif (count($docsByStatus['pending']) > 0) {
+    $defaultDocTab = 'pending';
+} elseif (count($docsByStatus['rejected']) > 0) {
+    $defaultDocTab = 'rejected';
+} elseif (count($docsByStatus['verified']) > 0) {
+    $defaultDocTab = 'verified';
+}
 ?>
 
 <div class="page" id="page-verification">
@@ -257,28 +279,67 @@ elseif ($hasPending) $vStatus = 'pending';
       </div>
     <?php endif; ?>
 
-    <?php if (!empty($docs)): ?>
-      <div style="margin-top:40px">
-        <h3 style="font-size:16px;font-weight:800;margin-bottom:16px;color:var(--dark)">Document History</h3>
-        <div class="card" style="border-radius:12px">
-          <?php foreach ($docs as $doc): ?>
-            <div style="padding:16px 20px;border-bottom:1px solid #f1f5f1;display:flex;align-items:center;justify-content:space-between">
-              <div style="display:flex;align-items:center;gap:14px">
-                <div style="width:40px;height:40px;background:var(--off);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px">📄</div>
-                <div>
-                  <div style="font-weight:700;font-size:14px;color:var(--dark)"><?php echo htmlspecialchars($doc['doc_type']); ?></div>
-                  <div style="font-size:11.5px;color:var(--muted)"><?php echo date('M d, Y · h:i A', strtotime($doc['created_at'])); ?></div>
-                </div>
-              </div>
-              <div>
-                <?php 
-                  $bCls = $doc['status'] === 'approved' ? 'b-green' : ($doc['status'] === 'pending' ? 'b-yellow' : 'b-red');
-                ?>
-                <span class="badge <?php echo $bCls; ?>" style="text-transform:capitalize;padding:4px 12px;border-radius:6px"><?php echo $doc['status']; ?></span>
-              </div>
-            </div>
+    <?php if ($hasAnyDocs): ?>
+      <div style="margin-top:40px" id="vdoc-history-section">
+        <h3 style="font-size:16px;font-weight:800;margin-bottom:16px;color:var(--dark)">Your Verification Documents</h3>
+        <div class="vdoc-tabs" style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+          <?php foreach (['pending', 'verified', 'rejected'] as $tabKey):
+            $tabCount = count($docsByStatus[$tabKey]);
+            $tabLabel = ucfirst($tabKey);
+          ?>
+          <button type="button" class="vdoc-tab<?php echo $defaultDocTab === $tabKey ? ' active' : ''; ?>" data-vdoc-tab="<?php echo $tabKey; ?>" onclick="switchVDocTab('<?php echo $tabKey; ?>', this)"><?php echo $tabLabel; ?> (<?php echo $tabCount; ?>)</button>
           <?php endforeach; ?>
         </div>
+        <?php
+        $statusLabels = ['pending' => 'Pending', 'verified' => 'Verified', 'rejected' => 'Rejected'];
+        $badgeClasses = ['pending' => 'b-yellow', 'verified' => 'b-green', 'rejected' => 'b-red'];
+        foreach (['pending', 'verified', 'rejected'] as $tabKey):
+          $tabDocs = $docsByStatus[$tabKey];
+          $isActivePanel = $defaultDocTab === $tabKey;
+        ?>
+        <div class="card vdoc-panel" id="vdoc-panel-<?php echo $tabKey; ?>" style="border-radius:12px;<?php echo $isActivePanel ? '' : 'display:none'; ?>">
+          <?php if (empty($tabDocs)): ?>
+            <div style="padding:28px 20px;text-align:center;color:var(--muted);font-size:13.5px">
+              No <?php echo strtolower($statusLabels[$tabKey]); ?> documents.
+            </div>
+          <?php else: ?>
+            <?php foreach ($tabDocs as $i => $doc):
+              $typeLabel = $docTypeLabels[$doc['doc_type']] ?? ucwords(str_replace('-', ' ', $doc['doc_type']));
+              $fileUrl = null;
+              $rawPath = trim((string)($doc['file_path'] ?? ''));
+              if ($rawPath !== '') {
+                  if ($rawPath[0] === '{') {
+                      $decoded = json_decode($rawPath, true);
+                      if (is_array($decoded) && !empty($decoded['front'])) {
+                          $fileUrl = baseUrl($decoded['front']);
+                      }
+                  } else {
+                      $fileUrl = baseUrl($rawPath);
+                  }
+              }
+            ?>
+            <div style="padding:16px 20px;<?php echo $i < count($tabDocs) - 1 ? 'border-bottom:1px solid #f1f5f1;' : ''; ?>display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+              <div style="display:flex;align-items:center;gap:14px;min-width:0">
+                <div style="width:40px;height:40px;background:var(--off);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">📄</div>
+                <div style="min-width:0">
+                  <div style="font-weight:700;font-size:14px;color:var(--dark)"><?php echo htmlspecialchars($typeLabel); ?></div>
+                  <div style="font-size:11.5px;color:var(--muted)"><?php echo date('M d, Y · h:i A', strtotime($doc['created_at'])); ?></div>
+                  <?php if ($tabKey === 'rejected' && !empty($doc['rejection_reason'])): ?>
+                    <div style="font-size:11.5px;color:#b91c1c;margin-top:4px">Reason: <?php echo htmlspecialchars($doc['rejection_reason']); ?></div>
+                  <?php endif; ?>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
+                <?php if ($fileUrl): ?>
+                  <a href="<?php echo htmlspecialchars($fileUrl); ?>" target="_blank" rel="noopener" class="btn btn-w btn-sm" style="padding:5px 12px;font-size:12px">View</a>
+                <?php endif; ?>
+                <span class="badge <?php echo $badgeClasses[$tabKey]; ?>" style="text-transform:capitalize;padding:4px 12px;border-radius:6px"><?php echo $statusLabels[$tabKey]; ?></span>
+              </div>
+            </div>
+            <?php endforeach; ?>
+          <?php endif; ?>
+        </div>
+        <?php endforeach; ?>
       </div>
     <?php endif; ?>
 
@@ -288,11 +349,26 @@ elseif ($hasPending) $vStatus = 'pending';
 <style>
 .doc-type-card:hover { border-color: var(--g)!important; background: var(--gl); }
 .doc-type-card.selected { border-color: var(--g)!important; background: var(--gl); box-shadow: 0 0 0 3px rgba(20,168,0,0.1); }
+.vdoc-tab {
+  padding: 8px 16px; border-radius: 20px; font-size: 12.5px; font-weight: 600;
+  border: 1px solid var(--border); background: white; color: var(--muted); cursor: pointer;
+  font-family: inherit; transition: all .15s;
+}
+.vdoc-tab:hover { border-color: var(--g); color: var(--dark); }
+.vdoc-tab.active { background: var(--gl); border-color: var(--g); color: var(--g); }
 </style>
 
 <script>
 let vDocType = null;
 let vFiles = { front: null, back: null };
+
+function switchVDocTab(tab, btn) {
+  document.querySelectorAll('.vdoc-tab').forEach(el => el.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  document.querySelectorAll('.vdoc-panel').forEach(panel => {
+    panel.style.display = panel.id === 'vdoc-panel-' + tab ? 'block' : 'none';
+  });
+}
 
 function selectDocType(type, id) {
   vDocType = type;

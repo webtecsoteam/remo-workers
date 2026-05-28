@@ -5,6 +5,12 @@ require_once __DIR__ . '/../../includes/classes/Mailer.php';
 
 header('Content-Type: application/json');
 
+$suspendedError = Auth::suspendedClientError();
+if ($suspendedError) {
+    echo json_encode(['success' => false, 'message' => $suspendedError]);
+    exit;
+}
+
 $user = Auth::user();
 if (!$user || $user['role'] !== 'client') {
     echo json_encode(['success' => false, 'message' => 'Unauthorized access.']);
@@ -30,6 +36,11 @@ $freelancerStmt->execute([$freelancerId]);
 $freelancer = $freelancerStmt->fetch();
 if (!$freelancer) {
     echo json_encode(['success' => false, 'message' => 'Freelancer not found.']);
+    exit;
+}
+
+if (!Auth::isIdentityVerified($freelancer)) {
+    echo json_encode(['success' => false, 'message' => 'This freelancer has not completed identity verification.']);
     exit;
 }
 
@@ -82,7 +93,7 @@ try {
 
     // 6. Send the styled email notification to the freelancer
     $subject = "You've been invited to apply to a job on RemoWorkers";
-    $jobUrl = baseUrl('remoworkers-dashboard?job_id=' . urlencode(encodeJobId($jobId)));
+    $jobUrl = baseUrl('remoworkers-dashboard/j/' . encodeJobId($jobId) . '?apply=1');
     $logoUrl = baseUrl('favicon.png');
     
     $budgetFormatted = "$" . number_format($job['budget']);

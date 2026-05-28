@@ -100,6 +100,72 @@ class Auth {
         session_destroy();
     }
 
+    public static function isActive($user = null) {
+        $user = $user ?? self::user();
+        return $user && ($user['status'] ?? '') === 'active';
+    }
+
+    /**
+     * Block suspended (or otherwise inactive) clients from restricted actions.
+     * Returns an error string, or null if the client may proceed.
+     * Reads fresh status from the database so checks work even before Auth::user() clears the session.
+     */
+    public static function suspendedClientError($user = null) {
+        if (is_array($user)) {
+            $role = $user['role'] ?? '';
+            $status = $user['status'] ?? '';
+            $userId = $user['id'] ?? null;
+        } else {
+            $userId = $user ?? ($_SESSION['user_id'] ?? null);
+            if (!$userId) {
+                return null;
+            }
+            $db = getDB();
+            $stmt = $db->prepare("SELECT role, status FROM users WHERE id = ?");
+            $stmt->execute([$userId]);
+            $row = $stmt->fetch();
+            if (!$row) {
+                return null;
+            }
+            $role = $row['role'] ?? '';
+            $status = $row['status'] ?? '';
+        }
+
+        if ($role !== 'client' || $status === 'active') {
+            return null;
+        }
+        if ($status === 'suspended') {
+            return 'Your account has been suspended. You cannot perform this action. Please contact support.';
+        }
+        return 'Your account is ' . $status . '. You cannot perform this action. Please contact support.';
+    }
+
+    /** Minimum wallet balance (USD) required before a client can start an hourly contract. */
+    public const CLIENT_MIN_HOURLY_BALANCE = 1.0;
+
+    /**
+     * Returns an error message if the client lacks the minimum balance for hourly contracts,
+     * or null if they may proceed.
+     */
+    public static function hourlyContractBalanceError($clientId, $db = null, $forUpdate = false) {
+        $db = $db ?? getDB();
+        $sql = "SELECT balance FROM users WHERE id = ? AND role = 'client'";
+        if ($forUpdate) {
+            $sql .= ' FOR UPDATE';
+        }
+        $stmt = $db->prepare($sql);
+        $stmt->execute([(int) $clientId]);
+        $balance = $stmt->fetchColumn();
+        if ($balance === false) {
+            return 'Client account not found.';
+        }
+        if ((float) $balance < self::CLIENT_MIN_HOURLY_BALANCE) {
+            return 'You need at least $' . number_format(self::CLIENT_MIN_HOURLY_BALANCE, 2)
+                . ' in your account balance to start an hourly contract. Please add funds first.';
+        }
+        return null;
+    }
+
     public static function user() {
         if (!isset($_SESSION['user_id'])) return null;
         ensureFreelancerSchema();
@@ -114,7 +180,12 @@ class Auth {
         
         $stmt = $db->prepare("SELECT * FROM users WHERE id = ?");
         $stmt->execute([$_SESSION['user_id']]);
-        return $stmt->fetch();
+        $user = $stmt->fetch();
+        if ($user && ($user['status'] ?? '') !== 'active') {
+            self::logout();
+            return null;
+        }
+        return $user;
     }
 
     public static function check() {

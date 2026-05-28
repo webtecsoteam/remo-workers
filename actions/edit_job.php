@@ -32,6 +32,12 @@ if (!$job_id || empty($title) || empty($description) || empty($category)) {
     exit;
 }
 
+$activeCategoryNames = array_column(getJobCategories(true), 'name');
+if (!in_array($category, $activeCategoryNames, true)) {
+    echo json_encode(['success' => false, 'error' => 'Please select a valid active category']);
+    exit;
+}
+
 $db = getDB();
 try {
     // Verify ownership

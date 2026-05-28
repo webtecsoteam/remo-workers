@@ -4,6 +4,12 @@ require_once __DIR__ . '/../includes/classes/Auth.php';
 
 header('Content-Type: application/json');
 
+$suspendedError = Auth::suspendedClientError();
+if ($suspendedError) {
+    echo json_encode(['success' => false, 'error' => $suspendedError]);
+    exit;
+}
+
 $user = Auth::user();
 if (!$user || $user['role'] !== 'client') {
     echo json_encode(['success' => false, 'error' => 'Unauthorized access']);
@@ -26,6 +32,12 @@ $max_hourly_rate = isset($_POST['max_hourly_rate']) && $_POST['max_hourly_rate']
 
 if (empty($title) || empty($description) || empty($category)) {
     echo json_encode(['success' => false, 'error' => 'Title, description, and category are required']);
+    exit;
+}
+
+$activeCategoryNames = array_column(getJobCategories(true), 'name');
+if (!in_array($category, $activeCategoryNames, true)) {
+    echo json_encode(['success' => false, 'error' => 'Please select a valid active category']);
     exit;
 }
 

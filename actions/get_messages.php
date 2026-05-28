@@ -3,6 +3,7 @@ ob_start();
 header('Content-Type: application/json');
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/classes/Auth.php';
+require_once __DIR__ . '/../includes/client_blocks.php';
 
 function json_response($data) {
     ob_end_clean();
@@ -37,8 +38,14 @@ try {
     ");
     $stmt->execute([$user['id'], $other_id, $other_id, $user['id']]);
     $messages = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $blockStatus = clientMessagingBlockStatus($db, $user, $other_id);
 
-    json_response(['success' => true, 'messages' => $messages]);
+    json_response([
+        'success' => true,
+        'messages' => $messages,
+        'blocked' => $blockStatus['blocked'],
+        'blocked_by_me' => $blockStatus['blocked_by_me'],
+    ]);
 } catch (Exception $e) {
     json_response(['success' => false, 'error' => 'Database error: ' . $e->getMessage()]);
 }

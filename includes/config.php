@@ -64,6 +64,9 @@ define('APP_DEBUG', env('APP_DEBUG', false));
 define('APP_URL', env('APP_URL', 'http://localhost'));
 define('BASE_PATH', dirname(__DIR__));
 
+$_appUrlHost = parse_url(APP_URL, PHP_URL_HOST);
+define('CANONICAL_HOST', strtolower((string) ($_appUrlHost ?: 'localhost')));
+
 // Database config
 define('DB_HOST', env('DB_HOST', '127.0.0.1'));
 define('DB_PORT', env('DB_PORT', '3306'));
@@ -71,9 +74,26 @@ define('DB_DATABASE', env('DB_DATABASE', 'remoworkers'));
 define('DB_USERNAME', env('DB_USERNAME', 'root'));
 define('DB_PASSWORD', env('DB_PASSWORD', ''));
 
-// Session
-if (session_status() === PHP_SESSION_NONE) {
+// Session (shared across www and apex when on production domain)
+if (PHP_SAPI !== 'cli' && session_status() === PHP_SESSION_NONE) {
+    $cookieDomain = sessionCookieDomain();
+    if ($cookieDomain !== null) {
+        $secure = (!empty($_SERVER['HTTPS']) && strtolower((string) $_SERVER['HTTPS']) !== 'off')
+            || (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && strtolower((string) $_SERVER['HTTP_X_FORWARDED_PROTO']) === 'https');
+        session_set_cookie_params([
+            'lifetime' => 0,
+            'path' => '/',
+            'domain' => $cookieDomain,
+            'secure' => $secure,
+            'httponly' => true,
+            'samesite' => 'Lax',
+        ]);
+    }
     session_start();
+}
+
+if (PHP_SAPI !== 'cli') {
+    enforceCanonicalHost();
 }
 
 // Database connection helper
@@ -97,68 +117,7 @@ function getDB() {
     return $pdo;
 }
 
-/** Translates ISO country codes and capitalizes full names cleanly. */
-function getCountryName($val) {
-    if (empty($val)) return 'United States';
-    $val = trim($val);
-    if (strlen($val) === 2) {
-        $countries = [
-            'AF' => 'Afghanistan', 'AX' => 'Åland Islands', 'AL' => 'Albania', 'DZ' => 'Algeria', 'AS' => 'American Samoa', 'AD' => 'Andorra', 'AO' => 'Angola', 'AI' => 'Anguilla', 'AQ' => 'Antarctica', 'AG' => 'Antigua and Barbuda', 'AR' => 'Argentina', 'AM' => 'Armenia', 'AW' => 'Aruba', 'AU' => 'Australia', 'AT' => 'Austria', 'AZ' => 'Azerbaijan',
-            'BS' => 'Bahamas', 'BH' => 'Bahrain', 'BD' => 'Bangladesh', 'BB' => 'Barbados', 'BY' => 'Belarus', 'BE' => 'Belgium', 'BZ' => 'Belize', 'BJ' => 'Benin', 'BM' => 'Bermuda', 'BT' => 'Bhutan', 'BO' => 'Bolivia', 'BA' => 'Bosnia and Herzegovina', 'BW' => 'Botswana', 'BV' => 'Bouvet Island', 'BR' => 'Brazil', 'IO' => 'British Indian Ocean Territory',
-            'BN' => 'Brunei Darussalam', 'BG' => 'Bulgaria', 'BF' => 'Burkina Faso', 'BI' => 'Burundi', 'KH' => 'Cambodia', 'CM' => 'Cameroon', 'CA' => 'Canada', 'CV' => 'Cape Verde', 'KY' => 'Cayman Islands', 'CF' => 'Central African Republic', 'TD' => 'Chad', 'CL' => 'Chile', 'CN' => 'China', 'CX' => 'Christmas Island', 'CC' => 'Cocos (Keeling) Islands',
-            'CO' => 'Colombia', 'KM' => 'Comoros', 'CG' => 'Congo', 'CD' => 'Congo, Democratic Republic', 'CK' => 'Cook Islands', 'CR' => 'Costa Rica', 'CI' => "Cote D'Ivoire", 'HR' => 'Croatia', 'CU' => 'Cuba', 'CY' => 'Cyprus', 'CZ' => 'Czech Republic', 'DK' => 'Denmark', 'DJ' => 'Djibouti', 'DM' => 'Dominica', 'DO' => 'Dominican Republic',
-            'EC' => 'Ecuador', 'EG' => 'Egypt', 'SV' => 'El Salvador', 'GQ' => 'Equatorial Guinea', 'ER' => 'Eritrea', 'EE' => 'Estonia', 'ET' => 'Ethiopia', 'FK' => 'Falkland Islands', 'FO' => 'Faroe Islands', 'FJ' => 'Fiji', 'FI' => 'Finland', 'FR' => 'France', 'GF' => 'French Guiana', 'PF' => 'French Polynesia', 'TF' => 'French Southern Territories',
-            'GA' => 'Gabon', 'GM' => 'Gambia', 'GE' => 'Georgia', 'DE' => 'Germany', 'GH' => 'Ghana', 'GI' => 'Gibraltar', 'GR' => 'Greece', 'GL' => 'Greenland', 'GD' => 'Grenada', 'GP' => 'Guadeloupe', 'GU' => 'Guam', 'GT' => 'Guatemala', 'GG' => 'Guernsey', 'GN' => 'Guinea', 'GW' => 'Guinea-Bissau', 'GY' => 'Guyana', 'HT' => 'Haiti',
-            'HM' => 'Heard Island and McDonald Islands', 'VA' => 'Holy See (Vatican City State)', 'HN' => 'Honduras', 'HK' => 'Hong Kong', 'HU' => 'Hungary', 'IS' => 'Iceland', 'IN' => 'India', 'ID' => 'Indonesia', 'IR' => 'Iran', 'IQ' => 'Iraq', 'IE' => 'Ireland', 'IM' => 'Isle of Man', 'IL' => 'Israel', 'IT' => 'Italy', 'JM' => 'Jamaica',
-            'JP' => 'Japan', 'JE' => 'Jersey', 'JO' => 'Jordan', 'KZ' => 'Kazakhstan', 'KE' => 'Kenya', 'KI' => 'Kiribati', 'KP' => "Korea, Democratic People's Republic of", 'KR' => 'Korea, Republic of', 'KW' => 'Kuwait', 'KG' => 'Kyrgyzstan', 'LA' => "Lao People's Democratic Republic", 'LV' => 'Latvia', 'LB' => 'Lebanon', 'LS' => 'Lesotho',
-            'LR' => 'Liberia', 'LY' => 'Libyan Arab Jamahiriya', 'LI' => 'Liechtenstein', 'LT' => 'Lithuania', 'LU' => 'Luxembourg', 'MO' => 'Macao', 'MK' => 'Macedonia', 'MG' => 'Madagascar', 'MW' => 'Malawi', 'MY' => 'Malaysia', 'MV' => 'Maldives', 'ML' => 'Mali', 'MT' => 'Malta', 'MH' => 'Marshall Islands', 'MQ' => 'Martinique',
-            'MR' => 'Mauritania', 'MU' => 'Mauritius', 'YT' => 'Mayotte', 'MX' => 'Mexico', 'FM' => 'Micronesia', 'MD' => 'Moldova', 'MC' => 'Monaco', 'MN' => 'Mongolia', 'ME' => 'Montenegro', 'MS' => 'Montserrat', 'MA' => 'Morocco', 'MZ' => 'Mozambique', 'MM' => 'Myanmar', 'NA' => 'Namibia', 'NR' => 'Nauru', 'NP' => 'Nepal', 'NL' => 'Netherlands',
-            'AN' => 'Netherlands Antilles', 'NC' => 'New Caledonia', 'NZ' => 'New Zealand', 'NI' => 'Nicaragua', 'NE' => 'Niger', 'NG' => 'Nigeria', 'NU' => 'Niue', 'NF' => 'Norfolk Island', 'MP' => 'Northern Mariana Islands', 'NO' => 'Norway', 'OM' => 'Oman', 'PK' => 'Pakistan', 'PW' => 'Palau', 'PS' => 'Palestinian Territory, Occupied',
-            'PA' => 'Panama', 'PG' => 'Papua New Guinea', 'PY' => 'Paraguay', 'PE' => 'Peru', 'PH' => 'Philippines', 'PN' => 'Pitcairn', 'PL' => 'Poland', 'PT' => 'Portugal', 'PR' => 'Puerto Rico', 'QA' => 'Qatar', 'RE' => 'Reunion', 'RO' => 'Romania', 'RU' => 'Russian Federation', 'RW' => 'Rwanda', 'SH' => 'Saint Helena',
-            'KN' => 'Saint Kitts and Nevis', 'LC' => 'Saint Lucia', 'PM' => 'Saint Pierre and Miquelon', 'VC' => 'Saint Vincent and the Grenadines', 'WS' => 'Samoa', 'SM' => 'San Marino', 'ST' => 'Sao Tome and Principe', 'SA' => 'Saudi Arabia', 'SN' => 'Senegal', 'RS' => 'Serbia', 'SC' => 'Seychelles', 'SL' => 'Sierra Leone',
-            'SG' => 'Singapore', 'SK' => 'Slovakia', 'SI' => 'Slovenia', 'SB' => 'Solomon Islands', 'SO' => 'Somalia', 'ZA' => 'South Africa', 'GS' => 'South Georgia and the South Sandwich Islands', 'ES' => 'Spain', 'LK' => 'Sri Lanka', 'SD' => 'Sudan', 'SR' => 'Suriname', 'SJ' => 'Svalbard and Jan Mayen', 'SZ' => 'Swaziland',
-            'SE' => 'Sweden', 'CH' => 'Switzerland', 'SY' => 'Syrian Arab Republic', 'TW' => 'Taiwan', 'TJ' => 'Tajikistan', 'TZ' => 'Tanzania', 'TH' => 'Thailand', 'TL' => 'Timor-Leste', 'TG' => 'Togo', 'TK' => 'Tokelau', 'TO' => 'Tonga', 'TT' => 'Trinidad and Tobago', 'TN' => 'Tunisia', 'TR' => 'Turkey', 'TM' => 'Turkmenistan',
-            'TC' => 'Turks and Caicos Islands', 'TV' => 'Tuvalu', 'UG' => 'Uganda', 'UA' => 'Ukraine', 'AE' => 'United Arab Emirates', 'GB' => 'United Kingdom', 'US' => 'United States', 'UM' => 'United States Minor Outlying Islands', 'UY' => 'Uruguay', 'UZ' => 'Uzbekistan', 'VU' => 'Vanuatu', 'VE' => 'Venezuela',
-            'VN' => 'Viet Nam', 'VG' => 'Virgin Islands, British', 'VI' => 'Virgin Islands, U.S.', 'WF' => 'Wallis and Futuna', 'EH' => 'Western Sahara', 'YE' => 'Yemen', 'ZM' => 'Zambia', 'ZW' => 'Zimbabwe'
-        ];
-        $upper = strtoupper($val);
-        if (isset($countries[$upper])) return $countries[$upper];
-    }
-    $cleaned = ucwords(strtolower($val));
-    $cleaned = str_ireplace('Kingdon', 'Kingdom', $cleaned);
-    return $cleaned;
-}
-
-/** Get alphabetical sorted list of all countries. */
-function getAllCountries() {
-    static $sortedCountries = null;
-    if ($sortedCountries === null) {
-        $countries = [
-            'AF' => 'Afghanistan', 'AX' => 'Åland Islands', 'AL' => 'Albania', 'DZ' => 'Algeria', 'AS' => 'American Samoa', 'AD' => 'Andorra', 'AO' => 'Angola', 'AI' => 'Anguilla', 'AQ' => 'Antarctica', 'AG' => 'Antigua and Barbuda', 'AR' => 'Argentina', 'AM' => 'Armenia', 'AW' => 'Aruba', 'AU' => 'Australia', 'AT' => 'Austria', 'AZ' => 'Azerbaijan',
-            'BS' => 'Bahamas', 'BH' => 'Bahrain', 'BD' => 'Bangladesh', 'BB' => 'Barbados', 'BY' => 'Belarus', 'BE' => 'Belgium', 'BZ' => 'Belize', 'BJ' => 'Benin', 'BM' => 'Bermuda', 'BT' => 'Bhutan', 'BO' => 'Bolivia', 'BA' => 'Bosnia and Herzegovina', 'BW' => 'Botswana', 'BV' => 'Bouvet Island', 'BR' => 'Brazil', 'IO' => 'British Indian Ocean Territory',
-            'BN' => 'Brunei Darussalam', 'BG' => 'Bulgaria', 'BF' => 'Burkina Faso', 'BI' => 'Burundi', 'KH' => 'Cambodia', 'CM' => 'Cameroon', 'CA' => 'Canada', 'CV' => 'Cape Verde', 'KY' => 'Cayman Islands', 'CF' => 'Central African Republic', 'TD' => 'Chad', 'CL' => 'Chile', 'CN' => 'China', 'CX' => 'Christmas Island', 'CC' => 'Cocos (Keeling) Islands',
-            'CO' => 'Colombia', 'KM' => 'Comoros', 'CG' => 'Congo', 'CD' => 'Congo, Democratic Republic', 'CK' => 'Cook Islands', 'CR' => 'Costa Rica', 'CI' => "Cote D'Ivoire", 'HR' => 'Croatia', 'CU' => 'Cuba', 'CY' => 'Cyprus', 'CZ' => 'Czech Republic', 'DK' => 'Denmark', 'DJ' => 'Djibouti', 'DM' => 'Dominica', 'DO' => 'Dominican Republic',
-            'EC' => 'Ecuador', 'EG' => 'Egypt', 'SV' => 'El Salvador', 'GQ' => 'Equatorial Guinea', 'ER' => 'Eritrea', 'EE' => 'Estonia', 'ET' => 'Ethiopia', 'FK' => 'Falkland Islands', 'FO' => 'Faroe Islands', 'FJ' => 'Fiji', 'FI' => 'Finland', 'FR' => 'France', 'GF' => 'French Guiana', 'PF' => 'French Polynesia', 'TF' => 'French Southern Territories',
-            'GA' => 'Gabon', 'GM' => 'Gambia', 'GE' => 'Georgia', 'DE' => 'Germany', 'GH' => 'Ghana', 'GI' => 'Gibraltar', 'GR' => 'Greece', 'GL' => 'Greenland', 'GD' => 'Grenada', 'GP' => 'Guadeloupe', 'GU' => 'Guam', 'GT' => 'Guatemala', 'GG' => 'Guernsey', 'GN' => 'Guinea', 'GW' => 'Guinea-Bissau', 'GY' => 'Guyana', 'HT' => 'Haiti',
-            'HM' => 'Heard Island and McDonald Islands', 'VA' => 'Holy See (Vatican City State)', 'HN' => 'Honduras', 'HK' => 'Hong Kong', 'HU' => 'Hungary', 'IS' => 'Iceland', 'IN' => 'India', 'ID' => 'Indonesia', 'IR' => 'Iran', 'IQ' => 'Iraq', 'IE' => 'Ireland', 'IM' => 'Isle of Man', 'IL' => 'Israel', 'IT' => 'Italy', 'JM' => 'Jamaica',
-            'JP' => 'Japan', 'JE' => 'Jersey', 'JO' => 'Jordan', 'KZ' => 'Kazakhstan', 'KE' => 'Kenya', 'KI' => 'Kiribati', 'KP' => "Korea, Democratic People's Republic of", 'KR' => 'Korea, Republic of', 'KW' => 'Kuwait', 'KG' => 'Kyrgyzstan', 'LA' => "Lao People's Democratic Republic", 'LV' => 'Latvia', 'LB' => 'Lebanon', 'LS' => 'Lesotho',
-            'LR' => 'Liberia', 'LY' => 'Libyan Arab Jamahiriya', 'LI' => 'Liechtenstein', 'LT' => 'Lithuania', 'LU' => 'Luxembourg', 'MO' => 'Macao', 'MK' => 'Macedonia', 'MG' => 'Madagascar', 'MW' => 'Malawi', 'MY' => 'Malaysia', 'MV' => 'Maldives', 'ML' => 'Mali', 'MT' => 'Malta', 'MH' => 'Marshall Islands', 'MQ' => 'Martinique',
-            'MR' => 'Mauritania', 'MU' => 'Mauritius', 'YT' => 'Mayotte', 'MX' => 'Mexico', 'FM' => 'Micronesia', 'MD' => 'Moldova', 'MC' => 'Monaco', 'MN' => 'Mongolia', 'ME' => 'Montenegro', 'MS' => 'Montserrat', 'MA' => 'Morocco', 'MZ' => 'Mozambique', 'MM' => 'Myanmar', 'NA' => 'Namibia', 'NR' => 'Nauru', 'NP' => 'Nepal', 'NL' => 'Netherlands',
-            'AN' => 'Netherlands Antilles', 'NC' => 'New Caledonia', 'NZ' => 'New Zealand', 'NI' => 'Nicaragua', 'NE' => 'Niger', 'NG' => 'Nigeria', 'NU' => 'Niue', 'NF' => 'Norfolk Island', 'MP' => 'Northern Mariana Islands', 'NO' => 'Norway', 'OM' => 'Oman', 'PK' => 'Pakistan', 'PW' => 'Palau', 'PS' => 'Palestinian Territory, Occupied',
-            'PA' => 'Panama', 'PG' => 'Papua New Guinea', 'PY' => 'Paraguay', 'PE' => 'Peru', 'PH' => 'Philippines', 'PN' => 'Pitcairn', 'PL' => 'Poland', 'PT' => 'Portugal', 'PR' => 'Puerto Rico', 'QA' => 'Qatar', 'RE' => 'Reunion', 'RO' => 'Romania', 'RU' => 'Russian Federation', 'RW' => 'Rwanda', 'SH' => 'Saint Helena',
-            'KN' => 'Saint Kitts and Nevis', 'LC' => 'Saint Lucia', 'PM' => 'Saint Pierre and Miquelon', 'VC' => 'Saint Vincent and the Grenadines', 'WS' => 'Samoa', 'SM' => 'San Marino', 'ST' => 'Sao Tome and Principe', 'SA' => 'Saudi Arabia', 'SN' => 'Senegal', 'RS' => 'Serbia', 'SC' => 'Seychelles', 'SL' => 'Sierra Leone',
-            'SG' => 'Singapore', 'SK' => 'Slovakia', 'SI' => 'Slovenia', 'SB' => 'Solomon Islands', 'SO' => 'Somalia', 'ZA' => 'South Africa', 'GS' => 'South Georgia and the South Sandwich Islands', 'ES' => 'Spain', 'LK' => 'Sri Lanka', 'SD' => 'Sudan', 'SR' => 'Suriname', 'SJ' => 'Svalbard and Jan Mayen', 'SZ' => 'Swaziland',
-            'SE' => 'Sweden', 'CH' => 'Switzerland', 'SY' => 'Syrian Arab Republic', 'TW' => 'Taiwan', 'TJ' => 'Tajikistan', 'TZ' => 'Tanzania', 'TH' => 'Thailand', 'TL' => 'Timor-Leste', 'TG' => 'Togo', 'TK' => 'Tokelau', 'TO' => 'Tonga', 'TT' => 'Trinidad and Tobago', 'TN' => 'Tunisia', 'TR' => 'Turkey', 'TM' => 'Turkmenistan',
-            'TC' => 'Turks and Caicos Islands', 'TV' => 'Tuvalu', 'UG' => 'Uganda', 'UA' => 'Ukraine', 'AE' => 'United Arab Emirates', 'GB' => 'United Kingdom', 'US' => 'United States', 'UM' => 'United States Minor Outlying Islands', 'UY' => 'Uruguay', 'UZ' => 'Uzbekistan', 'VU' => 'Vanuatu', 'VE' => 'Venezuela',
-            'VN' => 'Viet Nam', 'VG' => 'Virgin Islands, British', 'VI' => 'Virgin Islands, U.S.', 'WF' => 'Wallis and Futuna', 'EH' => 'Western Sahara', 'YE' => 'Yemen', 'ZM' => 'Zambia', 'ZW' => 'Zimbabwe'
-        ];
-        $values = array_values($countries);
-        sort($values);
-        $sortedCountries = $values;
-    }
-    return $sortedCountries;
-}
-
+require_once __DIR__ . '/countries.php';
 
 /** Encodes job ID to a short, URL-safe encrypted alphanumeric string. */
 function encodeJobId($id) {
@@ -179,6 +138,28 @@ function decodeJobId($encoded) {
     if ($decoded === false) return 0;
     $xor = intval($decoded);
     $original = $xor ^ 958273;
+    return ($original > 0 && $original < 10000000) ? $original : 0;
+}
+
+/** Encodes freelancer user ID to a short, URL-safe string (public profile links). */
+function encodeFreelancerId($id) {
+    $xor = intval($id) ^ 847291;
+    $str = strval($xor);
+    $encoded = base64_encode($str);
+    return str_replace(['+', '/', '='], ['-', '_', ''], $encoded);
+}
+
+/** Decodes public freelancer profile slug back to user ID. */
+function decodeFreelancerId($encoded) {
+    $base64 = str_replace(['-', '_'], ['+', '/'], $encoded);
+    $pad = strlen($base64) % 4;
+    if ($pad) {
+        $base64 .= str_repeat('=', 4 - $pad);
+    }
+    $decoded = base64_decode($base64);
+    if ($decoded === false) return 0;
+    $xor = intval($decoded);
+    $original = $xor ^ 847291;
     return ($original > 0 && $original < 10000000) ? $original : 0;
 }
 
@@ -208,6 +189,12 @@ function ensureFreelancerSchema() {
         }
         if (!in_array('last_active_at', $cols)) {
             $db->exec("ALTER TABLE users ADD COLUMN last_active_at TIMESTAMP NULL DEFAULT NULL");
+        }
+        if (!in_array('admin_spent_offset', $cols)) {
+            $db->exec("ALTER TABLE users ADD COLUMN admin_spent_offset DECIMAL(12, 2) NOT NULL DEFAULT 0.00");
+        }
+        if (!in_array('admin_hires_offset', $cols)) {
+            $db->exec("ALTER TABLE users ADD COLUMN admin_hires_offset INT NOT NULL DEFAULT 0");
         }
     } catch (PDOException $e) {
         if (defined('APP_DEBUG') && APP_DEBUG) {
@@ -306,7 +293,9 @@ function ensurePlatformSettingsTable() {
         'freelancer_fee_monthly' => ['10.00', 'Platform fee percentage charged to freelancers for Monthly contracts.'],
         'client_fee_fixed' => ['0.00', 'Platform fee percentage charged to clients for Fixed Price contracts.'],
         'client_fee_hourly' => ['0.00', 'Platform fee percentage charged to clients for Hourly contracts.'],
-        'client_fee_monthly' => ['0.00', 'Platform fee percentage charged to clients for Monthly contracts.']
+        'client_fee_monthly' => ['0.00', 'Platform fee percentage charged to clients for Monthly contracts.'],
+        'google_analytics_enabled' => ['0', 'Enable Google Analytics tracking on the public site (1 = on, 0 = off).'],
+        'google_analytics_id' => ['', 'Google Analytics 4 Measurement ID (e.g. G-XXXXXXXXXX).']
     ];
     
     $checkStmt = $db->prepare("SELECT COUNT(*) FROM platform_settings WHERE setting_key = ?");
@@ -338,6 +327,76 @@ function ensurePlatformSettingsTable() {
     $initialized = true;
 }
 
+/** Ensure job_categories table exists and has baseline categories. */
+function ensureJobCategoriesTable(): void
+{
+    static $initialized = false;
+    if ($initialized) {
+        return;
+    }
+
+    $db = getDB();
+    $db->exec("
+        CREATE TABLE IF NOT EXISTS job_categories (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(191) NOT NULL UNIQUE,
+            image VARCHAR(255) NULL,
+            status ENUM('active','inactive') NOT NULL DEFAULT 'active',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    ");
+
+    $defaults = [
+        'Accounting & Consulting',
+        'Admin Support',
+        'Customer Service',
+        'Data Science & Analytics',
+        'Design & Creative',
+        'Engineering & Architecture',
+        'IT & Networking',
+        'Legal',
+        'Sales & Marketing',
+        'Translation',
+        'Web, Mobile & Software Dev',
+        'Writing',
+    ];
+
+    $checkStmt = $db->prepare("SELECT COUNT(*) FROM job_categories WHERE name = ?");
+    $insertStmt = $db->prepare("INSERT INTO job_categories (name, status) VALUES (?, 'active')");
+    foreach ($defaults as $name) {
+        $checkStmt->execute([$name]);
+        if ((int)$checkStmt->fetchColumn() === 0) {
+            $insertStmt->execute([$name]);
+        }
+    }
+
+    $initialized = true;
+}
+
+/**
+ * @return list<array{id:int,name:string,image:?string,status:string}>
+ */
+function getJobCategories(bool $activeOnly = false): array
+{
+    try {
+        ensureJobCategoriesTable();
+        $db = getDB();
+        if ($activeOnly) {
+            $stmt = $db->query("SELECT id, name, image, status FROM job_categories WHERE status = 'active' ORDER BY name ASC");
+        } else {
+            $stmt = $db->query("SELECT id, name, image, status FROM job_categories ORDER BY name ASC");
+        }
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return is_array($rows) ? $rows : [];
+    } catch (Throwable $e) {
+        if (defined('APP_DEBUG') && APP_DEBUG) {
+            error_log('getJobCategories failed: ' . $e->getMessage());
+        }
+        return [];
+    }
+}
+
 /** Get a dynamic platform setting value. */
 function getPlatformSetting($key, $default = 0) {
     try {
@@ -352,9 +411,191 @@ function getPlatformSetting($key, $default = 0) {
     }
 }
 
-// Helper: Get base URL
+/** Get a platform setting as a string (for IDs, flags, etc.). */
+function getPlatformSettingString($key, $default = '') {
+    try {
+        ensurePlatformSettingsTable();
+        $db = getDB();
+        $stmt = $db->prepare("SELECT setting_value FROM platform_settings WHERE setting_key = ?");
+        $stmt->execute([$key]);
+        $val = $stmt->fetchColumn();
+        return $val !== false ? (string)$val : (string)$default;
+    } catch (PDOException $e) {
+        return (string)$default;
+    }
+}
+
+/** Cookie domain so login works on both www and apex (e.g. .remoworkers.com). */
+function sessionCookieDomain(): ?string {
+    $host = CANONICAL_HOST;
+    if ($host === 'localhost' || $host === '127.0.0.1' || filter_var($host, FILTER_VALIDATE_IP)) {
+        return null;
+    }
+    $bare = (strpos($host, 'www.') === 0) ? substr($host, 4) : $host;
+    return '.' . $bare;
+}
+
+/** Hostnames allowed for CORS (apex + www of APP_URL domain). */
+function corsAllowedOrigins(): array {
+    $hosts = [];
+    foreach ([CANONICAL_HOST] as $host) {
+        if ($host === '' || $host === 'localhost') {
+            continue;
+        }
+        $bare = (strpos($host, 'www.') === 0) ? substr($host, 4) : $host;
+        $hosts[] = $bare;
+        $hosts[] = 'www.' . $bare;
+    }
+    $hosts = array_unique($hosts);
+    $origins = [];
+    foreach ($hosts as $host) {
+        $origins[] = 'https://' . $host;
+        if (APP_ENV === 'development') {
+            $origins[] = 'http://' . $host;
+        }
+    }
+    return $origins;
+}
+
+/** Send CORS headers when browser Origin is www vs apex (backup if redirect is skipped). */
+function applyCorsHeaders(): bool {
+    $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+    if ($origin === '' || !in_array($origin, corsAllowedOrigins(), true)) {
+        return false;
+    }
+    header('Access-Control-Allow-Origin: ' . $origin);
+    header('Access-Control-Allow-Credentials: true');
+    header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+    header('Access-Control-Allow-Headers: Content-Type, X-Requested-With');
+    header('Vary: Origin');
+    return true;
+}
+
+function handleCorsPreflight(): void {
+    applyCorsHeaders();
+    http_response_code(204);
+    exit;
+}
+
+/**
+ * 301 redirect www <-> apex so the site always matches APP_URL host (fixes login CORS).
+ */
+function enforceCanonicalHost(): void {
+    if (empty($_SERVER['HTTP_HOST'])) {
+        return;
+    }
+
+    $current = strtolower((string) $_SERVER['HTTP_HOST']);
+    $canonical = CANONICAL_HOST;
+
+    if ($current === $canonical) {
+        return;
+    }
+
+    if (APP_ENV === 'development' && in_array($current, ['localhost', '127.0.0.1'], true)) {
+        return;
+    }
+
+    $bare = (strpos($canonical, 'www.') === 0) ? substr($canonical, 4) : $canonical;
+    $wwwHost = 'www.' . $bare;
+    $isPair = ($current === $bare || $current === $wwwHost);
+    if (!$isPair) {
+        return;
+    }
+
+    $scheme = 'http';
+    if (
+        (!empty($_SERVER['HTTPS']) && strtolower((string) $_SERVER['HTTPS']) !== 'off')
+        || (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && strtolower((string) $_SERVER['HTTP_X_FORWARDED_PROTO']) === 'https')
+        || (!empty($_SERVER['SERVER_PORT']) && (string) $_SERVER['SERVER_PORT'] === '443')
+    ) {
+        $scheme = 'https';
+    }
+
+    $uri = $_SERVER['REQUEST_URI'] ?? '/';
+    header('Location: ' . $scheme . '://' . $canonical . $uri, true, 301);
+    exit;
+}
+
+// Build base URL from the current HTTP request (avoids www vs apex CORS mismatches).
+function requestBaseUrl(): ?string {
+    if (PHP_SAPI === 'cli' || empty($_SERVER['HTTP_HOST'])) {
+        return null;
+    }
+
+    $scheme = 'http';
+    if (
+        (!empty($_SERVER['HTTPS']) && strtolower((string) $_SERVER['HTTPS']) !== 'off')
+        || (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && strtolower((string) $_SERVER['HTTP_X_FORWARDED_PROTO']) === 'https')
+        || (!empty($_SERVER['SERVER_PORT']) && (string) $_SERVER['SERVER_PORT'] === '443')
+    ) {
+        $scheme = 'https';
+    }
+
+    $scriptName = $_SERVER['SCRIPT_NAME'] ?? '/index.php';
+    $dir = str_replace('\\', '/', dirname($scriptName));
+    if ($dir === '/' || $dir === '\\' || $dir === '.') {
+        $dir = '';
+    }
+
+    return $scheme . '://' . $_SERVER['HTTP_HOST'] . $dir . '/';
+}
+
+/** AJAX login/register (FormData + hidden ajax=1, or legacy X-Requested-With). */
+function isAjaxRequest(): bool {
+    if (isset($_POST['ajax']) && (string) $_POST['ajax'] === '1') {
+        return true;
+    }
+    $xrw = $_SERVER['HTTP_X_REQUESTED_WITH'] ?? '';
+    return strtolower($xrw) === 'xmlhttprequest';
+}
+
+// Helper: Application base URL (APP_URL host/path only — not the current PHP script folder)
+/**
+ * Public URL for a stored avatar only if the file exists on disk.
+ */
+function publicAvatarUrl(?string $avatarUrl): string
+{
+    if ($avatarUrl === null || trim($avatarUrl) === '') {
+        return '';
+    }
+    $relative = ltrim(trim($avatarUrl), '/');
+    $fullPath = dirname(__DIR__) . '/' . $relative;
+    if (!is_file($fullPath)) {
+        return '';
+    }
+    return baseUrl($relative);
+}
+
+function appBasePathPrefix(): string
+{
+    $appParts = parse_url(APP_URL);
+    $pathPrefix = $appParts['path'] ?? '/';
+    if ($pathPrefix === '' || $pathPrefix === '/') {
+        return '/';
+    }
+    return '/' . trim($pathPrefix, '/') . '/';
+}
+
 function baseUrl($path = '') {
-    return rtrim(APP_URL, '/') . '/' . ltrim($path, '/');
+    static $base = null;
+    if ($base === null) {
+        $pathPrefix = appBasePathPrefix();
+        $detected = requestBaseUrl();
+        if ($detected !== null) {
+            // Use current host/scheme (www vs apex, localhost) but APP_URL path — not the script folder.
+            $parts = parse_url($detected);
+            $scheme = $parts['scheme'] ?? 'http';
+            $host = $parts['host'] ?? CANONICAL_HOST;
+            $port = isset($parts['port']) ? ':' . $parts['port'] : '';
+            $base = $scheme . '://' . $host . $port . $pathPrefix;
+        } else {
+            $appParts = parse_url(APP_URL);
+            $scheme = $appParts['scheme'] ?? 'http';
+            $base = $scheme . '://' . CANONICAL_HOST . $pathPrefix;
+        }
+    }
+    return rtrim($base, '/') . '/' . ltrim($path, '/');
 }
 
 // Helper: Redirect
@@ -369,38 +610,236 @@ function isRoute($route) {
     return $currentRoute === $route || strpos($currentRoute, $route) === 0;
 }
 
+/**
+ * @param array<string, mixed> $user
+ * @param array{completed: int, active: int, cancelled: int, disputed: int, earned: float, reviews: int, satisfied: int, avg_rating: ?float} $agg
+ * @return array<string, mixed>
+ */
+function computeFreelancerStats(array $user, array $agg): array
+{
+    $completedCount = (int) ($agg['completed'] ?? 0);
+    $cancelledCount = (int) ($agg['cancelled'] ?? 0);
+    $disputedCount = (int) ($agg['disputed'] ?? 0);
+    $totalEarned = (float) ($agg['earned'] ?? 0);
+    $reviewsCount = (int) ($agg['reviews'] ?? 0);
+    $satisfiedCount = (int) ($agg['satisfied'] ?? 0);
+    $avgRatingRaw = $agg['avg_rating'] ?? null;
+    $avgRating = $avgRatingRaw !== null ? number_format((float) $avgRatingRaw, 1) : '0.0';
+
+    $completeness = 40;
+    if (!empty($user['bio'])) {
+        $completeness += 20;
+    }
+    $skills = !empty($user['skills']) ? json_decode((string) $user['skills'], true) : [];
+    if (is_array($skills) && !empty($skills)) {
+        $completeness += 20;
+    }
+    if (!empty($user['title']) && (float) ($user['hourly_rate'] ?? 0) > 0) {
+        $completeness += 10;
+    }
+    if (!empty($user['avatar_url'])) {
+        $completeness += 10;
+    }
+    $completeness = min(100, $completeness);
+
+    $totalClosed = $completedCount + $cancelledCount + $disputedCount;
+    if ($reviewsCount > 0) {
+        $jssVal = (int) round(($satisfiedCount / $reviewsCount) * 100);
+        $jssVal = max(60, min(100, $jssVal));
+        $jss = $jssVal . '%';
+    } elseif ($totalClosed === 0) {
+        $jssVal = null;
+        $jss = 'N/A';
+    } else {
+        $jssVal = (int) round(($completedCount / $totalClosed) * 100);
+        $jssVal = max(60, min(100, $jssVal));
+        $jss = $jssVal . '%';
+    }
+
+    $badge = null;
+    $badge_label = '';
+    if ($completeness === 100) {
+        if ($jssVal === null || $totalClosed === 0) {
+            if ($totalEarned < 1000) {
+                $badge = 'rising_talent';
+                $badge_label = 'Rising Talent';
+            }
+        } elseif ($jssVal >= 90) {
+            if ($totalEarned >= 10000) {
+                $badge = 'expert_vetted';
+                $badge_label = 'Expert Vetted';
+            } elseif ($totalEarned >= 5000) {
+                $badge = 'top_rated_plus';
+                $badge_label = 'Top Rated Plus';
+            } elseif ($totalEarned >= 1000) {
+                $badge = 'top_rated';
+                $badge_label = 'Top Rated';
+            } else {
+                $badge = 'rising_talent';
+                $badge_label = 'Rising Talent';
+            }
+        }
+    }
+
+    $rating = $reviewsCount > 0 ? $avgRating : '0.0';
+    if ($reviewsCount === 0 && $completedCount > 0) {
+        $rating = '5.0';
+    }
+
+    return [
+        'total_earned' => $totalEarned,
+        'completed_contracts' => $completedCount,
+        'active_contracts' => (int) ($agg['active'] ?? 0),
+        'jss' => $jss,
+        'jss_val' => $jssVal,
+        'completeness' => $completeness,
+        'badge' => $badge,
+        'badge_label' => $badge_label,
+        'rating' => $rating,
+        'reviews_count' => $reviewsCount > 0 ? $reviewsCount : $completedCount,
+    ];
+}
+
+/**
+ * @param list<int> $freelancerIds
+ * @param array<int, array<string, mixed>> $usersById
+ * @return array<int, array<string, mixed>>
+ */
+function getFreelancerStatsBatch(array $freelancerIds, array $usersById = []): array
+{
+    $freelancerIds = array_values(array_unique(array_filter(array_map('intval', $freelancerIds), static fn ($id) => $id > 0)));
+    if ($freelancerIds === []) {
+        return [];
+    }
+
+    $empty = [
+        'total_earned' => 0.0,
+        'completed_contracts' => 0,
+        'active_contracts' => 0,
+        'jss' => 'N/A',
+        'jss_val' => null,
+        'completeness' => 0,
+        'badge' => null,
+        'badge_label' => '',
+        'rating' => '0.0',
+        'reviews_count' => 0,
+    ];
+
+    $contractAgg = [];
+    $earned = [];
+    $reviewAgg = [];
+
+    try {
+        $db = getDB();
+        $placeholders = implode(',', array_fill(0, count($freelancerIds), '?'));
+
+        $stmt = $db->prepare(
+            "SELECT freelancer_id, status, COUNT(*) AS cnt
+             FROM contracts
+             WHERE freelancer_id IN ($placeholders)
+             GROUP BY freelancer_id, status"
+        );
+        $stmt->execute($freelancerIds);
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $fid = (int) ($row['freelancer_id'] ?? 0);
+            if ($fid <= 0) {
+                continue;
+            }
+            if (!isset($contractAgg[$fid])) {
+                $contractAgg[$fid] = ['completed' => 0, 'active' => 0, 'cancelled' => 0, 'disputed' => 0];
+            }
+            $status = (string) ($row['status'] ?? '');
+            if (isset($contractAgg[$fid][$status])) {
+                $contractAgg[$fid][$status] = (int) $row['cnt'];
+            }
+        }
+
+        $stmt = $db->prepare(
+            "SELECT payee_id, COALESCE(SUM(amount), 0) AS earned
+             FROM payments
+             WHERE payee_id IN ($placeholders)
+               AND status = 'completed'
+               AND transaction_id NOT LIKE 'ESC-%'
+             GROUP BY payee_id"
+        );
+        $stmt->execute($freelancerIds);
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $earned[(int) $row['payee_id']] = (float) $row['earned'];
+        }
+
+        $stmt = $db->prepare(
+            "SELECT reviewee_id,
+                    COUNT(*) AS reviews,
+                    AVG(rating) AS avg_rating,
+                    SUM(CASE WHEN rating >= 4.0 THEN 1 ELSE 0 END) AS satisfied
+             FROM reviews
+             WHERE reviewee_id IN ($placeholders)
+             GROUP BY reviewee_id"
+        );
+        $stmt->execute($freelancerIds);
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $fid = (int) ($row['reviewee_id'] ?? 0);
+            $reviewAgg[$fid] = [
+                'reviews' => (int) ($row['reviews'] ?? 0),
+                'avg_rating' => $row['avg_rating'] !== null ? (float) $row['avg_rating'] : null,
+                'satisfied' => (int) ($row['satisfied'] ?? 0),
+            ];
+        }
+
+        $missingUsers = [];
+        foreach ($freelancerIds as $fid) {
+            if (!isset($usersById[$fid])) {
+                $missingUsers[] = $fid;
+            }
+        }
+        if ($missingUsers !== []) {
+            $ph = implode(',', array_fill(0, count($missingUsers), '?'));
+            $stmt = $db->prepare("SELECT * FROM users WHERE id IN ($ph)");
+            $stmt->execute($missingUsers);
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                $usersById[(int) $row['id']] = $row;
+            }
+        }
+    } catch (Throwable $e) {
+        if (defined('APP_DEBUG') && APP_DEBUG) {
+            error_log('getFreelancerStatsBatch: ' . $e->getMessage());
+        }
+        $out = [];
+        foreach ($freelancerIds as $fid) {
+            $out[$fid] = $empty;
+        }
+        return $out;
+    }
+
+    $out = [];
+    foreach ($freelancerIds as $fid) {
+        $user = $usersById[$fid] ?? null;
+        if (!$user) {
+            $out[$fid] = $empty;
+            continue;
+        }
+        $c = $contractAgg[$fid] ?? ['completed' => 0, 'active' => 0, 'cancelled' => 0, 'disputed' => 0];
+        $r = $reviewAgg[$fid] ?? ['reviews' => 0, 'avg_rating' => null, 'satisfied' => 0];
+        $out[$fid] = computeFreelancerStats($user, [
+            'completed' => $c['completed'],
+            'active' => $c['active'],
+            'cancelled' => $c['cancelled'],
+            'disputed' => $c['disputed'],
+            'earned' => $earned[$fid] ?? 0.0,
+            'reviews' => $r['reviews'],
+            'satisfied' => $r['satisfied'],
+            'avg_rating' => $r['avg_rating'],
+        ]);
+    }
+
+    return $out;
+}
+
 // Helper: Calculate Freelancer JSS, Profile Completeness, and Upwork badges dynamically
-function getFreelancerStats($freelancerId) {
-    $db = getDB();
-    
-    // 1. Fetch completed, active, cancelled, disputed contracts count
-    $stmt = $db->prepare("SELECT COUNT(*) FROM contracts WHERE freelancer_id = ? AND status = 'completed'");
-    $stmt->execute([$freelancerId]);
-    $completedCount = (int)$stmt->fetchColumn();
-
-    $stmt = $db->prepare("SELECT COUNT(*) FROM contracts WHERE freelancer_id = ? AND status = 'active'");
-    $stmt->execute([$freelancerId]);
-    $activeCount = (int)$stmt->fetchColumn();
-
-    $stmt = $db->prepare("SELECT COUNT(*) FROM contracts WHERE freelancer_id = ? AND status = 'cancelled'");
-    $stmt->execute([$freelancerId]);
-    $cancelledCount = (int)$stmt->fetchColumn();
-
-    $stmt = $db->prepare("SELECT COUNT(*) FROM contracts WHERE freelancer_id = ? AND status = 'disputed'");
-    $stmt->execute([$freelancerId]);
-    $disputedCount = (int)$stmt->fetchColumn();
-
-    // 2. Fetch total earned
-    $stmt = $db->prepare("SELECT SUM(amount) FROM payments WHERE payee_id = ? AND status = 'completed' AND transaction_id NOT LIKE 'ESC-%'");
-    $stmt->execute([$freelancerId]);
-    $totalEarned = (float)$stmt->fetchColumn() ?: 0.0;
-
-    // 3. Fetch user details for profile completeness
-    $stmt = $db->prepare("SELECT * FROM users WHERE id = ?");
-    $stmt->execute([$freelancerId]);
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    if (!$user) {
+function getFreelancerStats($freelancerId)
+{
+    $freelancerId = (int) $freelancerId;
+    if ($freelancerId <= 0) {
         return [
             'total_earned' => 0.0,
             'completed_contracts' => 0,
@@ -411,93 +850,20 @@ function getFreelancerStats($freelancerId) {
             'badge' => null,
             'badge_label' => '',
             'rating' => '0.0',
-            'reviews_count' => 0
+            'reviews_count' => 0,
         ];
     }
-
-    // 4. Profile completeness
-    $completeness = 40; // Base
-    if (!empty($user['bio'])) $completeness += 20;
-    $skills = !empty($user['skills']) ? json_decode($user['skills'], true) : [];
-    if (!empty($skills)) $completeness += 20;
-    if (!empty($user['title']) && (float)($user['hourly_rate'] ?? 0) > 0) $completeness += 10;
-    if (!empty($user['avatar_url'])) $completeness += 10;
-    $completeness = min(100, $completeness);
-
-    // 5. Fetch received reviews count and average rating from reviews table
-    $stmt = $db->prepare("SELECT COUNT(*), AVG(rating) FROM reviews WHERE reviewee_id = ?");
-    $stmt->execute([$freelancerId]);
-    $revRow = $stmt->fetch(PDO::FETCH_NUM);
-    $reviewsCount = (int)$revRow[0];
-    $avgRating = $revRow[1] !== null ? number_format((float)$revRow[1], 1) : '0.0';
-
-    // 6. Job Success Score (JSS) based on client satisfaction reviews
-    $totalClosed = $completedCount + $cancelledCount + $disputedCount;
-    if ($reviewsCount > 0) {
-        // Satisfied reviews are those with rating >= 4.0 stars
-        $stmt = $db->prepare("SELECT COUNT(*) FROM reviews WHERE reviewee_id = ? AND rating >= 4.0");
-        $stmt->execute([$freelancerId]);
-        $satisfiedCount = (int)$stmt->fetchColumn();
-        
-        $jssVal = round(($satisfiedCount / $reviewsCount) * 100);
-        $jssVal = max(60, min(100, $jssVal));
-        $jss = $jssVal . '%';
-    } else {
-        // Fallback to contract status if no explicit reviews yet
-        if ($totalClosed === 0) {
-            $jssVal = null;
-            $jss = 'N/A';
-        } else {
-            $jssVal = round(($completedCount / $totalClosed) * 100);
-            $jssVal = max(60, min(100, $jssVal));
-            $jss = $jssVal . '%';
-        }
-    }
-
-    // 7. Dynamic badge
-    $badge = null;
-    $badge_label = '';
-    if ($completeness === 100) {
-        if ($jssVal === null || $totalClosed === 0) {
-            if ($totalEarned < 1000) {
-                $badge = 'rising_talent';
-                $badge_label = 'Rising Talent';
-            }
-        } else {
-            if ($jssVal >= 90) {
-                if ($totalEarned >= 10000) {
-                    $badge = 'expert_vetted';
-                    $badge_label = 'Expert Vetted';
-                } elseif ($totalEarned >= 5000) {
-                    $badge = 'top_rated_plus';
-                    $badge_label = 'Top Rated Plus';
-                } elseif ($totalEarned >= 1000) {
-                    $badge = 'top_rated';
-                    $badge_label = 'Top Rated';
-                } else {
-                    $badge = 'rising_talent';
-                    $badge_label = 'Rising Talent';
-                }
-            }
-        }
-    }
-
-    // 8. Rating and reviews mapping
-    $rating = $reviewsCount > 0 ? $avgRating : '0.0';
-    if ($reviewsCount === 0 && $completedCount > 0) {
-        $rating = '5.0'; // Historical fallback
-    }
-
-    return [
-        'total_earned' => $totalEarned,
-        'completed_contracts' => $completedCount,
-        'active_contracts' => $activeCount,
-        'jss' => $jss,
-        'jss_val' => $jssVal,
-        'completeness' => $completeness,
-        'badge' => $badge,
-        'badge_label' => $badge_label,
-        'rating' => $rating,
-        'reviews_count' => $reviewsCount > 0 ? $reviewsCount : $completedCount
+    $batch = getFreelancerStatsBatch([$freelancerId]);
+    return $batch[$freelancerId] ?? [
+        'total_earned' => 0.0,
+        'completed_contracts' => 0,
+        'active_contracts' => 0,
+        'jss' => 'N/A',
+        'jss_val' => null,
+        'completeness' => 0,
+        'badge' => null,
+        'badge_label' => '',
+        'rating' => '0.0',
+        'reviews_count' => 0,
     ];
 }

@@ -55,6 +55,8 @@
       if (id === 'reports' && typeof renderReports === 'function') renderReports();
       if (id === 'profile' && typeof renderSuggestedSkills === 'function') renderSuggestedSkills();
       if (id === 'connects' && typeof loadConnectsPageData === 'function') loadConnectsPageData();
+      if (id === 'messages' && typeof startConversationsPolling === 'function') startConversationsPolling();
+      if (id !== 'messages' && typeof stopConversationsPolling === 'function') stopConversationsPolling();
     } catch (e) { console.warn("Deferred render error:", e); }
   };
 
@@ -77,6 +79,8 @@
   const USER_EMAIL_VERIFIED = <?php echo Auth::isEmailVerified($user) ? 'true' : 'false'; ?>;
   const USER_ID_VERIFIED = <?php echo Auth::isIdentityVerified($user) ? 'true' : 'false'; ?>;
   const USER_HAS_PHOTO = <?php echo !empty($user['avatar_url']) ? 'true' : 'false'; ?>;
+  const COUNTRY_OPTIONS_HTML = <?php echo json_encode(buildCountryOptionsHtml($user['country'] ?? 'United Kingdom'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
+  const COUNTRY_CODE_MAP = <?php echo json_encode(getCountryCodeNameMapForJs(), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
   let userConnectsBalance = USER_CONNECTS;
   // Global showPage for legacy onclicks (redundant now but keeping it for safety at end of script if needed)
   window.showPage = window.showPage;
@@ -90,7 +94,7 @@
     const info = {
       'wip': '<strong>Work in Progress</strong>: These are hours you have logged during the current week that have not yet been billed to the client. This amount will move to "In Review" after the week ends (Sunday midnight UTC).',
       'review': '<strong>In Review</strong>: This includes hours from the previous week or completed milestones that the client is currently reviewing. Clients have 5 days to dispute hourly work.',
-      'pending': '<strong>Processing</strong>: These are funds that have been approved by the client but are held for a standard 5-day security period before becoming available for withdrawal.',
+      'pending': '<strong>Processing</strong>: The client has paid and these funds are on hold until an administrator approves them. After approval they move to your available balance for withdrawal.',
       'available': '<strong>Available</strong>: This is your balance ready to be withdrawn to your preferred payment method.'
     };
     
@@ -138,7 +142,7 @@
     });
   }
 
-  window.initiateWithdrawal = function(amount) {
+  window.initiateWithdrawal = async function(amount) {
     if (amount <= 0) return toast('Error', 'No funds available to withdraw');
     const methodId = document.getElementById('saved-withdraw-method').value;
     
@@ -146,7 +150,7 @@
       return toast('Error', 'Please save a withdrawal method first');
     }
     
-    if (!confirm(`Are you sure you want to withdraw $${parseFloat(amount).toFixed(2)} to this saved account?`)) return;
+    if (!(await remoConfirm(`Withdraw $${parseFloat(amount).toFixed(2)} to your saved account?`, 'Confirm withdrawal'))) return;
     
     toast('Processing...', 'Initiating withdrawal...');
     
@@ -170,8 +174,8 @@
     });
   }
 
-  window.buyConnects = function(amount, price) {
-    if (!confirm(`Buy ${amount} Connects for $${price.toFixed(2)} using your available balance?`)) return;
+  window.buyConnects = async function(amount, price) {
+    if (!(await remoConfirm(`Buy ${amount} Connects for $${price.toFixed(2)} from your balance?`, 'Purchase connects'))) return;
     
     toast('Processing...', 'Purchasing connects');
     
@@ -387,8 +391,8 @@
     window.openApplyModal(jobId);
   };
 
-  window.declineInvitation = function(inviteId, btn) {
-    if (!confirm('Are you sure you want to decline this invitation?')) return;
+  window.declineInvitation = async function(inviteId, btn) {
+    if (!(await remoConfirm('The client will be notified.', 'Decline this invitation?'))) return;
     
     btn.disabled = true;
     btn.textContent = 'Declining...';
@@ -546,7 +550,7 @@
     
     if (hlist) {
       hlist.innerHTML = JOBS.slice(0, 3).map(j => `
-        <div class="job-row" onclick="openJobDetail(${j.id})">
+        <div class="job-row" onclick="window.location.href=jobPageUrl(${j.id})" style="cursor:pointer">
           <div style="font-weight:700;margin-bottom:4px">${j.title}</div>
           <div style="font-size:12px;color:var(--muted)">${j.client_name} · ${timeAgo(j.created_at)}</div>
         </div>`).join('');
@@ -568,7 +572,7 @@
         const isSaved = SAVED_IDS.includes(parseInt(j.id));
         const matchPercent = getMatchPercentage(j);
         return `
-        <div class="job-row" onclick="openJobDetail(${j.id})" style="display:grid;grid-template-columns:1fr 180px;padding:20px;border-radius:12px;margin-bottom:15px;align-items:start">
+        <div class="job-row" onclick="window.location.href=jobPageUrl(${j.id})" style="display:grid;grid-template-columns:1fr 180px;padding:20px;border-radius:12px;margin-bottom:15px;align-items:start;cursor:pointer">
           <div style="padding-right:20px">
             <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
               <div style="font-weight:700;font-size:16px;color:var(--dark)">${j.title}</div>
@@ -601,7 +605,7 @@
           </div>
 
           <div style="text-align:right;border-left:1px solid var(--border);padding-left:20px">
-            <button class="btn btn-g" style="width:100%;margin-bottom:12px" onclick="event.stopPropagation();openApplyModal(${j.id})">Apply Now</button>
+            <button class="btn btn-g" style="width:100%;margin-bottom:12px" onclick="event.stopPropagation();window.location.href=jobPageUrl(${j.id},true)">Apply Now</button>
             <div style="color:var(--muted2);font-size:12px;margin-bottom:4px;display:flex;align-items:center;justify-content:flex-end;gap:4px">
               <span style="color:#f59e0b">⚡</span> ${CONNECTS_PER_APPLICATION} Connects
             </div>
@@ -688,29 +692,10 @@
 
   function getCountryName(val) {
     if (!val) return 'United States';
-    val = val.trim();
+    val = String(val).trim();
     if (val.length === 2) {
-      const countries = {
-        'AF': 'Afghanistan', 'AX': 'Åland Islands', 'AL': 'Albania', 'DZ': 'Algeria', 'AS': 'American Samoa', 'AD': 'Andorra', 'AO': 'Angola', 'AI': 'Anguilla', 'AQ': 'Antarctica', 'AG': 'Antigua and Barbuda', 'AR': 'Argentina', 'AM': 'Armenia', 'AW': 'Aruba', 'AU': 'Australia', 'AT': 'Austria', 'AZ': 'Azerbaijan',
-        'BS': 'Bahamas', 'BH': 'Bahrain', 'BD': 'Bangladesh', 'BB': 'Barbados', 'BY': 'Belarus', 'BE': 'Belgium', 'BZ': 'Belize', 'BJ': 'Benin', 'BM': 'Bermuda', 'BT': 'Bhutan', 'BO': 'Bolivia', 'BA': 'Bosnia and Herzegovina', 'BW': 'Botswana', 'BV': 'Bouvet Island', 'BR': 'Brazil', 'IO': 'British Indian Ocean Territory',
-        'BN': 'Brunei Darussalam', 'BG': 'Bulgaria', 'BF': 'Burkina Faso', 'BI': 'Burundi', 'KH': 'Cambodia', 'CM': 'Cameroon', 'CA': 'Canada', 'CV': 'Cape Verde', 'KY': 'Cayman Islands', 'CF': 'Central African Republic', 'TD': 'Chad', 'CL': 'Chile', 'CN': 'China', 'CX': 'Christmas Island', 'CC': 'Cocos (Keeling) Islands',
-        'CO': 'Colombia', 'KM': 'Comoros', 'CG': 'Congo', 'CD': 'Congo, Democratic Republic', 'CK': 'Cook Islands', 'CR': 'Costa Rica', 'CI': 'Cote D\'Ivoire', 'HR': 'Croatia', 'CU': 'Cuba', 'CY': 'Cyprus', 'CZ': 'Czech Republic', 'DK': 'Denmark', 'DJ': 'Djibouti', 'DM': 'Dominica', 'DO': 'Dominican Republic',
-        'EC': 'Ecuador', 'EG': 'Egypt', 'SV': 'El Salvador', 'GQ': 'Equatorial Guinea', 'ER': 'Eritrea', 'EE': 'Estonia', 'ET': 'Ethiopia', 'FK': 'Falkland Islands', 'FO': 'Faroe Islands', 'FJ': 'Fiji', 'FI': 'Finland', 'FR': 'France', 'GF': 'French Guiana', 'PF': 'French Polynesia', 'TF': 'French Southern Territories',
-        'GA': 'Gabon', 'GM': 'Gambia', 'GE': 'Georgia', 'DE': 'Germany', 'GH': 'Ghana', 'GI': 'Gibraltar', 'GR': 'Greece', 'GL': 'Greenland', 'GD': 'Grenada', 'GP': 'Guadeloupe', 'GU': 'Guam', 'GT': 'Guatemala', 'GG': 'Guernsey', 'GN': 'Guinea', 'GW': 'Guinea-Bissau', 'GY': 'Guyana', 'HT': 'Haiti',
-        'HM': 'Heard Island and McDonald Islands', 'VA': 'Holy See (Vatican City State)', 'HN': 'Honduras', 'HK': 'Hong Kong', 'HU': 'Hungary', 'IS': 'Iceland', 'IN': 'India', 'ID': 'Indonesia', 'IR': 'Iran', 'IQ': 'Iraq', 'IE': 'Ireland', 'IM': 'Isle of Man', 'IL': 'Israel', 'IT': 'Italy', 'JM': 'Jamaica',
-        'JP': 'Japan', 'JE': 'Jersey', 'JO': 'Jordan', 'KZ': 'Kazakhstan', 'KE': 'Kenya', 'KI': 'Kiribati', 'KP': 'Korea, Democratic People\'s Republic of', 'KR': 'Korea, Republic of', 'KW': 'Kuwait', 'KG': 'Kyrgyzstan', 'LA': 'Lao People\'s Democratic Republic', 'LV': 'Latvia', 'LB': 'Lebanon', 'LS': 'Lesotho',
-        'LR': 'Liberia', 'LY': 'Libyan Arab Jamahiriya', 'LI': 'Liechtenstein', 'LT': 'Lithuania', 'LU': 'Luxembourg', 'MO': 'Macao', 'MK': 'Macedonia', 'MG': 'Madagascar', 'MW': 'Malawi', 'MY': 'Malaysia', 'MV': 'Maldives', 'ML': 'Mali', 'MT': 'Malta', 'MH': 'Marshall Islands', 'MQ': 'Martinique',
-        'MR': 'Mauritania', 'MU': 'Mauritius', 'YT': 'Mayotte', 'MX': 'Mexico', 'FM': 'Micronesia', 'MD': 'Moldova', 'MC': 'Monaco', 'MN': 'Mongolia', 'ME': 'Montenegro', 'MS': 'Montserrat', 'MA': 'Morocco', 'MZ': 'Mozambique', 'MM': 'Myanmar', 'NA': 'Namibia', 'NR': 'Nauru', 'NP': 'Nepal', 'NL': 'Netherlands',
-        'AN': 'Netherlands Antilles', 'NC': 'New Caledonia', 'NZ': 'New Zealand', 'NI': 'Nicaragua', 'NE': 'Niger', 'NG': 'Nigeria', 'NU': 'Niue', 'NF': 'Norfolk Island', 'MP': 'Northern Mariana Islands', 'NO': 'Norway', 'OM': 'Oman', 'PK': 'Pakistan', 'PW': 'Palau', 'PS': 'Palestinian Territory, Occupied',
-        'PA': 'Panama', 'PG': 'Papua New Guinea', 'PY': 'Paraguay', 'PE': 'Peru', 'PH': 'Philippines', 'PN': 'Pitcairn', 'PL': 'Poland', 'PT': 'Portugal', 'PR': 'Puerto Rico', 'QA': 'Qatar', 'RE': 'Reunion', 'RO': 'Romania', 'RU': 'Russian Federation', 'RW': 'Rwanda', 'SH': 'Saint Helena',
-        'KN': 'Saint Kitts and Nevis', 'LC': 'Saint Lucia', 'PM': 'Saint Pierre and Miquelon', 'VC': 'Saint Vincent and the Grenadines', 'WS': 'Samoa', 'SM': 'San Marino', 'ST': 'Sao Tome and Principe', 'SA': 'Saudi Arabia', 'SN': 'Senegal', 'RS': 'Serbia', 'SC': 'Seychelles', 'SL': 'Sierra Leone',
-        'SG': 'Singapore', 'SK': 'Slovakia', 'SI': 'Slovenia', 'SB': 'Solomon Islands', 'SO': 'Somalia', 'ZA': 'South Africa', 'GS': 'South Georgia and the South Sandwich Islands', 'ES': 'Spain', 'LK': 'Sri Lanka', 'SD': 'Sudan', 'SR': 'Suriname', 'SJ': 'Svalbard and Jan Mayen', 'SZ': 'Swaziland',
-        'SE': 'Sweden', 'CH': 'Switzerland', 'SY': 'Syrian Arab Republic', 'TW': 'Taiwan', 'TJ': 'Tajikistan', 'TZ': 'Tanzania', 'TH': 'Thailand', 'TL': 'Timor-Leste', 'TG': 'Togo', 'TK': 'Tokelau', 'TO': 'Tonga', 'TT': 'Trinidad and Tobago', 'TN': 'Tunisia', 'TR': 'Turkey', 'TM': 'Turkmenistan',
-        'TC': 'Turks and Caicos Islands', 'TV': 'Tuvalu', 'UG': 'Uganda', 'UA': 'Ukraine', 'AE': 'United Arab Emirates', 'GB': 'United Kingdom', 'US': 'United States', 'UM': 'United States Minor Outlying Islands', 'UY': 'Uruguay', 'UZ': 'Uzbekistan', 'VU': 'Vanuatu', 'VE': 'Venezuela',
-        'VN': 'Viet Nam', 'VG': 'Virgin Islands, British', 'VI': 'Virgin Islands, U.S.', 'WF': 'Wallis and Futuna', 'EH': 'Western Sahara', 'YE': 'Yemen', 'ZM': 'Zambia', 'ZW': 'Zimbabwe'
-      };
       const upper = val.toUpperCase();
-      if (countries[upper]) return countries[upper];
+      if (COUNTRY_CODE_MAP[upper]) return COUNTRY_CODE_MAP[upper];
     }
     let cleaned = val.replace(/\b[a-z]/g, function(char) {
       return char.toUpperCase();
@@ -739,6 +724,62 @@
     }
     return String(skillsField).split(',').map(s => s.replace(/[\[\]"']/g, '').trim()).filter(Boolean);
   }
+
+  window.jobPageUrl = function(id, apply) {
+    let url = BASE_URL + 'remoworkers-dashboard/j/' + encodeJobId(id);
+    if (apply) url += '?apply=1';
+    return url;
+  };
+
+  window.encodeFreelancerId = function(id) {
+    const xor = parseInt(id, 10) ^ 847291;
+    const str = String(xor);
+    const encoded = btoa(str);
+    return encoded.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  };
+
+  window.getPublicProfileUrl = function(freelancerId) {
+    const base = (typeof BASE_URL === 'string' ? BASE_URL : '/').replace(/\/?$/, '/');
+    return base + 'f/' + encodeFreelancerId(freelancerId);
+  };
+
+  window.copyProfileShareLink = function(freelancerId) {
+    const url = getPublicProfileUrl(freelancerId);
+    const done = function() {
+      toast('Link copied', 'Your public profile link is ready to share.');
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(done).catch(function() {
+        const input = document.getElementById('my-public-profile-url');
+        if (input) {
+          input.value = url;
+          input.select();
+          try {
+            document.execCommand('copy');
+            done();
+          } catch (e) {
+            toast('Profile link', url);
+          }
+        } else {
+          toast('Profile link', url);
+        }
+      });
+    } else {
+      const input = document.getElementById('my-public-profile-url');
+      if (input) {
+        input.value = url;
+        input.select();
+        try {
+          document.execCommand('copy');
+          done();
+        } catch (e) {
+          toast('Profile link', url);
+        }
+      } else {
+        toast('Profile link', url);
+      }
+    }
+  };
 
   window.encodeJobId = function(id) {
     const xor = parseInt(id, 10) ^ 958273;
@@ -842,6 +883,10 @@
   };
 
   window.openJobDetail = function(id) {
+    if (typeof jobPageUrl === 'function') {
+      window.location.href = jobPageUrl(id);
+      return;
+    }
     const job = JOBS.find(j => j.id == id);
     if (!job) return;
     const matchPercent = getMatchPercentage(job);
@@ -936,6 +981,17 @@
     if (block) {
       toast(block.title, block.message);
       if (block.action) block.action();
+      return;
+    }
+
+    if (document.getElementById('job-apply-section')) {
+      const section = document.getElementById('job-apply-section');
+      section.scrollIntoView({ behavior: 'smooth' });
+      return;
+    }
+
+    if (typeof jobPageUrl === 'function') {
+      window.location.href = jobPageUrl(id, true);
       return;
     }
     
@@ -1045,6 +1101,14 @@
 
 
   window.submitProposalForm = function(jobId) {
+    const hasInvite = INVITATIONS.some(i => i.job_id == jobId);
+    const block = getApplyBlockReason(hasInvite);
+    if (block) {
+      toast(block.title, block.message);
+      if (block.action) block.action();
+      return;
+    }
+
     const rate = document.getElementById('prop-rate').value;
     const durationInput = document.getElementById('prop-duration');
     const days = durationInput ? parseInt(durationInput.value, 10) : 30;
@@ -1113,7 +1177,11 @@
 
         toast('Success', data.message);
         closeModal();
-        showPage('proposals');
+        if (document.getElementById('job-apply-section')) {
+          window.location.href = BASE_URL + 'remoworkers-dashboard#proposals';
+        } else {
+          showPage('proposals');
+        }
       } else {
         restoreBtn();
         toast('Error', data.message || data.error);
@@ -1568,13 +1636,7 @@
             <div class="fg">
               <label>Country / Location</label>
               <select id="edit-location" style="width:100%;padding:12px;border:1.5px solid var(--border);border-radius:8px;outline:none;background:#fff;color:var(--dark);font-size:14px;font-family:inherit">
-                <?php
-                $currentCountry = $user['country'] ?? 'United Kingdom';
-                foreach (getAllCountries() as $c) {
-                    $sel = (strcasecmp($currentCountry, $c) === 0) ? 'selected' : '';
-                    echo "<option value=\"" . htmlspecialchars($c) . "\" $sel>" . htmlspecialchars($c) . "</option>";
-                }
-                ?>
+                ${COUNTRY_OPTIONS_HTML}
               </select>
             </div>
           </div>
@@ -1774,8 +1836,8 @@
     .catch(err => toast('Error', 'Failed to update service'));
   }
 
-  window.deleteService = function(id) {
-    if (!confirm('Are you sure you want to delete this service?')) return;
+  window.deleteService = async function(id) {
+    if (!(await remoConfirm('This service will be removed from your catalog.', 'Delete service?', { danger: true, confirmLabel: 'Delete' }))) return;
 
     const fd = new FormData();
     fd.append('id', id);
@@ -2571,9 +2633,97 @@
   };
 
   let activeChatId = null;
+  let activeChatName = '';
+  let activeChatInitials = '';
+  let activeChatAvatar = '';
+  let pendingChatAttachment = null;
+  const CHAT_POLL_MS = 3000;
+  const CONVERSATIONS_POLL_MS = 8000;
+
+  function escapeChatHtml(text) {
+    const el = document.createElement('div');
+    el.textContent = text == null ? '' : String(text);
+    return el.innerHTML;
+  }
+
+  function messageAttachmentUrl(messageId) {
+    const base = (typeof BASE_URL === 'string' ? BASE_URL : '/').replace(/\/?$/, '/');
+    return base + 'actions/download_message_attachment.php?id=' + messageId;
+  }
+
+  function renderMessageAttachmentHtml(m, isMe) {
+    if (!m.attachment_path && !m.attachment_name) return '';
+    const name = escapeChatHtml(m.attachment_name || 'Attachment');
+    const url = messageAttachmentUrl(m.id);
+    const style = isMe
+      ? 'display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:8px 12px;background:rgba(255,255,255,.18);border-radius:8px;color:#fff;font-size:12px;font-weight:600;text-decoration:none'
+      : 'display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:8px 12px;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:8px;color:#047857;font-size:12px;font-weight:600;text-decoration:none';
+    return `<a href="${url}" class="msg-attachment-link" style="${style}" target="_blank" rel="noopener noreferrer">📎 ${name}</a>`;
+  }
+
+  function onChatAttachmentSelected(input) {
+    const file = input.files && input.files[0];
+    if (!file) return;
+    pendingChatAttachment = file;
+    updateChatAttachmentPreview();
+  }
+
+  function updateChatAttachmentPreview() {
+    const el = document.getElementById('chat-attachment-preview');
+    if (!el) return;
+    if (!pendingChatAttachment) {
+      el.style.display = 'none';
+      el.innerHTML = '';
+      return;
+    }
+    el.style.display = 'flex';
+    el.innerHTML = `
+      <span style="font-size:12px;color:var(--muted);flex:1">📎 ${escapeChatHtml(pendingChatAttachment.name)}</span>
+      <button type="button" class="btn btn-sm" style="padding:2px 8px;font-size:11px" onclick="clearChatAttachment()">Remove</button>
+    `;
+  }
+
+  function clearChatAttachment() {
+    pendingChatAttachment = null;
+    const input = document.getElementById('chat-attachment-input');
+    if (input) input.value = '';
+    updateChatAttachmentPreview();
+  }
+
+  let activeChatBlocked = false;
+
+  function getLatestRenderedMessageId() {
+    const scroll = document.getElementById('chat-messages-scroll');
+    if (!scroll) return 0;
+    let max = 0;
+    scroll.querySelectorAll('[data-message-id]').forEach(el => {
+      const id = parseInt(el.getAttribute('data-message-id'), 10);
+      if (!Number.isNaN(id) && id > max) max = id;
+    });
+    return max;
+  }
+
+  function chatHasNewMessages(serverMessages) {
+    if (!Array.isArray(serverMessages) || !serverMessages.length) return false;
+    const lastServerId = parseInt(serverMessages[serverMessages.length - 1].id, 10);
+    return lastServerId > getLatestRenderedMessageId();
+  }
+
+  function isMessagesPageActive() {
+    const page = document.getElementById('page-messages');
+    return page && page.classList.contains('active');
+  }
 
   async function loadChat(otherId, name, initials, el, avatar = '') {
     activeChatId = otherId;
+    activeChatName = name;
+    activeChatInitials = initials;
+    activeChatAvatar = avatar;
+    activeChatBlocked = false;
+    if (chatPollInterval) {
+      clearInterval(chatPollInterval);
+      chatPollInterval = null;
+    }
     
     // Highlight sidebar
     if(el) {
@@ -2591,12 +2741,15 @@
     chatWindow.innerHTML = `<div style="flex:1;display:flex;align-items:center;justify-content:center"><span class="spinner"></span></div>`;
 
     try {
-      const response = await fetch(`${BASE_URL}/actions/get_messages.php?with=${otherId}`);
+      const response = await fetch(`${BASE_URL}actions/get_messages.php?with=${otherId}`);
       const result = await response.json();
       
       if(result.success) {
+        activeChatBlocked = !!result.blocked;
         renderChatWindow(name, initials, result.messages, avatar);
-        startChatPolling(otherId, name, initials, avatar);
+        if (!activeChatBlocked) {
+          startChatPolling(otherId, name, initials, avatar);
+        }
       } else {
         chatWindow.innerHTML = `<div style="padding:20px;text-align:center;color:red">${result.error}</div>`;
       }
@@ -2616,8 +2769,8 @@
     const msgHtml = messages.map(m => {
       const isMe = (m.sender_id != activeChatId);
       
-      let bubbleContent = m.message;
-      if (!isMe && m.message.startsWith('CREATED MILESTONE:')) {
+      let bubbleContent = m.message || '';
+      if (!isMe && bubbleContent.startsWith('CREATED MILESTONE:')) {
         bubbleContent = `
           <div style="margin-bottom:10px">${m.message}</div>
           <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:12px; margin-top:8px; display:flex; flex-direction:column; gap:8px; align-items:flex-start">
@@ -2630,7 +2783,7 @@
             <button class="btn btn-g btn-sm" onclick="showPage('earnings')" style="padding:4px 10px; font-size:11px; margin-top:4px">View Earnings</button>
           </div>
         `;
-      } else if (isMe && m.message.startsWith('PROPOSED MILESTONE:')) {
+      } else if (isMe && bubbleContent.startsWith('PROPOSED MILESTONE:')) {
         bubbleContent = `
           <div style="margin-bottom:10px">${m.message}</div>
           <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:12px; margin-top:8px; display:flex; flex-direction:column; gap:8px; align-items:flex-start">
@@ -2646,14 +2799,14 @@
       }
 
       return `
-        <div style="display:flex;gap:10px;${isMe ? 'flex-direction:row-reverse' : ''}">
+        <div data-message-id="${m.id}" style="display:flex;gap:10px;${isMe ? 'flex-direction:row-reverse' : ''}">
           <div class="av" style="width:30px;height:30px;font-size:10px;background:${isMe ? 'var(--g)' : 'white'};color:${isMe ? 'white' : 'var(--muted)'};border:${isMe ? 'none' : '1px solid var(--border)'};flex-shrink:0;display:flex;align-items:center;justify-content:center;border-radius:50%">
             ${isMe ? 'Me' : 
             (avatar ? `<div class="av" style="position:relative;width:100%;height:100%"><img src="${getAvatarUrl(avatar)}" style="width:100%;height:100%;border-radius:50%;object-fit:cover" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div style="display:none;background:var(--gl);color:var(--forest);width:100%;height:100%;align-items:center;justify-content:center;border-radius:50%;font-weight:700;font-size:10px">${initials}</div></div>` :
               `<div style="background:var(--gl);color:var(--forest);width:100%;height:100%;display:flex;align-items:center;justify-content:center;border-radius:50%;font-weight:700;font-size:10px">${initials}</div>`)}
           </div>
           <div style="max-width:75%;${isMe ? 'text-align:right' : ''}">
-            <div style="background:${isMe ? 'var(--g)' : 'white'};color:${isMe ? 'white' : 'var(--forest)'};border-radius:12px;padding:10px 15px;font-size:13.5px;box-shadow:0 1px 2px rgba(0,0,0,.05);text-align:left">${bubbleContent}</div>
+            <div style="background:${isMe ? 'var(--g)' : 'white'};color:${isMe ? 'white' : 'var(--forest)'};border-radius:12px;padding:10px 15px;font-size:13.5px;box-shadow:0 1px 2px rgba(0,0,0,.05);text-align:left">${bubbleContent}${renderMessageAttachmentHtml(m, isMe)}</div>
             <div style="font-size:11px;color:var(--muted);margin-top:4px">${new Date(m.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>
           </div>
         </div>
@@ -2676,29 +2829,51 @@
         ` : ''}
       </div>
       <div style="flex:1;padding:20px;display:flex;flex-direction:column;gap:15px;overflow-y:auto" id="chat-messages-scroll">${msgHtml}</div>
-      <div style="padding:15px;background:white;border-top:1px solid var(--border);display:flex;gap:10px">
-        <input id="chat-input" type="text" placeholder="Write a message..." style="flex:1;padding:10px;border:1px solid var(--border);border-radius:8px" onkeydown="if(event.key==='Enter')sendMsg()">
-        <button class="btn btn-g" onclick="sendMsg()">Send</button>
+      ${activeChatBlocked ? `
+      <div style="padding:15px;background:#fafafa;border-top:1px solid var(--border)">
+        <div style="font-size:13px;color:var(--muted);text-align:center;line-height:1.5">
+          This client is not accepting messages from you.
+        </div>
       </div>
+      ` : `
+      <div style="padding:15px;background:white;border-top:1px solid var(--border)">
+        <div id="chat-attachment-preview" style="display:none;align-items:center;gap:8px;margin-bottom:8px;padding:8px 10px;background:#f8faf8;border:1px solid var(--border);border-radius:8px"></div>
+        <div style="display:flex;gap:10px;align-items:center">
+          <input type="file" id="chat-attachment-input" style="display:none" accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip,.rar" onchange="onChatAttachmentSelected(this)">
+          <button type="button" class="btn" title="Attach file" style="padding:9px 12px;font-size:16px;line-height:1" onclick="document.getElementById('chat-attachment-input').click()">📎</button>
+          <input id="chat-input" type="text" placeholder="Write a message..." style="flex:1;padding:10px;border:1px solid var(--border);border-radius:8px" onkeydown="if(event.key==='Enter')sendMsg()">
+          <button class="btn btn-g" onclick="sendMsg()">Send</button>
+        </div>
+      </div>
+      `}
     `;
     const scroll = document.getElementById('chat-messages-scroll');
     if(scroll) scroll.scrollTop = scroll.scrollHeight;
+    updateChatAttachmentPreview();
   }
 
   async function sendMsg() {
+    if (activeChatBlocked) {
+      toast('Unavailable', 'This client is not accepting messages from you.');
+      return;
+    }
     const input = document.getElementById('chat-input');
-    const msg = input.value.trim();
-    if(!msg || !activeChatId) return;
+    const msg = input?.value?.trim() ?? '';
+    const file = pendingChatAttachment;
+    if((!msg && !file) || !activeChatId) return;
 
     const chatMessagesScroll = document.getElementById('chat-messages-scroll');
     const tempId = 'temp-' + Date.now();
+    const attachPreview = file
+      ? `<span style="display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:8px 12px;background:rgba(255,255,255,.18);border-radius:8px;font-size:12px">📎 ${escapeChatHtml(file.name)}</span>`
+      : '';
     
     // Append immediately for snappy feel
     const myMsgHtml = `
       <div style="display:flex;gap:10px;flex-direction:row-reverse" id="${tempId}">
         <div class="av" style="width:30px;height:30px;font-size:10px;background:var(--g);color:white;flex-shrink:0;display:flex;align-items:center;justify-content:center;border-radius:50%">Me</div>
         <div style="max-width:75%;text-align:right">
-          <div style="background:var(--g);color:white;border-radius:12px;padding:10px 15px;font-size:13.5px;box-shadow:0 1px 2px rgba(0,0,0,.05);text-align:left">${msg}</div>
+          <div style="background:var(--g);color:white;border-radius:12px;padding:10px 15px;font-size:13.5px;box-shadow:0 1px 2px rgba(0,0,0,.05);text-align:left">${msg ? escapeChatHtml(msg) : ''}${attachPreview}</div>
           <div style="font-size:11px;color:var(--muted);margin-top:4px">Sending...</div>
         </div>
       </div>
@@ -2707,12 +2882,15 @@
     chatMessagesScroll.scrollTop = chatMessagesScroll.scrollHeight;
 
     input.value = '';
+    const sentFile = file;
+    clearChatAttachment();
     try {
       const formData = new FormData();
       formData.append('receiver_id', activeChatId);
       formData.append('message', msg);
+      if (sentFile) formData.append('attachment', sentFile);
       
-      const response = await fetch(`${BASE_URL}/actions/send_message.php`, {
+      const response = await fetch(`${BASE_URL}actions/send_message.php`, {
         method: 'POST',
         body: formData
       });
@@ -2720,35 +2898,201 @@
       if(result.success) {
         const tempMsg = document.getElementById(tempId);
         if(tempMsg) {
-          tempMsg.querySelector('div[style*="margin-top:4px"]').innerText = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+          if (result.message_id) tempMsg.setAttribute('data-message-id', result.message_id);
+          const timeEl = tempMsg.querySelector('div[style*="margin-top:4px"]');
+          if (timeEl) timeEl.innerText = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+          if (result.attachment && result.message_id) {
+            const bubble = tempMsg.querySelector('div[style*="box-shadow"]');
+            if (bubble) {
+              const link = document.createElement('a');
+              link.href = messageAttachmentUrl(result.message_id);
+              link.target = '_blank';
+              link.rel = 'noopener noreferrer';
+              link.style.cssText = 'display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:8px 12px;background:rgba(255,255,255,.18);border-radius:8px;color:#fff;font-size:12px;font-weight:600;text-decoration:none';
+              link.textContent = '📎 ' + (result.attachment.name || 'Attachment');
+              if (!msg) bubble.innerHTML = '';
+              bubble.appendChild(link);
+            }
+          }
         }
+      } else {
+        toast('Error', result.error || 'Failed to send message');
+        document.getElementById(tempId)?.remove();
       }
     } catch(err) {
       toast('Error', 'Failed to send message');
+      document.getElementById(tempId)?.remove();
     }
   }
 
-  // Polling for new messages
+  // Polling for new messages in the open conversation
   let chatPollInterval = null;
-  function startChatPolling(otherId, name, initials, avatar = '') {
-    if(chatPollInterval) clearInterval(chatPollInterval);
-    chatPollInterval = setInterval(async () => {
-      if(activeChatId !== otherId || document.getElementById('page-messages').style.display === 'none') {
+  async function pollActiveChat(otherId, name, initials, avatar) {
+    if (activeChatId !== otherId || !isMessagesPageActive()) {
+      if (chatPollInterval) {
         clearInterval(chatPollInterval);
+        chatPollInterval = null;
+      }
+      return;
+    }
+    try {
+      const response = await fetch(`${BASE_URL}actions/get_messages.php?with=${otherId}`);
+      const result = await response.json();
+      if (!result.success) return;
+
+      activeChatBlocked = !!result.blocked;
+      if (activeChatBlocked) {
+        if (chatPollInterval) {
+          clearInterval(chatPollInterval);
+          chatPollInterval = null;
+        }
+        renderChatWindow(name, initials, result.messages, avatar);
         return;
       }
-      try {
-        const response = await fetch(`${BASE_URL}/actions/get_messages.php?with=${otherId}`);
-        const result = await response.json();
-        if(result.success) {
-          const currentCount = document.querySelectorAll('#chat-messages-scroll > div').length;
-          if(result.messages.length > currentCount) {
-            renderChatWindow(name, initials, result.messages, avatar);
-          }
-        }
-      } catch(e) {}
-    }, 5000);
+      if (chatHasNewMessages(result.messages)) {
+        renderChatWindow(name, initials, result.messages, avatar);
+      }
+    } catch (e) {}
   }
+
+  function startChatPolling(otherId, name, initials, avatar = '') {
+    if (chatPollInterval) clearInterval(chatPollInterval);
+    pollActiveChat(otherId, name, initials, avatar);
+    chatPollInterval = setInterval(() => pollActiveChat(otherId, name, initials, avatar), CHAT_POLL_MS);
+  }
+
+  let conversationsPollInterval = null;
+
+  function conversationInitials(name) {
+    const parts = String(name || '').trim().split(/\s+/);
+    return (parts[0]?.[0] || '?').toUpperCase() + (parts[1]?.[0] || '').toUpperCase();
+  }
+
+  function refreshConversationsList(conversations) {
+    const list = document.getElementById('conversations-list');
+    if (!list) return;
+
+    if (!conversations.length) {
+      list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);font-size:13px">No conversations yet.</div>';
+      return;
+    }
+
+    const currentUserId = <?php echo (int)($user['id'] ?? 0); ?>;
+    list.innerHTML = conversations.map(c => {
+      const initials = conversationInitials(c.other_name);
+      const isUnread = (parseInt(c.is_read, 10) === 0 && parseInt(c.sender_id, 10) !== currentUserId);
+      const time = c.last_time ? new Date(c.last_time.replace(' ', 'T')).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+      const safeName = escapeChatHtml(c.other_name);
+      const safeMsg = escapeChatHtml(c.last_message || '');
+      const avatar = c.other_avatar || '';
+      const avatarArg = avatar.replace(/'/g, "\\'");
+      return `
+        <div class="msg-item${isUnread ? ' unread' : ''}${activeChatId == c.other_id ? ' active' : ''}" style="border-radius:0;margin:0;padding:12px 14px;display:flex;gap:12px;align-items:center;border-bottom:1px solid var(--border);cursor:pointer;${activeChatId == c.other_id ? 'background:var(--gl)' : ''}" onclick="loadChat(${c.other_id}, '${String(c.other_name).replace(/'/g, "\\'")}', '${initials}', this, '${avatarArg}')">
+          <div class="av" style="width:40px;height:40px;position:relative;flex-shrink:0;display:flex;align-items:center;justify-content:center;border-radius:50%">
+            ${avatar ? `<img src="${getAvatarUrl(avatar)}" style="width:100%;height:100%;border-radius:50%;object-fit:cover" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div style="display:none;background:var(--gl);color:var(--forest);width:100%;height:100%;align-items:center;justify-content:center;border-radius:50%;font-weight:bold;font-size:13px">${initials}</div>` :
+            `<div style="background:var(--gl);color:var(--forest);width:100%;height:100%;display:flex;align-items:center;justify-content:center;border-radius:50%;font-weight:bold;font-size:13px">${initials}</div>`}
+          </div>
+          <div class="msg-meta" style="flex:1;min-width:0">
+            <div class="msg-name" style="display:flex;justify-content:space-between;font-weight:700;font-size:13.5px;color:var(--dark)">${safeName}<span class="msg-time" style="font-size:11px;color:var(--muted);font-weight:400">${time}</span></div>
+            <div class="msg-text" style="font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px">${safeMsg}</div>
+          </div>
+          ${isUnread ? '<div class="msg-dot" style="width:8px;height:8px;background:var(--g);border-radius:50%;flex-shrink:0"></div>' : ''}
+        </div>
+      `;
+    }).join('');
+  }
+
+  async function pollConversationsList() {
+    if (!isMessagesPageActive()) {
+      stopConversationsPolling();
+      return;
+    }
+    try {
+      const response = await fetch(`${BASE_URL}actions/get_conversations.php`);
+      const result = await response.json();
+      if (result.success && Array.isArray(result.conversations)) {
+        refreshConversationsList(result.conversations);
+      }
+    } catch (e) {}
+  }
+
+  function startConversationsPolling() {
+    if (conversationsPollInterval) clearInterval(conversationsPollInterval);
+    pollConversationsList();
+    conversationsPollInterval = setInterval(pollConversationsList, CONVERSATIONS_POLL_MS);
+  }
+
+  function stopConversationsPolling() {
+    if (conversationsPollInterval) {
+      clearInterval(conversationsPollInterval);
+      conversationsPollInterval = null;
+    }
+  }
+
+  let unreadBadgePollInterval = null;
+  const UNREAD_BADGE_POLL_MS = 3000;
+
+  function setUnreadBadgeDisplay(badgeEl, count) {
+    if (!badgeEl) return;
+    if (count > 0) {
+      badgeEl.textContent = String(count);
+      badgeEl.style.display = '';
+    } else {
+      badgeEl.style.display = 'none';
+    }
+  }
+
+  function updateUnreadMessagesBadges(unreadCount) {
+    // Desktop: sidebar badge
+    const navMessages = document.getElementById('nav-messages');
+    if (navMessages) {
+      let badge = navMessages.querySelector('.sb-badge');
+      if (!badge && unreadCount > 0) {
+        badge = document.createElement('span');
+        badge.className = 'sb-badge';
+        navMessages.appendChild(badge);
+      }
+      setUnreadBadgeDisplay(badge, unreadCount);
+    }
+
+    // Mobile: bottom nav badge
+    const mobMessagesBtn = Array.from(document.querySelectorAll('.mob-nav-item')).find(btn => {
+      const onclick = btn.getAttribute('onclick') || '';
+      return onclick.includes("showPage('messages'");
+    });
+    if (mobMessagesBtn) {
+      let badge = mobMessagesBtn.querySelector('.mob-nav-badge');
+      if (!badge && unreadCount > 0) {
+        badge = document.createElement('div');
+        badge.className = 'mob-nav-badge';
+        mobMessagesBtn.appendChild(badge);
+      }
+      setUnreadBadgeDisplay(badge, unreadCount);
+    }
+  }
+
+  async function pollUnreadMessagesBadge() {
+    try {
+      const response = await fetch(`${BASE_URL}actions/get_unread_messages_count.php`, { method: 'GET' });
+      const result = await response.json();
+      if (result && result.success) {
+        updateUnreadMessagesBadges(result.unread_count || 0);
+      }
+    } catch (e) {
+      // Ignore polling errors; next tick may succeed.
+    }
+  }
+
+  function startUnreadMessagesBadgePolling() {
+    if (unreadBadgePollInterval) clearInterval(unreadBadgePollInterval);
+    pollUnreadMessagesBadge();
+    unreadBadgePollInterval = setInterval(pollUnreadMessagesBadge, UNREAD_BADGE_POLL_MS);
+  }
+
+  window.loadChat = loadChat;
+  window.startConversationsPolling = startConversationsPolling;
+  window.stopConversationsPolling = stopConversationsPolling;
+  window.startUnreadMessagesBadgePolling = startUnreadMessagesBadgePolling;
 
   function filterConversations(query) {
     const q = query.toLowerCase();
@@ -2776,13 +3120,15 @@
       window.history.replaceState({}, document.title, newUrl);
     }
     if (params.has('job_id')) {
-      const jobId = parseInt(params.get('job_id'), 10);
-      if (jobId > 0) {
-        setTimeout(() => {
-          if (typeof openJobDetail === 'function') {
-            openJobDetail(jobId);
-          }
-        }, 400);
+      const raw = params.get('job_id');
+      let jobId = parseInt(raw, 10);
+      if (!jobId && typeof decodeJobId === 'function') {
+        jobId = decodeJobId(raw);
+      }
+      if (jobId > 0 && typeof jobPageUrl === 'function') {
+        const apply = params.get('apply') === '1';
+        window.location.replace(jobPageUrl(jobId, apply));
+        return;
       }
     }
     
@@ -2815,6 +3161,9 @@
     // Add pagination for freelancer reports page
     applyPagination('#page-reports .desk-only table', 'tbody tr', 10);
     applyPagination('#page-reports .mob-only', '.tx-item', 10);
+
+    // Live unread badge (Message menu) across all pages.
+    if (typeof startUnreadMessagesBadgePolling === 'function') startUnreadMessagesBadgePolling();
   }
 
   if (document.readyState === 'loading') {
@@ -2828,7 +3177,7 @@
     showPage(hash || 'home');
   });
 async function requestMilestone(milestoneId, btn) {
-    if (!confirm('Are you sure you want to request completion for this milestone?')) return;
+    if (!(await remoConfirm('The client will review your milestone completion request.', 'Request milestone completion?'))) return;
     
     const originalText = btn.innerText;
     btn.disabled = true;
@@ -2867,35 +3216,7 @@ async function requestMilestone(milestoneId, btn) {
 }
 
 async function releasePendingPayment(paymentId, btn) {
-    if (!confirm('Are you sure you want to clear this hold and move funds to your available balance?')) return;
-    
-    const originalText = btn.innerText;
-    btn.disabled = true;
-    btn.innerText = 'Clearing...';
-
-    try {
-        const res = await fetch(BASE_URL + 'freelancer/api/clear-hold.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ payment_id: paymentId })
-        });
-        const data = await res.json();
-        if (data.success) {
-            toast('Success! 🎉', 'Hold cleared successfully.');
-            // Reload page to reflect stats and available balance
-            setTimeout(() => {
-                location.reload();
-            }, 1000);
-        } else {
-            toast('Error', data.message);
-            btn.disabled = false;
-            btn.innerText = originalText;
-        }
-    } catch (err) {
-        toast('Error', 'Action failed');
-        btn.disabled = false;
-        btn.innerText = originalText;
-    }
+    toast('Awaiting approval', 'Payment holds are released by an administrator. You will be notified when funds are available.');
 }
 
 // Dedicated Connects Page Helpers
@@ -3572,10 +3893,10 @@ window.openDisputeModal = function(contractId) {
   openModal('file-dispute', contractId);
 };
 
-window.submitDispute = function(contractId) {
+window.submitDispute = async function(contractId) {
   const reason = document.getElementById('dispute-reason').value.trim();
   if (!reason) {
-    alert('Please enter a reason for the dispute.');
+    remoAlert('Please enter a reason for the dispute.', 'Dispute');
     return;
   }
 
@@ -3600,7 +3921,7 @@ window.submitDispute = function(contractId) {
       closeModal();
       setTimeout(() => location.reload(), 1500);
     } else {
-      alert(data.error || 'Failed to file dispute');
+      remoAlert(data.error || 'Failed to file dispute', 'Error');
       if (btn) {
         btn.disabled = false;
         btn.innerText = 'Raise Dispute ⚠️';
@@ -3609,7 +3930,7 @@ window.submitDispute = function(contractId) {
   })
   .catch(err => {
     console.error(err);
-    alert('An error occurred. Check console.');
+    remoAlert('An error occurred. Please try again.', 'Error');
     if (btn) {
       btn.disabled = false;
       btn.innerText = 'Raise Dispute ⚠️';

@@ -95,7 +95,7 @@ try {
     ]);
 
     $db->commit();
-    echo json_encode(['success' => true, 'message' => 'Milestone approved! Payments released to security hold (Pending).']);
+    echo json_encode(['success' => true, 'message' => 'Milestone approved! Payment is in processing until an administrator releases it to the freelancer balance.']);
 } catch (Exception $e) {
     if ($db->inTransaction()) $db->rollBack();
     echo json_encode(['success' => false, 'message' => 'Error: ' . $e->getMessage()]);

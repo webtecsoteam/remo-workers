@@ -20,8 +20,8 @@ $allJobs = [];
 try {
     $allJobsStmt = $db->query("
         SELECT j.*, u.name as client_name, u.country as client_country, u.is_verified as client_verified,
-        COALESCE((SELECT SUM(amount) FROM payments WHERE payer_id = j.client_id AND status = 'completed'), 0) as client_total_spent,
-        COALESCE((SELECT COUNT(*) FROM contracts WHERE client_id = j.client_id), 0) as client_hires,
+        COALESCE((SELECT SUM(amount) FROM payments WHERE payer_id = j.client_id AND status = 'completed'), 0) + COALESCE(u.admin_spent_offset, 0) as client_total_spent,
+        COALESCE((SELECT COUNT(*) FROM contracts WHERE client_id = j.client_id), 0) + COALESCE(u.admin_hires_offset, 0) as client_hires,
         COALESCE((SELECT COUNT(*) FROM proposals WHERE job_id = j.id), 0) as proposal_count,
         COALESCE((SELECT AVG(rating) FROM reviews WHERE reviewee_id = j.client_id), 0.0) as client_rating,
         COALESCE((SELECT COUNT(*) FROM contracts WHERE job_id = j.id), 0) as project_hires

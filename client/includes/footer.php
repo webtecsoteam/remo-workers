@@ -4,6 +4,10 @@
 <script>
   let availableBalance = <?php echo (float) ($user['balance'] ?? 0); ?>;
   const CONTRACTS = <?php echo json_encode($allContracts ?? [], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?: '[]'; ?>;
+  const BLOCKED_FREELANCER_IDS = <?php echo json_encode(array_map('intval', array_column(isset($blockedFreelancers) ? $blockedFreelancers : [], 'id'))); ?>;
+  const CLIENT_USER_ID = <?php echo (int) $user['id']; ?>;
+  let activeChatBlocked = false;
+  let activeChatBlockedByMe = false;
   let clientFeePercent = <?php echo getPlatformSetting('client_fee_fixed', 0); ?>;
   let selectedCVType = null;
   let selectedCVFile = null;
@@ -195,18 +199,6 @@
         <label>Category</label>
         <select id="pj-cat" onchange="updateSubcats()">
           <option value="">— Select a category —</option>
-          <option value="Accounting & Consulting">Accounting & Consulting</option>
-          <option value="Admin Support">Admin Support</option>
-          <option value="Customer Service">Customer Service</option>
-          <option value="Data Science & Analytics">Data Science & Analytics</option>
-          <option value="Design & Creative">Design & Creative</option>
-          <option value="Engineering & Architecture">Engineering & Architecture</option>
-          <option value="IT & Networking">IT & Networking</option>
-          <option value="Legal">Legal</option>
-          <option value="Sales & Marketing">Sales & Marketing</option>
-          <option value="Translation">Translation</option>
-          <option value="Web, Mobile & Software Dev">Web, Mobile & Software Dev</option>
-          <option value="Writing">Writing</option>
         </select>
       </div>
 
@@ -595,6 +587,7 @@
   };
 
   function bindPostJobModal() {
+    loadActiveJobCategories();
     const btn = document.getElementById('pj-submit-btn');
     const btnText = document.getElementById('pj-btn-text');
     if (btnText) btnText.innerText = 'Post Job →';
@@ -649,8 +642,52 @@
   window.__openModalImpl = openModal;
   window.openModal = openModal;
 
+  function encodeJobId(id) {
+    const xor = parseInt(id, 10) ^ 958273;
+    const str = String(xor);
+    const encoded = btoa(str);
+    return encoded.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+
+  function getPublicJobUrl(jobId) {
+    const base = (typeof BASE_URL === 'string' ? BASE_URL : '/').replace(/\/?$/, '/');
+    return base + 'j/' + encodeJobId(jobId);
+  }
+
+  function copyJobShareLink(jobId) {
+    const url = getPublicJobUrl(jobId);
+    const done = function() {
+      toast('Link copied', 'Job link copied to clipboard. Share it with freelancers or anyone.');
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(done).catch(function() {
+        fallbackCopyJobLink(url, done);
+      });
+    } else {
+      fallbackCopyJobLink(url, done);
+    }
+  }
+
+  function fallbackCopyJobLink(text, onSuccess) {
+    const input = document.createElement('input');
+    input.value = text;
+    input.setAttribute('readonly', '');
+    input.style.position = 'fixed';
+    input.style.left = '-9999px';
+    document.body.appendChild(input);
+    input.select();
+    try {
+      document.execCommand('copy');
+      if (onSuccess) onSuccess();
+    } catch (e) {
+      toast('Copy link', text);
+    }
+    document.body.removeChild(input);
+  }
+
   function viewJobDetails(job) {
     currentJob = job;
+    const shareUrl = getPublicJobUrl(job.id);
 
     let actionButtons = '';
     if (job.status === 'open') {
@@ -694,7 +731,16 @@
         </div>
       </div>
       <div style="font-size:13px;color:#374151;line-height:1.7;margin-bottom:14px">${job.description}</div>
-      <div style="display:flex;gap:8px;margin-top:16px;margin-bottom:24px">
+      <div style="border-top:1.5px solid var(--uw-border);padding-top:16px;margin-bottom:20px">
+        <div style="font-size:13px;font-weight:700;margin-bottom:6px">Share job link</div>
+        <p style="font-size:12px;color:var(--uw-gray);margin:0 0 10px;line-height:1.5">Copy this link to share the public job page. Anyone can view the posting; freelancers can sign in to apply.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <input type="text" readonly value="${shareUrl}" id="job-share-url-${job.id}" style="flex:1;min-width:180px;padding:9px 12px;font-size:12px;border:1.5px solid var(--uw-border);border-radius:8px;background:var(--uw-bg);color:var(--uw-black);font-family:inherit" onclick="this.select()">
+          <button type="button" class="btn btn-g btn-sm" onclick="copyJobShareLink(${job.id})">Copy link</button>
+          <a href="${shareUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-w btn-sm" style="text-decoration:none">View page</a>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:16px;margin-bottom:24px;flex-wrap:wrap">
         ${actionButtons}
         ${deleteButton}
       </div>
@@ -733,7 +779,7 @@
       actionButtons = `
       <button class="btn btn-w" style="flex:1;justify-content:center;padding:12px" onclick="closeModal();showChatWithFreelancer(${p.freelancer_id}, '${p.freelancer_name.replace(/'/g, "\\'")}', '${p.freelancer_avatar || ''}')">💬 Message</button>
       <button class="btn btn-o" style="flex:1;justify-content:center;padding:12px" onclick="closeModal();updateProposalStatus(${p.id}, '${p.status === 'shortlisted' ? 'pending' : 'shortlisted'}')">${p.status === 'shortlisted' ? 'Unshortlist' : 'Shortlist'}</button>
-      <button class="btn btn-g" style="flex:1.5;justify-content:center;padding:12px" onclick="closeModal();hireFreelancer(${p.id}, ${p.bid_amount})">Hire Freelancer →</button>
+      <button class="btn btn-g" style="flex:1.5;justify-content:center;padding:12px" onclick="closeModal();hireFreelancer(${p.id}, ${p.bid_amount}, '${(p.budget_type || 'fixed').replace(/'/g, "\\'")}')">Hire Freelancer →</button>
     `;
     }
 
@@ -808,7 +854,7 @@
   }
 
   async function deleteJob(jobId) {
-    if (!confirm("Are you sure you want to completely delete this job post? This will also remove any received proposals and cannot be undone.")) {
+    if (!(await remoConfirm('This will also remove any received proposals and cannot be undone.', 'Delete this job post?', { danger: true, confirmLabel: 'Delete' }))) {
       return;
     }
     toast('Deleting...', 'Removing job post...');
@@ -833,10 +879,11 @@
     }
   }
 
-  function editJob() {
+  async function editJob() {
     const job = currentJob;
     if (!job) return;
     openModal('post-job');
+    await loadActiveJobCategories();
     window.isEditingJobId = job.id;
     document.getElementById('mh-title').innerText = 'Edit Job Post';
 
@@ -1023,6 +1070,57 @@
   let activeChatName = '';
   let activeChatInitials = '';
   let activeChatAvatar = '';
+  let pendingChatAttachment = null;
+
+  function escapeChatHtml(text) {
+    const el = document.createElement('div');
+    el.textContent = text == null ? '' : String(text);
+    return el.innerHTML;
+  }
+
+  function messageAttachmentUrl(messageId) {
+    const base = (typeof BASE_URL === 'string' ? BASE_URL : '/').replace(/\/?$/, '/');
+    return base + 'actions/download_message_attachment.php?id=' + messageId;
+  }
+
+  function renderMessageAttachmentHtml(m, isMe) {
+    if (!m.attachment_path && !m.attachment_name) return '';
+    const name = escapeChatHtml(m.attachment_name || 'Attachment');
+    const url = messageAttachmentUrl(m.id);
+    const style = isMe
+      ? 'display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:8px 12px;background:rgba(255,255,255,.18);border-radius:8px;color:#fff;font-size:12px;font-weight:600;text-decoration:none'
+      : 'display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:8px 12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;color:#15803d;font-size:12px;font-weight:600;text-decoration:none';
+    return `<a href="${url}" class="msg-attachment-link" style="${style}" target="_blank" rel="noopener noreferrer">📎 ${name}</a>`;
+  }
+
+  function onChatAttachmentSelected(input) {
+    const file = input.files && input.files[0];
+    if (!file) return;
+    pendingChatAttachment = file;
+    updateChatAttachmentPreview();
+  }
+
+  function updateChatAttachmentPreview() {
+    const el = document.getElementById('chat-attachment-preview');
+    if (!el) return;
+    if (!pendingChatAttachment) {
+      el.style.display = 'none';
+      el.innerHTML = '';
+      return;
+    }
+    el.style.display = 'flex';
+    el.innerHTML = `
+      <span style="font-size:12px;color:var(--uw-gray2);flex:1">📎 ${escapeChatHtml(pendingChatAttachment.name)}</span>
+      <button type="button" class="btn btn-sm" style="padding:2px 8px;font-size:11px" onclick="clearChatAttachment()">Remove</button>
+    `;
+  }
+
+  function clearChatAttachment() {
+    pendingChatAttachment = null;
+    const input = document.getElementById('chat-attachment-input');
+    if (input) input.value = '';
+    updateChatAttachmentPreview();
+  }
 
   async function loadChat(otherId, name, initials, el, avatar = '') {
     activeChatId = otherId;
@@ -1047,8 +1145,13 @@
       const result = await response.json();
 
       if (result.success) {
+        activeChatBlocked = !!result.blocked;
+        activeChatBlockedByMe = !!result.blocked_by_me;
         renderChatWindow(name, initials, result.messages, avatar);
-        startChatPolling(otherId, name, initials, avatar);
+        scheduleConversationsRefresh(300);
+        if (!activeChatBlocked) {
+          startChatPolling(otherId, name, initials, avatar);
+        }
       } else {
         chatWindow.innerHTML = `<div style="padding:20px;text-align:center;color:red">${result.error}</div>`;
       }
@@ -1063,8 +1166,8 @@
       const isMe = (m.sender_id != activeChatId);
 
       // Inline rich card for proposed milestones
-      let bubbleContent = m.message;
-      if (!isMe && m.message.startsWith('PROPOSED MILESTONE:')) {
+      let bubbleContent = m.message || '';
+      if (!isMe && bubbleContent.startsWith('PROPOSED MILESTONE:')) {
         bubbleContent = `
         <div style="margin-bottom:10px">${m.message}</div>
         <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:12px; margin-top:8px; display:flex; flex-direction:column; gap:8px; align-items:flex-start">
@@ -1077,7 +1180,7 @@
           <button class="btn btn-g btn-sm" onclick="showPage('contracts')" style="padding:4px 10px; font-size:11px; margin-top:4px">Review & Fund Milestone</button>
         </div>
       `;
-      } else if (isMe && m.message.startsWith('CREATED MILESTONE:')) {
+      } else if (isMe && bubbleContent.startsWith('CREATED MILESTONE:')) {
         bubbleContent = `
         <div style="margin-bottom:10px">${m.message}</div>
         <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:12px; margin-top:8px; display:flex; flex-direction:column; gap:8px; align-items:flex-start">
@@ -1100,7 +1203,7 @@
             `<div style="background:var(--uw-green-light);color:var(--uw-green);width:100%;height:100%;display:flex;align-items:center;justify-content:center;border-radius:50%">${initials}</div>`)}
         </div>
         <div style="max-width:75%;${isMe ? 'text-align:right' : ''}">
-          <div style="background:${isMe ? 'var(--uw-green)' : 'var(--uw-bg)'};color:${isMe ? 'white' : 'var(--uw-dark)'};border:${isMe ? 'none' : '1.5px solid var(--uw-border)'};border-radius:${isMe ? '12px 2px 12px 12px' : '2px 12px 12px 12px'};padding:10px 14px;font-size:13px;line-height:1.6;text-align:left">${bubbleContent}</div>
+          <div style="background:${isMe ? 'var(--uw-green)' : 'var(--uw-bg)'};color:${isMe ? 'white' : 'var(--uw-dark)'};border:${isMe ? 'none' : '1.5px solid var(--uw-border)'};border-radius:${isMe ? '12px 2px 12px 12px' : '2px 12px 12px 12px'};padding:10px 14px;font-size:13px;line-height:1.6;text-align:left">${bubbleContent}${renderMessageAttachmentHtml(m, isMe)}</div>
           <div style="font-size:11px;color:var(--uw-gray2);margin-top:4px">${new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
         </div>
       </div>
@@ -1111,11 +1214,38 @@
       ? CONTRACTS.some(c => c.freelancer_id == activeChatId && (c.status === 'active' || c.status === 'paused' || c.status === 'completed'))
       : false;
       
-    const milestoneBtn = hasContract ? `
+    const milestoneBtn = hasContract && !activeChatBlocked ? `
       <button class="btn btn-g btn-sm" onclick="openModal('add-milestone', ${activeChatId})" style="padding:6px 12px;font-size:12.5px;display:flex;align-items:center;gap:6px;margin-left:auto">
         <span>➕</span> Add Milestone
       </button>
     ` : '';
+
+    const blockBtn = !activeChatBlockedByMe ? `
+      <button type="button" id="chat-block-btn" class="btn btn-sm" title="Block freelancer" style="padding:6px 12px;font-size:12px;color:#991b1b;border-color:#fecaca">Block</button>
+    ` : `
+      <button type="button" id="chat-unblock-btn" class="btn btn-sm" style="padding:6px 12px;font-size:12px">Unblock</button>
+    `;
+
+    const composerHtml = activeChatBlocked ? `
+    <div style="padding:14px 18px;border-top:1px solid var(--uw-border);background:#fafafa">
+      <div style="font-size:13px;color:var(--uw-gray2);text-align:center;line-height:1.5">
+        ${activeChatBlockedByMe
+          ? 'You blocked this freelancer. They cannot message you until you unblock them.'
+          : 'Messaging is unavailable for this conversation.'}
+      </div>
+      ${activeChatBlockedByMe ? `<div style="text-align:center;margin-top:10px"><button type="button" id="chat-unblock-composer-btn" class="btn btn-g btn-sm">Unblock &amp; chat again</button></div>` : ''}
+    </div>
+    ` : `
+    <div style="padding:14px 18px;border-top:1px solid var(--uw-border)">
+      <div id="chat-attachment-preview" style="display:none;align-items:center;gap:8px;margin-bottom:8px;padding:8px 10px;background:var(--uw-bg);border:1px solid var(--uw-border);border-radius:8px"></div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <input type="file" id="chat-attachment-input" style="display:none" accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip,.rar" onchange="onChatAttachmentSelected(this)">
+        <button type="button" class="btn" title="Attach file" style="padding:9px 12px;font-size:16px;line-height:1" onclick="document.getElementById('chat-attachment-input').click()">📎</button>
+        <input id="chat-input" style="flex:1;padding:9px 14px;border:1.5px solid var(--uw-border);border-radius:50px;font-size:13px;font-family:inherit;outline:none" placeholder="Type a message…" onkeydown="if(event.key==='Enter')sendMsg()">
+        <button class="btn btn-g" onclick="sendMsg()">Send</button>
+      </div>
+    </div>
+    `;
 
     chatWindow.innerHTML = `
     <div style="padding:14px 18px;border-bottom:1px solid var(--uw-border);display:flex;align-items:center;gap:12px;justify-content:space-between">
@@ -1124,34 +1254,184 @@
           ${avatar ? `<div class="av" style="position:relative;width:100%;height:100%"><img src="${getAvatarUrl(avatar)}" style="width:100%;height:100%;border-radius:50%;object-fit:cover" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div style="display:none;background:var(--uw-green-light);color:var(--uw-green);width:100%;height:100%;align-items:center;justify-content:center;border-radius:50%;font-weight:700">${initials}</div></div>` :
           `<div style="background:var(--uw-green-light);color:var(--uw-green);width:100%;height:100%;display:flex;align-items:center;justify-content:center;border-radius:50%">${initials}</div>`}
         </div>
-        <div><div style="font-weight:700;font-size:14px">${name}</div><div style="font-size:12px;color:var(--uw-green)">Online</div></div>
+        <div><div style="font-weight:700;font-size:14px">${name}</div><div style="font-size:12px;color:${activeChatBlockedByMe ? 'var(--uw-gray)' : 'var(--uw-green)'}">${activeChatBlockedByMe ? 'Blocked' : 'Online'}</div></div>
       </div>
-      ${milestoneBtn}
+      <div style="display:flex;align-items:center;gap:8px">${blockBtn}${milestoneBtn}</div>
     </div>
     <div style="flex:1;padding:18px;overflow-y:auto;display:flex;flex-direction:column;gap:12px" id="chat-messages-scroll">${msgHtml}</div>
-    <div style="padding:14px 18px;border-top:1px solid var(--uw-border);display:flex;gap:10px">
-      <input id="chat-input" style="flex:1;padding:9px 14px;border:1.5px solid var(--uw-border);border-radius:50px;font-size:13px;font-family:inherit;outline:none" placeholder="Type a message…" onkeydown="if(event.key==='Enter')sendMsg()">
-      <button class="btn btn-g" onclick="sendMsg()">Send</button>
-    </div>
+    ${composerHtml}
   `;
     const scroll = document.getElementById('chat-messages-scroll');
     scroll.scrollTop = scroll.scrollHeight;
+    updateChatAttachmentPreview();
+    bindChatBlockButtons(activeChatId, name);
+  }
+
+  function bindChatBlockButtons(freelancerId, name) {
+    const blockBtnEl = document.getElementById('chat-block-btn');
+    if (blockBtnEl) {
+      blockBtnEl.onclick = () => blockFreelancer(freelancerId, name);
+    }
+    const unblockHeaderBtn = document.getElementById('chat-unblock-btn');
+    if (unblockHeaderBtn) {
+      unblockHeaderBtn.onclick = () => unblockFreelancer(freelancerId, name);
+    }
+    const unblockComposerBtn = document.getElementById('chat-unblock-composer-btn');
+    if (unblockComposerBtn) {
+      unblockComposerBtn.onclick = () => unblockFreelancer(freelancerId, name);
+    }
+  }
+
+  async function blockFreelancer(freelancerId, name) {
+    if (!freelancerId) return;
+    if (!(await remoConfirm(`They will not be able to message you.`, `Block ${name}?`))) return;
+
+    try {
+      const res = await fetch(BASE_URL + 'client/api/block-freelancer.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ freelancer_id: freelancerId })
+      });
+      const data = await res.json();
+      if (!data.success) {
+        toast('Error', data.message || 'Could not block freelancer.');
+        return;
+      }
+      toast('Blocked', data.message || 'Freelancer blocked.');
+      if (!BLOCKED_FREELANCER_IDS.includes(freelancerId)) {
+        BLOCKED_FREELANCER_IDS.push(freelancerId);
+      }
+      removeConversationFromList(freelancerId);
+      appendBlockedListItem(freelancerId, name);
+      activeChatBlocked = true;
+      activeChatBlockedByMe = true;
+      if (activeChatId === freelancerId) {
+        if (chatPollInterval) clearInterval(chatPollInterval);
+        const res = await fetch(`${BASE_URL}/actions/get_messages.php?with=${freelancerId}`);
+        const payload = await res.json();
+        if (payload.success) {
+          renderChatWindow(activeChatName, activeChatInitials, payload.messages, activeChatAvatar);
+        }
+      }
+    } catch (e) {
+      toast('Error', 'Could not block freelancer.');
+    }
+  }
+
+  async function unblockFreelancer(freelancerId, name, btnEl) {
+    if (!freelancerId) return;
+
+    try {
+      const res = await fetch(BASE_URL + 'client/api/unblock-freelancer.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ freelancer_id: freelancerId })
+      });
+      const data = await res.json();
+      if (!data.success) {
+        toast('Error', data.message || 'Could not unblock freelancer.');
+        return;
+      }
+      toast('Unblocked', data.message || 'You can chat again.');
+      const idx = BLOCKED_FREELANCER_IDS.indexOf(freelancerId);
+      if (idx >= 0) BLOCKED_FREELANCER_IDS.splice(idx, 1);
+      removeBlockedListItem(freelancerId, btnEl);
+      activeChatBlocked = false;
+      activeChatBlockedByMe = false;
+      if (activeChatId === freelancerId) {
+        loadChat(freelancerId, activeChatName || name, activeChatInitials, null, activeChatAvatar);
+      }
+    } catch (e) {
+      toast('Error', 'Could not unblock freelancer.');
+    }
+  }
+
+  window.blockFreelancer = blockFreelancer;
+  window.unblockFreelancer = unblockFreelancer;
+
+  function removeConversationFromList(freelancerId) {
+    const list = document.getElementById('conversations-list');
+    if (!list) return;
+    const targetIdStr = String(freelancerId);
+    list.querySelectorAll('.msg-item').forEach(item => {
+      const onclick = item.getAttribute('onclick') || '';
+      const dsId = String(item.dataset?.otherId || '');
+      const onclickFn = item.onclick ? item.onclick.toString() : '';
+      if (
+        dsId === targetIdStr ||
+        onclick.includes(`loadChat(${freelancerId}`) ||
+        onclickFn.includes(targetIdStr)
+      ) {
+        item.remove();
+      }
+    });
+    if (!list.querySelector('.msg-item') && !list.querySelector('.blocked-freelancer-item')) {
+      const empty = document.createElement('div');
+      empty.style.cssText = 'padding:20px;text-align:center;color:var(--uw-gray);font-size:13px';
+      empty.textContent = 'No conversations yet.';
+      list.prepend(empty);
+    }
+  }
+
+  function removeBlockedListItem(freelancerId, btnEl) {
+    const row = btnEl?.closest?.('.blocked-freelancer-item')
+      || document.querySelector(`.blocked-freelancer-item[data-freelancer-id="${freelancerId}"]`);
+    if (row) row.remove();
+    const section = document.getElementById('blocked-freelancers-list');
+    if (section && !section.children.length) {
+      section.closest('div')?.remove();
+    }
+  }
+
+  function appendBlockedListItem(freelancerId, name) {
+    let section = document.getElementById('blocked-freelancers-list');
+    if (!section) {
+      const sidebar = document.querySelector('#page-messages [style*="border-right"]');
+      if (!sidebar) return;
+      const wrap = document.createElement('div');
+      wrap.style.cssText = 'border-top:1px solid var(--uw-border);padding:10px 14px 12px';
+      wrap.innerHTML = '<div style="font-size:11px;font-weight:700;color:var(--uw-gray);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px">Blocked</div><div id="blocked-freelancers-list"></div>';
+      sidebar.appendChild(wrap);
+      section = document.getElementById('blocked-freelancers-list');
+    }
+    const list = document.getElementById('conversations-list');
+    list?.querySelector('div[style*="No conversations"]')?.remove();
+    const initials = (name || '?').split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase();
+    const row = document.createElement('div');
+    row.className = 'blocked-freelancer-item';
+    row.dataset.freelancerId = String(freelancerId);
+    row.style.cssText = 'display:flex;align-items:center;gap:10px;padding:8px 0';
+    row.innerHTML = `
+      <div class="av" style="width:28px;height:28px;flex-shrink:0"><div style="background:#f3f4f6;color:var(--uw-gray);width:100%;height:100%;display:flex;align-items:center;justify-content:center;border-radius:50%;font-weight:bold;font-size:11px">${initials}</div></div>
+      <div style="flex:1;min-width:0"><div style="font-size:12.5px;font-weight:600;color:var(--uw-gray2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeChatHtml(name)}</div></div>
+      <button type="button" class="btn btn-sm" style="font-size:11px;padding:4px 10px;flex-shrink:0">Unblock</button>
+    `;
+    row.querySelector('button').onclick = () => unblockFreelancer(freelancerId, name, row.querySelector('button'));
+    section.appendChild(row);
   }
 
   async function sendMsg() {
+    if (activeChatBlocked) {
+      toast('Blocked', 'Unblock this freelancer to send messages.');
+      return;
+    }
     const input = document.getElementById('chat-input');
-    const msg = input.value.trim();
-    if (!msg || !activeChatId) return;
+    const msg = input?.value?.trim() ?? '';
+    const file = pendingChatAttachment;
+    if ((!msg && !file) || !activeChatId) return;
 
     const chatMessagesScroll = document.getElementById('chat-messages-scroll');
     const tempId = 'temp-' + Date.now();
+    const attachPreview = file
+      ? `<a style="display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:8px 12px;background:rgba(255,255,255,.18);border-radius:8px;color:#fff;font-size:12px">📎 ${escapeChatHtml(file.name)}</a>`
+      : '';
 
     // Append immediately for snappy feel
     const myMsgHtml = `
     <div style="display:flex;gap:10px;flex-direction:row-reverse" id="${tempId}">
       <div class="av" style="width:30px;height:30px;font-size:10px;background:var(--uw-green);color:white;flex-shrink:0">Me</div>
       <div style="max-width:75%;text-align:right">
-        <div style="background:var(--uw-green);color:white;border-radius:12px 2px 12px 12px;padding:10px 14px;font-size:13px;line-height:1.6;text-align:left">${msg}</div>
+        <div style="background:var(--uw-green);color:white;border-radius:12px 2px 12px 12px;padding:10px 14px;font-size:13px;line-height:1.6;text-align:left">${msg ? escapeChatHtml(msg) : ''}${attachPreview}</div>
         <div style="font-size:11px;color:var(--uw-gray2);margin-top:4px">Sending...</div>
       </div>
     </div>
@@ -1160,10 +1440,13 @@
     chatMessagesScroll.scrollTop = chatMessagesScroll.scrollHeight;
 
     input.value = '';
+    const sentFile = file;
+    clearChatAttachment();
     try {
       const formData = new FormData();
       formData.append('receiver_id', activeChatId);
       formData.append('message', msg);
+      if (sentFile) formData.append('attachment', sentFile);
 
       const response = await fetch(`${BASE_URL}/actions/send_message.php`, {
         method: 'POST',
@@ -1173,13 +1456,30 @@
       if (result.success) {
         const tempMsg = document.getElementById(tempId);
         if (tempMsg) {
-          tempMsg.querySelector('div[style*="margin-top:4px"]').innerText = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          const timeEl = tempMsg.querySelector('div[style*="margin-top:4px"]');
+          if (timeEl) timeEl.innerText = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          if (result.attachment && result.message_id) {
+            const bubble = tempMsg.querySelector('div[style*="border-radius:12px 2px"]');
+            if (bubble) {
+              const link = document.createElement('a');
+              link.href = messageAttachmentUrl(result.message_id);
+              link.target = '_blank';
+              link.rel = 'noopener noreferrer';
+              link.style.cssText = 'display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:8px 12px;background:rgba(255,255,255,.18);border-radius:8px;color:#fff;font-size:12px;font-weight:600;text-decoration:none';
+              link.textContent = '📎 ' + (result.attachment.name || 'Attachment');
+              if (!msg) bubble.innerHTML = '';
+              bubble.appendChild(link);
+            }
+          }
         }
+        scheduleConversationsRefresh(300);
       } else {
         toast('Error', result.error || 'Failed to send message');
+        document.getElementById(tempId)?.remove();
       }
     } catch (err) {
       toast('Error', 'Failed to send message');
+      document.getElementById(tempId)?.remove();
     }
   }
 
@@ -1196,7 +1496,12 @@
         const response = await fetch(`${BASE_URL}/actions/get_messages.php?with=${otherId}`);
         const result = await response.json();
         if (result.success) {
-          // Only re-render if message count changed
+          activeChatBlocked = !!result.blocked;
+          activeChatBlockedByMe = !!result.blocked_by_me;
+          if (activeChatBlocked) {
+            clearInterval(chatPollInterval);
+            return;
+          }
           const currentCount = document.querySelectorAll('#chat-messages-scroll > div').length;
           if (result.messages.length > currentCount) {
             renderChatWindow(name, initials, result.messages, avatar);
@@ -1206,12 +1511,186 @@
     }, 5000);
   }
 
+  // Live unread badge (Message menu) across all pages.
+  let unreadBadgePollInterval = null;
+  const UNREAD_BADGE_POLL_MS = 3000;
+
+  function setUnreadBadgeDisplay(badgeEl, count) {
+    if (!badgeEl) return;
+    if (count > 0) {
+      badgeEl.textContent = String(count);
+      badgeEl.style.display = '';
+    } else {
+      badgeEl.style.display = 'none';
+    }
+  }
+
+  function updateUnreadMessagesBadgesClient(unreadCount) {
+    // Desktop: sidebar badge inside the Messages nav item.
+    const messagesItem = Array.from(document.querySelectorAll('.sb-item')).find(el => {
+      const onclick = el.getAttribute('onclick') || '';
+      return onclick.includes("showPage('messages'");
+    });
+    if (messagesItem) {
+      let badge = messagesItem.querySelector('.sb-badge');
+      if (!badge && unreadCount > 0) {
+        badge = document.createElement('span');
+        badge.className = 'sb-badge';
+        messagesItem.appendChild(badge);
+      }
+      setUnreadBadgeDisplay(badge, unreadCount);
+    }
+
+    // Mobile: bottom nav badge next to the Messages icon.
+    const mobMessagesBtn = document.getElementById('mbn-messages');
+    if (mobMessagesBtn) {
+      let badge = mobMessagesBtn.querySelector('.mob-nav-badge');
+      if (!badge && unreadCount > 0) {
+        badge = document.createElement('div');
+        badge.className = 'mob-nav-badge';
+        mobMessagesBtn.appendChild(badge);
+      }
+      setUnreadBadgeDisplay(badge, unreadCount);
+    }
+  }
+
+  async function pollUnreadMessagesBadgeClient() {
+    try {
+      const response = await fetch(`${BASE_URL}actions/get_unread_messages_count.php`, { method: 'GET' });
+      const result = await response.json();
+      if (result && result.success) {
+        updateUnreadMessagesBadgesClient(result.unread_count || 0);
+      }
+    } catch (e) {
+      // Ignore polling errors; next tick may succeed.
+    }
+  }
+
+  function startUnreadMessagesBadgePolling() {
+    if (unreadBadgePollInterval) clearInterval(unreadBadgePollInterval);
+    pollUnreadMessagesBadgeClient();
+    unreadBadgePollInterval = setInterval(pollUnreadMessagesBadgeClient, UNREAD_BADGE_POLL_MS);
+  }
+
+  window.startUnreadMessagesBadgePolling = startUnreadMessagesBadgePolling;
+
   function filterConversations(query) {
     const q = query.toLowerCase();
     document.querySelectorAll('.msg-item').forEach(item => {
       const text = item.innerText.toLowerCase();
       item.style.display = text.includes(q) ? 'flex' : 'none';
     });
+  }
+
+  // ── MESSAGES LEFT-PANEL REFRESH (AJAX, no full reload) ──
+  let conversationsPollInterval = null;
+  let conversationsRefreshTimeout = null;
+  let isRefreshingConversations = false;
+  const CONVERSATIONS_POLL_MS = 10000;
+
+  function getConversationsSearchValue() {
+    const list = document.getElementById('conversations-list');
+    const searchEl = list?.previousElementSibling?.querySelector('input');
+    return (searchEl?.value || '').toString();
+  }
+
+  function scheduleConversationsRefresh(delayMs = 250) {
+    clearTimeout(conversationsRefreshTimeout);
+    conversationsRefreshTimeout = setTimeout(() => refreshConversationsList(), delayMs);
+  }
+
+  async function refreshConversationsList() {
+    const list = document.getElementById('conversations-list');
+    if (!list) return;
+    if (!document.getElementById('page-messages')?.classList.contains('active')) return;
+    if (isRefreshingConversations) return;
+
+    isRefreshingConversations = true;
+    const searchValue = getConversationsSearchValue();
+
+    try {
+      const res = await fetch(`${BASE_URL}actions/get_conversations.php`, { method: 'GET' });
+      const result = await res.json();
+      if (!result.success) return;
+
+      const conversations = Array.isArray(result.conversations) ? result.conversations : [];
+      list.innerHTML = '';
+
+      if (!conversations.length) {
+        list.innerHTML = `<div style="padding:20px;text-align:center;color:var(--uw-gray);font-size:13px">No conversations yet.</div>`;
+      } else {
+        conversations.forEach(c => {
+          const otherId = Number(c.other_id);
+          const otherName = c.other_name || '';
+          const initials = (otherName || '?')
+            .split(/\s+/)
+            .filter(Boolean)
+            .slice(0, 2)
+            .map(p => p[0])
+            .join('')
+            .toUpperCase();
+
+          const otherAvatar = c.other_avatar || '';
+          const otherNameEsc = escapeChatHtml(otherName);
+          const lastMsgEsc = escapeChatHtml(c.last_message || '');
+
+          const timeLabel = c.last_time
+            ? new Date(c.last_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            : '';
+
+          const isActive = activeChatId != null && Number(activeChatId) === otherId;
+          const isUnread =
+            !isActive &&
+            Number(c.is_read) === 0 &&
+            Number(c.sender_id) !== Number(CLIENT_USER_ID);
+
+          const item = document.createElement('div');
+          item.dataset.otherId = String(otherId);
+          item.className = `msg-item${isUnread ? ' unread' : ''}${isActive ? ' active' : ''}`;
+          item.style.cssText = 'border-radius:0;margin:0;padding:12px 14px';
+          item.addEventListener('click', () => loadChat(otherId, otherName, initials, item, otherAvatar));
+
+          const avatarHtml = otherAvatar
+            ? `
+                <img src="${getAvatarUrl(otherAvatar)}" style="width:100%;height:100%;border-radius:50%;object-fit:cover" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                <div style="display:none;background:var(--uw-green-light);color:var(--uw-green);width:100%;height:100%;align-items:center;justify-content:center;border-radius:50%;font-weight:bold;font-size:13px">${initials}</div>
+              `
+            : `<div style="background:var(--uw-green-light);color:var(--uw-green);width:100%;height:100%;display:flex;align-items:center;justify-content:center;border-radius:50%;font-weight:bold;font-size:13px">${initials}</div>`;
+
+          item.innerHTML = `
+            <div class="av">${avatarHtml}</div>
+            <div class="msg-meta">
+              <div class="msg-name">${otherNameEsc}<span class="msg-time">${timeLabel}</span></div>
+              <div class="msg-text">${lastMsgEsc}</div>
+            </div>
+            ${isUnread ? '<div class="msg-dot"></div>' : ''}
+          `;
+
+          list.appendChild(item);
+        });
+      }
+
+      if (searchValue) filterConversations(searchValue);
+    } catch (e) {
+      // Ignore refresh errors (polling will retry).
+    } finally {
+      isRefreshingConversations = false;
+    }
+  }
+
+  function startConversationsPolling() {
+    if (conversationsPollInterval) clearInterval(conversationsPollInterval);
+    conversationsPollInterval = setInterval(() => {
+      const page = document.getElementById('page-messages');
+      if (!page || !page.classList.contains('active')) return;
+      refreshConversationsList();
+    }, CONVERSATIONS_POLL_MS);
+  }
+
+  function stopConversationsPolling() {
+    if (conversationsPollInterval) clearInterval(conversationsPollInterval);
+    conversationsPollInterval = null;
+    clearTimeout(conversationsRefreshTimeout);
   }
 
   // ── MOBILE SIDEBAR ──
@@ -1237,11 +1716,23 @@
 
     // Wait for page to switch
     setTimeout(() => {
+      if (BLOCKED_FREELANCER_IDS.includes(id)) {
+        loadChat(id, name, initials, null, avatar);
+        return;
+      }
       const list = document.getElementById('conversations-list');
       const items = list.querySelectorAll('.msg-item');
       let foundEl = null;
+      const targetIdStr = String(id);
       items.forEach(item => {
-        if (item.onclick.toString().includes(id.toString())) {
+        const dsId = String(item.dataset?.otherId || '');
+        const onclickAttr = item.getAttribute('onclick') || '';
+        const onclickFn = item.onclick ? item.onclick.toString() : '';
+        if (
+          dsId === targetIdStr ||
+          onclickAttr.includes(`loadChat(${id}`) ||
+          onclickFn.includes(targetIdStr)
+        ) {
           foundEl = item;
         }
       });
@@ -1253,6 +1744,7 @@
         const newItem = document.createElement('div');
         newItem.className = 'msg-item active';
         newItem.style.cssText = 'border-radius:0;margin:0;padding:12px 14px';
+        newItem.dataset.otherId = String(id);
         newItem.onclick = function () { loadChat(id, name, initials, this, avatar); };
         newItem.innerHTML = `
         <div class="av">
@@ -1304,6 +1796,13 @@
     if (titleEl) titleEl.textContent = titles[id] || id;
 
     // 5. Cleanup
+    // 5a. Messages: keep left panel updated without reload
+    if (id === 'messages') {
+      refreshConversationsList();
+      startConversationsPolling();
+    } else {
+      stopConversationsPolling();
+    }
     window.location.hash = id;
     closeMobSidebar();
     window.scrollTo(0, 0);
@@ -1509,8 +2008,8 @@
   }
 
   async function cancelHiring(propId) {
-    const reason = prompt('Please enter the reason for cancellation:');
-    if (reason === null) return; // Cancelled prompt
+    const reason = await remoPrompt('Please enter the reason for cancellation:', 'Cancel hiring', '', { multiline: true });
+    if (reason === null) return;
 
     toast('Processing...', 'Cancelling hiring');
     const formData = new FormData();
@@ -1557,10 +2056,10 @@
     openModal('file-dispute');
   };
 
-  window.submitDispute = function(contractId) {
+  window.submitDispute = async function(contractId) {
     const reason = document.getElementById('dispute-reason').value.trim();
     if (!reason) {
-      alert('Please enter a reason for the dispute.');
+      remoAlert('Please enter a reason for the dispute.', 'Dispute');
       return;
     }
 
@@ -1585,7 +2084,7 @@
         closeModal();
         setTimeout(() => location.reload(), 1500);
       } else {
-        alert(data.error || 'Failed to file dispute');
+        remoAlert(data.error || 'Failed to file dispute', 'Error');
         if (btn) {
           btn.disabled = false;
           btn.innerText = 'Raise Dispute ⚠️';
@@ -1594,7 +2093,7 @@
     })
     .catch(err => {
       console.error(err);
-      alert('An error occurred. Check console.');
+      remoAlert('An error occurred. Please try again.', 'Error');
       if (btn) {
         btn.disabled = false;
         btn.innerText = 'Raise Dispute ⚠️';
@@ -1761,7 +2260,9 @@
           <button class="btn btn-w" style="justify-content:center;padding:12px;color:#ef4444;border-color:#fecaca" onclick="closeModal();cancelHiring(${contract.proposal_id})">
             ❌ Cancel Hiring
           </button>
+        ` : ''}
 
+        ${(contract.status === 'active' || contract.status === 'paused' || contract.status === 'completed') ? `
           <button class="btn btn-w" style="justify-content:center;padding:12px;color:#ef4444;border-color:#fecaca;margin-top:4px" onclick="closeModal();openDisputeModal(${contract.id})">
             ⚠️ File a Dispute
           </button>
@@ -1773,7 +2274,7 @@
   }
 
   async function releaseMilestone(milestoneId, btn, contractId) {
-    if (!confirm('Are you sure you want to approve this milestone and release payment?')) return;
+    if (!(await remoConfirm('Payment will be released to the freelancer.', 'Approve this milestone?'))) return;
 
     const originalText = btn.innerText;
     btn.disabled = true;
@@ -1810,7 +2311,7 @@
   }
 
   async function rejectMilestone(milestoneId, btn, contractId) {
-    if (!confirm('Are you sure you want to reject this submission? The milestone will return to Active status.')) return;
+    if (!(await remoConfirm('The milestone will return to Active status.', 'Reject this submission?'))) return;
 
     const originalText = btn.innerText;
     btn.disabled = true;
@@ -1872,6 +2373,7 @@
   }
 
   // ─── UPWORK CATEGORY DATA ───
+  let ACTIVE_JOB_CATEGORIES = [];
   const UW_CATS = {
     "Accounting & Consulting": {
       "Personal & Professional Coaching": ["Career Coaching", "Personal Coaching"],
@@ -1963,6 +2465,40 @@
     }
   };
 
+  function escapeJobCategoryHtml(s) {
+    return String(s || '').replace(/[&<>"']/g, (m) => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    }[m]));
+  }
+
+  function renderJobCategoryOptions() {
+    const catSel = document.getElementById('pj-cat');
+    if (!catSel) return;
+    const options = ACTIVE_JOB_CATEGORIES
+      .map(c => `<option value="${escapeJobCategoryHtml(c)}">${escapeJobCategoryHtml(c)}</option>`)
+      .join('');
+    catSel.innerHTML = '<option value="">— Select a category —</option>' + options;
+  }
+
+  async function loadActiveJobCategories() {
+    try {
+      const response = await fetch(BASE_URL + 'actions/get_job_categories.php?active_only=1');
+      const result = await response.json();
+      if (result && result.success && Array.isArray(result.data) && result.data.length) {
+        ACTIVE_JOB_CATEGORIES = result.data.map(row => row.name).filter(Boolean);
+      } else {
+        ACTIVE_JOB_CATEGORIES = Object.keys(UW_CATS);
+      }
+    } catch (e) {
+      ACTIVE_JOB_CATEGORIES = Object.keys(UW_CATS);
+    }
+    renderJobCategoryOptions();
+  }
+
   function updateSubcats() {
     const cat = (document.getElementById('pj-cat') || {}).value;
     const subcatSel = document.getElementById('pj-subcat');
@@ -1971,6 +2507,13 @@
     const specWrap = document.getElementById('pj-spec-wrap');
     if (!cat) { subcatWrap.style.display = 'none'; specWrap.style.display = 'none'; return; }
     const subcats = Object.keys(UW_CATS[cat] || {});
+    if (!subcats.length) {
+      subcatSel.innerHTML = '<option value="">— Select a subcategory —</option>';
+      specSel.innerHTML = '<option value="">— Select a specialty —</option>';
+      subcatWrap.style.display = 'none';
+      specWrap.style.display = 'none';
+      return;
+    }
     subcatSel.innerHTML = '<option value="">— Select a subcategory —</option>' + subcats.map(s => `<option value="${s}">${s}</option>`).join('');
     subcatWrap.style.display = 'block';
     specSel.innerHTML = '<option value="">— Select a specialty —</option>';
@@ -2132,8 +2675,13 @@
   window.updatePostJobFields = updatePostJobFields;
   window.submitPostJob = submitPostJob;
   window.bindPostJobModal = bindPostJobModal;
-  async function hireFreelancer(proposalId, amount) {
-    if (!confirm('Are you sure you want to hire this freelancer?')) return;
+  async function hireFreelancer(proposalId, amount, budgetType) {
+    if (budgetType === 'hourly' && availableBalance < 1) {
+      toast('Balance required', 'Add at least $1.00 to your wallet before starting an hourly contract.');
+      return;
+    }
+
+    if (!(await remoConfirm('A contract will be created for this freelancer.', 'Hire this freelancer?'))) return;
 
     toast('Processing...', 'Setting up your contract');
 
@@ -2277,6 +2825,8 @@
       openModal(window.__pendingModalId);
       window.__pendingModalId = null;
     }
+
+    if (typeof startUnreadMessagesBadgePolling === 'function') startUnreadMessagesBadgePolling();
     
     // Paginate client transactions
     applyPagination('#page-payments .desk-only table', 'tbody tr', 10);
@@ -2298,9 +2848,9 @@
   });
 
   setTimeout(() => toast('Welcome back, <?php echo addslashes(htmlspecialchars($user['name'])); ?>!', 'You have <?php echo (int) $unreadMessagesCount; ?> unread messages and <?php echo (int) $stats['open_proposals']; ?> new proposals'), 1000);
-  function processWorkLog(logId, action) {
-    if (action === 'approved' && !confirm('Are you sure you want to approve this work and release payment?')) return;
-    if (action === 'rejected' && !confirm('Are you sure you want to reject this work?')) return;
+  async function processWorkLog(logId, action) {
+    if (action === 'approved' && !(await remoConfirm('Payment will be released to the freelancer.', 'Approve this work?'))) return;
+    if (action === 'rejected' && !(await remoConfirm('The freelancer will be notified of the rejection.', 'Reject this work?'))) return;
 
     fetch(BASE_URL + 'client/api/process-work.php', {
       method: 'POST',

@@ -1,0 +1,118 @@
+/* Shared toast variants + confirm/prompt dialogs */
+.toast.toast-error strong { color: #f87171; }
+.toast.toast-success strong { color: #6ee564; }
+
+.remo-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 12000;
+  background: rgba(0, 0, 0, 0.5);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.remo-dialog-card {
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+  width: 100%;
+  max-width: 440px;
+  font-family: inherit;
+}
+
+.remo-dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.remo-dialog-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1a2e;
+}
+
+.remo-dialog-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  line-height: 1;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.remo-dialog-body {
+  padding: 16px 20px;
+}
+
+.remo-dialog-message {
+  font-size: 14px;
+  color: #6b7280;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.remo-dialog-input {
+  width: 100%;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  resize: vertical;
+}
+
+.remo-dialog-input:focus {
+  border-color: #14a800;
+}
+
+.remo-dialog-footer {
+  display: flex;
+  gap: 10px;
+  padding: 0 20px 16px;
+}
+
+.remo-dialog-btn {
+  flex: 1;
+  padding: 9px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid #e5e7eb;
+  font-family: inherit;
+  background: #fff;
+  color: #1a1a2e;
+}
+
+.remo-dialog-btn-cancel:hover {
+  background: #f4f2ee;
+}
+
+.remo-dialog-btn-primary {
+  background: #14a800;
+  border-color: #14a800;
+  color: #fff;
+}
+
+.remo-dialog-btn-primary:hover {
+  background: #118a00;
+}
+
+.remo-dialog-btn-danger {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #ef4444;
+}
+
+.remo-dialog-btn-danger:hover {
+  background: #fee2e2;
+}

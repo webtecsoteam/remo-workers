@@ -4,6 +4,12 @@ require_once __DIR__ . '/../../includes/classes/Auth.php';
 
 header('Content-Type: application/json');
 
+$suspendedError = Auth::suspendedClientError();
+if ($suspendedError) {
+    echo json_encode(['success' => false, 'message' => $suspendedError]);
+    exit;
+}
+
 $user = Auth::user();
 if (!$user || $user['role'] !== 'client') {
     echo json_encode(['success' => false, 'message' => 'Unauthorized access.']);
@@ -34,6 +40,11 @@ if (!$freelancer) {
     exit;
 }
 
+if (!Auth::isIdentityVerified($freelancer)) {
+    echo json_encode(['success' => false, 'message' => 'This freelancer has not completed identity verification.']);
+    exit;
+}
+
 // 2. Verify job exists, is open/active and belongs to this client
 $jobStmt = $db->prepare("SELECT * FROM jobs WHERE id = ? AND client_id = ? AND status IN ('open', 'in_progress')");
 $jobStmt->execute([$jobId, $user['id']]);
@@ -41,6 +52,14 @@ $job = $jobStmt->fetch();
 if (!$job) {
     echo json_encode(['success' => false, 'message' => 'Selected job is either closed or unauthorized.']);
     exit;
+}
+
+if ($contractType === 'hourly') {
+    $balanceError = Auth::hourlyContractBalanceError($user['id'], $db);
+    if ($balanceError) {
+        echo json_encode(['success' => false, 'message' => $balanceError]);
+        exit;
+    }
 }
 
 try {

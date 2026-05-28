@@ -144,6 +144,7 @@ $error = $_GET['error'] ?? null;
     </div>
     
     <form id="admin-login-form" onsubmit="handleAdminLogin(event)">
+        <input type="hidden" name="ajax" value="1">
         <input type="hidden" name="redirect" value="admin">
         <div class="form-group">
             <label>Email Address</label>
@@ -187,10 +188,11 @@ async function handleAdminLogin(e) {
 
   try {
     const formData = new FormData(form);
+    formData.set('ajax', '1');
     const response = await fetch('<?php echo baseUrl("login"); ?>', {
       method: 'POST',
       body: formData,
-      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      credentials: 'same-origin'
     });
 
     const result = await response.json();

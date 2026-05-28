@@ -54,8 +54,13 @@ try {
         throw new Exception("A dispute has already been filed for this contract.");
     }
 
-    if ($contract['status'] === 'completed' || $contract['status'] === 'cancelled') {
-        throw new Exception("Cannot file a dispute on a completed or cancelled contract.");
+    if ($contract['status'] === 'cancelled') {
+        throw new Exception("Cannot file a dispute on a cancelled contract.");
+    }
+
+    $isClient = (int)$contract['client_id'] === (int)$user['id'];
+    if ($contract['status'] === 'completed' && !$isClient) {
+        throw new Exception("Cannot file a dispute on a completed contract.");
     }
 
     // 2. Insert dispute record

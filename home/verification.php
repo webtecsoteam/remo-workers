@@ -19,6 +19,7 @@ $uStmt = $db->prepare("SELECT is_verified, status FROM users WHERE id = ?");
 $uStmt->execute([$user['id']]);
 $userData = $uStmt->fetch();
 
+$pageExtraCss = ['home/css/style.css?v=1.0.4'];
 include __DIR__ . '/includes/header.php';
 ?>
 
@@ -127,7 +128,7 @@ include __DIR__ . '/includes/header.php';
                         <div style="display: flex; align-items: center; gap: 12px;">
                             <span class="badge badge-<?php echo $doc['status']; ?>"><?php echo $doc['status']; ?></span>
                             <?php if ($doc['status'] === 'rejected'): ?>
-                                <button onclick="alert('Rejection Reason: <?php echo htmlspecialchars($doc['rejection_reason']); ?>')" class="btn btn-outline btn-sm">Reason</button>
+                                <button type="button" onclick="remoAlert(<?php echo json_encode($doc['rejection_reason'] ?? '', JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT); ?>, 'Rejection reason')" class="btn btn-outline btn-sm">Reason</button>
                             <?php endif; ?>
                         </div>
                     </div>
@@ -144,4 +145,5 @@ function updateFileName(input) {
 }
 </script>
 
+<?php include __DIR__ . '/includes/site-footer.php'; ?>
 <?php include __DIR__ . '/includes/footer.php'; ?>

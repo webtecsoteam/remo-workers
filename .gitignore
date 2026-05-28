@@ -34,3 +34,6 @@ composer.phar
 # Temp files
 tmp/
 temp/
+
+# Generated homepage aggregates (rebuilt automatically)
+storage/cache/
