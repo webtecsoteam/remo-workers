@@ -11,10 +11,24 @@ if (!$user || $user['role'] !== 'freelancer') {
 }
 
 $db = getDB();
+ensureAgencySchema();
+$activeAgency = getActiveAgencyForUser((int)$user['id']);
+$canApplyAsAgency = !empty($activeAgency['id']);
 
 $jobId = $_POST['job_id'] ?? 0;
 $bidAmount = (float)($_POST['bid_amount'] ?? 0);
 $coverLetter = $_POST['cover_letter'] ?? '';
+$applyAs = strtolower(trim((string)($_POST['apply_as'] ?? '')));
+$applyAs = in_array($applyAs, ['individual', 'agency'], true) ? $applyAs : '';
+
+if ($applyAs === 'agency' && !$canApplyAsAgency) {
+    echo json_encode(['success' => false, 'error' => 'Agency profile not found. Create or join an agency first.']);
+    exit;
+}
+if ($applyAs === '') {
+    $applyAs = (!empty($user['account_mode']) && $user['account_mode'] === 'agency' && $canApplyAsAgency) ? 'agency' : 'individual';
+}
+$agencyIdForProposal = ($applyAs === 'agency' && $canApplyAsAgency) ? (int)$activeAgency['id'] : null;
 
 if (!$jobId || !$bidAmount || empty($coverLetter)) {
     echo json_encode(['success' => false, 'error' => 'All fields are required']);
@@ -30,10 +44,11 @@ try {
         exit;
     }
 
-    $stmt = $db->prepare("INSERT INTO proposals (job_id, freelancer_id, bid_amount, cover_letter, status) VALUES (?, ?, ?, ?, 'pending')");
+    $stmt = $db->prepare("INSERT INTO proposals (job_id, freelancer_id, agency_id, bid_amount, cover_letter, status) VALUES (?, ?, ?, ?, ?, 'pending')");
     $stmt->execute([
         $jobId,
         $user['id'],
+        $agencyIdForProposal,
         $bidAmount,
         $coverLetter
     ]);

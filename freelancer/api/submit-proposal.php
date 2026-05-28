@@ -57,6 +57,8 @@ $bidAmount = isset($data['bid_amount']) ? (float)$data['bid_amount'] : 0;
 $estimatedDays = isset($data['estimated_days']) ? (int)$data['estimated_days'] : 0;
 $coverLetter = trim($data['cover_letter'] ?? '');
 $attachments = $data['attachments'] ?? '';
+$applyAs = strtolower(trim((string)($data['apply_as'] ?? '')));
+$applyAs = in_array($applyAs, ['individual', 'agency'], true) ? $applyAs : '';
 $connectsCost = Auth::CONNECTS_PER_APPLICATION;
 
 if ($jobId <= 0 || $bidAmount <= 0 || $coverLetter === '') {
@@ -66,6 +68,18 @@ if ($jobId <= 0 || $bidAmount <= 0 || $coverLetter === '') {
 }
 
 $db = getDB();
+ensureAgencySchema();
+$activeAgency = getActiveAgencyForUser((int)$user['id']);
+$canApplyAsAgency = !empty($activeAgency['id']);
+if ($applyAs === 'agency' && !$canApplyAsAgency) {
+    ob_end_clean();
+    echo json_encode(['success' => false, 'message' => 'Agency profile not found. Create or join an agency first.']);
+    exit;
+}
+if ($applyAs === '') {
+    $applyAs = (!empty($user['account_mode']) && $user['account_mode'] === 'agency' && $canApplyAsAgency) ? 'agency' : 'individual';
+}
+$agencyIdForProposal = ($applyAs === 'agency' && $canApplyAsAgency) ? (int)$activeAgency['id'] : null;
 
 // Check if there is a pending invitation to bypass connects deduction
 $hasInvite = false;
@@ -97,12 +111,13 @@ try {
     }
 
     $stmt = $db->prepare("
-        INSERT INTO proposals (job_id, freelancer_id, bid_amount, cover_letter, estimated_days, attachments, status)
-        VALUES (?, ?, ?, ?, ?, ?, 'pending')
+        INSERT INTO proposals (job_id, freelancer_id, agency_id, bid_amount, cover_letter, estimated_days, attachments, status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')
     ");
     $stmt->execute([
         $jobId,
         (int)$user['id'],
+        $agencyIdForProposal,
         $bidAmount,
         $coverLetter,
         $estimatedDays,

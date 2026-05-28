@@ -261,7 +261,152 @@ function ensureFreelancerSchema() {
         // Silently continue
     }
     
+    ensureAgencySchema();
     $done = true;
+}
+
+/** Ensure agency-related schema exists (safe to call repeatedly). */
+function ensureAgencySchema(): void
+{
+    static $done = false;
+    if ($done) return;
+
+    $db = getDB();
+    try {
+        $db->exec("
+            CREATE TABLE IF NOT EXISTS agencies (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                owner_user_id INT NOT NULL,
+                name VARCHAR(191) NOT NULL UNIQUE,
+                slug VARCHAR(191) NULL UNIQUE,
+                description TEXT NULL,
+                agency_earnings_offset DECIMAL(12, 2) NOT NULL DEFAULT 0.00,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                FOREIGN KEY (owner_user_id) REFERENCES users(id) ON DELETE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        ");
+
+        $db->exec("
+            CREATE TABLE IF NOT EXISTS agency_members (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                agency_id INT NOT NULL,
+                user_id INT NOT NULL,
+                role ENUM('owner', 'admin', 'member') NOT NULL DEFAULT 'member',
+                status ENUM('active', 'inactive') NOT NULL DEFAULT 'active',
+                invited_by INT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                UNIQUE KEY uniq_agency_member (agency_id, user_id),
+                FOREIGN KEY (agency_id) REFERENCES agencies(id) ON DELETE CASCADE,
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+                FOREIGN KEY (invited_by) REFERENCES users(id) ON DELETE SET NULL
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        ");
+
+        $db->exec("
+            CREATE TABLE IF NOT EXISTS agency_member_invitations (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                agency_id INT NOT NULL,
+                user_id INT NOT NULL,
+                email VARCHAR(191) NOT NULL,
+                role ENUM('admin', 'member') NOT NULL DEFAULT 'member',
+                status ENUM('pending', 'accepted', 'declined') NOT NULL DEFAULT 'pending',
+                invitation_token VARCHAR(64) NOT NULL UNIQUE,
+                invited_by INT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                responded_at TIMESTAMP NULL DEFAULT NULL,
+                KEY idx_ami_agency_user_status (agency_id, user_id, status),
+                FOREIGN KEY (agency_id) REFERENCES agencies(id) ON DELETE CASCADE,
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+                FOREIGN KEY (invited_by) REFERENCES users(id) ON DELETE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        ");
+
+        $userCols = $db->query("SHOW COLUMNS FROM users")->fetchAll(PDO::FETCH_COLUMN);
+        if (!in_array('account_mode', $userCols, true)) {
+            $db->exec("ALTER TABLE users ADD COLUMN account_mode ENUM('individual','agency') NOT NULL DEFAULT 'individual' AFTER role");
+        }
+        if (!in_array('agency_id', $userCols, true)) {
+            $db->exec("ALTER TABLE users ADD COLUMN agency_id INT NULL AFTER account_mode");
+        }
+
+        $agencyCols = $db->query("SHOW COLUMNS FROM agencies")->fetchAll(PDO::FETCH_COLUMN);
+        if (!in_array('agency_earnings_offset', $agencyCols, true)) {
+            $db->exec("ALTER TABLE agencies ADD COLUMN agency_earnings_offset DECIMAL(12, 2) NOT NULL DEFAULT 0.00 AFTER description");
+        }
+
+        $proposalCols = $db->query("SHOW COLUMNS FROM proposals")->fetchAll(PDO::FETCH_COLUMN);
+        if (!in_array('agency_id', $proposalCols, true)) {
+            $db->exec("ALTER TABLE proposals ADD COLUMN agency_id INT NULL AFTER freelancer_id");
+        }
+
+        $contractCols = $db->query("SHOW COLUMNS FROM contracts")->fetchAll(PDO::FETCH_COLUMN);
+        if (!in_array('agency_id', $contractCols, true)) {
+            $db->exec("ALTER TABLE contracts ADD COLUMN agency_id INT NULL AFTER freelancer_id");
+        }
+
+        $fkStmt = $db->prepare("
+            SELECT CONSTRAINT_NAME
+            FROM information_schema.TABLE_CONSTRAINTS
+            WHERE TABLE_SCHEMA = DATABASE()
+              AND TABLE_NAME = ?
+              AND CONSTRAINT_TYPE = 'FOREIGN KEY'
+              AND CONSTRAINT_NAME = ?
+            LIMIT 1
+        ");
+
+        $fkStmt->execute(['users', 'fk_users_agency_id']);
+        if (!$fkStmt->fetchColumn()) {
+            $db->exec("ALTER TABLE users ADD CONSTRAINT fk_users_agency_id FOREIGN KEY (agency_id) REFERENCES agencies(id) ON DELETE SET NULL");
+        }
+        $fkStmt->execute(['proposals', 'fk_proposals_agency_id']);
+        if (!$fkStmt->fetchColumn()) {
+            $db->exec("ALTER TABLE proposals ADD CONSTRAINT fk_proposals_agency_id FOREIGN KEY (agency_id) REFERENCES agencies(id) ON DELETE SET NULL");
+        }
+        $fkStmt->execute(['contracts', 'fk_contracts_agency_id']);
+        if (!$fkStmt->fetchColumn()) {
+            $db->exec("ALTER TABLE contracts ADD CONSTRAINT fk_contracts_agency_id FOREIGN KEY (agency_id) REFERENCES agencies(id) ON DELETE SET NULL");
+        }
+    } catch (Throwable $e) {
+        if (defined('APP_DEBUG') && APP_DEBUG) {
+            error_log('ensureAgencySchema failed: ' . $e->getMessage());
+        }
+    }
+
+    $done = true;
+}
+
+function getActiveAgencyForUser(int $userId): ?array
+{
+    if ($userId <= 0) return null;
+    ensureAgencySchema();
+    $db = getDB();
+    $stmt = $db->prepare("
+        SELECT a.*, am.role as member_role
+        FROM agency_members am
+        JOIN agencies a ON a.id = am.agency_id
+        WHERE am.user_id = ? AND am.status = 'active'
+        LIMIT 1
+    ");
+    $stmt->execute([$userId]);
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    return $row ?: null;
+}
+
+function isAgencyMember(int $agencyId, int $userId): bool
+{
+    if ($agencyId <= 0 || $userId <= 0) return false;
+    ensureAgencySchema();
+    $db = getDB();
+    $stmt = $db->prepare("
+        SELECT 1
+        FROM agency_members
+        WHERE agency_id = ? AND user_id = ? AND status = 'active'
+        LIMIT 1
+    ");
+    $stmt->execute([$agencyId, $userId]);
+    return (bool) $stmt->fetchColumn();
 }
 
 /** Ensure platform dynamic settings table exists and has defaults. */
@@ -612,7 +757,7 @@ function isRoute($route) {
 
 /**
  * @param array<string, mixed> $user
- * @param array{completed: int, active: int, cancelled: int, disputed: int, earned: float, reviews: int, satisfied: int, avg_rating: ?float} $agg
+ * @param array{completed: int, active: int, cancelled: int, disputed: int, earned: float, contract_earned?: float, reviews: int, satisfied: int, avg_rating: ?float} $agg
  * @return array<string, mixed>
  */
 function computeFreelancerStats(array $user, array $agg): array
@@ -621,6 +766,11 @@ function computeFreelancerStats(array $user, array $agg): array
     $cancelledCount = (int) ($agg['cancelled'] ?? 0);
     $disputedCount = (int) ($agg['disputed'] ?? 0);
     $totalEarned = (float) ($agg['earned'] ?? 0);
+    $fallbackContractEarned = (float) ($agg['contract_earned'] ?? 0);
+    if ($totalEarned <= 0 && $fallbackContractEarned > 0) {
+        // Some legacy contracts may not have payment rows yet.
+        $totalEarned = $fallbackContractEarned;
+    }
     $reviewsCount = (int) ($agg['reviews'] ?? 0);
     $satisfiedCount = (int) ($agg['satisfied'] ?? 0);
     $avgRatingRaw = $agg['avg_rating'] ?? null;
@@ -727,6 +877,7 @@ function getFreelancerStatsBatch(array $freelancerIds, array $usersById = []): a
 
     $contractAgg = [];
     $earned = [];
+    $contractEarned = [];
     $reviewAgg = [];
 
     try {
@@ -765,6 +916,18 @@ function getFreelancerStatsBatch(array $freelancerIds, array $usersById = []): a
         $stmt->execute($freelancerIds);
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $earned[(int) $row['payee_id']] = (float) $row['earned'];
+        }
+
+        $stmt = $db->prepare(
+            "SELECT freelancer_id, COALESCE(SUM(amount), 0) AS earned
+             FROM contracts
+             WHERE freelancer_id IN ($placeholders)
+               AND status = 'completed'
+             GROUP BY freelancer_id"
+        );
+        $stmt->execute($freelancerIds);
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $contractEarned[(int) $row['freelancer_id']] = (float) $row['earned'];
         }
 
         $stmt = $db->prepare(
@@ -826,6 +989,7 @@ function getFreelancerStatsBatch(array $freelancerIds, array $usersById = []): a
             'cancelled' => $c['cancelled'],
             'disputed' => $c['disputed'],
             'earned' => $earned[$fid] ?? 0.0,
+            'contract_earned' => $contractEarned[$fid] ?? 0.0,
             'reviews' => $r['reviews'],
             'satisfied' => $r['satisfied'],
             'avg_rating' => $r['avg_rating'],

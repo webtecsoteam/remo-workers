@@ -267,6 +267,301 @@ switch ($action) {
         }
         break;
 
+    case 'get_agencies_admin':
+        try {
+            ensureAgencySchema();
+            $search = trim((string)($_GET['search'] ?? ''));
+            $where = '';
+            $params = [];
+            if ($search !== '') {
+                $where = "WHERE a.name LIKE ? OR owner.name LIKE ? OR owner.email LIKE ?";
+                $like = '%' . $search . '%';
+                $params = [$like, $like, $like];
+            }
+
+            $sql = "
+                SELECT
+                    a.id, a.name, a.slug, a.description, a.owner_user_id, a.created_at, a.updated_at,
+                    COALESCE(a.agency_earnings_offset, 0) AS agency_earnings_offset,
+                    owner.name AS owner_name, owner.email AS owner_email,
+                    (
+                        SELECT COUNT(*)
+                        FROM agency_members amc
+                        WHERE amc.agency_id = a.id AND amc.status = 'active'
+                    ) AS members_count,
+                    (
+                        SELECT COALESCE(SUM(p.amount), 0)
+                        FROM payments p
+                        INNER JOIN contracts c
+                            ON c.job_id = p.job_id
+                           AND c.freelancer_id = p.payee_id
+                        WHERE c.agency_id = a.id
+                          AND p.status = 'completed'
+                          AND p.transaction_id NOT LIKE 'ESC-%'
+                    ) AS agency_earned_live
+                FROM agencies a
+                LEFT JOIN users owner ON owner.id = a.owner_user_id
+                $where
+                ORDER BY a.created_at DESC
+                LIMIT 500
+            ";
+            $stmt = $db->prepare($sql);
+            $stmt->execute($params);
+            $agencies = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+
+            $membersByAgency = [];
+            if (!empty($agencies)) {
+                $agencyIds = array_map(static fn($a) => (int)$a['id'], $agencies);
+                $placeholders = implode(',', array_fill(0, count($agencyIds), '?'));
+                $mStmt = $db->prepare("
+                    SELECT am.agency_id, am.user_id, am.role, am.status, am.created_at, u.name, u.email
+                    FROM agency_members am
+                    JOIN users u ON u.id = am.user_id
+                    WHERE am.agency_id IN ($placeholders) AND am.status = 'active'
+                    ORDER BY am.agency_id ASC, FIELD(am.role, 'owner', 'admin', 'member'), u.name ASC
+                ");
+                $mStmt->execute($agencyIds);
+                foreach (($mStmt->fetchAll(PDO::FETCH_ASSOC) ?: []) as $row) {
+                    $aid = (int)$row['agency_id'];
+                    if (!isset($membersByAgency[$aid])) {
+                        $membersByAgency[$aid] = [];
+                    }
+                    $membersByAgency[$aid][] = $row;
+                }
+            }
+
+            foreach ($agencies as &$agency) {
+                $agency['members'] = $membersByAgency[(int)$agency['id']] ?? [];
+                $live = (float)($agency['agency_earned_live'] ?? 0);
+                $offset = (float)($agency['agency_earnings_offset'] ?? 0);
+                $agency['agency_earned_total'] = max(0, $live + $offset);
+            }
+            unset($agency);
+
+            echo json_encode(['success' => true, 'data' => $agencies]);
+        } catch (Throwable $e) {
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+        break;
+
+    case 'update_agency_admin':
+        try {
+            ensureAgencySchema();
+            $input = json_decode(file_get_contents('php://input'), true) ?: $_REQUEST;
+            $agencyId = (int)($input['agency_id'] ?? 0);
+            $name = trim((string)($input['name'] ?? ''));
+            $description = trim((string)($input['description'] ?? ''));
+
+            if ($agencyId <= 0) throw new Exception('Invalid agency ID');
+            if ($name === '') throw new Exception('Agency name is required');
+
+            $slug = strtolower((string)preg_replace('/[^a-z0-9]+/i', '-', $name));
+            $slug = trim($slug, '-');
+            if ($slug === '') {
+                $slug = 'agency-' . $agencyId;
+            }
+
+            $slugStmt = $db->prepare("SELECT id FROM agencies WHERE slug = ? AND id <> ? LIMIT 1");
+            $slugStmt->execute([$slug, $agencyId]);
+            if ($slugStmt->fetchColumn()) {
+                $slug .= '-' . $agencyId;
+            }
+
+            $stmt = $db->prepare("
+                UPDATE agencies
+                SET name = ?, slug = ?, description = ?
+                WHERE id = ?
+                LIMIT 1
+            ");
+            $stmt->execute([$name, $slug, $description !== '' ? $description : null, $agencyId]);
+            if ($stmt->rowCount() < 1) {
+                $existsStmt = $db->prepare("SELECT id FROM agencies WHERE id = ? LIMIT 1");
+                $existsStmt->execute([$agencyId]);
+                if (!$existsStmt->fetchColumn()) {
+                    throw new Exception('Agency not found');
+                }
+            }
+
+            echo json_encode(['success' => true, 'message' => 'Agency updated successfully']);
+        } catch (Throwable $e) {
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+        break;
+
+    case 'adjust_agency_earnings_admin':
+        try {
+            ensureAgencySchema();
+            $input = json_decode(file_get_contents('php://input'), true) ?: $_REQUEST;
+            $agencyId = (int)($input['agency_id'] ?? 0);
+            $mode = strtolower(trim((string)($input['mode'] ?? 'add')));
+            $amount = (float)($input['amount'] ?? 0);
+
+            if ($agencyId <= 0) throw new Exception('Invalid agency ID');
+            if (!in_array($mode, ['add', 'subtract'], true)) {
+                throw new Exception('Mode must be add or subtract');
+            }
+            if ($amount <= 0) throw new Exception('Amount must be greater than 0');
+
+            $delta = ($mode === 'subtract') ? -$amount : $amount;
+            $stmt = $db->prepare("
+                UPDATE agencies
+                SET agency_earnings_offset = COALESCE(agency_earnings_offset, 0) + ?
+                WHERE id = ?
+                LIMIT 1
+            ");
+            $stmt->execute([$delta, $agencyId]);
+            if ($stmt->rowCount() < 1) {
+                throw new Exception('Agency not found');
+            }
+
+            echo json_encode(['success' => true, 'message' => 'Agency earnings updated successfully']);
+        } catch (Throwable $e) {
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+        break;
+
+    case 'delete_agency_admin':
+        try {
+            ensureAgencySchema();
+            $input = json_decode(file_get_contents('php://input'), true) ?: $_REQUEST;
+            $agencyId = (int)($input['agency_id'] ?? 0);
+            if ($agencyId <= 0) throw new Exception('Invalid agency ID');
+
+            $db->beginTransaction();
+
+            $resetUsers = $db->prepare("
+                UPDATE users
+                SET account_mode = 'individual', agency_id = NULL
+                WHERE agency_id = ?
+            ");
+            $resetUsers->execute([$agencyId]);
+
+            // Hard cleanup membership/invitation rows even on legacy schemas
+            // where FK cascade may be missing.
+            $deleteInvites = $db->prepare("DELETE FROM agency_member_invitations WHERE agency_id = ?");
+            $deleteInvites->execute([$agencyId]);
+
+            $deleteMembers = $db->prepare("DELETE FROM agency_members WHERE agency_id = ?");
+            $deleteMembers->execute([$agencyId]);
+
+            $stmt = $db->prepare("DELETE FROM agencies WHERE id = ? LIMIT 1");
+            $stmt->execute([$agencyId]);
+            if ($stmt->rowCount() < 1) {
+                throw new Exception('Agency not found');
+            }
+
+            $db->commit();
+            echo json_encode(['success' => true, 'message' => 'Agency deleted successfully']);
+        } catch (Throwable $e) {
+            if ($db->inTransaction()) {
+                $db->rollBack();
+            }
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+        break;
+
+    case 'update_agency_member_admin':
+        try {
+            ensureAgencySchema();
+            $input = json_decode(file_get_contents('php://input'), true) ?: $_REQUEST;
+            $agencyId = (int)($input['agency_id'] ?? 0);
+            $userId = (int)($input['user_id'] ?? 0);
+            $role = strtolower(trim((string)($input['role'] ?? 'member')));
+
+            if ($agencyId <= 0 || $userId <= 0) throw new Exception('Invalid member payload');
+            if (!in_array($role, ['admin', 'member'], true)) {
+                throw new Exception('Only admin/member role can be assigned');
+            }
+
+            $ownerStmt = $db->prepare("SELECT owner_user_id FROM agencies WHERE id = ? LIMIT 1");
+            $ownerStmt->execute([$agencyId]);
+            $ownerId = (int)($ownerStmt->fetchColumn() ?: 0);
+            if ($ownerId <= 0) throw new Exception('Agency not found');
+            if ($ownerId === $userId) throw new Exception('Owner role cannot be changed');
+
+            $stmt = $db->prepare("
+                UPDATE agency_members
+                SET role = ?
+                WHERE agency_id = ? AND user_id = ? AND status = 'active'
+                LIMIT 1
+            ");
+            $stmt->execute([$role, $agencyId, $userId]);
+            if ($stmt->rowCount() < 1) {
+                throw new Exception('Member not found or already inactive');
+            }
+
+            echo json_encode(['success' => true, 'message' => 'Member role updated']);
+        } catch (Throwable $e) {
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+        break;
+
+    case 'remove_agency_member_admin':
+        try {
+            ensureAgencySchema();
+            $input = json_decode(file_get_contents('php://input'), true) ?: $_REQUEST;
+            $agencyId = (int)($input['agency_id'] ?? 0);
+            $userId = (int)($input['user_id'] ?? 0);
+
+            if ($agencyId <= 0 || $userId <= 0) throw new Exception('Invalid member payload');
+
+            $ownerStmt = $db->prepare("SELECT owner_user_id FROM agencies WHERE id = ? LIMIT 1");
+            $ownerStmt->execute([$agencyId]);
+            $ownerId = (int)($ownerStmt->fetchColumn() ?: 0);
+            if ($ownerId <= 0) throw new Exception('Agency not found');
+            if ($ownerId === $userId) throw new Exception('Owner cannot be removed from the agency');
+
+            $db->beginTransaction();
+
+            $memberRole = '';
+            $existsStmt = $db->prepare("
+                SELECT role
+                FROM agency_members
+                WHERE agency_id = ? AND user_id = ?
+                LIMIT 1
+            ");
+            $existsStmt->execute([$agencyId, $userId]);
+            $memberRole = (string)($existsStmt->fetchColumn() ?: '');
+            if ($memberRole === 'owner') {
+                throw new Exception('Owner cannot be removed from the agency');
+            }
+
+            // Remove active/inactive membership rows for this agency-user relation.
+            $deleteMember = $db->prepare("
+                DELETE FROM agency_members
+                WHERE agency_id = ? AND user_id = ? AND role <> 'owner'
+            ");
+            $deleteMember->execute([$agencyId, $userId]);
+
+            // Also remove any pending/old agency invitations so the member does not
+            // continue to appear in frontend agency list as pending.
+            $deleteInvites = $db->prepare("
+                DELETE FROM agency_member_invitations
+                WHERE agency_id = ? AND user_id = ?
+            ");
+            $deleteInvites->execute([$agencyId, $userId]);
+
+            if ($deleteMember->rowCount() < 1 && $deleteInvites->rowCount() < 1) {
+                throw new Exception('Member not found in this agency');
+            }
+
+            $unlinkUser = $db->prepare("
+                UPDATE users
+                SET account_mode = 'individual', agency_id = NULL
+                WHERE id = ? AND agency_id = ?
+            ");
+            $unlinkUser->execute([$userId, $agencyId]);
+
+            $db->commit();
+            echo json_encode(['success' => true, 'message' => 'Member removed from agency']);
+        } catch (Throwable $e) {
+            if ($db->inTransaction()) {
+                $db->rollBack();
+            }
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+        break;
+
     case 'get_user_profile':
         try {
             require_once __DIR__ . '/../includes/classes/Auth.php';

@@ -228,7 +228,76 @@ $allReviews = $reviewsQuery->fetchAll(PDO::FETCH_ASSOC);
               <span style="color:var(--muted)">Total earned</span>
               <strong style="color:var(--g)">$<?php echo number_format($fStats['total_earned'], 2); ?>+</strong>
             </div>
+            <?php if ($activeAgency): ?>
+            <div style="display:flex;justify-content:space-between;font-size:13px">
+              <span style="color:var(--muted)">Complete agency earnings</span>
+              <strong style="color:var(--g)">$<?php echo number_format((float)$completeAgencyEarnings, 2); ?></strong>
+            </div>
+            <?php endif; ?>
           </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-head"><h3>Agency Profile</h3></div>
+        <div class="card-body">
+          <?php if (!$isAgencyAccount): ?>
+            <p style="font-size:12px;color:var(--muted);margin:0 0 12px;line-height:1.5">Switch to an agency account to submit proposals as your agency and let teammates manage chats for running agency contracts.</p>
+            <button class="btn btn-g btn-sm" style="width:100%;justify-content:center" onclick="convertToAgencyAccount()">Convert to Agency Account</button>
+          <?php elseif (!$activeAgency): ?>
+            <p style="font-size:12px;color:var(--muted);margin:0 0 12px;line-height:1.5">Your account is in agency mode. Create your agency to start adding members.</p>
+            <input id="agency-name-input" type="text" placeholder="Agency name" style="width:100%;padding:9px 11px;border:1px solid var(--border);border-radius:8px;font-size:12px;margin-bottom:8px">
+            <textarea id="agency-description-input" rows="2" placeholder="Agency description (optional)" style="width:100%;padding:9px 11px;border:1px solid var(--border);border-radius:8px;font-size:12px;resize:vertical;margin-bottom:8px"></textarea>
+            <button class="btn btn-g btn-sm" style="width:100%;justify-content:center" onclick="createAgencyProfile()">Create Agency</button>
+          <?php else: ?>
+            <div style="font-size:13px;font-weight:700;color:var(--dark);margin-bottom:2px"><?php echo htmlspecialchars($activeAgency['name']); ?></div>
+            <div style="font-size:11.5px;color:var(--muted);margin-bottom:10px">Role: <?php echo ucfirst((string)$activeAgency['member_role']); ?></div>
+            <?php if (!empty($activeAgency['description'])): ?>
+              <p style="font-size:12px;color:var(--muted);margin:0 0 12px;line-height:1.5"><?php echo nl2br(htmlspecialchars((string)$activeAgency['description'])); ?></p>
+            <?php endif; ?>
+
+            <?php if (in_array((string)$activeAgency['member_role'], ['owner', 'admin'], true)): ?>
+              <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px;padding:10px;border:1px dashed var(--border);border-radius:8px;background:#fafafa">
+                <input id="agency-edit-name" type="text" placeholder="Agency name" value="<?php echo htmlspecialchars((string)$activeAgency['name']); ?>" style="padding:9px 11px;border:1px solid var(--border);border-radius:8px;font-size:12px">
+                <textarea id="agency-edit-description" rows="2" placeholder="Agency description (optional)" style="padding:9px 11px;border:1px solid var(--border);border-radius:8px;font-size:12px;resize:vertical"><?php echo htmlspecialchars((string)($activeAgency['description'] ?? '')); ?></textarea>
+                <div style="display:flex;gap:8px;flex-wrap:wrap">
+                  <button class="btn btn-g btn-sm" style="flex:1;justify-content:center;min-width:120px" onclick="updateAgencyProfile()">Save Agency</button>
+                  <button class="btn btn-sm" style="background:#ef4444;color:#fff;border:none;flex:1;justify-content:center;min-width:120px" onclick="deleteAgencyProfile()">Delete Agency</button>
+                </div>
+              </div>
+
+              <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px">
+                <input id="agency-member-email" type="email" placeholder="Freelancer email" style="padding:9px 11px;border:1px solid var(--border);border-radius:8px;font-size:12px">
+                <select id="agency-member-role" style="padding:9px 11px;border:1px solid var(--border);border-radius:8px;font-size:12px">
+                  <option value="member">Member</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+              <button class="btn btn-w btn-sm" style="width:100%;justify-content:center;margin-bottom:8px" onclick="addAgencyMember()">Invite Member</button>
+              <p style="margin:0 0 12px;font-size:11px;color:var(--muted);line-height:1.5">Only freelancers with verified Remoworkers profiles can be invited. They will receive an email with Accept/Decline options.</p>
+            <?php endif; ?>
+
+            <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px">Members</div>
+            <div style="display:flex;flex-direction:column;gap:6px;max-height:180px;overflow:auto">
+              <?php foreach ($agencyMembers as $m): ?>
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border:1px solid var(--border);border-radius:8px">
+                  <div style="min-width:0">
+                    <div style="font-size:12px;font-weight:600;color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><?php echo htmlspecialchars($m['name']); ?></div>
+                    <div style="font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><?php echo htmlspecialchars($m['email']); ?></div>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+                    <span class="badge b-gray" style="font-size:10px"><?php echo ucfirst((string)$m['role']); ?></span>
+                    <?php if (($m['status'] ?? '') === 'pending'): ?>
+                      <span class="badge b-yellow" style="font-size:10px">Pending</span>
+                    <?php endif; ?>
+                  </div>
+                </div>
+              <?php endforeach; ?>
+              <?php if (empty($agencyMembers)): ?>
+                <div style="font-size:12px;color:var(--muted);text-align:center;padding:10px 0">No members yet.</div>
+              <?php endif; ?>
+            </div>
+          <?php endif; ?>
         </div>
       </div>
 

@@ -79,11 +79,75 @@
   const USER_EMAIL_VERIFIED = <?php echo Auth::isEmailVerified($user) ? 'true' : 'false'; ?>;
   const USER_ID_VERIFIED = <?php echo Auth::isIdentityVerified($user) ? 'true' : 'false'; ?>;
   const USER_HAS_PHOTO = <?php echo !empty($user['avatar_url']) ? 'true' : 'false'; ?>;
+  const USER_ACCOUNT_MODE = <?php echo json_encode((string)($user['account_mode'] ?? 'individual'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
+  const ACTIVE_AGENCY = <?php
+    $activeAgencyForApply = (isset($activeAgency) && is_array($activeAgency)) ? $activeAgency : getActiveAgencyForUser((int)($user['id'] ?? 0));
+    echo json_encode($activeAgencyForApply ?: null, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+  ?>;
+  const CAN_APPLY_AS_AGENCY = !!(ACTIVE_AGENCY && ACTIVE_AGENCY.id);
   const COUNTRY_OPTIONS_HTML = <?php echo json_encode(buildCountryOptionsHtml($user['country'] ?? 'United Kingdom'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
   const COUNTRY_CODE_MAP = <?php echo json_encode(getCountryCodeNameMapForJs(), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
   let userConnectsBalance = USER_CONNECTS;
   // Global showPage for legacy onclicks (redundant now but keeping it for safety at end of script if needed)
   window.showPage = window.showPage;
+
+  (function setupDashboardLiveChat() {
+    function hideFloatChatButton() {
+      if (!window.$zoho || !$zoho.salesiq) return;
+      try {
+        if ($zoho.salesiq.floatbutton && typeof $zoho.salesiq.floatbutton.visible === 'function') {
+          $zoho.salesiq.floatbutton.visible('hide');
+        }
+      } catch (e) {}
+    }
+
+    function injectZohoScript() {
+      if (document.getElementById('zsiqscript')) return;
+      window.$zoho = window.$zoho || {};
+      $zoho.salesiq = $zoho.salesiq || {};
+      $zoho.salesiq.ready = hideFloatChatButton;
+      const s = document.createElement('script');
+      s.id = 'zsiqscript';
+      s.src = 'https://salesiq.zohopublic.com/widget?wc=siq3522b6c8efa1866fa919f61c10976b22744d3361ea908b3985ef2a2bb0af56e8';
+      s.defer = true;
+      document.body.appendChild(s);
+    }
+
+    window.openDashboardLiveChat = function () {
+      injectZohoScript();
+      if (!window.$zoho || !$zoho.salesiq) return;
+      try {
+        if ($zoho.salesiq.chat && typeof $zoho.salesiq.chat.start === 'function') {
+          $zoho.salesiq.chat.start();
+          return;
+        }
+        if ($zoho.salesiq.floatwindow && typeof $zoho.salesiq.floatwindow.visible === 'function') {
+          $zoho.salesiq.floatwindow.visible('show');
+          return;
+        }
+      } catch (e) {}
+      let tries = 0;
+      const timer = setInterval(function () {
+        tries += 1;
+        try {
+          if (window.$zoho && $zoho.salesiq && $zoho.salesiq.chat && typeof $zoho.salesiq.chat.start === 'function') {
+            $zoho.salesiq.chat.start();
+            clearInterval(timer);
+            return;
+          }
+          if (window.$zoho && $zoho.salesiq && $zoho.salesiq.floatwindow && typeof $zoho.salesiq.floatwindow.visible === 'function') {
+            $zoho.salesiq.floatwindow.visible('show');
+            clearInterval(timer);
+            return;
+          }
+        } catch (err) {}
+        if (tries >= 20) {
+          clearInterval(timer);
+          if (typeof toast === 'function') toast('Live Chat', 'Please try again in a moment.');
+        }
+      }, 300);
+    };
+  })();
 
   // Define all other functions here... (I will just remove the IIFE wrappers)
 
@@ -1049,6 +1113,15 @@
         </div>
 
         <div style="margin-bottom:20px">
+          <label style="display:block;font-weight:700;margin-bottom:8px;font-size:14px">Apply As</label>
+          <select id="prop-apply-as" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-size:14px;background:#fff">
+            <option value="individual">Individual</option>
+            ${CAN_APPLY_AS_AGENCY ? `<option value="agency">${ACTIVE_AGENCY.name ? `Agency (${ACTIVE_AGENCY.name})` : 'Agency'}</option>` : ''}
+          </select>
+          ${CAN_APPLY_AS_AGENCY ? '' : '<div style="margin-top:8px;font-size:12px;color:var(--muted2)">Create or join an agency from Profile to apply as agency.</div>'}
+        </div>
+
+        <div style="margin-bottom:20px">
           <label style="display:block;font-weight:700;margin-bottom:8px;font-size:14px">Cover Letter *</label>
           <textarea id="prop-letter" style="width:100%;height:150px;padding:12px;border:1px solid var(--border);border-radius:8px;font-size:14px;line-height:1.6" placeholder="Write your proposal here..."></textarea>
         </div>
@@ -1112,6 +1185,8 @@
     const rate = document.getElementById('prop-rate').value;
     const durationInput = document.getElementById('prop-duration');
     const days = durationInput ? parseInt(durationInput.value, 10) : 30;
+    const applyAsInput = document.getElementById('prop-apply-as');
+    const applyAs = applyAsInput ? applyAsInput.value : 'individual';
     const letter = document.getElementById('prop-letter').value;
     const attach = document.getElementById('prop-attach').value;
 
@@ -1135,6 +1210,7 @@
         job_id: jobId,
         bid_amount: parseFloat(rate || 0),
         estimated_days: days,
+        apply_as: applyAs,
         cover_letter: letter,
         attachments: attach,
         milestones: []
@@ -1403,7 +1479,10 @@
                 <div style="padding:15px; border:1px solid #eee; border-radius:10px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center">
                   <div>
                     <div style="font-size:14px; font-weight:600">${ms.description}</div>
-                    <div style="font-size:12px; color:#999">$${parseFloat(ms.amount).toLocaleString()} · ${ms.status.charAt(0).toUpperCase() + ms.status.slice(1)}</div>
+                    <div style="font-size:12px; color:#999">
+                      $${parseFloat(ms.amount).toLocaleString()} · ${ms.status.charAt(0).toUpperCase() + ms.status.slice(1)}
+                      ${ms.refund_request_status ? ` · Refund ${ms.refund_request_status.charAt(0).toUpperCase() + ms.refund_request_status.slice(1)}` : ''}
+                    </div>
                   </div>
                   <div>
                     ${ms.status === 'pending' ? `
@@ -1412,7 +1491,14 @@
                       (c.status === 'completed' || c.status === 'cancelled') ? `
                         <span class="badge" style="background:#e0f2fe; color:#0369a1; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:600">Funded</span>
                       ` : `
-                        <button class="btn btn-g btn-sm" onclick="requestMilestone(${ms.id}, this)">Submit Work</button>
+                        ${ms.refund_request_status === 'pending' ? `
+                          <div style="display:flex;gap:6px">
+                            <button class="btn btn-g btn-sm" onclick="respondMilestoneRefund(${ms.id}, 'accept', this)">Accept Refund</button>
+                            <button class="btn btn-w btn-sm" style="color:#b91c1c;border-color:#fecaca" onclick="respondMilestoneRefund(${ms.id}, 'reject', this)">Reject Refund</button>
+                          </div>
+                        ` : `
+                          <button class="btn btn-g btn-sm" onclick="requestMilestone(${ms.id}, this)">Submit Work</button>
+                        `}
                       `
                     ) : (ms.status === 'requested' ? `
                       <span class="badge" style="background:#fef3c7; color:#b45309; padding:4px 8px; border-radius:4px; font-size:11px">Under Review</span>
@@ -1928,6 +2014,113 @@
       }
     })
     .catch(err => toast('Error', 'Update failed'));
+  }
+
+  window.convertToAgencyAccount = function() {
+    fetch(BASE_URL + 'freelancer/api/convert-to-agency.php', {
+      method: 'POST'
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        toast('Agency Mode', data.message || 'Converted successfully');
+        setTimeout(() => location.reload(), 700);
+      } else {
+        toast('Error', data.message || 'Could not convert account');
+      }
+    })
+    .catch(() => toast('Error', 'Could not convert account'));
+  }
+
+  window.createAgencyProfile = function() {
+    const name = (document.getElementById('agency-name-input')?.value || '').trim();
+    const description = (document.getElementById('agency-description-input')?.value || '').trim();
+    if (!name) return toast('Required', 'Agency name is required');
+
+    const fd = new FormData();
+    fd.append('name', name);
+    fd.append('description', description);
+    fetch(BASE_URL + 'freelancer/api/create-agency.php', {
+      method: 'POST',
+      body: fd
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        toast('Success', data.message || 'Agency created');
+        setTimeout(() => location.reload(), 700);
+      } else {
+        toast('Error', data.message || 'Could not create agency');
+      }
+    })
+    .catch(() => toast('Error', 'Could not create agency'));
+  }
+
+  window.addAgencyMember = function() {
+    const email = (document.getElementById('agency-member-email')?.value || '').trim();
+    const role = (document.getElementById('agency-member-role')?.value || 'member').trim();
+    if (!email) return toast('Required', 'Freelancer email is required');
+
+    const fd = new FormData();
+    fd.append('email', email);
+    fd.append('role', role);
+    fetch(BASE_URL + 'freelancer/api/add-agency-member.php', {
+      method: 'POST',
+      body: fd
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        toast('Success', data.message || 'Member added');
+        setTimeout(() => location.reload(), 700);
+      } else {
+        toast('Error', data.message || 'Could not add member');
+      }
+    })
+    .catch(() => toast('Error', 'Could not add member'));
+  }
+
+  window.updateAgencyProfile = function() {
+    const name = (document.getElementById('agency-edit-name')?.value || '').trim();
+    const description = (document.getElementById('agency-edit-description')?.value || '').trim();
+    if (!name) return toast('Required', 'Agency name is required');
+
+    const fd = new FormData();
+    fd.append('name', name);
+    fd.append('description', description);
+    fetch(BASE_URL + 'freelancer/api/update-agency.php', {
+      method: 'POST',
+      body: fd
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        toast('Success', data.message || 'Agency updated');
+        setTimeout(() => location.reload(), 700);
+      } else {
+        toast('Error', data.message || 'Could not update agency');
+      }
+    })
+    .catch(() => toast('Error', 'Could not update agency'));
+  }
+
+  window.deleteAgencyProfile = function() {
+    const confirmed = confirm('Delete this agency? This will remove all agency members and switch them to individual mode.');
+    if (!confirmed) return;
+
+    fetch(BASE_URL + 'freelancer/api/delete-agency.php', {
+      method: 'POST'
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        toast('Deleted', data.message || 'Agency deleted');
+        setTimeout(() => location.reload(), 700);
+      } else {
+        toast('Error', data.message || 'Could not delete agency');
+      }
+    })
+    .catch(() => toast('Error', 'Could not delete agency'));
   }
 
   window.logWork = function(contractId) {
@@ -3212,6 +3405,44 @@ async function requestMilestone(milestoneId, btn) {
         toast('Error', 'Request failed');
         btn.disabled = false;
         btn.innerText = originalText;
+    }
+}
+
+async function respondMilestoneRefund(milestoneId, decision, btn) {
+    const actionLabel = decision === 'accept' ? 'accept' : 'reject';
+    if (!(await remoConfirm(
+        decision === 'accept'
+            ? 'This will return funded escrow to the client and move this milestone back to Awaiting Funding.'
+            : 'This will keep the milestone funded so you can continue work.',
+        `Are you sure you want to ${actionLabel} this refund request?`
+    ))) return;
+
+    const container = btn.parentElement;
+    if (container) {
+        Array.from(container.querySelectorAll('button')).forEach(b => b.disabled = true);
+    }
+
+    try {
+        const res = await fetch(BASE_URL + 'freelancer/api/respond-refund-request.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ milestone_id: milestoneId, decision })
+        });
+        const data = await res.json();
+        if (data.success) {
+            toast('Success', data.message || 'Refund request processed.');
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            toast('Error', data.message || 'Could not process refund request.');
+            if (container) {
+                Array.from(container.querySelectorAll('button')).forEach(b => b.disabled = false);
+            }
+        }
+    } catch (err) {
+        toast('Error', 'Request failed');
+        if (container) {
+            Array.from(container.querySelectorAll('button')).forEach(b => b.disabled = false);
+        }
     }
 }
 

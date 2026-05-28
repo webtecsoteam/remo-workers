@@ -17,6 +17,7 @@ if (!$user || $user['role'] !== 'client') {
 }
 
 $db = getDB();
+ensureAgencySchema();
 $proposalId = $_POST['proposal_id'] ?? 0;
 
 if (!$proposalId) {
@@ -51,11 +52,12 @@ try {
     }
 
     // 2. Create contract
-    $cStmt = $db->prepare("INSERT INTO contracts (job_id, client_id, freelancer_id, proposal_id, amount, contract_type, status) VALUES (?, ?, ?, ?, ?, ?, 'active')");
+    $cStmt = $db->prepare("INSERT INTO contracts (job_id, client_id, freelancer_id, agency_id, proposal_id, amount, contract_type, status) VALUES (?, ?, ?, ?, ?, ?, ?, 'active')");
     $cStmt->execute([
         $proposal['job_id'],
         $user['id'],
         $proposal['freelancer_id'],
+        $proposal['agency_id'] ?: null,
         $proposal['id'],
         $proposal['bid_amount'],
         $proposal['budget_type']

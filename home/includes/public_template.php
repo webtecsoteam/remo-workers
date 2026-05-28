@@ -185,6 +185,8 @@ function publicTemplateApplyFooterTransforms(string $footer): string
     $homeUrl = htmlspecialchars(baseUrl(), ENT_QUOTES, 'UTF-8');
     $homeLogoUrl = htmlspecialchars(baseUrl('assets/white-logo.png'), ENT_QUOTES, 'UTF-8');
     $talentsUrl = htmlspecialchars(baseUrl('talents'), ENT_QUOTES, 'UTF-8');
+    $jobsUrl = htmlspecialchars(baseUrl('jobs'), ENT_QUOTES, 'UTF-8');
+    $postJobUrl = htmlspecialchars(baseUrl('post-job'), ENT_QUOTES, 'UTF-8');
     $brandColumn = '<div class="footer-item">'
         . '<a href="' . $homeUrl . '" class="d-inline-block mb-3"><img src="' . $homeLogoUrl . '" alt="Remoworkers" style="max-height:48px;width:auto"></a>'
         . '<p class="mb-4" style="color:rgba(255,255,255,.75);line-height:1.7">The world\'s work marketplace. Connecting businesses with independent talent across 180+ countries.</p>'
@@ -210,12 +212,24 @@ function publicTemplateApplyFooterTransforms(string $footer): string
         'href="policy/terms-of-service"' => 'href="' . htmlspecialchars(baseUrl('page/terms-of-service'), ENT_QUOTES, 'UTF-8') . '"',
         'href="cookie-policy"' => 'href="' . htmlspecialchars(baseUrl('page/cookie-settings'), ENT_QUOTES, 'UTF-8') . '"',
         'href="blogs"' => 'href="' . htmlspecialchars(baseUrl('blog'), ENT_QUOTES, 'UTF-8') . '"',
+        'href="about"' => 'href="' . htmlspecialchars(baseUrl('page/about-us'), ENT_QUOTES, 'UTF-8') . '"',
+        'href="contact"' => 'href="' . htmlspecialchars(baseUrl('page/contact-us'), ENT_QUOTES, 'UTF-8') . '"',
+        'href="buyer/job/post/job-details"' => 'href="' . $postJobUrl . '"',
+        'href="freelance-jobs"' => 'href="' . $jobsUrl . '"',
     ]);
 
     $accessibilityFooterLink = '<li class="footer-menu__item"><a href="' . htmlspecialchars(baseUrl('page/accessibility'), ENT_QUOTES, 'UTF-8') . '" class="footer-menu__link">Accessibility</a></li>';
     $footer = preg_replace(
         '#(<h5 class="footer-item__title">\s*Terms\s*</h5>\s*<ul class="footer-menu">[\s\S]*?)(</ul>\s*</div>)#i',
         '$1' . $accessibilityFooterLink . '$2',
+        $footer,
+        1
+    );
+
+    $liveChatFooterLink = '<li class="footer-menu__item"><a href="#" class="footer-menu__link js-live-chat-trigger" data-live-chat-trigger="1">Live Chat</a></li>';
+    $footer = preg_replace(
+        '#(<h5 class="footer-item__title">\s*Important\s*Link\s*</h5>\s*<ul class="footer-menu">[\s\S]*?)(</ul>\s*</div>)#i',
+        '$1' . $liveChatFooterLink . '$2',
         $footer,
         1
     );
@@ -232,6 +246,14 @@ function publicTemplateApplyFooterTransforms(string $footer): string
         ['~href="talents"~i', "~href='talents'~i"],
         ['href="' . $talentsUrl . '"', "href='" . $talentsUrl . "'"],
         $footer
+    );
+
+    // Remove "Login Now" from the Important Link list.
+    $footer = preg_replace(
+        '#<li class="footer-menu__item">\s*<a href="freelancer/login" class="footer-menu__link">\s*Login Now\s*</a>\s*</li>#i',
+        '',
+        $footer,
+        1
     );
 
     $footer = preg_replace(

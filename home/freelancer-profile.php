@@ -26,6 +26,30 @@ if (!is_array($skills)) {
     $skills = [];
 }
 
+$associatedAgency = getActiveAgencyForUser($freelancerId);
+$agencyTotalEarnings = 0.0;
+if ($associatedAgency) {
+    $agencyId = (int)($associatedAgency['id'] ?? 0);
+    if ($agencyId > 0) {
+        $agencyEarnStmt = $db->prepare("
+            SELECT COALESCE(SUM(p.amount), 0) AS total_earned
+            FROM payments p
+            INNER JOIN contracts c
+                ON c.job_id = p.job_id
+               AND c.freelancer_id = p.payee_id
+            WHERE c.agency_id = ?
+              AND p.status = 'completed'
+              AND p.transaction_id NOT LIKE 'ESC-%'
+        ");
+        $agencyEarnStmt->execute([$agencyId]);
+        $agencyTotalEarnings = (float)($agencyEarnStmt->fetchColumn() ?: 0);
+        $agencyTotalEarnings += (float)($associatedAgency['agency_earnings_offset'] ?? 0);
+        if ($agencyTotalEarnings < 0) {
+            $agencyTotalEarnings = 0;
+        }
+    }
+}
+
 $reviewsStmt = $db->prepare("
     SELECT r.*, j.title as job_title, u.name as client_name, u.country as client_country
     FROM reviews r
@@ -226,6 +250,14 @@ include __DIR__ . '/includes/header.php';
             <div class="fp-card">
                 <div class="fp-card-head">Details</div>
                 <div class="fp-card-body" style="display:flex;flex-direction:column;gap:10px;font-size:13px">
+                    <div style="display:flex;justify-content:space-between;gap:10px">
+                        <span style="color:var(--muted)">Associated agency</span>
+                        <strong style="text-align:right"><?php echo htmlspecialchars((string)($associatedAgency['name'] ?? 'Independent')); ?></strong>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;gap:10px">
+                        <span style="color:var(--muted)">Complete agency earnings</span>
+                        <strong>$<?php echo number_format((float)$agencyTotalEarnings, 2); ?></strong>
+                    </div>
                     <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Hourly rate</span><strong>$<?php echo number_format((float)($freelancer['hourly_rate'] ?? 0), 2); ?>/hr</strong></div>
                     <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Location</span><span><?php echo htmlspecialchars(getCountryName($freelancer['country'] ?? 'Global')); ?></span></div>
                     <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Member since</span><span><?php echo date('F Y', strtotime($freelancer['created_at'])); ?></span></div>

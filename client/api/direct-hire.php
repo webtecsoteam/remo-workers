@@ -30,6 +30,7 @@ if (!$freelancerId || !$jobId || $amount <= 0) {
 }
 
 $db = getDB();
+ensureAgencySchema();
 
 // 1. Verify freelancer exists and is active
 $freelancerStmt = $db->prepare("SELECT * FROM users WHERE id = ? AND role = 'freelancer'");
@@ -44,6 +45,9 @@ if (!Auth::isIdentityVerified($freelancer)) {
     echo json_encode(['success' => false, 'message' => 'This freelancer has not completed identity verification.']);
     exit;
 }
+
+$activeAgency = getActiveAgencyForUser($freelancerId);
+$agencyIdForHire = (!empty($freelancer['account_mode']) && $freelancer['account_mode'] === 'agency' && $activeAgency) ? (int)$activeAgency['id'] : null;
 
 // 2. Verify job exists, is open/active and belongs to this client
 $jobStmt = $db->prepare("SELECT * FROM jobs WHERE id = ? AND client_id = ? AND status IN ('open', 'in_progress')");
@@ -67,12 +71,13 @@ try {
 
     // 3. Create a pre-accepted proposal
     $propStmt = $db->prepare("
-        INSERT INTO proposals (job_id, freelancer_id, bid_amount, cover_letter, status)
-        VALUES (?, ?, ?, ?, 'accepted')
+        INSERT INTO proposals (job_id, freelancer_id, agency_id, bid_amount, cover_letter, status)
+        VALUES (?, ?, ?, ?, ?, 'accepted')
     ");
     $propStmt->execute([
         $jobId,
         $freelancerId,
+        $agencyIdForHire,
         $amount,
         $message ?: "Direct hire offer sent by " . $user['name']
     ]);
@@ -80,13 +85,14 @@ try {
 
     // 4. Create an active contract
     $contractStmt = $db->prepare("
-        INSERT INTO contracts (job_id, client_id, freelancer_id, proposal_id, amount, contract_type, status)
-        VALUES (?, ?, ?, ?, ?, ?, 'active')
+        INSERT INTO contracts (job_id, client_id, freelancer_id, agency_id, proposal_id, amount, contract_type, status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, 'active')
     ");
     $contractStmt->execute([
         $jobId,
         $user['id'],
         $freelancerId,
+        $agencyIdForHire,
         $proposalId,
         $amount,
         $contractType

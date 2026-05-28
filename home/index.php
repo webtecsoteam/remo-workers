@@ -93,6 +93,7 @@ require_once __DIR__ . '/../includes/blog_public.php';
 require_once __DIR__ . '/../includes/cms_pages.php';
 require_once __DIR__ . '/../includes/home_categories.php';
 require_once __DIR__ . '/../includes/home_featured_talent.php';
+require_once __DIR__ . '/../includes/seo_public.php';
 require_once __DIR__ . '/includes/public_template.php';
 $authUser = Auth::user();
 $isLoggedIn = $authUser !== null;
@@ -205,6 +206,70 @@ $latestBlogSectionHtml .= '</div></div></section>';
 $html = preg_replace(
     '#<section class="blog my-120">[\s\S]*?</section>#i',
     $latestBlogSectionHtml,
+    $html,
+    1
+);
+
+$homeFeedbackItems = [];
+try {
+    $feedbackStmt = getDB()->prepare("
+        SELECT
+            r.rating,
+            r.feedback,
+            r.created_at,
+            u.name AS reviewer_name,
+            u.country AS reviewer_country,
+            u.avatar_url AS reviewer_avatar_url
+        FROM reviews r
+        JOIN users u ON u.id = r.reviewer_id
+        WHERE TRIM(COALESCE(r.feedback, '')) <> ''
+        ORDER BY r.created_at DESC
+        LIMIT 10
+    ");
+    $feedbackStmt->execute();
+    $homeFeedbackItems = $feedbackStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+} catch (Throwable $e) {
+    if (defined('APP_DEBUG') && APP_DEBUG) {
+        error_log('Homepage feedback fetch failed: ' . $e->getMessage());
+    }
+}
+
+$feedbackSectionHtml = '<section class="testimonials my-120"><div class="container"><div class="row justify-content-center"><div class="col-lg-8"><div class="section-heading text-center"><h2 class="section-heading__title">Our Users Feedback</h2></div></div></div><div class="row"><div class="col-lg-12"><div class="testimonial-slider">';
+if (empty($homeFeedbackItems)) {
+    $feedbackSectionHtml .= '<div class="testimonial-item"><span class="testimonial-item__icon"><i class="fas fa-quote-left"></i></span><p class="testimonial-item__desc">No feedback available yet. Complete projects and share your experience to help other users.</p><div class="testimonial-item__info"><div class="testimonial-item__thumb"><img src="' . htmlspecialchars(baseUrl('assets/free-home/images/user/avatar.png'), ENT_QUOTES, 'UTF-8') . '" class="fit-image" alt="User"></div><div class="testimonial-item__details"><h6 class="testimonial-item__name">RemoWorkers User</h6><span class="testimonial-item__designation">From Community</span></div></div></div>';
+} else {
+    foreach ($homeFeedbackItems as $item) {
+        $name = trim((string) ($item['reviewer_name'] ?? 'User'));
+        if ($name === '') {
+            $name = 'User';
+        }
+        $country = trim((string) ($item['reviewer_country'] ?? ''));
+        $designation = $country !== '' ? ('From ' . $country) : 'From Community';
+        $feedbackText = trim((string) ($item['feedback'] ?? ''));
+        $rating = is_numeric($item['rating'] ?? null) ? (float) $item['rating'] : 0.0;
+        if ($rating > 0.0) {
+            $feedbackText = '★ ' . number_format($rating, 1) . ' — ' . $feedbackText;
+        }
+
+        $avatarUrl = publicAvatarUrl(isset($item['reviewer_avatar_url']) ? (string) $item['reviewer_avatar_url'] : null);
+        if ($avatarUrl === '') {
+            $avatarUrl = baseUrl('assets/free-home/images/user/avatar.png');
+        }
+
+        $feedbackSectionHtml .= '<div class="testimonial-item">'
+            . '<span class="testimonial-item__icon"><i class="fas fa-quote-left"></i></span>'
+            . '<p class="testimonial-item__desc">' . htmlspecialchars($feedbackText, ENT_QUOTES, 'UTF-8') . '</p>'
+            . '<div class="testimonial-item__info">'
+            . '<div class="testimonial-item__thumb"><img src="' . htmlspecialchars($avatarUrl, ENT_QUOTES, 'UTF-8') . '" class="fit-image" alt="' . htmlspecialchars($name, ENT_QUOTES, 'UTF-8') . '"></div>'
+            . '<div class="testimonial-item__details"><h6 class="testimonial-item__name">' . htmlspecialchars($name, ENT_QUOTES, 'UTF-8') . '</h6><span class="testimonial-item__designation">' . htmlspecialchars($designation, ENT_QUOTES, 'UTF-8') . '</span></div>'
+            . '</div></div>';
+    }
+}
+$feedbackSectionHtml .= '</div></div></div></div></section>';
+
+$html = preg_replace(
+    '#<section class="testimonials my-120">[\s\S]*?</section>#i',
+    $feedbackSectionHtml,
     $html,
     1
 );
@@ -439,6 +504,23 @@ $inject = str_replace('__MAIN_JS__', htmlspecialchars(baseUrl('assets/free-home/
 $inject = str_replace('__UI_ALERTS_JS__', htmlspecialchars(baseUrl('assets/js/ui-alerts.js'), ENT_QUOTES, 'UTF-8'), $inject);
 $inject = str_replace('__HOME_MODALS_JS__', htmlspecialchars(baseUrl('home/js/home-modals.js?v=1.0.5'), ENT_QUOTES, 'UTF-8'), $inject);
 $inject = str_replace('__HOME_AUTH_JS__', htmlspecialchars(baseUrl('home/js/home-auth.js?v=1.0.4'), ENT_QUOTES, 'UTF-8'), $inject);
+
+// Replace imported template SEO tags with normalized tags for social crawlers.
+$seoCleanupPatterns = [
+    '#<title\b[^>]*>.*?</title>#is',
+    '#<meta\b[^>]*name=("|\')(?:title|description|keywords|twitter:[^"\']+)\\1[^>]*>#is',
+    '#<meta\b[^>]*property=("|\')(?:og:[^"\']+)\\1[^>]*>#is',
+    '#<meta\b[^>]*itemprop=("|\')(?:name|description|image)\\1[^>]*>#is',
+    '#<link\b[^>]*rel=("|\')canonical\\1[^>]*>#is',
+];
+$html = preg_replace($seoCleanupPatterns, '', $html);
+
+ob_start();
+renderSeoMetaTags(['canonical' => baseUrl(), 'og_image' => baseUrl('assets/logo.png')], true);
+$seoHeadHtml = trim((string) ob_get_clean());
+if ($seoHeadHtml !== '') {
+    $html = preg_replace('#</head>#i', $seoHeadHtml . "\n</head>", $html, 1);
+}
 
 $html = str_replace('</body>', $inject . '</body>', $html);
 echo $html;

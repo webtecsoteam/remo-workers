@@ -40,6 +40,67 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($blockError) {
         json_response(['success' => false, 'error' => $blockError]);
     }
+    ensureAgencySchema();
+    $activeAgency = getActiveAgencyForUser((int)$user['id']);
+    if (($user['role'] ?? '') === 'freelancer' && !empty($user['account_mode']) && $user['account_mode'] === 'agency' && $activeAgency) {
+        $agencyId = (int)$activeAgency['id'];
+        $memberStmt = $db->prepare("
+            SELECT user_id
+            FROM agency_members
+            WHERE agency_id = ? AND status = 'active'
+        ");
+        $memberStmt->execute([$agencyId]);
+        $memberIds = array_map('intval', $memberStmt->fetchAll(PDO::FETCH_COLUMN) ?: []);
+        if (empty($memberIds)) {
+            json_response(['success' => false, 'error' => 'No active agency contract with this user']);
+        }
+
+        // Allow internal agency messaging.
+        if (in_array($receiver_id, $memberIds, true)) {
+            $canMessageReceiver = true;
+        } else {
+            $memberPh = implode(',', array_fill(0, count($memberIds), '?'));
+            $accessSql = "
+                SELECT 1
+                FROM contracts c
+                WHERE c.status IN ('active', 'paused')
+                  AND c.client_id = ?
+                  AND (
+                      c.agency_id = ?
+                      OR c.freelancer_id IN ($memberPh)
+                  )
+                LIMIT 1
+            ";
+            $accessStmt = $db->prepare($accessSql);
+            $accessParams = array_merge([$receiver_id, $agencyId], $memberIds);
+            $accessStmt->execute($accessParams);
+            $canMessageReceiver = (bool)$accessStmt->fetchColumn();
+        }
+
+        if (!$canMessageReceiver) {
+            // Fallback: allow if there is already a chat thread between this agency and receiver.
+            $historySql = "
+                SELECT 1
+                FROM messages
+                WHERE (
+                    receiver_id = ?
+                    AND sender_id IN (" . implode(',', array_fill(0, count($memberIds), '?')) . ")
+                ) OR (
+                    sender_id = ?
+                    AND receiver_id IN (" . implode(',', array_fill(0, count($memberIds), '?')) . ")
+                )
+                LIMIT 1
+            ";
+            $historyStmt = $db->prepare($historySql);
+            $historyParams = array_merge([$receiver_id], $memberIds, [$receiver_id], $memberIds);
+            $historyStmt->execute($historyParams);
+            $canMessageReceiver = (bool)$historyStmt->fetchColumn();
+        }
+
+        if (!$canMessageReceiver) {
+            json_response(['success' => false, 'error' => 'No active agency contract with this user']);
+        }
+    }
 
     $attachmentPath = null;
     $attachmentName = null;

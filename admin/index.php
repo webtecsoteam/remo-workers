@@ -335,6 +335,10 @@ if (!$user || $user['role'] !== 'admin') {
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         Users
       </div>
+      <div class="nav-item" onclick="showPage('agencies', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 10h6"/><path d="M9 14h6"/></svg>
+        Agencies
+      </div>
       <div class="nav-item" onclick="showPage('jobs', this)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
         Jobs
@@ -536,6 +540,19 @@ if (!$user || $user['role'] !== 'admin') {
         </div>
         <div class="table-wrapper" id="usersTable">
           <div class="loading"><span class="spinner"></span>Loading users…</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AGENCIES -->
+    <div class="page" id="page-agencies">
+      <div class="card">
+        <div class="card-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+          <span class="card-title">Agency Management</span>
+          <input type="text" id="agenciesSearch" placeholder="Search by agency, owner, or email…" oninput="debounceAgenciesSearch()" style="padding:8px 12px; border:1px solid var(--border); border-radius:8px; font-size:13px; min-width:260px; outline:none;">
+        </div>
+        <div class="table-wrapper" id="agenciesTable">
+          <div class="loading"><span class="spinner"></span>Loading agencies…</div>
         </div>
       </div>
     </div>
@@ -1600,7 +1617,7 @@ function verificationDocLinks(filePath) {
   return link('View Doc', raw);
 }
 
-const PAGE_TITLES = { disputes: 'Dispute', payments: 'Payments Management', 'payment-holds': 'Payment Holds', messages: 'Chats', blogs: 'Blog Management', 'cms-pages': 'Pages', seo: 'SEO Settings', countries: 'Countries', marketing: 'Marketing Emails', 'user-profile': 'User Profile', contracts: 'Contracts', 'job-detail': 'Job Detail', 'job-categories': 'Job Categories' };
+const PAGE_TITLES = { disputes: 'Dispute', payments: 'Payments Management', 'payment-holds': 'Payment Holds', messages: 'Chats', blogs: 'Blog Management', 'cms-pages': 'Pages', seo: 'SEO Settings', countries: 'Countries', marketing: 'Marketing Emails', 'user-profile': 'User Profile', contracts: 'Contracts', 'job-detail': 'Job Detail', 'job-categories': 'Job Categories', agencies: 'Agencies' };
 let marketingVerifiedFilter = '';
 let marketingFreelancersCache = [];
 let marketingSelectedIds = new Set();
@@ -1612,6 +1629,7 @@ let blogSearchTimer = null;
 let cmsPageSearchTimer = null;
 let countrySearchTimer = null;
 let userSearchTimer = null;
+let agenciesSearchTimer = null;
 let blogViewId = null;
 let paymentsSearchTimer = null;
 let conversationsSearchTimer = null;
@@ -1642,6 +1660,7 @@ function refreshPage(name) {
     stopOnlineRefresh();
   }
   if (active === 'users') loadUsers();
+  if (active === 'agencies') loadAgencies();
   if (active === 'jobs') loadJobs();
   if (active === 'job-categories') loadJobCategories();
   if (active === 'contracts') loadContracts();
@@ -2815,6 +2834,200 @@ function renderUsersTable(users) {
       </tr>`).join('')}
     </tbody>
   </table>`;
+}
+
+function debounceAgenciesSearch() {
+  clearTimeout(agenciesSearchTimer);
+  agenciesSearchTimer = setTimeout(loadAgencies, 300);
+}
+
+async function loadAgencies() {
+  const table = document.getElementById('agenciesTable');
+  if (!table) return;
+  table.innerHTML = '<div class="loading"><span class="spinner"></span>Loading agencies…</div>';
+  const search = (document.getElementById('agenciesSearch')?.value || '').trim();
+  const res = await apiFetch('get_agencies_admin', { search });
+  if (!res.success) {
+    table.innerHTML = `<div class="loading" style="color:var(--red);">${escapeHtml(res.message || 'Could not load agencies')}</div>`;
+    return;
+  }
+  table.innerHTML = renderAgenciesTable(res.data || []);
+  applyPagination('#agenciesTable', 'tbody tr[data-kind="agency"]', 8);
+}
+
+function renderAgenciesTable(agencies) {
+  if (!agencies.length) return '<div class="loading">No agencies found.</div>';
+
+  return `<table>
+    <thead>
+      <tr>
+        <th>Agency</th>
+        <th>Owner</th>
+        <th>Members</th>
+        <th>Created</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${agencies.map(a => {
+        const members = Array.isArray(a.members) ? a.members : [];
+        const membersHtml = members.length
+          ? members.map(m => {
+              const isOwner = m.role === 'owner';
+              const roleControl = isOwner
+                ? `<span class="badge badge-amber">Owner</span>`
+                : `<select class="btn btn-outline btn-sm" onchange="changeAgencyMemberRole(${a.id}, ${m.user_id}, this.value)">
+                    <option value="member" ${m.role === 'member' ? 'selected' : ''}>Member</option>
+                    <option value="admin" ${m.role === 'admin' ? 'selected' : ''}>Admin</option>
+                  </select>`;
+              const removeBtn = isOwner
+                ? ''
+                : `<button class="btn btn-danger btn-sm" onclick="removeAgencyMember(${a.id}, ${m.user_id}, '${escapeJsStr(m.name)}')">Remove</button>`;
+              return `<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)">
+                <div style="min-width:0">
+                  <div style="font-size:12.5px;font-weight:600">${escapeHtml(m.name || 'Member')}</div>
+                  <div style="font-size:11px;color:var(--text-3)">${escapeHtml(m.email || '')}</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+                  ${roleControl}
+                  ${removeBtn}
+                </div>
+              </div>`;
+            }).join('')
+          : '<span style="color:var(--text-3);font-size:12px">No members</span>';
+
+        return `<tr data-kind="agency">
+          <td>
+            <div style="display:flex;flex-direction:column;gap:6px;min-width:220px">
+              <input id="agency-name-${a.id}" type="text" value="${escapeHtml(a.name || '')}" style="padding:7px 10px;border:1px solid var(--border);border-radius:7px;font-size:12px;outline:none">
+              <textarea id="agency-desc-${a.id}" rows="2" style="padding:7px 10px;border:1px solid var(--border);border-radius:7px;font-size:12px;resize:vertical;outline:none">${escapeHtml(a.description || '')}</textarea>
+              <div style="display:flex;flex-direction:column;gap:8px;padding:12px;min-height:88px;border:1px solid #d1fae5;border-radius:10px;background:linear-gradient(180deg,#f0fdf4 0%,#ecfdf3 100%)">
+                <div style="font-size:11px;color:#065f46;font-weight:700;letter-spacing:.02em;text-transform:uppercase">Complete agency earnings</div>
+                <div style="font-size:20px;line-height:1.1;font-weight:800;color:#065f46">$${Number(a.agency_earned_total || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                <div style="font-size:11px;color:#047857">(live: $${Number(a.agency_earned_live || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} · offset: $${Number(a.agency_earnings_offset || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })})</div>
+                </div>
+                <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+                  <input id="agency-earnings-amount-${a.id}" type="number" min="0.01" step="0.01" placeholder="Amount" style="padding:7px 10px;border:1px solid var(--border);border-radius:7px;font-size:12px;outline:none;max-width:120px">
+                  <button class="btn btn-outline btn-sm" onclick="adjustAgencyEarnings(${a.id}, 'add')">+ Add</button>
+                  <button class="btn btn-outline btn-sm" onclick="adjustAgencyEarnings(${a.id}, 'subtract')">- Subtract</button>
+                </div>
+              </div>
+              <div style="font-size:11px;color:var(--text-3)">Slug: ${escapeHtml(a.slug || '—')} · ID #${a.id}</div>
+            </div>
+          </td>
+          <td>
+            <div style="font-size:12.5px;font-weight:600">${escapeHtml(a.owner_name || 'Unknown')}</div>
+            <div style="font-size:11px;color:var(--text-3)">${escapeHtml(a.owner_email || '')}</div>
+          </td>
+          <td style="min-width:300px">
+            <div style="font-size:11px;color:var(--text-3);margin-bottom:6px">${members.length} active member${members.length === 1 ? '' : 's'}</div>
+            <div style="max-height:190px;overflow:auto;padding-right:4px">${membersHtml}</div>
+          </td>
+          <td style="font-size:12px;color:var(--text-2)">${a.created_at ? new Date(a.created_at).toLocaleString() : '—'}</td>
+          <td style="display:flex;flex-direction:column;gap:8px;min-width:120px">
+            <button class="btn btn-primary btn-sm" onclick="saveAgencyFromAdmin(${a.id})">Save</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteAgencyFromAdmin(${a.id}, '${escapeJsStr(a.name || '')}')">Delete</button>
+          </td>
+        </tr>`;
+      }).join('')}
+    </tbody>
+  </table>`;
+}
+
+async function saveAgencyFromAdmin(agencyId) {
+  const name = (document.getElementById(`agency-name-${agencyId}`)?.value || '').trim();
+  const description = (document.getElementById(`agency-desc-${agencyId}`)?.value || '').trim();
+  if (!name) {
+    remoAlert('Agency name is required', 'Validation');
+    return;
+  }
+  const res = await apiPost('update_agency_admin', { agency_id: agencyId, name, description });
+  if (res.success) {
+    toast('Saved', res.message || 'Agency updated', 'success');
+  } else {
+    remoAlert(res.message || 'Could not update agency', 'Error');
+  }
+  await loadAgencies();
+}
+
+async function adjustAgencyEarnings(agencyId, mode) {
+  const input = document.getElementById(`agency-earnings-amount-${agencyId}`);
+  try {
+    const amount = Number(input?.value || 0);
+    if (!Number.isFinite(amount) || amount <= 0) {
+      toast('Validation', 'Enter a valid amount greater than 0', 'error');
+      return;
+    }
+
+    const res = await apiPost('adjust_agency_earnings_admin', { agency_id: agencyId, mode, amount });
+    if (res && res.success) {
+      toast('Updated', res.message || 'Agency earnings updated', 'success');
+      if (input) input.value = '';
+    } else {
+      const msg = (res && res.message) ? res.message : 'Could not update agency earnings';
+      toast('Error', msg, 'error');
+    }
+  } catch (e) {
+    toast('Error', (e && e.message) ? e.message : 'Could not update agency earnings', 'error');
+  } finally {
+    try {
+      await loadAgencies();
+    } catch (e) {
+      window.location.reload();
+    }
+  }
+}
+
+async function deleteAgencyFromAdmin(agencyId, agencyName) {
+  const ok = await remoConfirm(
+    `Delete agency "${agencyName}"? All linked users will be moved to individual mode.`,
+    'Delete agency?',
+    { danger: true, confirmLabel: 'Delete' }
+  );
+  if (!ok) return;
+  const res = await apiPost('delete_agency_admin', { agency_id: agencyId });
+  if (res.success) {
+    toast('Deleted', res.message || 'Agency deleted', 'success');
+  } else {
+    remoAlert(res.message || 'Could not delete agency', 'Error');
+  }
+  await loadAgencies();
+}
+
+async function changeAgencyMemberRole(agencyId, userId, role) {
+  const res = await apiPost('update_agency_member_admin', { agency_id: agencyId, user_id: userId, role });
+  if (res.success) {
+    toast('Updated', res.message || 'Member role updated', 'success');
+  } else {
+    remoAlert(res.message || 'Could not update member role', 'Error');
+  }
+  await loadAgencies();
+}
+
+async function removeAgencyMember(agencyId, userId, memberName) {
+  const ok = await remoConfirm(
+    `Remove "${memberName}" from this agency?`,
+    'Remove member?',
+    { danger: true, confirmLabel: 'Remove' }
+  );
+  if (!ok) return;
+  try {
+    const res = await apiPost('remove_agency_member_admin', { agency_id: agencyId, user_id: userId });
+    if (res && res.success) {
+      toast('Removed', res.message || 'Member removed', 'success');
+    } else {
+      const msg = (res && res.message) ? res.message : 'Could not remove member';
+      toast('Error', msg, 'error');
+    }
+  } catch (e) {
+    toast('Error', (e && e.message) ? e.message : 'Could not remove member', 'error');
+  } finally {
+    try {
+      await loadAgencies();
+    } catch (e) {
+      window.location.reload();
+    }
+  }
 }
 
 function onUserStatusChange(userId, selectEl, userName, userEmail) {

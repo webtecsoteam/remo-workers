@@ -12,6 +12,64 @@
   let selectedCVType = null;
   let selectedCVFile = null;
 
+  (function setupDashboardLiveChat() {
+    function hideFloatChatButton() {
+      if (!window.$zoho || !$zoho.salesiq) return;
+      try {
+        if ($zoho.salesiq.floatbutton && typeof $zoho.salesiq.floatbutton.visible === 'function') {
+          $zoho.salesiq.floatbutton.visible('hide');
+        }
+      } catch (e) {}
+    }
+
+    function injectZohoScript() {
+      if (document.getElementById('zsiqscript')) return;
+      window.$zoho = window.$zoho || {};
+      $zoho.salesiq = $zoho.salesiq || {};
+      $zoho.salesiq.ready = hideFloatChatButton;
+      const s = document.createElement('script');
+      s.id = 'zsiqscript';
+      s.src = 'https://salesiq.zohopublic.com/widget?wc=siq3522b6c8efa1866fa919f61c10976b22744d3361ea908b3985ef2a2bb0af56e8';
+      s.defer = true;
+      document.body.appendChild(s);
+    }
+
+    window.openDashboardLiveChat = function () {
+      injectZohoScript();
+      if (!window.$zoho || !$zoho.salesiq) return;
+      try {
+        if ($zoho.salesiq.chat && typeof $zoho.salesiq.chat.start === 'function') {
+          $zoho.salesiq.chat.start();
+          return;
+        }
+        if ($zoho.salesiq.floatwindow && typeof $zoho.salesiq.floatwindow.visible === 'function') {
+          $zoho.salesiq.floatwindow.visible('show');
+          return;
+        }
+      } catch (e) {}
+      let tries = 0;
+      const timer = setInterval(function () {
+        tries += 1;
+        try {
+          if (window.$zoho && $zoho.salesiq && $zoho.salesiq.chat && typeof $zoho.salesiq.chat.start === 'function') {
+            $zoho.salesiq.chat.start();
+            clearInterval(timer);
+            return;
+          }
+          if (window.$zoho && $zoho.salesiq && $zoho.salesiq.floatwindow && typeof $zoho.salesiq.floatwindow.visible === 'function') {
+            $zoho.salesiq.floatwindow.visible('show');
+            clearInterval(timer);
+            return;
+          }
+        } catch (err) {}
+        if (tries >= 20) {
+          clearInterval(timer);
+          if (typeof toast === 'function') toast('Live Chat', 'Please try again in a moment.');
+        }
+      }, 300);
+    };
+  })();
+
   // ─── MODALS ───
   function fundMilestoneBody(cfg) {
     const bal = availableBalance;
@@ -2147,7 +2205,10 @@
             <div style="padding:12px; border:1px solid var(--uw-border); border-radius:10px; display:flex; justify-content:space-between; align-items:center; background:white">
               <div>
                 <div style="font-size:13px; font-weight:600">${ms.description}</div>
-                <div style="font-size:11px; color:var(--uw-gray)">$${parseFloat(ms.amount).toLocaleString()} · ${ms.status.charAt(0).toUpperCase() + ms.status.slice(1)}</div>
+                <div style="font-size:11px; color:var(--uw-gray)">
+                  $${parseFloat(ms.amount).toLocaleString()} · ${ms.status.charAt(0).toUpperCase() + ms.status.slice(1)}
+                  ${ms.refund_request_status ? ` · Refund ${ms.refund_request_status.charAt(0).toUpperCase() + ms.refund_request_status.slice(1)}` : ''}
+                </div>
               </div>
               <div>
                 ${ms.status === 'pending' ? (
@@ -2157,7 +2218,13 @@
                     <button class="btn btn-g btn-sm" onclick="openFundMilestoneModal(${ms.id}, ${ms.amount}, '${ms.description.replace(/'/g, "\\'")}', ${contract.id})">Fund Milestone</button>
                   `
             ) : (ms.status === 'funded' ? `
-                  <span class="badge" style="background:#e0f2fe; color:#0369a1; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:600">Funded (In Progress)</span>
+                ${ms.refund_request_status === 'pending' ? `
+                  <span class="badge" style="background:#fef3c7; color:#b45309; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:600">Refund Requested</span>
+                ` : `
+                  <button class="btn btn-w btn-sm" style="color:#b91c1c;border-color:#fecaca" onclick="requestMilestoneRefund(${ms.id}, this, ${contract.id})">
+                    ${ms.refund_request_status === 'rejected' ? 'Request Refund Again' : 'Request Refund'}
+                  </button>
+                `}
                 ` : (ms.status === 'requested' ? (
               (contract.status === 'completed' || contract.status === 'cancelled') ? `
                     <span class="badge" style="background:#fef3c7; color:#b45309; padding:4px 8px; border-radius:4px; font-size:11px">Requested</span>
@@ -2336,6 +2403,41 @@
         }, 1000);
       } else {
         toast('Error', data.message);
+        btn.disabled = false;
+        btn.innerText = originalText;
+      }
+    } catch (err) {
+      toast('Error', 'Communication failed');
+      btn.disabled = false;
+      btn.innerText = originalText;
+    }
+  }
+
+  async function requestMilestoneRefund(milestoneId, btn, contractId) {
+    if (!(await remoConfirm('The freelancer will be asked to accept or reject your refund request.', 'Request refund for this funded milestone?'))) return;
+
+    const originalText = btn.innerText;
+    btn.disabled = true;
+    btn.innerText = 'Requesting...';
+
+    try {
+      const res = await fetch(BASE_URL + 'client/api/request-refund-milestone.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ milestone_id: milestoneId })
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast('Refund Requested', data.message || 'Refund request has been sent to the freelancer.');
+        setTimeout(() => {
+          if (typeof contractId !== 'undefined') {
+            manageContract(contractId);
+          } else {
+            location.reload();
+          }
+        }, 1000);
+      } else {
+        toast('Error', data.message || 'Could not request refund.');
         btn.disabled = false;
         btn.innerText = originalText;
       }

@@ -40,6 +40,57 @@ try {
 }
 
 $userSkills = !empty($user['skills']) ? json_decode($user['skills'], true) : [];
+$activeAgency = getActiveAgencyForUser((int)$user['id']);
+$isAgencyAccount = (($user['account_mode'] ?? 'individual') === 'agency');
+$agencyMembers = [];
+$completeAgencyEarnings = 0.0;
+if ($activeAgency) {
+    try {
+        $agencyMemberStmt = $db->prepare("
+            SELECT am.role, am.status, u.id, u.name, u.email
+            FROM agency_members am
+            JOIN users u ON u.id = am.user_id
+            WHERE am.agency_id = ? AND am.status = 'active'
+            ORDER BY FIELD(am.role, 'owner', 'admin', 'member'), u.name ASC
+        ");
+        $agencyMemberStmt->execute([(int)$activeAgency['id']]);
+        $agencyMembers = $agencyMemberStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+
+        $agencyInviteStmt = $db->prepare("
+            SELECT ami.role, ami.status, u.id, u.name, u.email
+            FROM agency_member_invitations ami
+            JOIN users u ON u.id = ami.user_id
+            WHERE ami.agency_id = ? AND ami.status = 'pending'
+            ORDER BY ami.created_at DESC
+        ");
+        $agencyInviteStmt->execute([(int)$activeAgency['id']]);
+        $pendingInvites = $agencyInviteStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        foreach ($pendingInvites as $pendingInvite) {
+            $pendingInvite['status'] = 'pending';
+            $agencyMembers[] = $pendingInvite;
+        }
+
+        $agencyEarnStmt = $db->prepare("
+            SELECT COALESCE(SUM(p.amount), 0) AS total_earned
+            FROM payments p
+            INNER JOIN contracts c
+                ON c.job_id = p.job_id
+               AND c.freelancer_id = p.payee_id
+            WHERE c.agency_id = ?
+              AND p.status = 'completed'
+              AND p.transaction_id NOT LIKE 'ESC-%'
+        ");
+        $agencyEarnStmt->execute([(int)$activeAgency['id']]);
+        $completeAgencyEarnings = (float)($agencyEarnStmt->fetchColumn() ?: 0);
+        $completeAgencyEarnings += (float)($activeAgency['agency_earnings_offset'] ?? 0);
+        if ($completeAgencyEarnings < 0) {
+            $completeAgencyEarnings = 0;
+        }
+    } catch (Throwable $e) {
+        $agencyMembers = [];
+        $completeAgencyEarnings = 0.0;
+    }
+}
 
 // Initialize variables with defaults
 $allContracts = [];
@@ -83,9 +134,48 @@ try {
         $mStmt = $db->prepare("SELECT contract_id, milestones.* FROM milestones WHERE contract_id IN ($placeholders) ORDER BY id ASC");
         $mStmt->execute($contractIds);
         $allMilestones = $mStmt->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_ASSOC);
+
+        $latestRefundByMilestone = [];
+        $milestoneIds = [];
+        foreach ($allMilestones as $rows) {
+            foreach ($rows as $row) {
+                $milestoneIds[] = (int)$row['id'];
+            }
+        }
+        $milestoneIds = array_values(array_unique(array_filter($milestoneIds)));
+        if (!empty($milestoneIds)) {
+            try {
+                $mPlaceholders = implode(',', array_fill(0, count($milestoneIds), '?'));
+                $refundStmt = $db->prepare("
+                    SELECT rr.*
+                    FROM milestone_refund_requests rr
+                    INNER JOIN (
+                        SELECT milestone_id, MAX(id) AS latest_id
+                        FROM milestone_refund_requests
+                        WHERE milestone_id IN ($mPlaceholders)
+                        GROUP BY milestone_id
+                    ) latest ON latest.latest_id = rr.id
+                ");
+                $refundStmt->execute($milestoneIds);
+                foreach (($refundStmt->fetchAll(PDO::FETCH_ASSOC) ?: []) as $rr) {
+                    $latestRefundByMilestone[(int)$rr['milestone_id']] = $rr;
+                }
+            } catch (Throwable $e) {
+                // Refund table may not exist yet; skip enrichment.
+            }
+        }
         
         foreach ($allContracts as &$c) {
             $c['milestones'] = $allMilestones[$c['id']] ?? [];
+            foreach ($c['milestones'] as &$ms) {
+                $refund = $latestRefundByMilestone[(int)$ms['id']] ?? null;
+                $ms['refund_request_status'] = $refund['status'] ?? null;
+                $ms['refund_requested_at'] = $refund['created_at'] ?? null;
+                $ms['refund_response_at'] = $refund['responded_at'] ?? null;
+                $ms['refund_client_note'] = $refund['client_note'] ?? null;
+                $ms['refund_freelancer_note'] = $refund['freelancer_note'] ?? null;
+            }
+            unset($ms);
         }
         unset($c);
     }
@@ -361,6 +451,7 @@ include __DIR__ . '/includes/header.php';
       <span class="sb-ico">💬</span>Messages
       <?php if ($unreadMessages > 0): ?><span class="sb-badge"><?php echo $unreadMessages; ?></span><?php endif; ?>
     </div>
+    <div class="sb-item" onclick="openDashboardLiveChat()"><span class="sb-ico">🟢</span>Chat with us</div>
     
     <div class="sb-section">Earnings</div>
     <div id="nav-earnings" class="sb-item" onclick="showPage('earnings')"><span class="sb-ico">💰</span>Earnings & Payments</div>

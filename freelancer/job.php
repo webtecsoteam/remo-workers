@@ -57,6 +57,8 @@ $submittedProposals = [];
 $jobInvitations = [];
 $allContracts = [];
 $myServices = [];
+$activeAgency = getActiveAgencyForUser((int)$user['id']);
+$canApplyAsAgency = !empty($activeAgency['id']);
 $totalProposals = 0;
 $totalContracts = 0;
 $unreadMessages = 0;
@@ -326,6 +328,19 @@ include __DIR__ . '/includes/header.php';
                   <option value="180">3 to 6 months</option>
                   <option value="365">More than 6 months</option>
                 </select>
+              </div>
+
+              <div style="margin-bottom:20px">
+                <label style="display:block;font-weight:700;margin-bottom:8px;font-size:14px">Apply As</label>
+                <select id="prop-apply-as" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-size:14px;background:#fff">
+                  <option value="individual">Individual</option>
+                  <?php if ($canApplyAsAgency): ?>
+                  <option value="agency">Agency<?php echo !empty($activeAgency['name']) ? ' (' . htmlspecialchars((string)$activeAgency['name']) . ')' : ''; ?></option>
+                  <?php endif; ?>
+                </select>
+                <?php if (!$canApplyAsAgency): ?>
+                <div style="margin-top:8px;font-size:12px;color:var(--muted2)">Create or join an agency from Profile to apply as agency.</div>
+                <?php endif; ?>
               </div>
 
               <div style="margin-bottom:20px">

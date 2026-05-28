@@ -94,6 +94,18 @@ function getSeoSettings(): array
     return $out;
 }
 
+function seoAbsoluteUrl(string $url): string
+{
+    $url = trim($url);
+    if ($url === '') {
+        return '';
+    }
+    if (preg_match('#^https?://#i', $url)) {
+        return $url;
+    }
+    return baseUrl(ltrim($url, '/'));
+}
+
 /**
  * @param array{title?: string, description?: string, keywords?: string, canonical?: string, og_image?: string} $overrides
  */
@@ -122,8 +134,15 @@ function renderSeoMetaTags(array $overrides = [], bool $isHome = false): void
             : $site['seo_site_keywords'];
     }
 
-    $ogImage = trim($overrides['og_image'] ?? $site['seo_og_image'] ?? '');
+    $ogImage = seoAbsoluteUrl(trim($overrides['og_image'] ?? $site['seo_og_image'] ?? ''));
+    if ($ogImage === '') {
+        $ogImage = baseUrl('assets/logo.png');
+    }
     $canonical = trim($overrides['canonical'] ?? '');
+    if ($canonical === '') {
+        $canonical = $isHome ? baseUrl() : '';
+    }
+    $canonical = seoAbsoluteUrl($canonical);
 
     echo '<title>' . htmlspecialchars($title, ENT_QUOTES, 'UTF-8') . "</title>\n";
     if ($description !== '') {
@@ -132,13 +151,21 @@ function renderSeoMetaTags(array $overrides = [], bool $isHome = false): void
     if ($keywords !== '') {
         echo '<meta name="keywords" content="' . htmlspecialchars($keywords, ENT_QUOTES, 'UTF-8') . "\">\n";
     }
+    echo '<meta property="og:type" content="website">' . "\n";
     echo '<meta property="og:title" content="' . htmlspecialchars($title, ENT_QUOTES, 'UTF-8') . "\">\n";
     if ($description !== '') {
         echo '<meta property="og:description" content="' . htmlspecialchars($description, ENT_QUOTES, 'UTF-8') . "\">\n";
     }
-    if ($ogImage !== '') {
-        echo '<meta property="og:image" content="' . htmlspecialchars($ogImage, ENT_QUOTES, 'UTF-8') . "\">\n";
+    if ($canonical !== '') {
+        echo '<meta property="og:url" content="' . htmlspecialchars($canonical, ENT_QUOTES, 'UTF-8') . "\">\n";
     }
+    echo '<meta property="og:image" content="' . htmlspecialchars($ogImage, ENT_QUOTES, 'UTF-8') . "\">\n";
+    echo '<meta name="twitter:card" content="summary_large_image">' . "\n";
+    echo '<meta name="twitter:title" content="' . htmlspecialchars($title, ENT_QUOTES, 'UTF-8') . "\">\n";
+    if ($description !== '') {
+        echo '<meta name="twitter:description" content="' . htmlspecialchars($description, ENT_QUOTES, 'UTF-8') . "\">\n";
+    }
+    echo '<meta name="twitter:image" content="' . htmlspecialchars($ogImage, ENT_QUOTES, 'UTF-8') . "\">\n";
     if ($canonical !== '') {
         echo '<link rel="canonical" href="' . htmlspecialchars($canonical, ENT_QUOTES, 'UTF-8') . "\">\n";
     }

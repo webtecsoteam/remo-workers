@@ -5,6 +5,7 @@ $user = Auth::user();
 if(!$user) { redirect(baseUrl()); }
 
 $db = getDB();
+ensureAgencySchema();
 $vDoc = $db->prepare("SELECT status FROM user_documents WHERE user_id = ? ORDER BY created_at DESC LIMIT 1");
 $vDoc->execute([$user['id']]);
 $vStatus = $vDoc->fetchColumn() ?: 'unverified';
@@ -117,10 +118,11 @@ foreach ($allJobs as $aj) {
 }
 
 // 6. All Proposals for Proposals Page
-$proposalsStmt = $db->prepare("SELECT p.*, j.title as job_title, j.budget_type, u.name as freelancer_name, u.email as freelancer_email, u.avatar_url as freelancer_avatar, u.title as freelancer_title, u.hourly_rate as freelancer_hourly_rate
+$proposalsStmt = $db->prepare("SELECT p.*, j.title as job_title, j.budget_type, u.name as freelancer_name, u.email as freelancer_email, u.avatar_url as freelancer_avatar, u.title as freelancer_title, u.hourly_rate as freelancer_hourly_rate, a.name as agency_name
                                 FROM proposals p 
                                 JOIN jobs j ON p.job_id = j.id 
                                 JOIN users u ON p.freelancer_id = u.id 
+                                LEFT JOIN agencies a ON p.agency_id = a.id
                                 WHERE j.client_id = ? 
                                 ORDER BY p.created_at DESC");
 $proposalsStmt->execute([$user['id']]);
@@ -176,9 +178,48 @@ if (!empty($allContracts)) {
     $mStmt->execute($contractIds);
     $allMilestones = $mStmt->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_ASSOC);
 
+    $latestRefundByMilestone = [];
+    $milestoneIds = [];
+    foreach ($allMilestones as $rows) {
+        foreach ($rows as $row) {
+            $milestoneIds[] = (int)$row['id'];
+        }
+    }
+    $milestoneIds = array_values(array_unique(array_filter($milestoneIds)));
+    if (!empty($milestoneIds)) {
+        try {
+            $mPlaceholders = implode(',', array_fill(0, count($milestoneIds), '?'));
+            $refundStmt = $db->prepare("
+                SELECT rr.*
+                FROM milestone_refund_requests rr
+                INNER JOIN (
+                    SELECT milestone_id, MAX(id) AS latest_id
+                    FROM milestone_refund_requests
+                    WHERE milestone_id IN ($mPlaceholders)
+                    GROUP BY milestone_id
+                ) latest ON latest.latest_id = rr.id
+            ");
+            $refundStmt->execute($milestoneIds);
+            foreach (($refundStmt->fetchAll(PDO::FETCH_ASSOC) ?: []) as $rr) {
+                $latestRefundByMilestone[(int)$rr['milestone_id']] = $rr;
+            }
+        } catch (Throwable $e) {
+            // Refund table may not exist yet; skip enrichment gracefully.
+        }
+    }
+
     
     foreach ($allContracts as &$c) {
         $c['milestones'] = $allMilestones[$c['id']] ?? [];
+        foreach ($c['milestones'] as &$ms) {
+            $refund = $latestRefundByMilestone[(int)$ms['id']] ?? null;
+            $ms['refund_request_status'] = $refund['status'] ?? null;
+            $ms['refund_requested_at'] = $refund['created_at'] ?? null;
+            $ms['refund_response_at'] = $refund['responded_at'] ?? null;
+            $ms['refund_client_note'] = $refund['client_note'] ?? null;
+            $ms['refund_freelancer_note'] = $refund['freelancer_note'] ?? null;
+        }
+        unset($ms);
     }
     unset($c);
 }
@@ -410,6 +451,7 @@ window.closeModal = function() {
     <div class="sb-item" onclick="showPage('talent',this)"><span class="ico">👥</span>Talent</div>
     <div class="sb-section">Tools</div>
     <div class="sb-item" onclick="showPage('messages',this)"><span class="ico">💬</span>Messages<?php if($unreadMessagesCount > 0): ?><span class="sb-badge"><?php echo $unreadMessagesCount; ?></span><?php endif; ?></div>
+    <div class="sb-item" onclick="openDashboardLiveChat()"><span class="ico">🟢</span>Chat with us</div>
     <div class="sb-item" onclick="showPage('payments',this)"><span class="ico">💳</span>Payments</div>
     <div class="sb-item" onclick="showPage('reports',this)"><span class="ico">📊</span>Reports</div>
     <div class="sb-item" onclick="showPage('verification',this)"><span class="ico">🪪</span>Identity Verification</div>
@@ -717,6 +759,9 @@ window.closeModal = function() {
               <div class="prop-info">
                 <div style="display:flex;align-items:center;gap:8px">
                   <h4 style="margin:0"><?php echo htmlspecialchars($p['freelancer_name']); ?></h4>
+                  <?php if (!empty($p['agency_name'])): ?>
+                    <span class="badge b-blue" style="font-size:9px;padding:2px 6px">Agency: <?php echo htmlspecialchars($p['agency_name']); ?></span>
+                  <?php endif; ?>
                   <span class="badge b-<?php echo ($p['status']==='shortlisted'?'blue':($p['status']==='archived'?'gray':'green')); ?>" style="font-size:9px;padding:2px 6px"><?php echo ucfirst($p['status']); ?></span>
                 </div>
                 <?php 
