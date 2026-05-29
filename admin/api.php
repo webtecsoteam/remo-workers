@@ -1893,6 +1893,33 @@ switch ($action) {
         }
         break;
 
+    case 'update_freelancer_join_date':
+        try {
+            $input = json_decode(file_get_contents('php://input'), true) ?: $_REQUEST;
+            $userId = (int)($input['user_id'] ?? 0);
+            $joinDate = trim((string)($input['join_date'] ?? ''));
+            if (!$userId) throw new Exception('Invalid user ID');
+            if ($joinDate === '') throw new Exception('Join date is required');
+
+            // Verify freelancer exists
+            $stmt = $db->prepare("SELECT id FROM users WHERE id = ? AND role = 'freelancer' LIMIT 1");
+            $stmt->execute([$userId]);
+            if (!$stmt->fetch()) throw new Exception('Freelancer not found');
+
+            // Basic YYYY-MM-DD validation
+            if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $joinDate)) {
+                throw new Exception('Invalid join date format. Use YYYY-MM-DD.');
+            }
+
+            $stmt = $db->prepare("UPDATE users SET created_at = ? WHERE id = ?");
+            $stmt->execute([$joinDate . ' 00:00:00', $userId]);
+
+            echo json_encode(['success' => true, 'message' => 'Freelancer join date updated successfully']);
+        } catch (Exception $e) {
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+        break;
+
     case 'get_blogs':
         try {
             $status = isset($_GET['status']) ? trim($_GET['status']) : '';
@@ -2199,6 +2226,39 @@ switch ($action) {
                 throw new Exception('Failed to save image');
             }
             $relativePath = 'uploads/blogs/' . $filename;
+            echo json_encode([
+                'success' => true,
+                'path' => $relativePath,
+                'url' => baseUrl($relativePath),
+            ]);
+        } catch (Exception $e) {
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+        break;
+
+    case 'upload_promo_email_image':
+        try {
+            if (!isset($_FILES['image']) || $_FILES['image']['error'] !== UPLOAD_ERR_OK) {
+                throw new Exception('No image uploaded');
+            }
+            $file = $_FILES['image'];
+            $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+            $allowedExts = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+            if (!in_array($ext, $allowedExts, true)) {
+                throw new Exception('Only JPG, PNG, GIF, and WebP images are allowed');
+            }
+            if ($file['size'] > 5 * 1024 * 1024) {
+                throw new Exception('Image must be under 5MB');
+            }
+            $uploadDir = BASE_PATH . '/uploads/promo-emails/';
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+            $filename = 'promo_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
+            if (!move_uploaded_file($file['tmp_name'], $uploadDir . $filename)) {
+                throw new Exception('Failed to save image');
+            }
+            $relativePath = 'uploads/promo-emails/' . $filename;
             echo json_encode([
                 'success' => true,
                 'path' => $relativePath,
@@ -2578,7 +2638,7 @@ switch ($action) {
             if ($subject === '') {
                 throw new Exception('Email subject is required');
             }
-            if ($message === '') {
+            if ($message === '' && !preg_match('/<img\b/i', $messageHtmlInput)) {
                 throw new Exception('Email message is required');
             }
             if (strlen($subject) > 200) {
@@ -2656,9 +2716,24 @@ switch ($action) {
                 // Allow limited formatting from admin editor while stripping risky markup/attributes.
                 $messageHtml = preg_replace('/<\s*(script|style)\b[^>]*>.*?<\s*\/\s*\1\s*>/is', '', $messageHtmlInput);
                 $messageHtml = preg_replace('/\son\w+\s*=\s*(".*?"|\'.*?\'|[^\s>]+)/i', '', $messageHtml);
-                $messageHtml = preg_replace('/\sstyle\s*=\s*(".*?"|\'.*?\'|[^\s>]+)/i', '', $messageHtml);
                 $messageHtml = preg_replace('/href\s*=\s*([\"\']?)\s*javascript:[^\"\']*\1/i', 'href="#"', $messageHtml);
-                $messageHtml = strip_tags($messageHtml, '<p><br><strong><b><em><i><u><ul><ol><li><a><h3><blockquote>');
+                $messageHtml = preg_replace('/\sstyle\s*=\s*(".*?"|\'.*?\'|[^\s>]+)/i', '', $messageHtml);
+                $messageHtml = strip_tags($messageHtml, '<p><br><strong><b><em><i><u><ul><ol><li><a><h3><blockquote><img>');
+                $promoImgPrefix = baseUrl('uploads/promo-emails/');
+                $messageHtml = preg_replace_callback('/<img\b[^>]*>/i', static function ($m) use ($promoImgPrefix) {
+                    if (!preg_match('/\ssrc\s*=\s*["\']([^"\']+)["\']/i', $m[0], $srcMatch)) {
+                        return '';
+                    }
+                    $src = $srcMatch[1];
+                    if (strpos($src, $promoImgPrefix) === 0) {
+                        $safeSrc = $src;
+                    } elseif (preg_match('#^uploads/promo-emails/[a-zA-Z0-9._-]+$#', $src)) {
+                        $safeSrc = baseUrl($src);
+                    } else {
+                        return '';
+                    }
+                    return '<img src="' . htmlspecialchars($safeSrc, ENT_QUOTES, 'UTF-8') . '" alt="" style="max-width:100%;height:auto;display:block;margin:12px 0;">';
+                }, $messageHtml);
                 $messageHtml = trim($messageHtml);
             }
             if ($messageHtml === '') {
@@ -2685,7 +2760,7 @@ switch ($action) {
                     </div>
                 </div>";
 
-                if (Mailer::sendViaBrevo($recipient['email'], $subject, $body)) {
+                if (Mailer::sendPromotional($recipient['email'], $subject, $body)) {
                     $sent++;
                 } else {
                     $failed[] = $recipient['email'];
@@ -2697,6 +2772,10 @@ switch ($action) {
                 $msg .= ' Failed: ' . implode(', ', array_slice($failed, 0, 5));
                 if (count($failed) > 5) {
                     $msg .= ' and ' . (count($failed) - 5) . ' more';
+                }
+                $mailError = trim(Mailer::getLastError());
+                if ($mailError !== '') {
+                    $msg .= ' (' . $mailError . ')';
                 }
             }
 

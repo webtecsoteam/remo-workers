@@ -1,6 +1,8 @@
 <?php
 require_once __DIR__ . '/../../includes/config.php';
 require_once __DIR__ . '/../../includes/classes/Auth.php';
+require_once __DIR__ . '/../../includes/classes/CCPayment.php';
+require_once __DIR__ . '/../../includes/ccpayment_transactions.php';
 
 header('Content-Type: application/json');
 
@@ -42,6 +44,11 @@ if ($validPrice !== false) {
 
 $paymentMethod = isset($data['payment_method']) ? trim($data['payment_method']) : 'wallet';
 
+// DDL must run outside PDO transactions (MySQL implicitly commits).
+if ($paymentMethod === 'crypto') {
+    ccpayment_ensure_transactions_table();
+}
+
 try {
     $db->beginTransaction();
 
@@ -59,51 +66,112 @@ try {
         $deduct = $db->prepare("UPDATE users SET balance = balance - ? WHERE id = ?");
         $deduct->execute([$price, $user['id']]);
         $paymentType = 'Upwork Balance';
-    } else {
-        // Paystack checkout for connects!
+    } elseif ($paymentMethod === 'card') {
         require_once __DIR__ . '/../../includes/classes/Paystack.php';
         $paystack = new Paystack();
-        
+
         $callbackUrl = baseUrl('actions/paystack_callback.php');
         $metadata = [
             'user_id' => $user['id'],
             'type' => 'connects',
             'connects_amount' => $amount,
-            'price' => $price
+            'price' => $price,
         ];
 
-        // Initialize Paystack with price in USD (lowest denomination: cents)
         $response = $paystack->initialize($user['email'], $price, $callbackUrl, $metadata);
 
         if ($response['status'] && isset($response['data']['authorization_url'])) {
             $paymentType = 'paystack';
             $transactionId = $response['data']['reference'];
 
-            // Record pending transaction so we can trace it when Paystack callbacks or webhooks are fired
             $logPayment = $db->prepare("
-                INSERT INTO payments (transaction_id, payer_id, payee_id, amount, status, payment_method, description, platform_fee) 
+                INSERT INTO payments (transaction_id, payer_id, payee_id, amount, status, payment_method, description, platform_fee)
                 VALUES (?, ?, ?, ?, 'pending', ?, ?, 0.0)
             ");
-            // Payer is freelancer, payee is 1 (Admin/System)
             $logPayment->execute([
                 $transactionId,
                 $user['id'],
-                1, // System
+                1,
                 $price,
                 $paymentType,
-                'Purchased ' . $amount . ' Connects (' . $paymentType . ' pending)'
+                'Purchased ' . $amount . ' Connects (' . $paymentType . ' pending)',
             ]);
 
             $db->commit();
             echo json_encode([
                 'success' => true,
                 'redirect' => true,
-                'authorization_url' => $response['data']['authorization_url']
+                'authorization_url' => $response['data']['authorization_url'],
             ]);
             exit;
-        } else {
-            throw new Exception($response['message'] ?? 'Failed to initialize Paystack transaction');
         }
+
+        throw new Exception($response['message'] ?? 'Failed to initialize Paystack transaction');
+    } elseif ($paymentMethod === 'crypto') {
+        $ccpayment = new CCPayment();
+        if (!$ccpayment->isConfigured()) {
+            throw new Exception('Cryptocurrency payments are not configured. Please contact support.');
+        }
+
+        $referenceId = 'CONN' . $user['id'] . 'T' . time() . 'R' . bin2hex(random_bytes(4));
+        $referenceId = substr($referenceId, 0, 64);
+
+        $chain = ccpayment_normalize_chain((string) env('CCPAYMENT_CHAIN', 'TRX'));
+        $apiRequest = ['referenceId' => $referenceId, 'chain' => $chain];
+        $addressResult = $ccpayment->getOrCreateDepositAddress($referenceId, $chain);
+
+        if (!$addressResult['success']) {
+            throw new Exception($addressResult['message'] ?? 'Failed to get crypto deposit address.');
+        }
+
+        $logPayment = $db->prepare("
+            INSERT INTO payments (transaction_id, payer_id, payee_id, amount, status, payment_method, description, platform_fee)
+            VALUES (?, ?, 1, ?, 'pending', 'ccpayment_crypto', ?, 0.0)
+        ");
+        $logPayment->execute([
+            $referenceId,
+            $user['id'],
+            $price,
+            'Purchased ' . $amount . ' Connects (USDT crypto pending)',
+        ]);
+        $paymentId = (int) $db->lastInsertId();
+
+        $logCc = $db->prepare("
+            INSERT INTO ccpayment_transactions (
+                reference_id, user_id, payment_id, purpose, connects_amount, amount_usd,
+                chain, coin_symbol, deposit_address, memo, status, api_request, api_response
+            ) VALUES (?, ?, ?, 'connects', ?, ?, ?, 'USDT', ?, ?, 'pending', ?, ?)
+        ");
+        $logCc->execute([
+            $referenceId,
+            $user['id'],
+            $paymentId,
+            $amount,
+            $price,
+            $chain,
+            $addressResult['address'],
+            $addressResult['memo'] ?? '',
+            json_encode($apiRequest, JSON_UNESCAPED_SLASHES),
+            json_encode($addressResult['raw'] ?? [], JSON_UNESCAPED_SLASHES),
+        ]);
+
+        $db->commit();
+        echo json_encode([
+            'success' => true,
+            'crypto' => true,
+            'reference_id' => $referenceId,
+            'address' => $addressResult['address'],
+            'memo' => $addressResult['memo'] ?? '',
+            'chain' => $chain,
+            'coin' => 'USDT',
+            'usdt_amount' => round($price, 2),
+            'connects_amount' => $amount,
+            'rate_label' => '1 USDT = 1 USD',
+            'chain_label' => ccpayment_chain_label($chain),
+        ]);
+        exit;
+    } else {
+        throw new Exception('Invalid payment method selected.');
     }
 
     // 2. Add connects to freelancer (Only reached for instant wallet payments)
@@ -150,6 +218,8 @@ try {
         'new_connects' => (int)$updated['connects']
     ]);
 } catch (Exception $e) {
-    if ($db->inTransaction()) $db->rollBack();
+    if ($db->inTransaction()) {
+        $db->rollBack();
+    }
     echo json_encode(['success' => false, 'message' => 'Error: ' . $e->getMessage()]);
 }

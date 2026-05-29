@@ -37,6 +37,16 @@ function loadEnv($path) {
     }
 }
 
+/** CCPayment webhooks must not start sessions or redirect hosts. */
+function remowork_is_ccpayment_webhook_request(): bool
+{
+    if (PHP_SAPI === 'cli') {
+        return false;
+    }
+    $route = isset($_GET['route']) ? trim((string) $_GET['route'], '/') : '';
+    return in_array($route, ['ccpayment-webhook-deposit', 'ccpayment-webhook-withdraw'], true);
+}
+
 // Helper function to get env values
 function env($key, $default = null) {
     $value = getenv($key);
@@ -75,7 +85,7 @@ define('DB_USERNAME', env('DB_USERNAME', 'root'));
 define('DB_PASSWORD', env('DB_PASSWORD', ''));
 
 // Session (shared across www and apex when on production domain)
-if (PHP_SAPI !== 'cli' && session_status() === PHP_SESSION_NONE) {
+if (PHP_SAPI !== 'cli' && !remowork_is_ccpayment_webhook_request() && session_status() === PHP_SESSION_NONE) {
     $cookieDomain = sessionCookieDomain();
     if ($cookieDomain !== null) {
         $secure = (!empty($_SERVER['HTTPS']) && strtolower((string) $_SERVER['HTTPS']) !== 'off')
@@ -92,7 +102,7 @@ if (PHP_SAPI !== 'cli' && session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-if (PHP_SAPI !== 'cli') {
+if (PHP_SAPI !== 'cli' && !remowork_is_ccpayment_webhook_request()) {
     enforceCanonicalHost();
 }
 

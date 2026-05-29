@@ -279,16 +279,41 @@ $allReviews = $reviewsQuery->fetchAll(PDO::FETCH_ASSOC);
 
             <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px">Members</div>
             <div style="display:flex;flex-direction:column;gap:6px;max-height:180px;overflow:auto">
-              <?php foreach ($agencyMembers as $m): ?>
-                <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border:1px solid var(--border);border-radius:8px">
-                  <div style="min-width:0">
+              <?php foreach ($agencyMembers as $m):
+                $memberInitials = strtoupper(substr((string)($m['name'] ?? '?'), 0, 2));
+              ?>
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border:1px solid var(--border);border-radius:8px;gap:10px">
+                  <div style="width:34px;height:34px;border-radius:50%;background:#c8f135;color:var(--forest);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex-shrink:0;overflow:hidden">
+                    <?php if (!empty($m['avatar_url'])): ?>
+                      <img src="<?php echo baseUrl($m['avatar_url']); ?>" alt="" style="width:100%;height:100%;object-fit:cover">
+                    <?php else: ?>
+                      <?php echo htmlspecialchars($memberInitials); ?>
+                    <?php endif; ?>
+                  </div>
+                  <div style="min-width:0;flex:1">
                     <div style="font-size:12px;font-weight:600;color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><?php echo htmlspecialchars($m['name']); ?></div>
-                    <div style="font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><?php echo htmlspecialchars($m['email']); ?></div>
+                    <?php if (($m['status'] ?? '') === 'pending'): ?>
+                      <div style="font-size:11px;color:var(--muted)">Invitation pending</div>
+                    <?php endif; ?>
                   </div>
                   <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
                     <span class="badge b-gray" style="font-size:10px"><?php echo ucfirst((string)$m['role']); ?></span>
                     <?php if (($m['status'] ?? '') === 'pending'): ?>
                       <span class="badge b-yellow" style="font-size:10px">Pending</span>
+                    <?php endif; ?>
+                    <?php if (
+                      ((string)($activeAgency['member_role'] ?? '') === 'owner')
+                      && in_array(strtolower((string)($m['role'] ?? '')), ['admin', 'member'], true)
+                      && (int)($m['id'] ?? 0) !== (int)$user['id']
+                    ): ?>
+                      <button
+                        type="button"
+                        class="btn btn-sm"
+                        style="background:#ef4444;color:#fff;border:none;padding:4px 8px;line-height:1"
+                        onclick="removeAgencyMember(<?php echo (int)$m['id']; ?>, '<?php echo addslashes((string)$m['name']); ?>')"
+                      >
+                        Remove
+                      </button>
                     <?php endif; ?>
                   </div>
                 </div>

@@ -349,7 +349,8 @@
   padding: 0 20px;
 }
 
-.public-site-main .auth-nav-inline .login-registration-list__link[role="button"] {
+.public-site-main .auth-nav-inline .login-registration-list__link[role="button"],
+.public-site-main .auth-nav-inline .login-registration-list__link[data-auth-modal] {
   cursor: pointer;
 }
 

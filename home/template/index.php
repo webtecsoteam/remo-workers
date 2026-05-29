@@ -16,16 +16,16 @@
     
     <meta itemprop="name" content="Olance - Home">
     <meta itemprop="description" content="Olance is a dynamic freelancing platform connecting clients with skilled professionals across various industries. With secure transactions, a user-friendly interface, and advanced project management tools, Olance simplifies remote work and collaboration. Whether you're hiring or offering services, Olance provides a seamless experience for freelancers and businesses alike.">
-    <meta itemprop="image" content="assets/images/seo/679de5c787bc51738401223.png">
+    <meta itemprop="image" content="assets/ShareLogo.png">
     
     <meta property="og:type" content="website">
     <meta property="og:title" content="Global Freelancing Marketplace">
     <meta property="og:description" content="Olance is a dynamic freelancing platform connecting clients with skilled professionals across various industries. With secure transactions, a user-friendly interface, and advanced project management tools, Olance simplifies remote work and collaboration. Whether you're hiring or offering services, Olance provides a seamless experience for freelancers and businesses alike.">
-    <meta property="og:image" content="assets/images/seo/679de5c787bc51738401223.png">
+    <meta property="og:image" content="assets/ShareLogo.png">
 
     <meta property="og:image:type" content="image/png">
-        <meta property="og:image:width" content="1180">
-    <meta property="og:image:height" content="600">
+        <meta property="og:image:width" content="1039">
+    <meta property="og:image:height" content="340">
     <meta property="og:url" content="https://script.viserlab.com/olance">
     
     <meta name="twitter:card" content="summary_large_image">
@@ -140,10 +140,6 @@ color-scheme:light !important;}</style><style type="text/css">.tawk-button-hover
                     <li class="nav-item active">
                         <a class="nav-link" aria-current="page" href="https://script.viserlab.com/olance"> Home </a>
                     </li>
-                                                                        <li class="nav-item ">
-                                <a class="nav-link" href="about">About</a>
-                            </li>
-                                            
                     <li class="nav-item ">
                         <a class="nav-link " href="freelance-jobs"> Find Jobs </a>
                     </li>
@@ -590,10 +586,10 @@ color-scheme:light !important;}</style><style type="text/css">.tawk-button-hover
             <div class="col-xl-6">
                 <div class="account-item">
                     <div class="account-item__content highlight">
-                        <h3 class="account-item__title s-highlight" data-s-break="-1" data-s-length="1">Sign Up as a <span class="text--base">Buyer</span></h3>
+                        <h3 class="account-item__title s-highlight" data-s-break="-1" data-s-length="1">Sign Up as a <span class="text--base">Client</span></h3>
                         <p class="account-item__text"> Post jobs, hire skilled talent, and get projects done. </p>
                         <div class="account-item__btn">
-                            <a href="buyer/register" class="btn btn--base"> Create Buyer Account</a>
+                            <a href="buyer/register" class="btn btn--base"> Create Client Account</a>
                         </div>
                     </div>
                     <div class="account-item__thumb">
@@ -6911,10 +6907,10 @@ color-scheme:light !important;}</style><style type="text/css">.tawk-button-hover
                         Create Freelance Account </a>
                 </div>
                 <div class="sign-up-content">
-                    <h4 class="sign-up-content__title s-highlight" data-s-break="-1" data-s-length="1">Sign Up as a <span class="text--base">Buyer</span></h4>
+                    <h4 class="sign-up-content__title s-highlight" data-s-break="-1" data-s-length="1">Sign Up as a <span class="text--base">Client</span></h4>
                     <p class="sign-up-content__desc"> Post jobs, hire skilled talent, and get projects done. </p>
                     <a href="buyer/register" class="sign-up-content__btn btn btn--base">
-                        Create Buyer Account </a>
+                        Create Client Account </a>
                 </div>
             </div>
         </div>
@@ -6926,10 +6922,6 @@ color-scheme:light !important;}</style><style type="text/css">.tawk-button-hover
                             Home </a></li>
                     <li class="footer-menu__item"><a href="blogs" class="footer-menu__link">
                             Blogs </a></li>
-                                            <li class="footer-menu__item ">
-                            <a href="about" class="footer-menu__link">
-                                About </a>
-                        </li>
                                         <li class="footer-menu__item"><a href="contact" class="footer-menu__link">Contact Us </a></li>
 
                 </ul>
@@ -6953,8 +6945,6 @@ color-scheme:light !important;}</style><style type="text/css">.tawk-button-hover
                                             <li class="footer-menu__item"><a href="policy/privacy-policy" class="footer-menu__link">Privacy Policy</a>
                         </li>
                                             <li class="footer-menu__item"><a href="policy/terms-of-service" class="footer-menu__link">Terms of Service</a>
-                        </li>
-                                            <li class="footer-menu__item"><a href="policy/bid-policy" class="footer-menu__link">Bid Policy</a>
                         </li>
                                         <li class="footer-menu__item"><a href="cookie-policy" class="footer-menu__link">
                             Cookie Policy </a>
@@ -6992,10 +6982,11 @@ color-scheme:light !important;}</style><style type="text/css">.tawk-button-hover
                 <div class="social-list-wrapper">
                     <p class="title">Follow Us </p>
                     <ul class="social-list">
-                                                    <li class="social-list__item"><a href="https://www.facebook.com/" target="_blank" title="Facebook" class="social-list__link flex-center"><i class="fab fa-facebook-f"></i></a> </li>
-                                                    <li class="social-list__item"><a href="https://www.twitter.com/" target="_blank" title="X" class="social-list__link flex-center"><i class="fa-brands fa-x-twitter"></i></a> </li>
-                                                    <li class="social-list__item"><a href="https://www.linkedin.com/" target="_blank" title="Linkedin" class="social-list__link flex-center"><i class="fab fa-linkedin-in"></i></a> </li>
-                                                    <li class="social-list__item"><a href="https://www.instagram.com/" target="_blank" title="Instagram" class="social-list__link flex-center"><i class="fab fa-instagram"></i></a> </li>
+                                                    <li class="social-list__item"><a href="https://www.facebook.com/remoworkershub" target="_blank" rel="noopener noreferrer" title="Facebook" class="social-list__link flex-center"><i class="fab fa-facebook-f"></i></a> </li>
+                                                    <li class="social-list__item"><a href="https://x.com/remoworkers" target="_blank" rel="noopener noreferrer" title="X" class="social-list__link flex-center"><i class="fa-brands fa-x-twitter"></i></a> </li>
+                                                    <li class="social-list__item"><a href="https://www.linkedin.com/company/palmstake" target="_blank" rel="noopener noreferrer" title="LinkedIn" class="social-list__link flex-center"><i class="fab fa-linkedin-in"></i></a> </li>
+                                                    <li class="social-list__item"><a href="https://www.youtube.com/@Remoworkers" target="_blank" rel="noopener noreferrer" title="YouTube" class="social-list__link flex-center"><i class="fab fa-youtube"></i></a> </li>
+                                                    <li class="social-list__item"><a href="https://www.instagram.com/remoworkers" target="_blank" rel="noopener noreferrer" title="Instagram" class="social-list__link flex-center"><i class="fab fa-instagram"></i></a> </li>
                                             </ul>
                 </div>
             </div>

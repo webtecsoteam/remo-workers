@@ -28,6 +28,14 @@ $page = $segments[1] ?? 'index';
 // =============================================
 
 switch ($section) {
+    case 'ccpayment-webhook-deposit':
+        include __DIR__ . '/actions/ccpayment_webhook_deposit.php';
+        break;
+
+    case 'ccpayment-webhook-withdraw':
+        include __DIR__ . '/actions/ccpayment_webhook_withdraw.php';
+        break;
+
     // ------------------------------------------
     // Route 1: Home Page (home.php)
     // ------------------------------------------

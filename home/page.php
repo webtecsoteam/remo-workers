@@ -11,6 +11,12 @@ if (!$page) {
     exit;
 }
 
+$externalUrl = trim((string) ($page['link_target'] ?? ''));
+if (($page['link_type'] ?? '') === 'external' && $externalUrl !== '' && preg_match('#^https?://#i', $externalUrl)) {
+    header('Location: ' . $externalUrl, true, 302);
+    exit;
+}
+
 $seoMeta = seoForCmsPage($page);
 include __DIR__ . '/includes/header.php';
 ?>

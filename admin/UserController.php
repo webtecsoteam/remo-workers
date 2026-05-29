@@ -54,12 +54,31 @@ class UserController extends Controller
         $user = User::findOrFail($id);
 
         $validated = $request->validate([
-            'name'  => 'sometimes|string|max:255',
-            'email' => "sometimes|email|unique:users,email,{$id}",
-            'role'  => 'sometimes|in:client,freelancer,admin',
+            'name'      => 'sometimes|string|max:255',
+            'email'     => "sometimes|email|unique:users,email,{$id}",
+            'role'      => 'sometimes|in:client,freelancer,admin',
+            'joined_at' => 'sometimes|date',
         ]);
 
+        $joinedAt = null;
+        if (array_key_exists('joined_at', $validated)) {
+            $joinedAt = $validated['joined_at'];
+            unset($validated['joined_at']);
+        }
+
         $user->update($validated);
+
+        if ($joinedAt !== null) {
+            if ($user->role !== 'freelancer') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Join date can only be adjusted for freelancers.',
+                ], 422);
+            }
+
+            $user->created_at = $joinedAt;
+            $user->save();
+        }
 
         return response()->json([
             'success' => true,

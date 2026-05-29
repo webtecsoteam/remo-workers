@@ -287,6 +287,7 @@ function openModal(id){
   const bodyEl = document.getElementById('modal-body');
   const overlayEl = document.getElementById('overlay');
   const authModalIds = new Set(['login', 'signup', 'forgot_password']);
+  if (!modalEl || !titleEl || !bodyEl || !overlayEl) return;
 
   titleEl.textContent=m.t;
   bodyEl.innerHTML=m.b;
@@ -295,6 +296,8 @@ function openModal(id){
   document.body.style.overflow='hidden';
 }
 function closeModal(e){if(e&&e.target!==document.getElementById('overlay'))return;document.getElementById('overlay').classList.remove('open');document.body.style.overflow='';}
+window.openModal = openModal;
+window.closeModal = closeModal;
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
 let toastTimer;
 function showToast(title,msg){const t=document.getElementById('toast');document.getElementById('toast-title').textContent=title;document.getElementById('toast-msg').textContent=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),3500);}
@@ -362,8 +365,6 @@ const NM = {
 };
 Object.assign(M, NM);
 
-window.openModal = openModal;
-window.closeModal = closeModal;
 window.showToast = showToast;
 window.doSearch = doSearch;
 window.searchFor = searchFor;
@@ -374,3 +375,8 @@ window.switchTab = switchTab;
 window.scrollToTop = scrollToTop;
 
 document.querySelectorAll('.uma-grid>div').forEach(el=>io.observe(el));
+
+if (window.__pendingAuthModal && typeof openModal === 'function') {
+  openModal(window.__pendingAuthModal);
+  window.__pendingAuthModal = null;
+}

@@ -5,6 +5,12 @@ use PHPMailer\PHPMailer\Exception;
 require_once __DIR__ . '/../../vendor/autoload.php';
 
 class Mailer {
+    private static $lastError = '';
+
+    public static function getLastError() {
+        return self::$lastError;
+    }
+
     /**
      * Send an email using primary SMTP (MAIL_* in .env).
      */
@@ -17,6 +23,23 @@ class Mailer {
      */
     public static function sendViaBrevo($to, $subject, $htmlBody, $textBody = '') {
         return self::sendSmtp($to, $subject, $htmlBody, $textBody, 'brevo');
+    }
+
+    /**
+     * Promotional/bulk mail: prefer Brevo when configured, fall back to primary SMTP.
+     */
+    public static function sendPromotional($to, $subject, $htmlBody, $textBody = '') {
+        if (self::isBrevoConfigured()) {
+            if (self::sendViaBrevo($to, $subject, $htmlBody, $textBody)) {
+                return true;
+            }
+        }
+        return self::send($to, $subject, $htmlBody, $textBody);
+    }
+
+    private static function isBrevoConfigured() {
+        return trim((string) env('MAIL_BREVO_USERNAME', '')) !== ''
+            && trim((string) env('MAIL_BREVO_PASSWORD', '')) !== '';
     }
 
     /**
@@ -63,8 +86,10 @@ class Mailer {
             $mail->AltBody = $textBody ?: strip_tags($htmlBody);
 
             $mail->send();
+            self::$lastError = '';
             return true;
         } catch (Exception $e) {
+            self::$lastError = $mail->ErrorInfo;
             error_log('Mailer Error (' . $driver . '): ' . $mail->ErrorInfo);
             return false;
         }

@@ -485,6 +485,24 @@
   </div>
 </div>
 
+<!-- Edit Join Date Modal -->
+<div class="modal-overlay" id="editJoinDateModal">
+  <div class="modal">
+    <div class="modal-title">Adjust Freelancer Join Date</div>
+    <div class="form-group">
+      <label>Joined At *</label>
+      <input type="datetime-local" id="editJoinDateInput" />
+    </div>
+    <p style="font-size:12px;color:var(--text-2);margin-top:4px">
+      This will update the freelancer's official join date on the platform.
+    </p>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('editJoinDateModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitJoinDate()">Save</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const API = (window.API_BASE_URL || 'http://localhost:8000/api');
 let token = localStorage.getItem('admin_token');
@@ -492,6 +510,7 @@ let currentPage = { users: 1, jobs: 1, payments: 1 };
 let revenueChartInst = null;
 let currentRefundId = null;
 let currentReportTab = 'overview';
+let currentJoinUserId = null;
 
 // ========== AUTH ==========
 async function apiFetch(method, path, body = null, params = null) {
@@ -695,6 +714,7 @@ function renderUsersTable(users, actions) {
         <div class="action-btns">
           ${u.status === 'active' ? `<button class="btn btn-danger btn-sm" onclick="userAction('suspend', ${u.id})">Suspend</button>` : `<button class="btn btn-outline btn-sm" onclick="userAction('activate', ${u.id})">Activate</button>`}
           ${!u.is_verified ? `<button class="btn btn-outline btn-sm" onclick="userAction('verify', ${u.id})">Verify</button>` : ''}
+          ${u.role === 'freelancer' ? `<button class="btn btn-outline btn-sm" onclick="openEditJoinDate(${u.id}, '${u.created_at}')">Edit join date</button>` : ''}
         </div>
       </td>` : ''}
     </tr>`).join('')}
@@ -706,6 +726,44 @@ async function userAction(action, id) {
   const endpoints = { suspend: `/admin/users/${id}/suspend`, activate: `/admin/users/${id}/activate`, verify: `/admin/users/${id}/verify` };
   await apiFetch('PATCH', endpoints[action]);
   showToast(action.charAt(0).toUpperCase() + action.slice(1) + ' action applied', 'success');
+  loadUsers();
+}
+
+function openEditJoinDate(id, currentDate) {
+  currentJoinUserId = id;
+  const input = document.getElementById('editJoinDateInput');
+  if (currentDate) {
+    const d = new Date(currentDate);
+    if (!isNaN(d.getTime())) {
+      const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000)
+        .toISOString()
+        .slice(0, 16);
+      input.value = local;
+    } else {
+      input.value = '';
+    }
+  } else {
+    input.value = '';
+  }
+  document.getElementById('editJoinDateModal').classList.add('open');
+}
+
+async function submitJoinDate() {
+  if (!currentJoinUserId) return;
+  const raw = document.getElementById('editJoinDateInput').value;
+  if (!raw) {
+    showToast('Please select a join date', 'error');
+    return;
+  }
+  const d = new Date(raw);
+  if (isNaN(d.getTime())) {
+    showToast('Invalid date value', 'error');
+    return;
+  }
+  const iso = d.toISOString();
+  await apiFetch('PUT', `/admin/users/${currentJoinUserId}`, { joined_at: iso });
+  closeModal('editJoinDateModal');
+  showToast('Join date updated', 'success');
   loadUsers();
 }
 

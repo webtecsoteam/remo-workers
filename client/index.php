@@ -391,7 +391,7 @@ $categorySpendList = $categorySpendStmt->fetchAll(PDO::FETCH_ASSOC);
 <title>RemoWorkers – Client Dashboard</title>
 <?php include __DIR__ . '/../includes/google-analytics.php'; ?>
 <link href="https://fonts.googleapis.com/css2?family=Neue+Haas+Grotesk+Display+Pro:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="<?php echo baseUrl("client/css/style.css"); ?>">
+<link rel="stylesheet" href="<?php echo baseUrl("client/css/style.css?v=20260529"); ?>">
 <link rel="stylesheet" href="<?php echo baseUrl('assets/css/ui-alerts.css'); ?>">
 <script src="<?php echo baseUrl('assets/js/pagination.js'); ?>"></script>
 <script src="<?php echo baseUrl('assets/js/ui-alerts.js'); ?>"></script>
@@ -1325,16 +1325,13 @@ window.closeModal = function() {
 
     <!-- ══ MESSAGES PAGE ══ -->
     <div class="page" id="page-messages">
-      <div class="pg-header">
-        <div class="pg-title">Messages</div>
-      </div>
-      <div style="background:white;border:1.5px solid var(--uw-border);border-radius:var(--radius);display:flex;min-height:480px;overflow:hidden">
+      <div id="messages-shell" style="background:white;border:1.5px solid var(--uw-border);border-radius:var(--radius);display:flex;width:100%;height:calc(100vh - 58px - 52px);min-height:480px;max-height:calc(100vh - 58px - 52px);overflow:hidden">
         <!-- Sidebar list -->
-        <div style="width:270px;border-right:1.5px solid var(--uw-border);flex-shrink:0">
-          <div style="padding:12px 14px;border-bottom:1px solid var(--uw-border)">
+        <div id="messages-sidebar" style="width:270px;border-right:1.5px solid var(--uw-border);flex-shrink:0;display:flex;flex-direction:column;min-height:0;overflow:hidden">
+          <div style="padding:12px 14px;border-bottom:1px solid var(--uw-border);flex-shrink:0">
             <input style="width:100%;padding:8px 12px;border:1.5px solid var(--uw-border);border-radius:50px;font-size:12.5px;font-family:inherit;outline:none;background:var(--uw-bg)" placeholder="Search messages…" onkeyup="filterConversations(this.value)">
           </div>
-          <div style="padding:6px 0;max-height:600px;overflow-y:auto" id="conversations-list">
+          <div style="flex:1;min-height:0;overflow-y:auto;padding:6px 0" id="conversations-list">
             <?php if(empty($conversations)): ?>
               <div style="padding:20px;text-align:center;color:var(--uw-gray);font-size:13px">No conversations yet.</div>
             <?php else: ?>
@@ -1388,7 +1385,7 @@ window.closeModal = function() {
           <?php endif; ?>
         </div>
         <!-- Chat window -->
-        <div style="flex:1;display:flex;flex-direction:column" id="chat-window">
+        <div style="flex:1;display:flex;flex-direction:column;min-height:0;min-width:0;overflow:hidden;background:var(--uw-bg)" id="chat-window">
           <div style="flex:1;display:flex;align-items:center;justify-content:center;color:var(--uw-gray);flex-direction:column;gap:15px">
             <span style="font-size:40px">💬</span>
             <div>Select a conversation to start chatting</div>

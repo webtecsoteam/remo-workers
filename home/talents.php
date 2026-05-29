@@ -30,8 +30,6 @@ if ($searchQuery !== '') {
     $params[] = $likeParam;
     $params[] = $likeParam;
 }
-$sql .= " ORDER BY created_at DESC";
-
 $stmt = $db->prepare($sql);
 $stmt->execute($params);
 $freelancers = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
@@ -55,6 +53,15 @@ if ($ids !== []) {
         }
     }
 }
+
+usort($freelancers, static function (array $a, array $b) use ($statsById): int {
+    $earnA = (float) (($statsById[(int) ($a['id'] ?? 0)]['total_earned'] ?? 0));
+    $earnB = (float) (($statsById[(int) ($b['id'] ?? 0)]['total_earned'] ?? 0));
+    if ($earnB !== $earnA) {
+        return $earnB <=> $earnA;
+    }
+    return strcmp((string) ($a['name'] ?? ''), (string) ($b['name'] ?? ''));
+});
 
 $seoMeta = [
     'title' => 'Find Talent' . ($searchQuery !== '' ? (' for "' . $searchQuery . '"') : '') . ' | Remoworkers',
@@ -196,7 +203,6 @@ include __DIR__ . '/includes/header.php';
         $profileUrl = baseUrl('f/' . encodeFreelancerId($fid));
         $fStats = $statsById[$fid] ?? [];
         $rating = (string) ($fStats['rating'] ?? '0.0');
-        $reviewsCount = (int) ($fStats['reviews_count'] ?? 0);
         $hourly = (float) ($f['hourly_rate'] ?? 0);
         $countryLabel = getCountryName($f['country'] ?? 'Global');
         $badgeHtml = homeTalentBadgeHtml($fStats['badge'] ?? null);
@@ -225,7 +231,6 @@ include __DIR__ . '/includes/header.php';
 
           <div class="talent-meta">
             <span class="talent-chip">★ <?php echo htmlspecialchars($rating, ENT_QUOTES, 'UTF-8'); ?></span>
-            <span class="talent-chip"><?php echo (int) $reviewsCount; ?> reviews</span>
             <span class="talent-chip"><?php echo htmlspecialchars($countryLabel ?: 'Global', ENT_QUOTES, 'UTF-8'); ?></span>
           </div>
 

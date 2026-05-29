@@ -13,7 +13,10 @@ function cmsBuiltinPageCatalog(): array
         string $html,
         ?string $footerSection = null,
         string $seoTitle = '',
-        string $seoDescription = ''
+        string $seoDescription = '',
+        string $linkType = 'content',
+        ?string $linkTarget = null,
+        bool $showInFooter = true
     ): array {
         return [
             'id' => 0,
@@ -21,10 +24,10 @@ function cmsBuiltinPageCatalog(): array
             'slug' => $slug,
             'description' => $html,
             'footer_section' => $footerSection,
-            'link_type' => 'content',
-            'link_target' => null,
+            'link_type' => $linkType,
+            'link_target' => $linkTarget,
             'sort_order' => 0,
-            'show_in_footer' => true,
+            'show_in_footer' => $showInFooter,
             'status' => 'published',
             'seo_title' => $seoTitle !== '' ? $seoTitle : ($name . ' | Remoworkers'),
             'seo_description' => $seoDescription,
@@ -151,7 +154,12 @@ function cmsBuiltinPageCatalog(): array
             'About Us',
             'about-us',
             '<p>Remoworkers connects businesses with independent talent across 180+ countries. Founded to make hiring flexible, fair, and fast for everyone.</p>',
-            'company'
+            'company',
+            '',
+            '',
+            'content',
+            null,
+            false
         ),
         'careers' => $p(
             'Careers',
@@ -219,10 +227,55 @@ function cmsBuiltinPageCatalog(): array
             '<p>Remoworkers is committed to WCAG 2.1 AA accessibility. If you encounter barriers, contact accessibility@remoworkers.com</p>',
             'legal'
         ),
-        'social-x' => $p('Follow us on X', 'social-x', '<p>Follow <strong>@Remoworkers</strong> for product updates, hiring tips, and community highlights.</p>'),
-        'social-linkedin' => $p('LinkedIn', 'social-linkedin', '<p>Connect with Remoworkers on LinkedIn for company news and talent insights.</p>'),
-        'social-facebook' => $p('Facebook', 'social-facebook', '<p>Join the Remoworkers community on Facebook.</p>'),
-        'social-youtube' => $p('YouTube', 'social-youtube', '<p>Watch tutorials, customer stories, and platform tips on our YouTube channel.</p>'),
-        'social-instagram' => $p('Instagram', 'social-instagram', '<p>Behind-the-scenes and talent spotlights on Instagram.</p>'),
+        'social-x' => $p(
+            'Follow us on X',
+            'social-x',
+            '<p>Follow <strong>@Remoworkers</strong> for product updates, hiring tips, and community highlights.</p>',
+            null,
+            '',
+            '',
+            'external',
+            socialProfileUrl('x')
+        ),
+        'social-linkedin' => $p(
+            'LinkedIn',
+            'social-linkedin',
+            '<p>Connect with Remoworkers on LinkedIn for company news and talent insights.</p>',
+            null,
+            '',
+            '',
+            'external',
+            socialProfileUrl('linkedin')
+        ),
+        'social-facebook' => $p(
+            'Facebook',
+            'social-facebook',
+            '<p>Join the Remoworkers community on Facebook.</p>',
+            null,
+            '',
+            '',
+            'external',
+            socialProfileUrl('facebook')
+        ),
+        'social-youtube' => $p(
+            'YouTube',
+            'social-youtube',
+            '<p>Watch tutorials, customer stories, and platform tips on our YouTube channel.</p>',
+            null,
+            '',
+            '',
+            'external',
+            socialProfileUrl('youtube')
+        ),
+        'social-instagram' => $p(
+            'Instagram',
+            'social-instagram',
+            '<p>Behind-the-scenes and talent spotlights on Instagram.</p>',
+            null,
+            '',
+            '',
+            'external',
+            socialProfileUrl('instagram')
+        ),
     ];
 }

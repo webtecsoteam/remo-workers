@@ -58,6 +58,26 @@
   margin: 0;
 }
 
+.remo-dialog-field {
+  margin-top: 12px;
+}
+
+.remo-dialog-field:first-child {
+  margin-top: 0;
+}
+
+.remo-dialog-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 6px;
+}
+
+.remo-dialog-field .remo-dialog-input {
+  margin-top: 0;
+}
+
 .remo-dialog-input {
   width: 100%;
   margin-top: 12px;

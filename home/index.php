@@ -367,7 +367,7 @@ $inject = <<<'HTML'
 <script>window.HOME_CATEGORY_STATS = __HOME_CATEGORY_STATS__;</script>
 <link rel="stylesheet" href="__UI_ALERTS_CSS__">
 <link rel="stylesheet" href="__HOME_MODALS_CSS__">
-<div class="overlay" id="overlay" onclick="closeModal(event)"><div class="modal" id="modal"><div class="modal-head"><h2 id="modal-title">Details</h2><button class="modal-close" onclick="closeModal()">✕</button></div><div class="modal-body" id="modal-body"></div></div></div>
+<div class="rw-overlay" id="overlay" onclick="closeModal(event)"><div class="rw-modal" id="modal"><div class="modal-head"><h2 id="modal-title">Details</h2><button type="button" class="modal-close" onclick="closeModal()" aria-label="Close">✕</button></div><div class="modal-body" id="modal-body"></div></div></div>
 <script src="__JQUERY_JS__"></script>
 <script src="__BOOTSTRAP_JS__"></script>
 <script src="__SELECT2_JS__"></script>
@@ -423,6 +423,11 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
+  if (window.__pendingAuthModal && typeof openModal === 'function') {
+    openModal(window.__pendingAuthModal);
+    window.__pendingAuthModal = null;
+  }
+
   const params = new URLSearchParams(window.location.search);
   if (params.get('login') === '1' && typeof openModal === 'function') {
     openModal('login');
@@ -464,17 +469,33 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 });
 
+function openAuthModal(id) {
+  if (!id) return;
+  if (typeof openModal === 'function') {
+    openModal(id);
+    return;
+  }
+  window.__pendingAuthModal = id;
+}
+
 document.addEventListener('click', function (e) {
+  const authTrigger = e.target.closest('[data-auth-modal]');
+  if (authTrigger) {
+    e.preventDefault();
+    openAuthModal(authTrigger.getAttribute('data-auth-modal'));
+    return;
+  }
+
   const a = e.target.closest('a[href]');
   if (!a) return;
   const href = a.getAttribute('href') || '';
   if (href.endsWith('freelancer/login') || href === 'freelancer/login' || href.endsWith('/login')) {
     e.preventDefault();
-    if (typeof openModal === 'function') openModal('login');
+    openAuthModal('login');
   }
   if (href.endsWith('freelancer/register') || href === 'freelancer/register' || href.endsWith('/register')) {
     e.preventDefault();
-    if (typeof openModal === 'function') openModal('signup');
+    openAuthModal('signup');
   }
   const normalizedHref = href.replace(/\/+$/, '');
   if (!__IS_LOGGED_IN__ && (normalizedHref.endsWith('/client') || normalizedHref === 'client')) {
@@ -494,7 +515,7 @@ $inject = str_replace('__DASHBOARD_URL__', htmlspecialchars($dashboardUrl, ENT_Q
 $inject = str_replace('__LOGOUT_URL__', htmlspecialchars($logoutUrl, ENT_QUOTES, 'UTF-8'), $inject);
 $inject = str_replace('__APP_URL__', htmlspecialchars(baseUrl(), ENT_QUOTES, 'UTF-8'), $inject);
 $inject = str_replace('__UI_ALERTS_CSS__', htmlspecialchars(baseUrl('assets/css/ui-alerts.css'), ENT_QUOTES, 'UTF-8'), $inject);
-$inject = str_replace('__HOME_MODALS_CSS__', htmlspecialchars(baseUrl('home/css/home-modals.css?v=1.0.1'), ENT_QUOTES, 'UTF-8'), $inject);
+$inject = str_replace('__HOME_MODALS_CSS__', htmlspecialchars(baseUrl('home/css/home-modals.css?v=1.0.2'), ENT_QUOTES, 'UTF-8'), $inject);
 $inject = str_replace('__JQUERY_JS__', htmlspecialchars(baseUrl('assets/free-home/global/js/jquery-3.7.1.min.js'), ENT_QUOTES, 'UTF-8'), $inject);
 $inject = str_replace('__BOOTSTRAP_JS__', htmlspecialchars(baseUrl('assets/free-home/global/js/bootstrap.bundle.min.js'), ENT_QUOTES, 'UTF-8'), $inject);
 $inject = str_replace('__SELECT2_JS__', htmlspecialchars(baseUrl('assets/free-home/global/js/select2.min.js'), ENT_QUOTES, 'UTF-8'), $inject);
@@ -502,7 +523,7 @@ $inject = str_replace('__VIEWPORT_JS__', htmlspecialchars(baseUrl('assets/free-h
 $inject = str_replace('__SLICK_JS__', htmlspecialchars(baseUrl('assets/free-home/templates/basic/js/slick.min.js'), ENT_QUOTES, 'UTF-8'), $inject);
 $inject = str_replace('__MAIN_JS__', htmlspecialchars(baseUrl('assets/free-home/templates/basic/js/main.js'), ENT_QUOTES, 'UTF-8'), $inject);
 $inject = str_replace('__UI_ALERTS_JS__', htmlspecialchars(baseUrl('assets/js/ui-alerts.js'), ENT_QUOTES, 'UTF-8'), $inject);
-$inject = str_replace('__HOME_MODALS_JS__', htmlspecialchars(baseUrl('home/js/home-modals.js?v=1.0.5'), ENT_QUOTES, 'UTF-8'), $inject);
+$inject = str_replace('__HOME_MODALS_JS__', htmlspecialchars(baseUrl('home/js/home-modals.js?v=1.0.6'), ENT_QUOTES, 'UTF-8'), $inject);
 $inject = str_replace('__HOME_AUTH_JS__', htmlspecialchars(baseUrl('home/js/home-auth.js?v=1.0.4'), ENT_QUOTES, 'UTF-8'), $inject);
 
 // Replace imported template SEO tags with normalized tags for social crawlers.
@@ -516,7 +537,7 @@ $seoCleanupPatterns = [
 $html = preg_replace($seoCleanupPatterns, '', $html);
 
 ob_start();
-renderSeoMetaTags(['canonical' => baseUrl(), 'og_image' => baseUrl('assets/logo.png')], true);
+renderSeoMetaTags(['canonical' => baseUrl()], true);
 $seoHeadHtml = trim((string) ob_get_clean());
 if ($seoHeadHtml !== '') {
     $html = preg_replace('#</head>#i', $seoHeadHtml . "\n</head>", $html, 1);

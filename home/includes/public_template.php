@@ -114,8 +114,8 @@ function publicTemplateAuthNavHtml(string $responsiveClasses = ''): string
     $responsive = $responsiveClasses !== '' ? ' ' . $responsiveClasses : '';
     return '<ul class="login-registration-list auth-nav-inline d-flex flex-wrap justify-content-between align-items-center' . $responsive . '">'
         . '<li class="login-registration-list__item"><a href="' . $postJobUrl . '" class="btn btn--base">Post Job</a></li>'
-        . '<li class="login-registration-list__item"><a href="#" onclick="openModal(\'login\'); return false;" class="login-registration-list__link" role="button">Login</a></li>'
-        . '<li class="login-registration-list__item"><a href="#" onclick="openModal(\'signup\'); return false;" class="login-registration-list__link" role="button">Register</a></li>'
+        . '<li class="login-registration-list__item"><a href="#" data-auth-modal="login" class="login-registration-list__link" role="button">Login</a></li>'
+        . '<li class="login-registration-list__item"><a href="#" data-auth-modal="signup" class="login-registration-list__link" role="button">Register</a></li>'
         . '</ul>';
 }
 
@@ -124,13 +124,16 @@ function publicTemplateApplyHeaderNav(string $header): string
     $blogUrl = htmlspecialchars(baseUrl('blog'), ENT_QUOTES, 'UTF-8');
     $findJobsUrl = htmlspecialchars(baseUrl('jobs'), ENT_QUOTES, 'UTF-8');
     $findTalentsUrl = htmlspecialchars(baseUrl('talents'), ENT_QUOTES, 'UTF-8');
-    $aboutUrl = htmlspecialchars(baseUrl('page/about-us'), ENT_QUOTES, 'UTF-8');
     $homeUrl = htmlspecialchars(baseUrl(), ENT_QUOTES, 'UTF-8');
 
     $header = preg_replace('#href="[^"]*blogs[^"]*"#i', 'href="' . $blogUrl . '"', $header);
     $header = preg_replace('#href="freelance-jobs"#i', 'href="' . $findJobsUrl . '"', $header);
     $header = preg_replace('#href="talents"#i', 'href="' . $findTalentsUrl . '"', $header);
-    $header = preg_replace('#href="about"#i', 'href="' . $aboutUrl . '"', $header);
+    $header = preg_replace(
+        '#<li class="nav-item[^"]*">\s*<a class="nav-link" href="about">\s*About\s*</a>\s*</li>#i',
+        '',
+        $header
+    );
     $header = preg_replace(
         '#<li class="nav-item[^"]*">\s*<a class="nav-link" href="contact">\s*Contact\s*</a>\s*</li>#i',
         '',
@@ -193,11 +196,11 @@ function publicTemplateApplyFooterTransforms(string $footer): string
         . '<div class="social-list-wrapper">'
         . '<p class="title">Follow Us</p>'
         . '<ul class="social-list">'
-        . '<li class="social-list__item"><a href="' . htmlspecialchars(cmsPageUrl('social-facebook'), ENT_QUOTES, 'UTF-8') . '" class="social-list__link flex-center" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a></li>'
-        . '<li class="social-list__item"><a href="' . htmlspecialchars(cmsPageUrl('social-x'), ENT_QUOTES, 'UTF-8') . '" class="social-list__link flex-center" aria-label="X"><i class="fa-brands fa-x-twitter"></i></a></li>'
-        . '<li class="social-list__item"><a href="' . htmlspecialchars(cmsPageUrl('social-linkedin'), ENT_QUOTES, 'UTF-8') . '" class="social-list__link flex-center" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a></li>'
-        . '<li class="social-list__item"><a href="' . htmlspecialchars(cmsPageUrl('social-youtube'), ENT_QUOTES, 'UTF-8') . '" class="social-list__link flex-center" aria-label="YouTube"><i class="fab fa-youtube"></i></a></li>'
-        . '<li class="social-list__item"><a href="' . htmlspecialchars(cmsPageUrl('social-instagram'), ENT_QUOTES, 'UTF-8') . '" class="social-list__link flex-center" aria-label="Instagram"><i class="fab fa-instagram"></i></a></li>'
+        . '<li class="social-list__item"><a href="' . htmlspecialchars(socialProfileUrl('facebook'), ENT_QUOTES, 'UTF-8') . '" target="_blank" rel="noopener noreferrer" class="social-list__link flex-center" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a></li>'
+        . '<li class="social-list__item"><a href="' . htmlspecialchars(socialProfileUrl('x'), ENT_QUOTES, 'UTF-8') . '" target="_blank" rel="noopener noreferrer" class="social-list__link flex-center" aria-label="X"><i class="fa-brands fa-x-twitter"></i></a></li>'
+        . '<li class="social-list__item"><a href="' . htmlspecialchars(socialProfileUrl('linkedin'), ENT_QUOTES, 'UTF-8') . '" target="_blank" rel="noopener noreferrer" class="social-list__link flex-center" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a></li>'
+        . '<li class="social-list__item"><a href="' . htmlspecialchars(socialProfileUrl('youtube'), ENT_QUOTES, 'UTF-8') . '" target="_blank" rel="noopener noreferrer" class="social-list__link flex-center" aria-label="YouTube"><i class="fab fa-youtube"></i></a></li>'
+        . '<li class="social-list__item"><a href="' . htmlspecialchars(socialProfileUrl('instagram'), ENT_QUOTES, 'UTF-8') . '" target="_blank" rel="noopener noreferrer" class="social-list__link flex-center" aria-label="Instagram"><i class="fab fa-instagram"></i></a></li>'
         . '</ul></div></div>';
 
     $footer = preg_replace(
@@ -212,7 +215,6 @@ function publicTemplateApplyFooterTransforms(string $footer): string
         'href="policy/terms-of-service"' => 'href="' . htmlspecialchars(baseUrl('page/terms-of-service'), ENT_QUOTES, 'UTF-8') . '"',
         'href="cookie-policy"' => 'href="' . htmlspecialchars(baseUrl('page/cookie-settings'), ENT_QUOTES, 'UTF-8') . '"',
         'href="blogs"' => 'href="' . htmlspecialchars(baseUrl('blog'), ENT_QUOTES, 'UTF-8') . '"',
-        'href="about"' => 'href="' . htmlspecialchars(baseUrl('page/about-us'), ENT_QUOTES, 'UTF-8') . '"',
         'href="contact"' => 'href="' . htmlspecialchars(baseUrl('page/contact-us'), ENT_QUOTES, 'UTF-8') . '"',
         'href="buyer/job/post/job-details"' => 'href="' . $postJobUrl . '"',
         'href="freelance-jobs"' => 'href="' . $jobsUrl . '"',
@@ -257,18 +259,25 @@ function publicTemplateApplyFooterTransforms(string $footer): string
     );
 
     $footer = preg_replace(
+        '#<li class="footer-menu__item[^"]*">\s*<a href="about" class="footer-menu__link">\s*About\s*</a>\s*</li>#i',
+        '',
+        $footer,
+        1
+    );
+
+    $footer = preg_replace(
         '~href="freelancer/register"~i',
-        'onclick="openModal(\'signup\')" href="#"',
+        'href="#" data-auth-modal="signup"',
         $footer
     );
     $footer = preg_replace(
         '~<a href="[^"]*buyer/register[^"]*" class="sign-up-content__btn btn btn--base"~i',
-        '<a onclick="openModal(\'login\')" class="sign-up-content__btn btn btn--base"',
+        '<a href="#" data-auth-modal="login" class="sign-up-content__btn btn btn--base"',
         $footer
     );
     $footer = preg_replace(
         '~<a href="[^"]*freelancer/register[^"]*" class="sign-up-content__btn btn btn--base"~i',
-        '<a onclick="openModal(\'signup\')" class="sign-up-content__btn btn btn--base"',
+        '<a href="#" data-auth-modal="signup" class="sign-up-content__btn btn btn--base"',
         $footer
     );
 

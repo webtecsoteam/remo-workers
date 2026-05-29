@@ -9,6 +9,7 @@ if (!isset($usePublicTemplate)) {
 <script>
 window.COUNTRY_OPTIONS_HTML = <?php echo json_encode($signupCountryOptionsHtml, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
 </script>
+<?php include __DIR__ . '/auth-modal-shell.php'; ?>
 <?php if ($usePublicTemplate): ?>
 <script src="<?php echo baseUrl('assets/free-home/global/js/jquery-3.7.1.min.js'); ?>"></script>
 <script src="<?php echo baseUrl('assets/free-home/global/js/bootstrap.bundle.min.js'); ?>"></script>
@@ -16,30 +17,50 @@ window.COUNTRY_OPTIONS_HTML = <?php echo json_encode($signupCountryOptionsHtml, 
 <script src="<?php echo baseUrl('assets/free-home/templates/basic/js/slick.min.js'); ?>"></script>
 <script src="<?php echo baseUrl('assets/free-home/templates/basic/js/main.js'); ?>"></script>
 <?php endif; ?>
-<script defer src="<?php echo baseUrl('home/js/home-modals.js?v=1.0.4'); ?>"></script>
+<script defer src="<?php echo baseUrl('home/js/home-modals.js?v=1.0.6'); ?>"></script>
 <script defer src="<?php echo baseUrl('home/js/home-auth.js?v=1.0.3'); ?>"></script>
 <script defer src="<?php echo baseUrl('home/js/home-blog.js?v=1.0.3'); ?>"></script>
 <script defer src="<?php echo baseUrl('home/js/home-talent.js?v=1.0.3'); ?>"></script>
 <?php if ($usePublicTemplate): ?>
 <script>
+function openAuthModal(id) {
+  if (!id) return;
+  if (typeof openModal === 'function') {
+    openModal(id);
+    return;
+  }
+  window.__pendingAuthModal = id;
+}
+
 document.addEventListener('click', function (e) {
+  const authTrigger = e.target.closest('[data-auth-modal]');
+  if (authTrigger) {
+    e.preventDefault();
+    openAuthModal(authTrigger.getAttribute('data-auth-modal'));
+    return;
+  }
+
   const a = e.target.closest('a[href]');
   if (!a) return;
-  const href = a.getAttribute('href') || '';
+  const href = (a.getAttribute('href') || '').replace(/\/+$/, '');
   if (href.endsWith('freelancer/login') || href === 'freelancer/login' || href.endsWith('/login')) {
     e.preventDefault();
-    if (typeof openModal === 'function') openModal('login');
+    openAuthModal('login');
   }
   if (href.endsWith('freelancer/register') || href === 'freelancer/register' || href.endsWith('/register')) {
     e.preventDefault();
-    if (typeof openModal === 'function') openModal('signup');
+    openAuthModal('signup');
   }
 });
 
 document.addEventListener('DOMContentLoaded', function () {
+  if (window.__pendingAuthModal && typeof openModal === 'function') {
+    openModal(window.__pendingAuthModal);
+    window.__pendingAuthModal = null;
+  }
+
   const params = new URLSearchParams(window.location.search);
-  if (params.get('login') !== '1') return;
-  if (typeof openModal === 'function') {
+  if (params.get('login') === '1' && typeof openModal === 'function') {
     openModal('login');
   }
 });

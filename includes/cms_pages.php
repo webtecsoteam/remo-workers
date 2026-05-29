@@ -114,6 +114,23 @@ function cmsPageUrl(string $slug): string
     return baseUrl('page/' . rawurlencode(cmsSlugify($slug)));
 }
 
+/** @return array<string, string> */
+function socialProfileUrls(): array
+{
+    return [
+        'facebook' => 'https://www.facebook.com/remoworkershub',
+        'x' => 'https://x.com/remoworkers',
+        'linkedin' => 'https://www.linkedin.com/company/palmstake',
+        'youtube' => 'https://www.youtube.com/@Remoworkers',
+        'instagram' => 'https://www.instagram.com/remoworkers',
+    ];
+}
+
+function socialProfileUrl(string $network): string
+{
+    return socialProfileUrls()[$network] ?? '';
+}
+
 function blogHubUrl(?string $category = null): string
 {
     $url = baseUrl('blog');
@@ -307,7 +324,6 @@ function cmsFooterDefaultLinks(): array
             ['name' => 'Community', 'href' => cmsPageUrl('community')],
         ],
         'company' => [
-            ['name' => 'About Us', 'href' => cmsPageUrl('about-us')],
             ['name' => 'Careers', 'href' => cmsPageUrl('careers')],
             ['name' => 'Press Room', 'href' => cmsPageUrl('press-room')],
             ['name' => 'Investor Relations', 'href' => cmsPageUrl('investor-relations')],

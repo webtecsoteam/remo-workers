@@ -77,7 +77,7 @@
       <!-- Payment Method Selection -->
       <div style="margin-bottom:20px">
         <label style="display:block;font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:8px">Select Payment Method</label>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:12px">
           <div id="connect-method-wallet" onclick="selectConnectPaymentMethod('wallet')" style="border:1px solid var(--border);border-radius:10px;padding:12px;cursor:pointer;text-align:center;background:white;transition:all 0.15s">
             <div style="font-size:16px;margin-bottom:4px">💼</div>
             <div style="font-size:12.5px;font-weight:700;color:var(--dark)">Wallet Balance</div>
@@ -85,6 +85,10 @@
           <div id="connect-method-card" onclick="selectConnectPaymentMethod('card')" style="border:1px solid var(--border);border-radius:10px;padding:12px;cursor:pointer;text-align:center;background:white;transition:all 0.15s">
             <div style="font-size:16px;margin-bottom:4px">💳</div>
             <div style="font-size:12.5px;font-weight:700;color:var(--dark)">Debit/Credit Card</div>
+          </div>
+          <div id="connect-method-crypto" onclick="selectConnectPaymentMethod('crypto')" style="border:1px solid var(--border);border-radius:10px;padding:12px;cursor:pointer;text-align:center;background:white;transition:all 0.15s">
+            <div style="font-size:16px;margin-bottom:4px">₿</div>
+            <div style="font-size:12.5px;font-weight:700;color:var(--dark)">Crypto Currency</div>
           </div>
         </div>
       </div>
@@ -94,6 +98,30 @@
         <div style="font-size:24px;margin-bottom:8px">🔒</div>
         <div style="font-size:13.5px;font-weight:700;color:var(--dark);margin-bottom:4px">Secure Paystack Checkout</div>
         <div style="font-size:12px;color:var(--muted);line-height:1.5">You will be securely redirected to Paystack to complete your purchase. All major debit/credit cards and online methods are supported.</div>
+      </div>
+
+      <!-- USDT crypto deposit instructions (shown after address is generated) -->
+      <div id="connects-crypto-form" style="display:none;background:#fffbeb;border:1.5px solid #fcd34d;border-radius:10px;padding:16px;margin-bottom:20px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px">
+          <div>
+            <div id="connects-crypto-title" style="font-size:13.5px;font-weight:800;color:var(--dark);margin-bottom:4px">Pay with USDT (Tron TRC20)</div>
+            <div style="font-size:12px;color:var(--muted);line-height:1.5"><strong id="connects-crypto-rate">1 USDT = 1 USD</strong> · Send exactly <strong id="connects-crypto-amount">0 USDT</strong> to the address below.</div>
+          </div>
+          <span style="font-size:22px">₿</span>
+        </div>
+        <div style="font-size:11px;font-weight:700;color:#b45309;text-transform:uppercase;margin-bottom:6px">Deposit address</div>
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
+          <code id="connects-crypto-address" style="flex:1;word-break:break-all;font-size:12px;background:white;border:1px solid var(--border);border-radius:8px;padding:10px;display:block">—</code>
+          <button type="button" class="btn" onclick="copyConnectsCryptoAddress()" style="flex-shrink:0;padding:8px 12px;font-size:12px">Copy</button>
+        </div>
+        <div id="connects-crypto-memo-wrap" style="display:none;margin-bottom:10px">
+          <div style="font-size:11px;font-weight:700;color:#b45309;text-transform:uppercase;margin-bottom:6px">Memo (required)</div>
+          <code id="connects-crypto-memo" style="word-break:break-all;font-size:12px;background:white;border:1px solid var(--border);border-radius:8px;padding:10px;display:block">—</code>
+        </div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.55;margin-bottom:14px">
+          Deposit <strong>USDT</strong> on the <strong id="connects-crypto-network">Tron (TRC20)</strong> network only. Sending on Polygon, Ethereum, or other networks will not be credited. After your transfer is sent, click confirm — connects are added automatically once CCPayment verifies your deposit.
+        </div>
+        <button type="button" id="btn-confirm-crypto-connects" class="btn btn-g" onclick="confirmCryptoConnectsDeposit()" style="width:100%;justify-content:center;padding:12px;font-weight:800;font-size:13px">I've deposited — Confirm payment</button>
       </div>
 
       <button id="btn-buy-connects-submit" class="btn btn-g" onclick="submitConnectsPurchase()" style="width:100%;justify-content:center;padding:14px;font-weight:800;font-size:14px" disabled>Buy Connects Pack</button>

@@ -30,10 +30,19 @@ if (!$job) {
 
 $user = Auth::user();
 $displayProposalCount = ((int) ($job['proposal_count'] ?? 0)) + 5;
+$jobIsOpen = strtolower((string) ($job['status'] ?? 'open')) === 'open';
+$applyDashboardUrl = baseUrl('remoworkers-dashboard/j/' . encodeJobId($jobId) . '?apply=1');
+$publicJobUrl = baseUrl('j/' . encodeJobId($jobId));
 
-if (isset($_GET['apply_login'])) {
+if ($user && ($user['role'] ?? '') === 'freelancer' && (isset($_GET['login']) || isset($_GET['apply']))) {
+    redirect($applyDashboardUrl);
+}
+
+if ((isset($_GET['login']) || isset($_GET['apply_login'])) && !$user) {
+    if (isset($_GET['apply_login'])) {
+        redirect($publicJobUrl . '?login=1');
+    }
     $_SESSION['redirect_to'] = 'remoworkers-dashboard/j/' . encodeJobId($jobId) . '?apply=1';
-    redirect(baseUrl('?show_login=1'));
 }
 
 $jobDescPlain = trim(strip_tags((string) ($job['description'] ?? '')));
@@ -47,6 +56,52 @@ include __DIR__ . '/includes/header.php';
 ?>
 
 <style>
+.public-job-page {
+  --g: #14a800;
+  --gd: #0e8f00;
+  --border: #dce8d8;
+  --muted: #617a5a;
+  --text: #111827;
+  --text-2: #374151;
+}
+.public-job-page .job-apply-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 14px 20px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  line-height: 1.2;
+  transition: background 0.18s, transform 0.18s;
+}
+.public-job-page .job-apply-btn--primary {
+  background: var(--g);
+  color: #fff;
+  box-shadow: 0 2px 12px rgba(20, 168, 0, 0.25);
+}
+.public-job-page .job-apply-btn--primary:hover {
+  background: var(--gd);
+  transform: translateY(-1px);
+  color: #fff;
+}
+.public-job-page .job-apply-hint {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 10px;
+  line-height: 1.5;
+}
+.public-job-page .job-apply-main {
+  margin-bottom: 24px;
+}
+@media (min-width: 801px) {
+  .public-job-page .job-apply-main { display: none; }
+}
 .public-job-page { max-width: 1000px; margin: 40px auto; padding: 0 20px; font-family: 'Plus Jakarta Sans', sans-serif; display: grid; grid-template-columns: 1fr 300px; gap: 30px; align-items: start; }
 .job-main { background: #fff; padding: 40px; border-radius: 16px; border: 1px solid var(--border); }
 .job-sidebar { background: #fff; padding: 30px; border-radius: 16px; border: 1px solid var(--border); }
@@ -100,6 +155,19 @@ include __DIR__ . '/includes/header.php';
             </div>
         </div>
 
+        <?php if ($jobIsOpen): ?>
+        <div class="job-apply-main">
+            <?php if ($user && ($user['role'] ?? '') === 'freelancer'): ?>
+                <a href="<?php echo htmlspecialchars($applyDashboardUrl); ?>" class="job-apply-btn job-apply-btn--primary">Apply Now</a>
+            <?php elseif ($user && ($user['role'] ?? '') === 'client'): ?>
+                <div style="background:#f3f4f6;color:var(--muted);padding:12px;border-radius:8px;font-size:13px;text-align:center">You are logged in as a Client. To apply, log in as a Freelancer.</div>
+            <?php else: ?>
+                <a href="<?php echo htmlspecialchars($publicJobUrl . '?login=1'); ?>" class="job-apply-btn job-apply-btn--primary">Apply Now</a>
+                <p class="job-apply-hint" style="text-align:center">Sign in or create a free freelancer account to submit your proposal.</p>
+            <?php endif; ?>
+        </div>
+        <?php endif; ?>
+
         <?php if ($user): ?>
         <p style="margin-bottom:20px"><a href="<?php echo $user['role'] === 'freelancer' ? baseUrl('remoworkers-dashboard/j/' . encodeJobId($job['id'])) : baseUrl('j/' . encodeJobId($job['id'])); ?>" style="font-size:13px;color:var(--g);font-weight:600;text-decoration:none">View full job page →</a></p>
         <?php endif; ?>
@@ -123,16 +191,18 @@ include __DIR__ . '/includes/header.php';
     </div>
 
     <div class="job-sidebar">
+        <?php if ($jobIsOpen): ?>
         <div class="side-sect" style="text-align:center">
-            <?php if ($user && $user['role'] === 'freelancer'): ?>
-                <a href="<?php echo baseUrl('remoworkers-dashboard/j/' . encodeJobId($job['id']) . '?apply=1'); ?>" class="btn btn-green btn-full btn-lg" style="margin-bottom:10px;font-size:15px">Apply Now</a>
-            <?php elseif ($user && $user['role'] === 'client'): ?>
+            <?php if ($user && ($user['role'] ?? '') === 'freelancer'): ?>
+                <a href="<?php echo htmlspecialchars($applyDashboardUrl); ?>" class="job-apply-btn job-apply-btn--primary">Apply Now</a>
+            <?php elseif ($user && ($user['role'] ?? '') === 'client'): ?>
                 <div style="background:#f3f4f6;color:var(--muted);padding:12px;border-radius:8px;font-size:13px">You are logged in as a Client. To apply, log in as a Freelancer.</div>
             <?php else: ?>
-                <a href="<?php echo baseUrl('j/' . encodeJobId($job['id']) . '?apply_login=1'); ?>" class="btn btn-green btn-full btn-lg" style="margin-bottom:10px;font-size:15px">Apply Now</a>
-                <p style="font-size:12px;color:var(--muted)">You'll be asked to sign in or create a free account.</p>
+                <a href="<?php echo htmlspecialchars($publicJobUrl . '?login=1'); ?>" class="job-apply-btn job-apply-btn--primary">Apply Now</a>
+                <p class="job-apply-hint">Sign in or create a free freelancer account to submit your proposal.</p>
             <?php endif; ?>
         </div>
+        <?php endif; ?>
 
         <div class="side-sect">
             <h3 style="font-size:16px;margin-bottom:18px">About the client</h3>
@@ -181,6 +251,16 @@ include __DIR__ . '/includes/header.php';
         </div>
     </div>
 </div>
+
+<?php if (isset($_GET['login']) && !$user): ?>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  if (typeof showToast === 'function') {
+    showToast('Sign in required', 'Log in or create a freelancer account to apply for this job.');
+  }
+});
+</script>
+<?php endif; ?>
 
 <?php include __DIR__ . '/includes/site-footer.php'; ?>
 <?php include __DIR__ . '/includes/footer.php'; ?>

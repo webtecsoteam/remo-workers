@@ -3,6 +3,14 @@
  * Site-wide SEO settings and meta tag rendering.
  */
 
+/** Relative path to the default image for Facebook, X, LinkedIn, WhatsApp, etc. */
+const SEO_SHARE_IMAGE_PATH = 'assets/ShareLogo.png';
+
+function seoDefaultShareImageUrl(): string
+{
+    return baseUrl(SEO_SHARE_IMAGE_PATH);
+}
+
 /** @return list<string> */
 function seoSettingKeys(): array
 {
@@ -44,7 +52,7 @@ function ensureSeoSettings(): void
         'seo_home_title' => ['Remoworkers – Where Great Work Gets Done', 'Homepage title.'],
         'seo_home_description' => ['Access 5 million+ vetted professionals. Post your job free — get proposals in hours.', 'Homepage meta description.'],
         'seo_home_keywords' => ['hire freelancers, remote talent, freelance marketplace, post a job', 'Homepage meta keywords.'],
-        'seo_og_image' => ['', 'Open Graph image URL.'],
+        'seo_og_image' => ['', 'Open Graph image URL (leave empty to use assets/ShareLogo.png).'],
     ];
 
     $check = $db->prepare('SELECT COUNT(*) FROM platform_settings WHERE setting_key = ?');
@@ -136,7 +144,7 @@ function renderSeoMetaTags(array $overrides = [], bool $isHome = false): void
 
     $ogImage = seoAbsoluteUrl(trim($overrides['og_image'] ?? $site['seo_og_image'] ?? ''));
     if ($ogImage === '') {
-        $ogImage = baseUrl('assets/logo.png');
+        $ogImage = seoDefaultShareImageUrl();
     }
     $canonical = trim($overrides['canonical'] ?? '');
     if ($canonical === '') {

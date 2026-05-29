@@ -131,39 +131,192 @@
     closeModal();
   }
   function selectPayMethod(el) { document.querySelectorAll('.pay-method').forEach(x => x.classList.remove('selected')); el.classList.add('selected'); }
+  window.selectedAddFundsPaymentMethod = 'card';
+  window.pendingCryptoDepositReference = null;
+
+  window.resetAddFundsCryptoPanel = function () {
+    window.pendingCryptoDepositReference = null;
+    const cryptoForm = document.getElementById('add-funds-crypto-form');
+    const submitBtn = document.getElementById('btn-add-funds-submit');
+    if (cryptoForm) cryptoForm.style.display = 'none';
+    if (submitBtn) submitBtn.style.display = '';
+  };
+
+  window.selectAddFundsPaymentMethod = function (method) {
+    window.selectedAddFundsPaymentMethod = method;
+    const cardEl = document.getElementById('add-funds-method-card');
+    const cryptoEl = document.getElementById('add-funds-method-crypto');
+    const cardNotice = document.getElementById('add-funds-card-notice');
+    const inactive = 'border:1.5px solid var(--uw-border);border-radius:10px;padding:12px;cursor:pointer;text-align:center;background:white;transition:all 0.15s';
+    const active = 'border:2px solid var(--uw-green);border-radius:10px;padding:11px;cursor:pointer;text-align:center;background:var(--uw-green-light)';
+
+    [cardEl, cryptoEl].forEach(function (el) {
+      if (!el) return;
+      el.style.cssText = inactive;
+      const label = el.querySelector('.add-funds-method-label');
+      if (label) label.style.color = 'var(--uw-black)';
+    });
+
+    const map = { card: cardEl, crypto: cryptoEl };
+    const selected = map[method];
+    if (selected) {
+      selected.style.cssText = active;
+      const label = selected.querySelector('.add-funds-method-label');
+      if (label) label.style.color = 'var(--uw-green)';
+    }
+
+    if (cardNotice) cardNotice.style.display = method === 'card' ? 'block' : 'none';
+    if (method !== 'crypto') resetAddFundsCryptoPanel();
+  };
+
+  window.showAddFundsCryptoDeposit = function (data) {
+    window.pendingCryptoDepositReference = data.reference_id;
+    const cryptoForm = document.getElementById('add-funds-crypto-form');
+    const submitBtn = document.getElementById('btn-add-funds-submit');
+    const addrEl = document.getElementById('add-funds-crypto-address');
+    const amtEl = document.getElementById('add-funds-crypto-amount');
+    const rateEl = document.getElementById('add-funds-crypto-rate');
+    const memoWrap = document.getElementById('add-funds-crypto-memo-wrap');
+    const memoEl = document.getElementById('add-funds-crypto-memo');
+    const chainLabel = data.chain_label || 'Tron (TRC20)';
+    const titleEl = document.getElementById('add-funds-crypto-title');
+    const networkEl = document.getElementById('add-funds-crypto-network');
+
+    if (titleEl) titleEl.textContent = 'Pay with USDT (' + chainLabel + ')';
+    if (networkEl) networkEl.textContent = chainLabel;
+    if (rateEl) rateEl.textContent = data.rate_label || '1 USDT = 1 USD';
+    if (amtEl) amtEl.textContent = Number(data.usdt_amount || 0).toFixed(2) + ' USDT';
+    if (addrEl) addrEl.textContent = data.address || '—';
+    if (memoWrap && memoEl) {
+      if (data.memo) {
+        memoWrap.style.display = 'block';
+        memoEl.textContent = data.memo;
+      } else {
+        memoWrap.style.display = 'none';
+      }
+    }
+    if (cryptoForm) cryptoForm.style.display = 'block';
+    if (submitBtn) submitBtn.style.display = 'none';
+  };
+
+  window.copyAddFundsCryptoAddress = function () {
+    const addr = document.getElementById('add-funds-crypto-address');
+    if (!addr || !addr.textContent || addr.textContent === '—') return;
+    navigator.clipboard.writeText(addr.textContent.trim()).then(function () {
+      toast('Copied', 'Deposit address copied to clipboard.');
+    }).catch(function () {
+      toast('Copy failed', 'Please copy the address manually.');
+    });
+  };
+
+  window.confirmCryptoDeposit = function () {
+    const ref = window.pendingCryptoDepositReference;
+    if (!ref) {
+      toast('Error', 'No pending crypto deposit found. Please start again.');
+      return;
+    }
+    const btn = document.getElementById('btn-confirm-crypto-deposit');
+    const originalText = btn ? btn.innerText : '';
+    if (btn) {
+      btn.disabled = true;
+      btn.innerText = 'Checking deposit...';
+    }
+    fetch(BASE_URL + 'client/api/confirm-crypto-deposit.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reference_id: ref })
+    })
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        if (data.success && data.completed) {
+          toast('Deposit confirmed! ✓', data.message);
+          if (typeof data.new_balance === 'number') {
+            availableBalance = data.new_balance;
+            const balEl = document.getElementById('client-available-balance');
+            if (balEl) {
+              balEl.textContent = '$' + availableBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            }
+            const pill = document.getElementById('add-funds-current-bal-pill');
+            if (pill) {
+              pill.innerHTML = '💰 Current Balance: $' + availableBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            }
+            const newBalEl = document.getElementById('add-new-bal');
+            if (newBalEl) {
+              newBalEl.textContent = '$' + availableBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            }
+          }
+          resetAddFundsCryptoPanel();
+          selectAddFundsPaymentMethod('card');
+          const amtInput = document.getElementById('add-funds-amount');
+          if (amtInput) {
+            amtInput.value = '';
+            updateAddFundsSummary(amtInput);
+          }
+          setTimeout(function () { location.reload(); }, 1200);
+        } else if (data.success && data.pending) {
+          toast('Awaiting confirmation', data.message);
+        } else {
+          toast('Error', data.message || 'Could not confirm deposit.');
+        }
+      })
+      .catch(function () {
+        toast('Error', 'Could not check deposit status.');
+      })
+      .finally(function () {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerText = originalText;
+        }
+      });
+  };
+
   async function handleAddFunds(btn) {
     const input = document.getElementById('add-funds-amount');
     const val = input ? input.value : 0;
     const v = parseFloat(val || 0);
     if (v < 1) { toast('Minimum $1', 'Please enter at least $1 to add'); return; }
 
-    if (!btn) btn = document.querySelector('#overlay button.btn-g');
-    const originalText = btn.innerText;
-    btn.disabled = true;
-    btn.innerText = 'Initializing...';
+    const method = window.selectedAddFundsPaymentMethod || 'card';
+    if (method === 'crypto' && window.pendingCryptoDepositReference) {
+      toast('Deposit pending', 'Complete your USDT deposit or use the confirm button below.');
+      return;
+    }
+
+    if (!btn) btn = document.getElementById('btn-add-funds-submit');
+    const originalText = btn ? btn.innerText : 'Add Funds →';
+    if (btn) {
+      btn.disabled = true;
+      const loadingLabels = { card: 'Redirecting to Paystack...', crypto: 'Generating deposit address...' };
+      btn.innerText = loadingLabels[method] || 'Initializing...';
+    }
 
     try {
-      const formData = new FormData();
-      formData.append('amount', v);
-
       const response = await fetch(BASE_URL + 'actions/add_funds.php', {
         method: 'POST',
-        body: formData
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: v, payment_method: method })
       });
 
       const result = await response.json();
       if (result.success && result.authorization_url) {
         toast('Redirecting...', 'Taking you to Paystack secure payment page');
         window.location.href = result.authorization_url;
-      } else {
-        toast('Error', result.error || 'Failed to initialize payment');
+        return;
+      }
+      if (result.success && result.crypto && result.address) {
+        showAddFundsCryptoDeposit(result);
+        const net = result.chain_label || 'Tron (TRC20)';
+        toast('Deposit address ready', 'Send ' + Number(result.usdt_amount).toFixed(2) + ' USDT on ' + net + ' to the address shown.');
+        return;
+      }
+      toast('Error', result.error || result.message || 'Failed to initialize payment');
+    } catch (err) {
+      toast('Error', 'An unexpected error occurred.');
+    } finally {
+      if (btn) {
         btn.disabled = false;
         btn.innerText = originalText;
       }
-    } catch (err) {
-      toast('Error', 'An unexpected error occurred.');
-      btn.disabled = false;
-      btn.innerText = originalText;
     }
   }
 
@@ -237,6 +390,7 @@
     </div>`;
     container.appendChild(msgEl);
     input.value = '';
+    autoGrowChatInput(input);
     input.style.height = 'auto';
     chat.scrollTop = chat.scrollHeight;
     toast('Message sent', 'Your message was delivered');
@@ -481,11 +635,48 @@
       t: 'Add Funds to Balance', b: `
     <div class="balance-pill" id="add-funds-current-bal-pill">💰 Current Balance: $0.00</div>
     <div class="fg"><label>Amount to Add ($)</label><input type="number" placeholder="e.g. 500" min="1" id="add-funds-amount" oninput="updateAddFundsSummary(this)"></div>
-    
-    <div style="background:#f8fafc;border:1.5px dashed var(--uw-border);border-radius:10px;padding:16px;margin-bottom:20px;text-align:center;margin-top:16px">
+
+    <div style="margin-bottom:16px">
+      <label style="display:block;font-size:11px;font-weight:700;color:var(--uw-gray);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Payment method</label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div id="add-funds-method-card" onclick="selectAddFundsPaymentMethod('card')" style="border:2px solid var(--uw-green);border-radius:10px;padding:11px;cursor:pointer;text-align:center;background:var(--uw-green-light)">
+          <div style="font-size:18px;margin-bottom:4px">💳</div>
+          <div class="add-funds-method-label" style="font-size:12.5px;font-weight:700;color:var(--uw-green)">Card / Bank</div>
+        </div>
+        <div id="add-funds-method-crypto" onclick="selectAddFundsPaymentMethod('crypto')" style="border:1.5px solid var(--uw-border);border-radius:10px;padding:12px;cursor:pointer;text-align:center;background:white">
+          <div style="font-size:18px;margin-bottom:4px">₿</div>
+          <div class="add-funds-method-label" style="font-size:12.5px;font-weight:700;color:var(--uw-black)">Crypto (USDT)</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="add-funds-card-notice" style="background:#f8fafc;border:1.5px dashed var(--uw-border);border-radius:10px;padding:16px;margin-bottom:20px;text-align:center">
       <div style="font-size:24px;margin-bottom:6px">🔒</div>
       <div style="font-size:13.5px;font-weight:700;color:var(--uw-black);margin-bottom:4px">Secure Paystack Checkout</div>
       <div style="font-size:11.5px;color:var(--uw-gray);line-height:1.5">You will be securely redirected to Paystack to complete your deposit. All major debit/credit cards, bank transfers, and mobile money options are fully supported.</div>
+    </div>
+
+    <div id="add-funds-crypto-form" style="display:none;background:#fffbeb;border:1.5px solid #fcd34d;border-radius:10px;padding:16px;margin-bottom:20px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px">
+        <div>
+          <div id="add-funds-crypto-title" style="font-size:13.5px;font-weight:800;color:var(--uw-black);margin-bottom:4px">Pay with USDT (Tron TRC20)</div>
+          <div style="font-size:12px;color:var(--uw-gray);line-height:1.5"><strong id="add-funds-crypto-rate">1 USDT = 1 USD</strong> · Send exactly <strong id="add-funds-crypto-amount">0 USDT</strong> to the address below.</div>
+        </div>
+        <span style="font-size:22px">₿</span>
+      </div>
+      <div style="font-size:11px;font-weight:700;color:#b45309;text-transform:uppercase;margin-bottom:6px">Deposit address</div>
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
+        <code id="add-funds-crypto-address" style="flex:1;word-break:break-all;font-size:12px;background:white;border:1px solid var(--uw-border);border-radius:8px;padding:10px;display:block">—</code>
+        <button type="button" class="btn btn-w btn-sm" onclick="copyAddFundsCryptoAddress()" style="flex-shrink:0">Copy</button>
+      </div>
+      <div id="add-funds-crypto-memo-wrap" style="display:none;margin-bottom:10px">
+        <div style="font-size:11px;font-weight:700;color:#b45309;text-transform:uppercase;margin-bottom:6px">Memo (required)</div>
+        <code id="add-funds-crypto-memo" style="word-break:break-all;font-size:12px;background:white;border:1px solid var(--uw-border);border-radius:8px;padding:10px;display:block">—</code>
+      </div>
+      <div style="font-size:12px;color:var(--uw-gray);line-height:1.55;margin-bottom:14px">
+        Deposit <strong>USDT</strong> on the <strong id="add-funds-crypto-network">Tron (TRC20)</strong> network only. After your transfer is sent, click confirm — your balance is updated automatically once CCPayment verifies the deposit.
+      </div>
+      <button type="button" id="btn-confirm-crypto-deposit" class="btn btn-g" onclick="confirmCryptoDeposit()" style="width:100%;justify-content:center;padding:12px;font-weight:800;font-size:13px">I've deposited — Confirm payment</button>
     </div>
 
     <div class="fund-summary">
@@ -493,7 +684,7 @@
       <div class="fund-summary-row"><span style="color:var(--uw-gray)">Processing fee</span><span>$0.00</span></div>
       <div class="fund-summary-row total"><span>New balance after deposit</span><span id="add-new-bal" style="color:var(--uw-green)">$0.00</span></div>
     </div>
-    <button class="btn btn-g" style="width:100%;justify-content:center;padding:11px" onclick="handleAddFunds(this)">Add Funds →</button>
+    <button id="btn-add-funds-submit" class="btn btn-g" style="width:100%;justify-content:center;padding:11px" onclick="handleAddFunds(this)">Add Funds →</button>
   `},
     'manage-cards': {
       t: 'Payment Methods', b: `
@@ -619,7 +810,8 @@
     }
 
     if (id === 'add-funds') {
-      // Populate current balance dynamically
+      window.selectedAddFundsPaymentMethod = 'card';
+      window.pendingCryptoDepositReference = null;
       const curBalEl = document.getElementById('add-funds-current-bal-pill');
       if (curBalEl) {
         curBalEl.innerHTML = `💰 Current Balance: $${parseFloat(availableBalance || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -628,6 +820,7 @@
       if (newBalEl) {
         newBalEl.textContent = `$${parseFloat(availableBalance || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
       }
+      selectAddFundsPaymentMethod('card');
     }
   }
 
@@ -1180,6 +1373,12 @@
     updateChatAttachmentPreview();
   }
 
+  function autoGrowChatInput(el) {
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+  }
+
   async function loadChat(otherId, name, initials, el, avatar = '') {
     activeChatId = otherId;
     activeChatName = name;
@@ -1285,7 +1484,7 @@
     `;
 
     const composerHtml = activeChatBlocked ? `
-    <div style="padding:14px 18px;border-top:1px solid var(--uw-border);background:#fafafa">
+    <div class="chat-pane-composer chat-pane-composer--blocked">
       <div style="font-size:13px;color:var(--uw-gray2);text-align:center;line-height:1.5">
         ${activeChatBlockedByMe
           ? 'You blocked this freelancer. They cannot message you until you unblock them.'
@@ -1294,19 +1493,19 @@
       ${activeChatBlockedByMe ? `<div style="text-align:center;margin-top:10px"><button type="button" id="chat-unblock-composer-btn" class="btn btn-g btn-sm">Unblock &amp; chat again</button></div>` : ''}
     </div>
     ` : `
-    <div style="padding:14px 18px;border-top:1px solid var(--uw-border)">
+    <div class="chat-pane-composer">
       <div id="chat-attachment-preview" style="display:none;align-items:center;gap:8px;margin-bottom:8px;padding:8px 10px;background:var(--uw-bg);border:1px solid var(--uw-border);border-radius:8px"></div>
       <div style="display:flex;gap:10px;align-items:center">
         <input type="file" id="chat-attachment-input" style="display:none" accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip,.rar" onchange="onChatAttachmentSelected(this)">
         <button type="button" class="btn" title="Attach file" style="padding:9px 12px;font-size:16px;line-height:1" onclick="document.getElementById('chat-attachment-input').click()">📎</button>
-        <input id="chat-input" style="flex:1;padding:9px 14px;border:1.5px solid var(--uw-border);border-radius:50px;font-size:13px;font-family:inherit;outline:none" placeholder="Type a message…" onkeydown="if(event.key==='Enter')sendMsg()">
+        <textarea id="chat-input" rows="1" style="flex:1;padding:9px 14px;border:1.5px solid var(--uw-border);border-radius:16px;font-size:13px;font-family:inherit;outline:none;line-height:1.4;resize:none;overflow-y:auto;min-height:40px;max-height:120px" placeholder="Type a message…" oninput="autoGrowChatInput(this)" onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault();sendMsg();}"></textarea>
         <button class="btn btn-g" onclick="sendMsg()">Send</button>
       </div>
     </div>
     `;
 
     chatWindow.innerHTML = `
-    <div style="padding:14px 18px;border-bottom:1px solid var(--uw-border);display:flex;align-items:center;gap:12px;justify-content:space-between">
+    <div class="chat-pane-header">
       <div style="display:flex;align-items:center;gap:12px">
         <div class="av" style="width:36px;height:36px">
           ${avatar ? `<div class="av" style="position:relative;width:100%;height:100%"><img src="${getAvatarUrl(avatar)}" style="width:100%;height:100%;border-radius:50%;object-fit:cover" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div style="display:none;background:var(--uw-green-light);color:var(--uw-green);width:100%;height:100%;align-items:center;justify-content:center;border-radius:50%;font-weight:700">${initials}</div></div>` :
@@ -1316,11 +1515,12 @@
       </div>
       <div style="display:flex;align-items:center;gap:8px">${blockBtn}${milestoneBtn}</div>
     </div>
-    <div style="flex:1;padding:18px;overflow-y:auto;display:flex;flex-direction:column;gap:12px" id="chat-messages-scroll">${msgHtml}</div>
+    <div id="chat-messages-scroll">${msgHtml}</div>
     ${composerHtml}
   `;
     const scroll = document.getElementById('chat-messages-scroll');
     scroll.scrollTop = scroll.scrollHeight;
+    autoGrowChatInput(document.getElementById('chat-input'));
     updateChatAttachmentPreview();
     bindChatBlockButtons(activeChatId, name);
   }
@@ -1444,10 +1644,10 @@
   function appendBlockedListItem(freelancerId, name) {
     let section = document.getElementById('blocked-freelancers-list');
     if (!section) {
-      const sidebar = document.querySelector('#page-messages [style*="border-right"]');
+      const sidebar = document.getElementById('messages-sidebar');
       if (!sidebar) return;
       const wrap = document.createElement('div');
-      wrap.style.cssText = 'border-top:1px solid var(--uw-border);padding:10px 14px 12px';
+      wrap.className = 'messages-blocked';
       wrap.innerHTML = '<div style="font-size:11px;font-weight:700;color:var(--uw-gray);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px">Blocked</div><div id="blocked-freelancers-list"></div>';
       sidebar.appendChild(wrap);
       section = document.getElementById('blocked-freelancers-list');
@@ -1861,9 +2061,12 @@
     } else {
       stopConversationsPolling();
     }
+    document.body.classList.toggle('page-messages-active', id === 'messages');
     window.location.hash = id;
     closeMobSidebar();
-    window.scrollTo(0, 0);
+    if (id !== 'messages') {
+      window.scrollTo(0, 0);
+    }
   }
 
   function setTab(el, targetId, page = 1) {

@@ -19,13 +19,20 @@ try {
 
     // Get recent activity with payment method joined
     $stmt = $db->prepare("
-        SELECT c.*, p.payment_method 
-        FROM connects_history c 
-        LEFT JOIN payments p ON p.payer_id = c.user_id 
+        SELECT c.*, p.payment_method
+        FROM connects_history c
+        LEFT JOIN payments p ON p.payer_id = c.user_id
             AND p.status = 'completed'
-            AND ABS(TIMESTAMPDIFF(SECOND, p.created_at, c.created_at)) < 300
-        WHERE c.user_id = ? 
-        ORDER BY c.created_at DESC 
+            AND (
+                ABS(TIMESTAMPDIFF(SECOND, p.created_at, c.created_at)) < 300
+                OR p.description COLLATE utf8mb4_unicode_ci = c.description COLLATE utf8mb4_unicode_ci
+                OR (
+                    c.description COLLATE utf8mb4_unicode_ci LIKE '%USDT%'
+                    AND p.payment_method COLLATE utf8mb4_unicode_ci LIKE '%ccpayment%'
+                )
+            )
+        WHERE c.user_id = ?
+        ORDER BY c.created_at DESC
         LIMIT 10
     ");
     $stmt->execute([$user['id']]);

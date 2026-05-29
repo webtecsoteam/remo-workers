@@ -4,7 +4,9 @@
 (function () {
   let confirmResolve = null;
   let promptResolve = null;
+  let linkPromptResolve = null;
   let toastTimer = null;
+  let remoToastRunning = false;
 
   function ensureToast() {
     let el = document.getElementById('toast');
@@ -103,20 +105,90 @@
     }
   }
 
+  function ensureLinkPromptModal() {
+    let el = document.getElementById('remoLinkPromptModal');
+    if (el) return el;
+    el = document.createElement('div');
+    el.id = 'remoLinkPromptModal';
+    el.className = 'remo-dialog-overlay';
+    el.style.display = 'none';
+    el.innerHTML = `
+      <div class="remo-dialog-card" role="dialog" aria-modal="true">
+        <div class="remo-dialog-header">
+          <span class="remo-dialog-title" id="remoLinkPromptTitle">Insert link</span>
+          <button type="button" class="remo-dialog-close" id="remoLinkPromptClose" aria-label="Close">&times;</button>
+        </div>
+        <div class="remo-dialog-body">
+          <div class="remo-dialog-field">
+            <label class="remo-dialog-label" for="remoLinkPromptText">Link text</label>
+            <input type="text" id="remoLinkPromptText" class="remo-dialog-input" placeholder="Text shown in the email" />
+          </div>
+          <div class="remo-dialog-field">
+            <label class="remo-dialog-label" for="remoLinkPromptUrl">URL</label>
+            <input type="text" id="remoLinkPromptUrl" class="remo-dialog-input" placeholder="https://example.com" />
+          </div>
+        </div>
+        <div class="remo-dialog-footer">
+          <button type="button" class="remo-dialog-btn remo-dialog-btn-cancel" id="remoLinkPromptCancel">Cancel</button>
+          <button type="button" class="remo-dialog-btn remo-dialog-btn-primary" id="remoLinkPromptOk">Insert</button>
+        </div>
+      </div>`;
+    document.body.appendChild(el);
+    el.querySelector('#remoLinkPromptCancel').addEventListener('click', () => finishLinkPrompt(null));
+    el.querySelector('#remoLinkPromptClose').addEventListener('click', () => finishLinkPrompt(null));
+    el.querySelector('#remoLinkPromptOk').addEventListener('click', () => {
+      const text = el.querySelector('#remoLinkPromptText').value.trim();
+      const url = el.querySelector('#remoLinkPromptUrl').value.trim();
+      if (!text || !url) {
+        window.remoAlert('Please enter both link text and URL.', 'Insert link');
+        return;
+      }
+      finishLinkPrompt({ text, url });
+    });
+    el.addEventListener('click', (e) => {
+      if (e.target === el) finishLinkPrompt(null);
+    });
+    return el;
+  }
+
+  function finishLinkPrompt(result) {
+    const el = document.getElementById('remoLinkPromptModal');
+    if (el) el.style.display = 'none';
+    if (linkPromptResolve) {
+      const fn = linkPromptResolve;
+      linkPromptResolve = null;
+      fn(result);
+    }
+  }
+
+  function escapeRteHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function normalizeRteLinkUrl(url) {
+    url = String(url || '').trim();
+    if (!url) return '';
+    if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+    return url;
+  }
+
   window.remoToast = function (title, msg, type) {
     if (typeof window.showToast === 'function' && document.getElementById('toast')) {
       window.showToast(title, msg || '');
       return;
     }
-    if (typeof window.toast === 'function' && document.getElementById('toast')) {
-      window.toast(title, msg || '');
-      const el = document.getElementById('toast');
-      if (el) {
-        el.classList.remove('toast-error', 'toast-success');
-        if (type === 'error') el.classList.add('toast-error');
-        if (type === 'success') el.classList.add('toast-success');
+    if (!remoToastRunning && typeof window.toast === 'function' && document.getElementById('toast')) {
+      remoToastRunning = true;
+      try {
+        window.toast(title, msg || '', type);
+        return;
+      } finally {
+        remoToastRunning = false;
       }
-      return;
     }
     const el = ensureToast();
     const t = document.getElementById('t-title');
@@ -178,5 +250,28 @@
       el.style.display = 'flex';
       setTimeout(() => document.getElementById('remoPromptInput').focus(), 50);
     });
+  };
+
+  window.remoLinkPrompt = function (title, defaults) {
+    defaults = defaults || {};
+    return new Promise((resolve) => {
+      const el = ensureLinkPromptModal();
+      document.getElementById('remoLinkPromptTitle').textContent = title || 'Insert link';
+      const textInput = document.getElementById('remoLinkPromptText');
+      const urlInput = document.getElementById('remoLinkPromptUrl');
+      textInput.value = defaults.text || '';
+      urlInput.value = defaults.url || 'https://';
+      linkPromptResolve = resolve;
+      el.style.display = 'flex';
+      setTimeout(() => (defaults.text ? urlInput : textInput).focus(), 50);
+    });
+  };
+
+  window.insertRteLink = function (editor, text, url) {
+    if (!editor || !text || !url) return;
+    editor.focus();
+    const href = normalizeRteLinkUrl(url);
+    const html = '<a href="' + escapeRteHtml(href) + '">' + escapeRteHtml(text) + '</a>';
+    document.execCommand('insertHTML', false, html);
   };
 })();

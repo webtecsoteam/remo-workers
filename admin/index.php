@@ -300,6 +300,7 @@ if (!$user || $user['role'] !== 'admin') {
   .rte-editor h3 { font-size: 16px; font-weight: 600; margin: 12px 0 8px; }
   .rte-editor blockquote { border-left: 3px solid var(--accent); padding: 8px 14px; margin: 10px 0; background: var(--accent-light); border-radius: 0 8px 8px 0; font-style: italic; color: var(--text-2); }
   .rte-editor ul, .rte-editor ol { padding-left: 22px; margin: 8px 0; }
+  .rte-editor img { max-width: 100%; height: auto; display: block; margin: 8px 0; border-radius: 6px; }
   .blog-view-body { font-size: 14px; line-height: 1.7; color: var(--text); }
   .blog-view-body h3 { font-size: 18px; font-weight: 600; margin: 16px 0 10px; }
   .blog-view-body blockquote { border-left: 3px solid var(--accent); padding: 10px 16px; margin: 14px 0; background: var(--accent-light); border-radius: 0 8px 8px 0; }
@@ -937,7 +938,8 @@ if (!$user || $user['role'] !== 'admin') {
             </div>
             <div style="margin-bottom:20px;">
               <label style="display:block;font-size:12px;margin-bottom:6px;color:var(--text-2);">Open Graph image URL</label>
-              <input type="url" id="seo_og_image" placeholder="https://…" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;outline:none;font-family:inherit;">
+              <input type="url" id="seo_og_image" placeholder="Leave empty to use assets/ShareLogo.png" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;outline:none;font-family:inherit;">
+              <p style="font-size:11px;color:var(--text-2);margin:8px 0 0;line-height:1.45;">Used when links are shared on Facebook, Instagram, X, LinkedIn, WhatsApp, and similar apps. Default: <code>assets/ShareLogo.png</code>.</p>
             </div>
             <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;">Save SEO Settings</button>
           </form>
@@ -1329,6 +1331,27 @@ if (!$user || $user['role'] !== 'admin') {
   </div>
 </div>
 
+<!-- Freelancer Join Date Modal -->
+<div id="freelancerJoinDateModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:200; align-items:center; justify-content:center;">
+  <div class="card" style="width:100%; max-width:480px; margin:20px;">
+    <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+      <span class="card-title">Adjust Freelancer Join Date</span>
+      <span onclick="closeModal('freelancerJoinDateModal')" style="cursor:pointer; font-size:24px; font-weight:700; color:var(--text-3)">&times;</span>
+    </div>
+    <div class="card-body">
+      <input type="hidden" id="fjUserId">
+      <p id="fjUserName" style="margin-bottom:16px; font-weight:600; font-size:15px;"></p>
+      <div style="margin-bottom:16px;">
+        <label style="display:block; font-size:12px; margin-bottom:6px; color:var(--text-2); font-weight:500;">Join Date</label>
+        <input type="date" id="fjJoinDate" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:8px; outline:none; font-family:inherit; font-size:13px;">
+        <small style="color:var(--text-3); font-size:11px; margin-top:4px; display:block;">This updates the freelancer's joined date (stored as account created date).</small>
+      </div>
+      <button class="btn btn-primary" onclick="saveFreelancerJoinDate()" style="width:100%; justify-content:center;">Save Join Date</button>
+      <div id="fjStatus" style="margin-top:12px; font-size:13px;"></div>
+    </div>
+  </div>
+</div>
+
 <!-- Reset User Password Modal -->
 <div id="resetPasswordModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:200; align-items:center; justify-content:center;">
   <div class="card" style="width:100%; max-width:420px; margin:20px;">
@@ -1430,8 +1453,10 @@ if (!$user || $user['role'] !== 'admin') {
             <button type="button" data-cmd="insertOrderedList" title="Numbered list">1. List</button>
             <button type="button" data-cmd="formatBlock" data-value="blockquote" title="Quote">Quote</button>
             <button type="button" data-cmd="createLink" title="Link">Link</button>
+            <button type="button" data-cmd="insertImage" title="Insert image">Image</button>
             <button type="button" data-cmd="removeFormat" title="Clear formatting">Clear</button>
           </div>
+          <input type="file" id="promoEmailImageInput" accept="image/jpeg,image/png,image/gif,image/webp" style="display:none;">
           <div id="promoEmailMessageEditor" class="rte-editor" contenteditable="true" data-placeholder="Write your promotional message..."></div>
         </div>
         <textarea id="promoEmailMessage" maxlength="50000" style="display:none;"></textarea>
@@ -1555,8 +1580,20 @@ async function apiPost(action, body) {
   return res.json();
 }
 
+let adminToastTimer;
 function toast(title, msg, type) {
-  remoToast(title, msg, type);
+  const el = document.getElementById('toast');
+  if (!el) return;
+  const t = document.getElementById('t-title');
+  const m = document.getElementById('t-msg');
+  if (t) t.textContent = title || 'Notice';
+  if (m) m.textContent = msg ? ' — ' + msg : '';
+  el.classList.remove('toast-error', 'toast-success');
+  if (type === 'error') el.classList.add('toast-error');
+  if (type === 'success') el.classList.add('toast-success');
+  el.classList.add('show');
+  clearTimeout(adminToastTimer);
+  adminToastTimer = setTimeout(() => el.classList.remove('show'), 3500);
 }
 
 function setAdminFlash(type, title, message) {
@@ -2221,6 +2258,19 @@ function stopOnlineRefresh() {
   }
 }
 
+function formatCompactNumber(value) {
+  const num = Number(value || 0);
+  const abs = Math.abs(num);
+  if (abs < 1000) return Math.round(num).toString();
+  if (abs >= 1000000000) {
+    return (num / 1000000000).toFixed(1).replace(/\.0$/, '') + 'B';
+  }
+  if (abs >= 1000000) {
+    return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+  }
+  return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+}
+
 async function loadDashboard() {
   const data = await apiFetch('get_stats');
   if (data.success) {
@@ -2230,7 +2280,7 @@ async function loadDashboard() {
       <div class="stat-card">
         <div class="stat-icon blue"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
         <div class="stat-label">Total Users</div>
-        <div class="stat-value">${d.total_users}</div>
+        <div class="stat-value">${formatCompactNumber(d.total_users)}</div>
         <div class="stat-change up">↑ Active members</div>
       </div>
       <div class="stat-card">
@@ -2242,19 +2292,19 @@ async function loadDashboard() {
       <div class="stat-card">
         <div class="stat-icon green"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></div>
         <div class="stat-label">Total Jobs</div>
-        <div class="stat-value">${d.total_jobs}</div>
+        <div class="stat-value">${formatCompactNumber(d.total_jobs)}</div>
         <div class="stat-change up">↑ Posted listings</div>
       </div>
       <div class="stat-card">
         <div class="stat-icon amber"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div>
         <div class="stat-label">Total Payments</div>
-        <div class="stat-value">${d.total_payments}</div>
+        <div class="stat-value">${formatCompactNumber(d.total_payments)}</div>
         <div class="stat-change up">↑ Completed tx</div>
       </div>
       <div class="stat-card">
         <div class="stat-icon green"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
         <div class="stat-label">Total Revenue</div>
-        <div class="stat-value">$${parseFloat(d.total_revenue).toLocaleString()}</div>
+        <div class="stat-value">$${formatCompactNumber(d.total_revenue)}</div>
         <div class="stat-change up">↑ Platform fees</div>
       </div>
     `;
@@ -2829,6 +2879,7 @@ function renderUsersTable(users) {
           <button class="btn btn-outline btn-sm" onclick="openChangeEmailModal(${u.id}, '${escapeJsStr(u.name)}', '${escapeJsStr(u.email)}')" ${u.role === 'admin' ? 'disabled' : ''}>Email</button>
           <button class="btn btn-outline btn-sm" onclick="openResetPasswordModal(${u.id}, '${escapeJsStr(u.name)}', '${escapeJsStr(u.email)}')" ${u.role === 'admin' ? 'disabled' : ''}>Password</button>
           ${u.role === 'client' ? `<button class="btn btn-outline btn-sm" style="border-color:var(--blue);color:var(--blue)" onclick="openClientStatsModal(${u.id})">Stats</button>` : ''}
+          ${u.role === 'freelancer' ? `<button class="btn btn-outline btn-sm" style="border-color:var(--accent);color:var(--accent)" onclick="openFreelancerJoinDateModal(${u.id}, '${escapeJsStr(u.name)}', '${escapeJsStr(u.created_at || '')}')">Join date</button>` : ''}
           <button class="btn btn-danger btn-sm" onclick="deleteUser(${u.id})" ${u.role === 'admin' ? 'disabled' : ''}>Delete</button>
         </td>
       </tr>`).join('')}
@@ -3171,6 +3222,43 @@ async function saveClientStats() {
     setTimeout(() => { closeModal('clientStatsModal'); loadUsers(); refreshUserProfileIfOpen(); }, 1500);
   } else {
     status.innerHTML = '<span style="color:var(--red)">' + res.message + '</span>';
+  }
+}
+
+function openFreelancerJoinDateModal(userId, userName, createdAt) {
+  document.getElementById('fjUserId').value = userId;
+  document.getElementById('fjUserName').textContent = 'Freelancer: ' + (userName || '');
+  document.getElementById('fjStatus').innerHTML = '';
+
+  // Pre-fill from created_at if present
+  let dateVal = '';
+  if (createdAt) {
+    const d = new Date(createdAt);
+    if (!isNaN(d.getTime())) {
+      dateVal = d.toISOString().slice(0, 10);
+    }
+  }
+  document.getElementById('fjJoinDate').value = dateVal;
+  document.getElementById('freelancerJoinDateModal').style.display = 'flex';
+}
+
+async function saveFreelancerJoinDate() {
+  const userId = document.getElementById('fjUserId').value;
+  const joinDate = document.getElementById('fjJoinDate').value;
+  const status = document.getElementById('fjStatus');
+  status.innerHTML = '<span style="color:var(--text-2)">Saving...</span>';
+
+  if (!joinDate) {
+    status.innerHTML = '<span style="color:var(--red)">Please select a join date.</span>';
+    return;
+  }
+
+  const res = await apiPost('update_freelancer_join_date', { user_id: userId, join_date: joinDate });
+  if (res.success) {
+    status.innerHTML = '<span style="color:var(--accent); font-weight:500">' + (res.message || 'Updated') + '</span>';
+    setTimeout(() => { closeModal('freelancerJoinDateModal'); loadUsers(); refreshUserProfileIfOpen(); }, 1200);
+  } else {
+    status.innerHTML = '<span style="color:var(--red)">' + (res.message || 'Could not update join date') + '</span>';
   }
 }
 
@@ -4767,11 +4855,70 @@ function openPromoEmailModal(sendAllInFilter) {
   document.getElementById('promoEmailModal').style.display = 'flex';
 }
 
+async function rteInsertLink(editor) {
+  if (!editor) return;
+  let defaultText = '';
+  const sel = window.getSelection();
+  if (sel && !sel.isCollapsed && sel.rangeCount && editor.contains(sel.anchorNode)) {
+    defaultText = sel.toString().trim();
+  }
+  const link = await remoLinkPrompt('Insert link', { text: defaultText, url: 'https://' });
+  if (!link) return;
+  insertRteLink(editor, link.text, link.url);
+}
+
+function insertPromoEmailImage(editor, imageUrl) {
+  if (!editor || !imageUrl) return;
+  editor.focus();
+  const html = '<img src="' + attrEsc(imageUrl) + '" alt="" style="max-width:100%;height:auto;">';
+  document.execCommand('insertHTML', false, html);
+}
+
+async function uploadPromoEmailImage(file, editor) {
+  if (!file || !editor) return;
+  const statusEl = document.getElementById('promoEmailStatus');
+  statusEl.innerHTML = '<span style="color:var(--text-2)">Uploading image…</span>';
+
+  const formData = new FormData();
+  formData.append('image', file);
+
+  const url = new URL(API);
+  url.searchParams.append('action', 'upload_promo_email_image');
+
+  try {
+    const res = await fetch(url, { method: 'POST', body: formData }).then(r => r.json());
+    if (res.success && res.url) {
+      insertPromoEmailImage(editor, res.url);
+      statusEl.innerHTML = '<span style="color:var(--accent)">Image inserted.</span>';
+      setTimeout(() => { statusEl.innerHTML = ''; }, 2000);
+    } else {
+      statusEl.innerHTML = '<span style="color:var(--red)">' + escapeHtml(res.message || 'Upload failed') + '</span>';
+    }
+  } catch (err) {
+    statusEl.innerHTML = '<span style="color:var(--red)">Upload failed.</span>';
+  }
+}
+
+function promoEmailHasContent(html, text) {
+  if ((text || '').trim()) return true;
+  return /<img\b/i.test(html || '');
+}
+
 function initPromoEmailRichEditor() {
   const toolbar = document.getElementById('promoEmailRteToolbar');
   const editor = document.getElementById('promoEmailMessageEditor');
+  const fileInput = document.getElementById('promoEmailImageInput');
   if (!toolbar || !editor || toolbar._rteBound) return;
   toolbar._rteBound = true;
+
+  if (fileInput && !fileInput._rteBound) {
+    fileInput._rteBound = true;
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      e.target.value = '';
+      if (file) void uploadPromoEmailImage(file, editor);
+    });
+  }
 
   toolbar.querySelectorAll('button[data-cmd]').forEach(btn => {
     btn.addEventListener('click', (e) => {
@@ -4780,10 +4927,11 @@ function initPromoEmailRichEditor() {
       const val = btn.getAttribute('data-value') || null;
       editor.focus();
       if (cmd === 'createLink') {
-        (async () => {
-          const url = await remoPrompt('Enter link URL:', 'Insert link', 'https://');
-          if (url) document.execCommand('createLink', false, url);
-        })();
+        void rteInsertLink(editor);
+        return;
+      }
+      if (cmd === 'insertImage') {
+        if (fileInput) fileInput.click();
         return;
       }
       if (cmd === 'formatBlock' && val) {
@@ -4822,7 +4970,7 @@ async function submitPromotionalEmail() {
     statusEl.innerHTML = '<span style="color:var(--red)">Subject is required.</span>';
     return;
   }
-  if (!message) {
+  if (!promoEmailHasContent(messageHtml, message)) {
     statusEl.innerHTML = '<span style="color:var(--red)">Message is required.</span>';
     return;
   }

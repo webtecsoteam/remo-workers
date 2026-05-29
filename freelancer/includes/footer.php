@@ -2080,6 +2080,30 @@
     .catch(() => toast('Error', 'Could not add member'));
   }
 
+  window.removeAgencyMember = function(memberId, memberName) {
+    const safeName = (memberName || 'this member').toString();
+    const confirmed = confirm(`Remove ${safeName} from your agency?`);
+    if (!confirmed) return;
+
+    const fd = new FormData();
+    fd.append('member_id', memberId);
+
+    fetch(BASE_URL + 'freelancer/api/remove-agency-member.php', {
+      method: 'POST',
+      body: fd
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        toast('Removed', data.message || 'Member removed');
+        setTimeout(() => location.reload(), 700);
+      } else {
+        toast('Error', data.message || 'Could not remove member');
+      }
+    })
+    .catch(() => toast('Error', 'Could not remove member'));
+  }
+
   window.updateAgencyProfile = function() {
     const name = (document.getElementById('agency-edit-name')?.value || '').trim();
     const description = (document.getElementById('agency-edit-description')?.value || '').trim();
@@ -2907,6 +2931,12 @@
     return page && page.classList.contains('active');
   }
 
+  function autoGrowChatInput(el) {
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+  }
+
   async function loadChat(otherId, name, initials, el, avatar = '') {
     activeChatId = otherId;
     activeChatName = name;
@@ -3034,7 +3064,7 @@
         <div style="display:flex;gap:10px;align-items:center">
           <input type="file" id="chat-attachment-input" style="display:none" accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip,.rar" onchange="onChatAttachmentSelected(this)">
           <button type="button" class="btn" title="Attach file" style="padding:9px 12px;font-size:16px;line-height:1" onclick="document.getElementById('chat-attachment-input').click()">📎</button>
-          <input id="chat-input" type="text" placeholder="Write a message..." style="flex:1;padding:10px;border:1px solid var(--border);border-radius:8px" onkeydown="if(event.key==='Enter')sendMsg()">
+          <textarea id="chat-input" placeholder="Write a message..." rows="1" style="flex:1;padding:10px;border:1px solid var(--border);border-radius:8px;font-family:inherit;line-height:1.4;resize:none;overflow-y:auto;min-height:40px;max-height:120px" oninput="autoGrowChatInput(this)" onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault();sendMsg();}"></textarea>
           <button class="btn btn-g" onclick="sendMsg()">Send</button>
         </div>
       </div>
@@ -3042,6 +3072,7 @@
     `;
     const scroll = document.getElementById('chat-messages-scroll');
     if(scroll) scroll.scrollTop = scroll.scrollHeight;
+    autoGrowChatInput(document.getElementById('chat-input'));
     updateChatAttachmentPreview();
   }
 
@@ -3075,6 +3106,7 @@
     chatMessagesScroll.scrollTop = chatMessagesScroll.scrollHeight;
 
     input.value = '';
+    autoGrowChatInput(input);
     const sentFile = file;
     clearChatAttachment();
     try {
@@ -3499,6 +3531,18 @@ window.loadConnectsPageData = function(page = 1) {
                       <span>💳</span> Paystack
                     </div>
                   `;
+                } else if (methodLower.includes('ccpayment') || methodLower.includes('crypto') || methodLower.includes('usdt')) {
+                  sourceBadge = `
+                    <div style="display:inline-flex;align-items:center;gap:4px;background:#fef3c7;color:#b45309;padding:3px 6px;border-radius:4px;font-size:10px;font-weight:700;text-transform:uppercase;margin-top:4px">
+                      <span>₿</span> USDT
+                    </div>
+                  `;
+                } else if (item.description && item.description.toLowerCase().includes('usdt')) {
+                  sourceBadge = `
+                    <div style="display:inline-flex;align-items:center;gap:4px;background:#fef3c7;color:#b45309;padding:3px 6px;border-radius:4px;font-size:10px;font-weight:700;text-transform:uppercase;margin-top:4px">
+                      <span>₿</span> USDT
+                    </div>
+                  `;
                 } else {
                   sourceBadge = `
                     <div style="display:inline-flex;align-items:center;gap:4px;background:#f0fdf4;color:#15803d;padding:3px 6px;border-radius:4px;font-size:10px;font-weight:700;text-transform:uppercase;margin-top:4px">
@@ -3575,25 +3619,127 @@ window.calculateCustomConnects = function(val) {
   document.getElementById('btn-buy-connects-submit').disabled = false;
 }
 
+window.resetConnectsCryptoPanel = function() {
+  window.pendingCryptoConnectsReference = null;
+  const cryptoForm = document.getElementById('connects-crypto-form');
+  const submitBtn = document.getElementById('btn-buy-connects-submit');
+  if (cryptoForm) cryptoForm.style.display = 'none';
+  if (submitBtn) submitBtn.style.display = '';
+}
+
 window.selectConnectPaymentMethod = function(method) {
   window.selectedConnectPaymentMethod = method;
   const w = document.getElementById('connect-method-wallet');
   const c = document.getElementById('connect-method-card');
+  const y = document.getElementById('connect-method-crypto');
   const cardForm = document.getElementById('connects-card-form');
-  
-  if (method === 'wallet') {
-    w.style.cssText = 'border:2px solid var(--g);border-radius:10px;padding:11px;cursor:pointer;text-align:center;background:var(--gl)';
-    w.querySelector('div:nth-child(2)').style.color = 'var(--g)';
-    c.style.cssText = 'border:1px solid var(--border);border-radius:10px;padding:12px;cursor:pointer;text-align:center;background:white';
-    c.querySelector('div:nth-child(2)').style.color = 'var(--dark)';
-    if (cardForm) cardForm.style.display = 'none';
-  } else {
-    c.style.cssText = 'border:2px solid var(--g);border-radius:10px;padding:11px;cursor:pointer;text-align:center;background:var(--gl)';
-    c.querySelector('div:nth-child(2)').style.color = 'var(--g)';
-    w.style.cssText = 'border:1px solid var(--border);border-radius:10px;padding:12px;cursor:pointer;text-align:center;background:white';
-    w.querySelector('div:nth-child(2)').style.color = 'var(--dark)';
-    if (cardForm) cardForm.style.display = 'block';
+  const inactive = 'border:1px solid var(--border);border-radius:10px;padding:12px;cursor:pointer;text-align:center;background:white';
+  const active = 'border:2px solid var(--g);border-radius:10px;padding:11px;cursor:pointer;text-align:center;background:var(--gl)';
+
+  [w, c, y].forEach(function(el) {
+    if (!el) return;
+    el.style.cssText = inactive;
+    const label = el.querySelector('div:nth-child(2)');
+    if (label) label.style.color = 'var(--dark)';
+  });
+
+  const map = { wallet: w, card: c, crypto: y };
+  const selected = map[method];
+  if (selected) {
+    selected.style.cssText = active;
+    const label = selected.querySelector('div:nth-child(2)');
+    if (label) label.style.color = 'var(--g)';
   }
+
+  if (cardForm) cardForm.style.display = method === 'card' ? 'block' : 'none';
+  if (method !== 'crypto') resetConnectsCryptoPanel();
+}
+
+window.showConnectsCryptoDeposit = function(data) {
+  window.pendingCryptoConnectsReference = data.reference_id;
+  const cryptoForm = document.getElementById('connects-crypto-form');
+  const submitBtn = document.getElementById('btn-buy-connects-submit');
+  const addrEl = document.getElementById('connects-crypto-address');
+  const amtEl = document.getElementById('connects-crypto-amount');
+  const rateEl = document.getElementById('connects-crypto-rate');
+  const memoWrap = document.getElementById('connects-crypto-memo-wrap');
+  const memoEl = document.getElementById('connects-crypto-memo');
+
+  const chainLabel = data.chain_label || 'Tron (TRC20)';
+  const titleEl = document.getElementById('connects-crypto-title');
+  const networkEl = document.getElementById('connects-crypto-network');
+  if (titleEl) titleEl.textContent = 'Pay with USDT (' + chainLabel + ')';
+  if (networkEl) networkEl.textContent = chainLabel;
+  if (rateEl) rateEl.textContent = data.rate_label || '1 USDT = 1 USD';
+  if (amtEl) amtEl.textContent = Number(data.usdt_amount || 0).toFixed(2) + ' USDT';
+  if (addrEl) addrEl.textContent = data.address || '—';
+  if (memoWrap && memoEl) {
+    if (data.memo) {
+      memoWrap.style.display = 'block';
+      memoEl.textContent = data.memo;
+    } else {
+      memoWrap.style.display = 'none';
+    }
+  }
+  if (cryptoForm) cryptoForm.style.display = 'block';
+  if (submitBtn) submitBtn.style.display = 'none';
+}
+
+window.copyConnectsCryptoAddress = function() {
+  const addr = document.getElementById('connects-crypto-address');
+  if (!addr || !addr.textContent || addr.textContent === '—') return;
+  navigator.clipboard.writeText(addr.textContent.trim()).then(function() {
+    window.toast('Copied', 'Deposit address copied to clipboard.');
+  }).catch(function() {
+    window.toast('Copy failed', 'Please copy the address manually.');
+  });
+}
+
+window.confirmCryptoConnectsDeposit = function() {
+  const ref = window.pendingCryptoConnectsReference;
+  if (!ref) {
+    window.toast('Error', 'No pending crypto payment found. Please start a new purchase.');
+    return;
+  }
+  const btn = document.getElementById('btn-confirm-crypto-connects');
+  const originalText = btn ? btn.innerText : '';
+  if (btn) {
+    btn.disabled = true;
+    btn.innerText = 'Checking deposit...';
+  }
+  fetch(BASE_URL + 'freelancer/api/confirm-crypto-connects.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ reference_id: ref })
+  })
+  .then(function(res) { return res.json(); })
+  .then(function(data) {
+    if (data.success && data.completed) {
+      window.toast('Success! 🎉', data.message);
+      const sbVal = document.getElementById('sb-connects-val');
+      if (sbVal) sbVal.textContent = data.new_connects;
+      const navConn = document.getElementById('nav-connects');
+      if (navConn) navConn.innerHTML = '<span class="sb-ico">🔗</span>Connects (' + data.new_connects + ')';
+      document.getElementById('custom-connects-qty').value = '';
+      document.getElementById('connects-purchase-summary').textContent = '0 Connects = $0.00';
+      resetConnectsCryptoPanel();
+      selectConnectPaymentMethod('wallet');
+      loadConnectsPageData();
+    } else if (data.success && data.pending) {
+      window.toast('Awaiting confirmation', data.message);
+    } else {
+      window.toast('Error', data.message || 'Could not confirm payment.');
+    }
+  })
+  .catch(function() {
+    window.toast('Error', 'Could not check payment status.');
+  })
+  .finally(function() {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerText = originalText;
+    }
+  });
 }
 
 window.submitConnectsPurchase = function() {
@@ -3607,14 +3753,20 @@ window.submitConnectsPurchase = function() {
   }
   
   if (method === 'wallet' && window.freelancerAvailableBalance < price) {
-    window.toast('Insufficient Balance', `Your wallet balance ($${window.freelancerAvailableBalance.toFixed(2)}) is less than the package price ($${price.toFixed(2)}). Please select Credit Card instead!`);
+    window.toast('Insufficient Balance', `Your wallet balance ($${window.freelancerAvailableBalance.toFixed(2)}) is less than the package price ($${price.toFixed(2)}). Please use card or crypto instead.`);
+    return;
+  }
+
+  if (method === 'crypto' && window.pendingCryptoConnectsReference) {
+    window.toast('Deposit pending', 'Complete your USDT deposit or use the confirm button below.');
     return;
   }
   
   const btn = document.getElementById('btn-buy-connects-submit');
   const originalText = btn.innerText;
   btn.disabled = true;
-  btn.innerText = method === 'card' ? 'Redirecting to Paystack...' : 'Processing Payment...';
+  const loadingLabels = { card: 'Redirecting to Paystack...', crypto: 'Generating deposit address...', wallet: 'Processing Payment...' };
+  btn.innerText = loadingLabels[method] || 'Processing Payment...';
   
   fetch(BASE_URL + 'freelancer/api/buy-connects.php', {
     method: 'POST',
@@ -3631,6 +3783,13 @@ window.submitConnectsPurchase = function() {
       if (data.redirect && data.authorization_url) {
         window.toast('Redirecting...', 'Taking you to Paystack secure payment page');
         window.location.href = data.authorization_url;
+        return;
+      }
+
+      if (data.crypto && data.address) {
+        showConnectsCryptoDeposit(data);
+        const net = data.chain_label || 'Tron (TRC20)';
+        window.toast('Deposit address ready', 'Send ' + Number(data.usdt_amount).toFixed(2) + ' USDT on ' + net + ' to the address shown.');
         return;
       }
       

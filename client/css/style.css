@@ -173,6 +173,43 @@ button{font-family:inherit;cursor:pointer}
 .page{display:none}
 .page.active{display:block}
 
+/* ── Messages: chat thread scrolls inside pane (shell height is inline on #messages-shell) ── */
+body.page-messages-active{overflow:hidden}
+body.page-messages-active .content{overflow:hidden}
+#messages-sidebar .msg-text{
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+#chat-window .chat-pane-header{
+  flex-shrink:0;
+  padding:14px 18px;
+  border-bottom:1.5px solid var(--uw-border);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  background:white;
+}
+#chat-messages-scroll{
+  flex:1;
+  min-height:0;
+  overflow-y:auto;
+  padding:16px 18px;
+  display:flex;
+  flex-direction:column;
+  gap:15px;
+  background:var(--uw-bg);
+}
+.chat-pane-composer{
+  flex-shrink:0;
+  padding:12px 16px;
+  border-top:1.5px solid var(--uw-border);
+  background:white;
+}
+.chat-pane-composer--blocked{
+  padding:16px;
+}
+
 /* ── PAGE HEADER ── */
 .pg-header{
   display:flex;align-items:flex-start;justify-content:space-between;
@@ -791,10 +828,19 @@ body.modal-open{
   .tbl .hide-mob{display:none}
 
   /* ── messages page ── */
-  #page-messages .card,
-  #page-messages > div[style*="display:flex"]{flex-direction:column}
-  #page-messages [style*="width:270px"]{width:100%!important;border-right:none;border-bottom:1.5px solid var(--uw-border)}
-  #page-messages [style*="flex:1;display:flex;flex-direction:column"]{min-height:320px}
+  #messages-shell{
+    flex-direction:column!important;
+    height:calc(100dvh - 52px - 32px - 56px)!important;
+    max-height:calc(100dvh - 52px - 32px - 56px)!important;
+    min-height:360px!important;
+  }
+  #messages-sidebar{
+    width:100%!important;
+    max-height:38vh;
+    border-right:none!important;
+    border-bottom:1.5px solid var(--uw-border);
+  }
+  #chat-window{min-height:240px}
 
   /* ── contracts table: show key cols only ── */
   .tbl th:nth-child(3),

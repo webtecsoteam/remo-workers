@@ -27,8 +27,9 @@ if (!is_array($skills)) {
 }
 
 $associatedAgency = getActiveAgencyForUser($freelancerId);
+$hasAssociatedAgency = !empty($associatedAgency) && (int)($associatedAgency['id'] ?? 0) > 0;
 $agencyTotalEarnings = 0.0;
-if ($associatedAgency) {
+if ($hasAssociatedAgency) {
     $agencyId = (int)($associatedAgency['id'] ?? 0);
     if ($agencyId > 0) {
         $agencyEarnStmt = $db->prepare("
@@ -88,6 +89,29 @@ function freelancerBadgeHtml($badge) {
         return '<span class="fp-badge fp-blue">↑ Rising Talent</span>';
     }
     return '';
+}
+
+function formatCompactNumber($value) {
+    $number = (float)$value;
+    $abs = abs($number);
+    if ($abs < 1000) {
+        return number_format($number, 0);
+    }
+
+    $suffix = 'K';
+    $divisor = 1000;
+    if ($abs >= 1000000000) {
+        $suffix = 'B';
+        $divisor = 1000000000;
+    } elseif ($abs >= 1000000) {
+        $suffix = 'M';
+        $divisor = 1000000;
+    }
+
+    $short = $number / $divisor;
+    $formatted = number_format($short, 1);
+    $formatted = rtrim(rtrim($formatted, '0'), '.');
+    return $formatted . $suffix;
 }
 
 include __DIR__ . '/includes/header.php';
@@ -166,7 +190,7 @@ include __DIR__ . '/includes/header.php';
                         <div class="fp-stat-lbl">Jobs completed</div>
                     </div>
                     <div class="fp-stat">
-                        <div class="fp-stat-val">$<?php echo number_format((float)$stats['total_earned'], 0); ?>+</div>
+                        <div class="fp-stat-val">$<?php echo formatCompactNumber((float)$stats['total_earned']); ?>+</div>
                         <div class="fp-stat-lbl">Total earned</div>
                     </div>
                 </div>
@@ -250,14 +274,16 @@ include __DIR__ . '/includes/header.php';
             <div class="fp-card">
                 <div class="fp-card-head">Details</div>
                 <div class="fp-card-body" style="display:flex;flex-direction:column;gap:10px;font-size:13px">
+                    <?php if ($hasAssociatedAgency): ?>
                     <div style="display:flex;justify-content:space-between;gap:10px">
                         <span style="color:var(--muted)">Associated agency</span>
-                        <strong style="text-align:right"><?php echo htmlspecialchars((string)($associatedAgency['name'] ?? 'Independent')); ?></strong>
+                        <strong style="text-align:right"><?php echo htmlspecialchars((string)$associatedAgency['name']); ?></strong>
                     </div>
                     <div style="display:flex;justify-content:space-between;gap:10px">
                         <span style="color:var(--muted)">Complete agency earnings</span>
-                        <strong>$<?php echo number_format((float)$agencyTotalEarnings, 2); ?></strong>
+                        <strong>$<?php echo formatCompactNumber((float)$agencyTotalEarnings); ?></strong>
                     </div>
+                    <?php endif; ?>
                     <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Hourly rate</span><strong>$<?php echo number_format((float)($freelancer['hourly_rate'] ?? 0), 2); ?>/hr</strong></div>
                     <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Location</span><span><?php echo htmlspecialchars(getCountryName($freelancer['country'] ?? 'Global')); ?></span></div>
                     <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Member since</span><span><?php echo date('F Y', strtotime($freelancer['created_at'])); ?></span></div>

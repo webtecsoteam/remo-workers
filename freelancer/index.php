@@ -47,7 +47,7 @@ $completeAgencyEarnings = 0.0;
 if ($activeAgency) {
     try {
         $agencyMemberStmt = $db->prepare("
-            SELECT am.role, am.status, u.id, u.name, u.email
+            SELECT am.role, am.status, u.id, u.name, u.avatar_url
             FROM agency_members am
             JOIN users u ON u.id = am.user_id
             WHERE am.agency_id = ? AND am.status = 'active'
@@ -57,7 +57,7 @@ if ($activeAgency) {
         $agencyMembers = $agencyMemberStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
         $agencyInviteStmt = $db->prepare("
-            SELECT ami.role, ami.status, u.id, u.name, u.email
+            SELECT ami.role, ami.status, u.id, u.name, u.avatar_url
             FROM agency_member_invitations ami
             JOIN users u ON u.id = ami.user_id
             WHERE ami.agency_id = ? AND ami.status = 'pending'

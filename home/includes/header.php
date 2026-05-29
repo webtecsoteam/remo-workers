@@ -26,8 +26,8 @@ if (!isset($seoMeta)) {
 <link rel="stylesheet" href="<?php echo baseUrl('assets/free-home/templates/basic/css/slick.css'); ?>">
 <link rel="stylesheet" href="<?php echo baseUrl('assets/free-home/templates/basic/css/main.css'); ?>">
 <link rel="stylesheet" href="<?php echo baseUrl('assets/free-home/templates/basic/css/custom.css'); ?>">
-<link rel="stylesheet" href="<?php echo baseUrl('home/css/public-pages.css?v=1.0.2'); ?>">
-<link rel="stylesheet" href="<?php echo baseUrl('home/css/home-modals.css?v=1.0.1'); ?>">
+<link rel="stylesheet" href="<?php echo baseUrl('home/css/public-pages.css?v=1.0.3'); ?>">
+<link rel="stylesheet" href="<?php echo baseUrl('home/css/home-modals.css?v=1.0.2'); ?>">
 <link rel="stylesheet" href="<?php echo baseUrl('assets/css/ui-alerts.css'); ?>">
 <?php if (!empty($pageExtraCss)): ?>
 <?php foreach ($pageExtraCss as $cssFile): ?>
@@ -48,7 +48,6 @@ if (!isset($seoMeta)) {
 </head>
 <body>
 <?php require_once __DIR__ . '/../../includes/classes/Auth.php'; $user = Auth::user(); ?>
-<div class="overlay" id="overlay" onclick="closeModal(event)"><div class="modal" id="modal"><div class="modal-head"><h2 id="modal-title">Details</h2><button class="modal-close" onclick="closeModal()">✕</button></div><div class="modal-body" id="modal-body"></div></div></div>
 <?php if ($usePublicTemplate): ?>
 <?php publicTemplateRenderHeader(); ?>
 <?php endif; ?>

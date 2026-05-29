@@ -9,10 +9,15 @@
                     </div>
                     <p class="footer-desc">Connecting businesses with top remote talent worldwide. Build your dream team today.</p>
                     <div class="footer-social">
-                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
-                        <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
-                        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <?php
+                        require_once __DIR__ . '/cms_pages.php';
+                        $socialExternal = ' target="_blank" rel="noopener noreferrer"';
+                        ?>
+                        <a href="<?php echo htmlspecialchars(socialProfileUrl('facebook'), ENT_QUOTES, 'UTF-8'); ?>"<?php echo $socialExternal; ?> aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="<?php echo htmlspecialchars(socialProfileUrl('x'), ENT_QUOTES, 'UTF-8'); ?>"<?php echo $socialExternal; ?> aria-label="X"><i class="fa-brands fa-x-twitter"></i></a>
+                        <a href="<?php echo htmlspecialchars(socialProfileUrl('linkedin'), ENT_QUOTES, 'UTF-8'); ?>"<?php echo $socialExternal; ?> aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="<?php echo htmlspecialchars(socialProfileUrl('youtube'), ENT_QUOTES, 'UTF-8'); ?>"<?php echo $socialExternal; ?> aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                        <a href="<?php echo htmlspecialchars(socialProfileUrl('instagram'), ENT_QUOTES, 'UTF-8'); ?>"<?php echo $socialExternal; ?> aria-label="Instagram"><i class="fab fa-instagram"></i></a>
                     </div>
                 </div>
                 <div class="footer-col">
