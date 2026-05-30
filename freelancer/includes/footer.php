@@ -36,7 +36,8 @@
       'home': 'Dashboard', 'find-work': 'Find Work', 'proposals': 'My Proposals',
       'contracts': 'My Contracts', 'messages': 'Messages', 'earnings': 'Earnings',
       'catalog': 'My Services', 'profile': 'My Profile', 'reports': 'Payment Reports',
-      'verification': 'ID Verification', 'connects': 'Connects Management'
+      'verification': 'ID Verification', 'connects': 'Connects Management',
+      'referral': 'Refer & Share'
     };
     const titleEl = document.getElementById('page-title');
     if (titleEl) titleEl.textContent = titles[id] || id;
@@ -55,6 +56,7 @@
       if (id === 'reports' && typeof renderReports === 'function') renderReports();
       if (id === 'profile' && typeof renderSuggestedSkills === 'function') renderSuggestedSkills();
       if (id === 'connects' && typeof loadConnectsPageData === 'function') loadConnectsPageData();
+      if (id === 'referral' && typeof loadReferralPage === 'function') loadReferralPage();
       if (id === 'messages' && typeof startConversationsPolling === 'function') startConversationsPolling();
       if (id !== 'messages' && typeof stopConversationsPolling === 'function') stopConversationsPolling();
     } catch (e) { console.warn("Deferred render error:", e); }
@@ -170,7 +172,10 @@
     const method = document.getElementById('new-withdraw-type').value;
     let details = {};
     
-    if (method === 'PayPal' || method === 'Payoneer') {
+    if (method === 'Crypto') {
+      const chainEl = document.getElementById('new-withdraw-crypto-chain');
+      details = { chain: chainEl ? chainEl.value : 'POLYGON' };
+    } else if (method === 'PayPal' || method === 'Payoneer') {
       const email = document.getElementById('new-withdraw-email').value.trim();
       if (!email) return toast('Error', 'Please enter your ' + method + ' email');
       details = { email };
@@ -206,27 +211,131 @@
     });
   }
 
+  window.openCryptoWithdrawModal = function (maxBalance, chainLabel) {
+    const available = Math.max(0, parseFloat(maxBalance) || 0);
+    const network = chainLabel ? String(chainLabel) : 'USDT';
+
+    return new Promise((resolve) => {
+      const overlay = document.getElementById('overlay');
+      const modal = document.getElementById('modal');
+      const mc = document.getElementById('mc-body');
+      if (!overlay || !modal || !mc) {
+        resolve(null);
+        return;
+      }
+
+      document.getElementById('mh-title').textContent = 'Crypto withdrawal';
+      modal.style.maxWidth = '440px';
+      mc.innerHTML = `
+        <div style="padding:22px">
+          <p style="font-size:13px;color:var(--muted);line-height:1.6;margin:0 0 16px">
+            Available: <strong>$${available.toFixed(2)}</strong>. Enter how much USDT to send and your wallet address (${network}).
+          </p>
+          <label style="display:block;font-size:12px;font-weight:600;margin-bottom:6px;color:var(--dark3)">Amount (USD / USDT)</label>
+          <input type="number" id="crypto-withdraw-amount" min="0.01" step="0.01"
+            value="${available > 0 ? available.toFixed(2) : ''}"
+            style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;margin-bottom:14px;box-sizing:border-box" />
+          <label style="display:block;font-size:12px;font-weight:600;margin-bottom:6px;color:var(--dark3)">Wallet address</label>
+          <input type="text" id="crypto-withdraw-address" placeholder="0x… or T…" autocomplete="off"
+            style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;margin-bottom:18px;box-sizing:border-box" />
+          <div style="display:flex;gap:10px">
+            <button type="button" class="btn btn-outline" id="crypto-withdraw-cancel" style="flex:1;justify-content:center">Cancel</button>
+            <button type="button" class="btn btn-g" id="crypto-withdraw-submit" style="flex:1;justify-content:center">Continue</button>
+          </div>
+        </div>`;
+
+      const finish = (result) => {
+        closeModal();
+        resolve(result);
+      };
+
+      mc.querySelector('#crypto-withdraw-cancel').onclick = () => finish(null);
+      mc.querySelector('#crypto-withdraw-submit').onclick = () => {
+        const amountRaw = mc.querySelector('#crypto-withdraw-amount').value.trim();
+        const address = mc.querySelector('#crypto-withdraw-address').value.trim();
+        const withdrawAmt = parseFloat(amountRaw);
+
+        if (!amountRaw || Number.isNaN(withdrawAmt) || withdrawAmt <= 0) {
+          toast('Error', 'Enter a valid withdrawal amount');
+          return;
+        }
+        if (available > 0 && withdrawAmt > available + 0.0001) {
+          toast('Error', 'Amount cannot exceed $' + available.toFixed(2));
+          return;
+        }
+        if (!address || address.length < 10) {
+          toast('Error', 'Enter a valid wallet address');
+          return;
+        }
+        finish({ amount: withdrawAmt, address });
+      };
+
+      overlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+      setTimeout(() => {
+        const amtEl = mc.querySelector('#crypto-withdraw-amount');
+        if (amtEl) amtEl.focus();
+      }, 50);
+    });
+  };
+
   window.initiateWithdrawal = async function(amount) {
     if (amount <= 0) return toast('Error', 'No funds available to withdraw');
-    const methodId = document.getElementById('saved-withdraw-method').value;
+    const methodSelect = document.getElementById('saved-withdraw-method');
+    if (!methodSelect) return toast('Error', 'Withdrawal form not found');
+    const methodId = methodSelect.value;
     
     if (methodId === 'new' || !methodId) {
       return toast('Error', 'Please save a withdrawal method first');
     }
+
+    const selectedOption = methodSelect.options[methodSelect.selectedIndex];
+    const methodType = selectedOption ? (selectedOption.getAttribute('data-method-type') || '') : '';
+    const isCrypto = methodType === 'Crypto' || (selectedOption && /^Crypto/i.test(selectedOption.textContent || ''));
+
+    let cryptoAddress = '';
+    let withdrawAmount = parseFloat(amount) || 0;
+
+    if (isCrypto) {
+      const chainLabel = selectedOption ? selectedOption.textContent.replace(/^Crypto\s*/i, '').trim() : 'USDT';
+      const openModalFn = typeof openCryptoWithdrawModal === 'function'
+        ? openCryptoWithdrawModal
+        : (typeof remoCryptoWithdrawPrompt === 'function' ? remoCryptoWithdrawPrompt : null);
+      if (!openModalFn) {
+        return toast('Error', 'Withdrawal dialog could not load. Please refresh the page.');
+      }
+      const cryptoForm = await openModalFn(withdrawAmount, chainLabel);
+      if (!cryptoForm) return;
+      withdrawAmount = parseFloat(cryptoForm.amount) || 0;
+      cryptoAddress = String(cryptoForm.address || '').trim();
+      if (withdrawAmount <= 0 || withdrawAmount > amount) {
+        return toast('Error', withdrawAmount > amount ? 'Amount exceeds available balance' : 'Enter a valid amount');
+      }
+      if (!cryptoAddress || cryptoAddress.length < 10) {
+        return toast('Error', 'Please enter a valid wallet address');
+      }
+      if (!(await remoConfirm(
+        `Withdraw $${withdrawAmount.toFixed(2)} as USDT to:\n${cryptoAddress}`,
+        'Confirm crypto withdrawal'
+      ))) return;
+    } else if (!(await remoConfirm(`Withdraw $${withdrawAmount.toFixed(2)} to your saved account?`, 'Confirm withdrawal'))) {
+      return;
+    }
     
-    if (!(await remoConfirm(`Withdraw $${parseFloat(amount).toFixed(2)} to your saved account?`, 'Confirm withdrawal'))) return;
+    toast('Processing...', isCrypto ? 'Submitting crypto withdrawal…' : 'Initiating withdrawal...');
     
-    toast('Processing...', 'Initiating withdrawal...');
-    
+    const payload = { amount: withdrawAmount, method_id: parseInt(methodId, 10) };
+    if (isCrypto) payload.crypto_address = cryptoAddress;
+
     fetch(BASE_URL + 'freelancer/api/withdraw.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ amount: amount, method_id: methodId })
+      body: JSON.stringify(payload)
     })
     .then(res => res.json())
     .then(data => {
       if (data.success) {
-        toast('Success', 'Withdrawal initiated successfully!');
+        toast('Success', data.message || 'Withdrawal initiated successfully!');
         setTimeout(() => location.reload(), 1500);
       } else {
         toast('Error', data.message || 'Failed to initiate withdrawal');

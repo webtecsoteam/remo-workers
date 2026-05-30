@@ -146,6 +146,43 @@
   margin-bottom: 14px;
 }
 
+#overlay .auth-optional {
+  font-weight: 400;
+  color: #8aa082;
+}
+
+#overlay .auth-referral-input {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+#overlay .auth-referral-status {
+  margin-top: 8px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+#overlay .auth-referral-status.is-valid {
+  background: rgba(20, 168, 0, 0.08);
+  color: #0f7f00;
+  border: 1px solid rgba(20, 168, 0, 0.2);
+}
+
+#overlay .auth-referral-status.is-warning {
+  background: rgba(245, 158, 11, 0.1);
+  color: #b45309;
+  border: 1px solid rgba(245, 158, 11, 0.25);
+}
+
+#overlay .auth-referral-status.is-loading {
+  background: #f7faf5;
+  color: #617a5a;
+  border: 1px solid #dce8d8;
+}
+
 #overlay .auth-shell form {
   display: block;
 }

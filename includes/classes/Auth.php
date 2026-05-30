@@ -224,7 +224,13 @@ class Auth {
             WHERE id = ?
         ");
         $upd->execute([$userId]);
-        return true;
+
+        if (file_exists(__DIR__ . '/../referral.php')) {
+            require_once __DIR__ . '/../referral.php';
+            referralOnReferredUserUpdated((int) $userId);
+        }
+
+        return (int) $userId;
     }
 
     public static function resendEmailVerification($userId) {

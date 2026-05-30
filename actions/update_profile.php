@@ -2,6 +2,7 @@
 header('Content-Type: application/json');
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/classes/Auth.php';
+require_once __DIR__ . '/../includes/referral.php';
 
 function json_response($data) {
     echo json_encode($data);
@@ -47,6 +48,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $stmt = $db->prepare("UPDATE users SET name = ?, title = ?, hourly_rate = ?, country = ?, bio = ?, avatar_url = ? WHERE id = ?");
         $stmt->execute([$name, $title, $rate, $country, $bio, $avatarUrl, $user['id']]);
+
+        if (trim($avatarUrl) !== '') {
+            referralOnReferredUserUpdated((int) $user['id']);
+        }
         
         json_response(['success' => true, 'avatar_url' => $avatarUrl]);
     } catch (PDOException $e) {

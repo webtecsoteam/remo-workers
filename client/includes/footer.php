@@ -2048,7 +2048,9 @@
       messages: 'Messages',
       payments: 'Payments',
       reports: 'Reports',
-      verification: 'Identity Verification'
+      verification: 'Identity Verification',
+      referral: 'Refer & Share',
+      settings: 'Settings'
     };
     const titleEl = document.getElementById('page-title');
     if (titleEl) titleEl.textContent = titles[id] || id;
@@ -2060,6 +2062,9 @@
       startConversationsPolling();
     } else {
       stopConversationsPolling();
+    }
+    if (id === 'referral' && typeof loadReferralPage === 'function') {
+      loadReferralPage();
     }
     document.body.classList.toggle('page-messages-active', id === 'messages');
     window.location.hash = id;

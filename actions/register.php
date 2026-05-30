@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/classes/Auth.php';
+require_once __DIR__ . '/../includes/referral.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     handleCorsPreflight();
@@ -13,6 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = $_POST['password'] ?? '';
     $role = $_POST['role'] ?? '';
     $country = $_POST['country'] ?? '';
+    $referralCode = (string) ($_POST['referral_code'] ?? '');
     
     $isAjax = isAjaxRequest();
     
@@ -30,6 +32,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             if (Auth::register($name, $email, $password, $role, $country)) {
                 Auth::login($email, $password);
+                $newUser = Auth::user();
+                if ($newUser && $referralCode !== '') {
+                    recordReferralOnSignup((int) $newUser['id'], $referralCode);
+                }
                 $targetUrl = ($role === 'client') ? baseUrl('client') : baseUrl('remoworkers-dashboard');
                 
                 if ($isAjax) {

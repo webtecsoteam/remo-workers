@@ -460,6 +460,7 @@ include __DIR__ . '/includes/header.php';
     <div id="nav-catalog" class="sb-item" onclick="showPage('catalog')"><span class="sb-ico">📦</span>My Services</div>
     
     <div class="sb-section">Settings</div>
+    <div id="nav-referral" class="sb-item" onclick="showPage('referral')"><span class="sb-ico">🎁</span>Refer &amp; Share</div>
     <div id="nav-profile" class="sb-item" onclick="showPage('profile')"><span class="sb-ico">👤</span>My Profile</div>
     <div id="nav-password" class="sb-item" onclick="openModal('change-password')"><span class="sb-ico">🔑</span>Change Password</div>
     <div id="nav-verification" class="sb-item" onclick="showPage('verification')">
@@ -517,6 +518,7 @@ include __DIR__ . '/includes/header.php';
     include __DIR__ . '/views/profile.php';
     include __DIR__ . '/views/verification.php';
     include __DIR__ . '/views/connects.php';
+    include __DIR__ . '/../includes/views/referral-page.php';
     ?>
   </div>
 </main>

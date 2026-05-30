@@ -206,6 +206,14 @@ function ensureFreelancerSchema() {
         if (!in_array('admin_hires_offset', $cols)) {
             $db->exec("ALTER TABLE users ADD COLUMN admin_hires_offset INT NOT NULL DEFAULT 0");
         }
+        if (!in_array('referral_code', $cols)) {
+            $db->exec("ALTER TABLE users ADD COLUMN referral_code VARCHAR(16) NULL");
+            try {
+                $db->exec("CREATE UNIQUE INDEX idx_users_referral_code ON users (referral_code)");
+            } catch (PDOException $indexError) {
+                // Index may already exist from migration.
+            }
+        }
     } catch (PDOException $e) {
         if (defined('APP_DEBUG') && APP_DEBUG) {
             error_log("Freelancer Schema Check/Migration failed: " . $e->getMessage());

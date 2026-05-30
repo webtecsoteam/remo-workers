@@ -27,7 +27,7 @@ if (!isset($seoMeta)) {
 <link rel="stylesheet" href="<?php echo baseUrl('assets/free-home/templates/basic/css/main.css'); ?>">
 <link rel="stylesheet" href="<?php echo baseUrl('assets/free-home/templates/basic/css/custom.css'); ?>">
 <link rel="stylesheet" href="<?php echo baseUrl('home/css/public-pages.css?v=1.0.3'); ?>">
-<link rel="stylesheet" href="<?php echo baseUrl('home/css/home-modals.css?v=1.0.2'); ?>">
+<link rel="stylesheet" href="<?php echo baseUrl('home/css/home-modals.css?v=1.0.3'); ?>">
 <link rel="stylesheet" href="<?php echo baseUrl('assets/css/ui-alerts.css'); ?>">
 <?php if (!empty($pageExtraCss)): ?>
 <?php foreach ($pageExtraCss as $cssFile): ?>

@@ -5,6 +5,7 @@
   let confirmResolve = null;
   let promptResolve = null;
   let linkPromptResolve = null;
+  let cryptoWithdrawResolve = null;
   let toastTimer = null;
   let remoToastRunning = false;
 
@@ -161,6 +162,74 @@
     }
   }
 
+  function ensureCryptoWithdrawModal() {
+    let el = document.getElementById('remoCryptoWithdrawModal');
+    if (el) return el;
+    el = document.createElement('div');
+    el.id = 'remoCryptoWithdrawModal';
+    el.className = 'remo-dialog-overlay';
+    el.style.display = 'none';
+    el.innerHTML = `
+      <div class="remo-dialog-card" role="dialog" aria-modal="true">
+        <div class="remo-dialog-header">
+          <span class="remo-dialog-title" id="remoCryptoWithdrawTitle">Crypto withdrawal</span>
+          <button type="button" class="remo-dialog-close" id="remoCryptoWithdrawClose" aria-label="Close">&times;</button>
+        </div>
+        <div class="remo-dialog-body">
+          <p id="remoCryptoWithdrawMessage" class="remo-dialog-message"></p>
+          <div class="remo-dialog-field">
+            <label class="remo-dialog-label" for="remoCryptoWithdrawAmount">Amount (USD / USDT)</label>
+            <input type="number" id="remoCryptoWithdrawAmount" class="remo-dialog-input" min="0.01" step="0.01" placeholder="0.00" />
+          </div>
+          <div class="remo-dialog-field">
+            <label class="remo-dialog-label" for="remoCryptoWithdrawAddress">Wallet address</label>
+            <input type="text" id="remoCryptoWithdrawAddress" class="remo-dialog-input" placeholder="0x… or T…" autocomplete="off" />
+          </div>
+        </div>
+        <div class="remo-dialog-footer">
+          <button type="button" class="remo-dialog-btn remo-dialog-btn-cancel" id="remoCryptoWithdrawCancel">Cancel</button>
+          <button type="button" class="remo-dialog-btn remo-dialog-btn-primary" id="remoCryptoWithdrawOk">Continue</button>
+        </div>
+      </div>`;
+    document.body.appendChild(el);
+    el.querySelector('#remoCryptoWithdrawCancel').addEventListener('click', () => finishCryptoWithdraw(null));
+    el.querySelector('#remoCryptoWithdrawClose').addEventListener('click', () => finishCryptoWithdraw(null));
+    el.querySelector('#remoCryptoWithdrawOk').addEventListener('click', () => {
+      const maxBalance = parseFloat(el.dataset.maxBalance || '0') || 0;
+      const amountRaw = el.querySelector('#remoCryptoWithdrawAmount').value.trim();
+      const address = el.querySelector('#remoCryptoWithdrawAddress').value.trim();
+      const amount = parseFloat(amountRaw);
+
+      if (!amountRaw || Number.isNaN(amount) || amount <= 0) {
+        window.remoAlert('Enter a valid withdrawal amount greater than zero.', 'Crypto withdrawal');
+        return;
+      }
+      if (maxBalance > 0 && amount > maxBalance + 0.0001) {
+        window.remoAlert('Amount cannot exceed your available balance ($' + maxBalance.toFixed(2) + ').', 'Crypto withdrawal');
+        return;
+      }
+      if (!address || address.length < 10) {
+        window.remoAlert('Enter a valid wallet address.', 'Crypto withdrawal');
+        return;
+      }
+      finishCryptoWithdraw({ amount, address });
+    });
+    el.addEventListener('click', (e) => {
+      if (e.target === el) finishCryptoWithdraw(null);
+    });
+    return el;
+  }
+
+  function finishCryptoWithdraw(result) {
+    const el = document.getElementById('remoCryptoWithdrawModal');
+    if (el) el.style.display = 'none';
+    if (cryptoWithdrawResolve) {
+      const fn = cryptoWithdrawResolve;
+      cryptoWithdrawResolve = null;
+      fn(result);
+    }
+  }
+
   function escapeRteHtml(str) {
     return String(str)
       .replace(/&/g, '&amp;')
@@ -249,6 +318,33 @@
       promptResolve = resolve;
       el.style.display = 'flex';
       setTimeout(() => document.getElementById('remoPromptInput').focus(), 50);
+    });
+  };
+
+  /**
+   * @param {number} maxBalance Available balance (USD)
+   * @param {string} [chainLabel] Network hint for the user
+   * @returns {Promise<{amount: number, address: string}|null>}
+   */
+  window.remoCryptoWithdrawPrompt = function (maxBalance, chainLabel) {
+    const available = Math.max(0, parseFloat(maxBalance) || 0);
+    return new Promise((resolve) => {
+      const el = ensureCryptoWithdrawModal();
+      el.dataset.maxBalance = String(available);
+      document.getElementById('remoCryptoWithdrawTitle').textContent = 'Crypto withdrawal';
+      document.getElementById('remoCryptoWithdrawMessage').textContent =
+        'Available: $' +
+        available.toFixed(2) +
+        '. Enter how much USDT to send and your wallet address' +
+        (chainLabel ? ' (' + chainLabel + ').' : '.');
+      const amountInput = document.getElementById('remoCryptoWithdrawAmount');
+      const addressInput = document.getElementById('remoCryptoWithdrawAddress');
+      amountInput.value = available > 0 ? available.toFixed(2) : '';
+      amountInput.max = available > 0 ? available : undefined;
+      addressInput.value = '';
+      cryptoWithdrawResolve = resolve;
+      el.style.display = 'flex';
+      setTimeout(() => amountInput.focus(), 50);
     });
   };
 

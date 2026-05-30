@@ -515,7 +515,7 @@ $inject = str_replace('__DASHBOARD_URL__', htmlspecialchars($dashboardUrl, ENT_Q
 $inject = str_replace('__LOGOUT_URL__', htmlspecialchars($logoutUrl, ENT_QUOTES, 'UTF-8'), $inject);
 $inject = str_replace('__APP_URL__', htmlspecialchars(baseUrl(), ENT_QUOTES, 'UTF-8'), $inject);
 $inject = str_replace('__UI_ALERTS_CSS__', htmlspecialchars(baseUrl('assets/css/ui-alerts.css'), ENT_QUOTES, 'UTF-8'), $inject);
-$inject = str_replace('__HOME_MODALS_CSS__', htmlspecialchars(baseUrl('home/css/home-modals.css?v=1.0.2'), ENT_QUOTES, 'UTF-8'), $inject);
+$inject = str_replace('__HOME_MODALS_CSS__', htmlspecialchars(baseUrl('home/css/home-modals.css?v=1.0.3'), ENT_QUOTES, 'UTF-8'), $inject);
 $inject = str_replace('__JQUERY_JS__', htmlspecialchars(baseUrl('assets/free-home/global/js/jquery-3.7.1.min.js'), ENT_QUOTES, 'UTF-8'), $inject);
 $inject = str_replace('__BOOTSTRAP_JS__', htmlspecialchars(baseUrl('assets/free-home/global/js/bootstrap.bundle.min.js'), ENT_QUOTES, 'UTF-8'), $inject);
 $inject = str_replace('__SELECT2_JS__', htmlspecialchars(baseUrl('assets/free-home/global/js/select2.min.js'), ENT_QUOTES, 'UTF-8'), $inject);
@@ -523,8 +523,8 @@ $inject = str_replace('__VIEWPORT_JS__', htmlspecialchars(baseUrl('assets/free-h
 $inject = str_replace('__SLICK_JS__', htmlspecialchars(baseUrl('assets/free-home/templates/basic/js/slick.min.js'), ENT_QUOTES, 'UTF-8'), $inject);
 $inject = str_replace('__MAIN_JS__', htmlspecialchars(baseUrl('assets/free-home/templates/basic/js/main.js'), ENT_QUOTES, 'UTF-8'), $inject);
 $inject = str_replace('__UI_ALERTS_JS__', htmlspecialchars(baseUrl('assets/js/ui-alerts.js'), ENT_QUOTES, 'UTF-8'), $inject);
-$inject = str_replace('__HOME_MODALS_JS__', htmlspecialchars(baseUrl('home/js/home-modals.js?v=1.0.6'), ENT_QUOTES, 'UTF-8'), $inject);
-$inject = str_replace('__HOME_AUTH_JS__', htmlspecialchars(baseUrl('home/js/home-auth.js?v=1.0.4'), ENT_QUOTES, 'UTF-8'), $inject);
+$inject = str_replace('__HOME_MODALS_JS__', htmlspecialchars(baseUrl('home/js/home-modals.js?v=1.0.7'), ENT_QUOTES, 'UTF-8'), $inject);
+$inject = str_replace('__HOME_AUTH_JS__', htmlspecialchars(baseUrl('home/js/home-auth.js?v=1.0.5'), ENT_QUOTES, 'UTF-8'), $inject);
 
 // Replace imported template SEO tags with normalized tags for social crawlers.
 $seoCleanupPatterns = [

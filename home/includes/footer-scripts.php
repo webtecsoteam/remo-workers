@@ -17,8 +17,8 @@ window.COUNTRY_OPTIONS_HTML = <?php echo json_encode($signupCountryOptionsHtml, 
 <script src="<?php echo baseUrl('assets/free-home/templates/basic/js/slick.min.js'); ?>"></script>
 <script src="<?php echo baseUrl('assets/free-home/templates/basic/js/main.js'); ?>"></script>
 <?php endif; ?>
-<script defer src="<?php echo baseUrl('home/js/home-modals.js?v=1.0.6'); ?>"></script>
-<script defer src="<?php echo baseUrl('home/js/home-auth.js?v=1.0.3'); ?>"></script>
+<script defer src="<?php echo baseUrl('home/js/home-modals.js?v=1.0.7'); ?>"></script>
+<script defer src="<?php echo baseUrl('home/js/home-auth.js?v=1.0.5'); ?>"></script>
 <script defer src="<?php echo baseUrl('home/js/home-blog.js?v=1.0.3'); ?>"></script>
 <script defer src="<?php echo baseUrl('home/js/home-talent.js?v=1.0.3'); ?>"></script>
 <?php if ($usePublicTemplate): ?>

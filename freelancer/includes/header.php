@@ -13,7 +13,7 @@
 <link rel="stylesheet" href="<?php echo baseUrl('assets/css/ui-alerts.css'); ?>">
 <link rel="icon" type="image/png" href="<?php echo baseUrl("favicon.png?v=1.0.0"); ?>">
 <script src="<?php echo baseUrl('assets/js/pagination.js'); ?>"></script>
-<script src="<?php echo baseUrl('assets/js/ui-alerts.js'); ?>"></script>
+<script src="<?php echo baseUrl('assets/js/ui-alerts.js?v=2'); ?>"></script>
 <script>const BASE_URL = '<?php echo baseUrl(); ?>';</script>
 <script>
 window.showPage = function(id) {

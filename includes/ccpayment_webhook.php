@@ -255,16 +255,10 @@ function ccpayment_process_withdraw(array $payload): bool
 
     if ($type === 'ApiWithdrawal' && is_array($msg)) {
         $status = strtolower((string) ($msg['status'] ?? ''));
-        if ($status !== 'success') {
-            return false;
-        }
         $recordId = (string) ($msg['recordId'] ?? '');
         $orderId = (string) ($msg['orderId'] ?? '');
     } else {
-        $payStatus = strtolower((string) ($payload['pay_status'] ?? $payload['status'] ?? ''));
-        if ($payStatus !== 'success') {
-            return false;
-        }
+        $status = strtolower((string) ($payload['pay_status'] ?? $payload['status'] ?? ''));
         $recordId = (string) ($payload['record_id'] ?? '');
         $orderId = (string) ($payload['order_id'] ?? '');
     }
@@ -273,9 +267,28 @@ function ccpayment_process_withdraw(array $payload): bool
         return false;
     }
 
+    if (in_array($status, ['failed', 'rejected'], true)) {
+        return ccpayment_reverse_withdrawal($recordId, $orderId, $payload);
+    }
+
+    if ($status !== 'success') {
+        return false;
+    }
+
+    return ccpayment_complete_withdrawal($recordId, $orderId, $payload);
+}
+
+/**
+ * @param array<string, mixed> $payload
+ */
+function ccpayment_complete_withdrawal(string $recordId, string $orderId, array $payload): bool
+{
     $merchantOrderId = '';
     if (isset($payload['extend']) && is_array($payload['extend'])) {
         $merchantOrderId = (string) ($payload['extend']['merchant_order_id'] ?? '');
+    }
+    if ($merchantOrderId === '' && isset($payload['merchant_order_id'])) {
+        $merchantOrderId = (string) $payload['merchant_order_id'];
     }
 
     $db = getDB();
@@ -296,8 +309,23 @@ function ccpayment_process_withdraw(array $payload): bool
             return true;
         }
 
-        $updPay = $db->prepare("UPDATE payments SET status = 'completed', payment_method = 'ccpayment' WHERE id = ?");
+        $updPay = $db->prepare("UPDATE payments SET status = 'completed', payment_method = 'ccpayment_crypto' WHERE id = ?");
         $updPay->execute([$payment['id']]);
+
+        if (file_exists(__DIR__ . '/ccpayment_transactions.php')) {
+            require_once __DIR__ . '/ccpayment_transactions.php';
+            ccpayment_ensure_transactions_table();
+            $refs = array_values(array_filter([$orderId, $merchantOrderId]));
+            if ($refs !== []) {
+                $placeholders = implode(',', array_fill(0, count($refs), '?'));
+                $ccUpd = $db->prepare("
+                    UPDATE ccpayment_transactions
+                    SET status = 'completed', completed_at = NOW(), ccpayment_record_id = COALESCE(?, ccpayment_record_id)
+                    WHERE reference_id IN ($placeholders) AND purpose = 'withdraw'
+                ");
+                $ccUpd->execute(array_merge([$recordId !== '' ? $recordId : null], $refs));
+            }
+        }
 
         $db->commit();
         return true;
@@ -306,7 +334,91 @@ function ccpayment_process_withdraw(array $payload): bool
             $db->rollBack();
         }
         if (defined('APP_DEBUG') && APP_DEBUG) {
-            error_log('ccpayment_process_withdraw: ' . $e->getMessage());
+            error_log('ccpayment_complete_withdrawal: ' . $e->getMessage());
+        }
+        return false;
+    }
+}
+
+/**
+ * Refund freelancer balance when an on-chain withdrawal fails or is rejected.
+ *
+ * @param array<string, mixed> $payload
+ */
+function ccpayment_reverse_withdrawal(string $recordId, string $orderId, array $payload): bool
+{
+    $merchantOrderId = '';
+    if (isset($payload['extend']) && is_array($payload['extend'])) {
+        $merchantOrderId = (string) ($payload['extend']['merchant_order_id'] ?? '');
+    }
+    if ($merchantOrderId === '' && isset($payload['merchant_order_id'])) {
+        $merchantOrderId = (string) $payload['merchant_order_id'];
+    }
+
+    $db = getDB();
+    $db->beginTransaction();
+
+    try {
+        $stmt = $db->prepare("
+            SELECT id, status, payee_id, amount
+            FROM payments
+            WHERE transaction_id IN (?, ?, ?)
+            LIMIT 1
+            FOR UPDATE
+        ");
+        $stmt->execute([$recordId, $orderId, $merchantOrderId]);
+        $payment = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$payment) {
+            $db->rollBack();
+            return false;
+        }
+
+        $currentStatus = (string) ($payment['status'] ?? '');
+        if ($currentStatus === 'failed' || $currentStatus === 'cancelled') {
+            $db->commit();
+            return true;
+        }
+
+        if ($currentStatus === 'completed') {
+            $db->rollBack();
+            return false;
+        }
+
+        $payeeId = (int) ($payment['payee_id'] ?? 0);
+        $amount = (float) ($payment['amount'] ?? 0);
+
+        if ($payeeId > 0 && $amount > 0) {
+            $refund = $db->prepare('UPDATE users SET balance = balance + ? WHERE id = ?');
+            $refund->execute([$amount, $payeeId]);
+        }
+
+        $updPay = $db->prepare("UPDATE payments SET status = 'failed', payment_method = 'ccpayment_crypto' WHERE id = ?");
+        $updPay->execute([$payment['id']]);
+
+        if (file_exists(__DIR__ . '/ccpayment_transactions.php')) {
+            require_once __DIR__ . '/ccpayment_transactions.php';
+            ccpayment_ensure_transactions_table();
+            $refs = array_values(array_filter([$orderId, $merchantOrderId]));
+            if ($refs !== []) {
+                $placeholders = implode(',', array_fill(0, count($refs), '?'));
+                $ccUpd = $db->prepare("
+                    UPDATE ccpayment_transactions
+                    SET status = 'failed', ccpayment_record_id = COALESCE(?, ccpayment_record_id)
+                    WHERE reference_id IN ($placeholders) AND purpose = 'withdraw'
+                ");
+                $ccUpd->execute(array_merge([$recordId !== '' ? $recordId : null], $refs));
+            }
+        }
+
+        $db->commit();
+        return true;
+    } catch (Throwable $e) {
+        if ($db->inTransaction()) {
+            $db->rollBack();
+        }
+        if (defined('APP_DEBUG') && APP_DEBUG) {
+            error_log('ccpayment_reverse_withdrawal: ' . $e->getMessage());
         }
         return false;
     }

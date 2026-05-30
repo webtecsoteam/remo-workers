@@ -457,6 +457,7 @@ window.closeModal = function() {
     <div class="sb-item" onclick="showPage('verification',this)"><span class="ico">🪪</span>Identity Verification</div>
     <div class="sb-item" onclick="toast('Uma AI','AI work assistant analyzing your active projects...')"><span class="ico">✨</span>AI Assistant</div>
     <div class="sb-section">Account</div>
+    <div class="sb-item" onclick="showPage('referral',this)"><span class="ico">🎁</span>Refer &amp; Share</div>
     <div class="sb-item" onclick="showPage('settings',this)"><span class="ico">⚙️</span>Settings</div>
     <div class="sb-item" onclick="toast('Help Center','Loading support articles...')"><span class="ico">❓</span>Help & Support</div>
   </nav>
@@ -1707,6 +1708,8 @@ window.closeModal = function() {
         </div>
       <?php endif; ?>
     </div>
+
+    <?php include __DIR__ . '/../includes/views/referral-page.php'; ?>
 
   </div>
 </div>

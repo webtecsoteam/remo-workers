@@ -84,6 +84,14 @@ switch ($section) {
         include __DIR__ . '/actions/register.php';
         break;
 
+    case 'get-referral':
+        include __DIR__ . '/actions/get_referral.php';
+        break;
+
+    case 'verify-referral':
+        include __DIR__ . '/actions/verify_referral.php';
+        break;
+
     case 'logout':
         require_once __DIR__ . '/includes/classes/Auth.php';
         Auth::logout();

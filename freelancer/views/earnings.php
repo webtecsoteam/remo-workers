@@ -40,21 +40,39 @@
           <div style="font-size:13px;font-weight:600;margin-bottom:8px">Available for Withdrawal: $<?php echo number_format($user['balance'] ?? 0, 2); ?></div>
           <select id="saved-withdraw-method" onchange="toggleAddMethod()" style="width:100%;padding:8px 11px;border:1px solid var(--border);border-radius:7px;font-size:13px;font-family:inherit;outline:none;margin-bottom:10px">
             <?php foreach($withdrawalMethods as $wm): 
-                $dets = json_decode($wm['details'], true);
-                $label = $wm['method_type'] . " - " . ($dets['email'] ?? "Acct ending in *" . substr($dets['accNum'] ?? '', -4));
+                $dets = json_decode($wm['details'], true) ?: [];
+                if ($wm['method_type'] === 'Crypto') {
+                    $chain = $dets['chain'] ?? env('CCPAYMENT_WITHDRAW_CHAIN', env('CCPAYMENT_CHAIN', 'POLYGON'));
+                    $label = 'Crypto (USDT)';
+                } elseif (!empty($dets['email'])) {
+                    $label = $wm['method_type'] . ' - ' . $dets['email'];
+                } else {
+                    $label = $wm['method_type'] . ' - Acct ending in *' . substr($dets['accNum'] ?? '', -4);
+                }
             ?>
-              <option value="<?php echo $wm['id']; ?>"><?php echo htmlspecialchars($label); ?></option>
+              <option value="<?php echo $wm['id']; ?>" data-method-type="<?php echo htmlspecialchars($wm['method_type']); ?>"><?php echo htmlspecialchars($label); ?></option>
             <?php endforeach; ?>
             <option value="new" <?php echo empty($withdrawalMethods) ? 'selected' : ''; ?>>+ Add New Withdrawal Method</option>
           </select>
 
           <div id="new-method-form" style="<?php echo empty($withdrawalMethods) ? 'display:block' : 'display:none'; ?>">
             <select id="new-withdraw-type" onchange="toggleWithdrawFields()" style="width:100%;padding:8px 11px;border:1px solid var(--border);border-radius:7px;font-size:13px;font-family:inherit;outline:none;margin-bottom:10px">
+              <option value="Crypto">Crypto (USDT)</option>
               <option value="Direct Bank Transfer (ACH)">Direct Bank Transfer (ACH)</option>
               <option value="PayPal">PayPal</option>
               <option value="Payoneer">Payoneer</option>
               <option value="Wire Transfer">Wire Transfer</option>
             </select>
+
+            <div id="withdraw-fields-crypto" style="margin-bottom:10px">
+              <div style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:8px">
+                Withdraw USDT to your wallet on the selected network. You will enter your wallet address when you confirm a withdrawal.
+              </div>
+              <select id="new-withdraw-crypto-chain" style="width:100%;padding:8px 11px;border:1px solid var(--border);border-radius:7px;font-size:13px;font-family:inherit;outline:none">
+                <option value="POLYGON" <?php echo strtoupper(env('CCPAYMENT_WITHDRAW_CHAIN', env('CCPAYMENT_CHAIN', 'POLYGON'))) === 'POLYGON' ? 'selected' : ''; ?>>Polygon (USDT)</option>
+                <option value="TRX" <?php echo strtoupper(env('CCPAYMENT_WITHDRAW_CHAIN', env('CCPAYMENT_CHAIN', 'POLYGON'))) === 'TRX' ? 'selected' : ''; ?>>Tron TRC20 (USDT)</option>
+              </select>
+            </div>
             
             <div id="withdraw-fields-email" style="display:none;margin-bottom:10px">
               <input type="email" id="new-withdraw-email" placeholder="Enter Account Email" style="width:100%;padding:8px 11px;border:1px solid var(--border);border-radius:7px;font-size:13px;font-family:inherit;outline:none">
@@ -83,18 +101,27 @@
             }
             function toggleWithdrawFields() {
               const val = document.getElementById('new-withdraw-type').value;
-              if (val === 'PayPal' || val === 'Payoneer') {
-                document.getElementById('withdraw-fields-email').style.display = 'block';
-                document.getElementById('withdraw-fields-bank').style.display = 'none';
+              const cryptoFields = document.getElementById('withdraw-fields-crypto');
+              const emailFields = document.getElementById('withdraw-fields-email');
+              const bankFields = document.getElementById('withdraw-fields-bank');
+              if (val === 'Crypto') {
+                if (cryptoFields) cryptoFields.style.display = 'block';
+                if (emailFields) emailFields.style.display = 'none';
+                if (bankFields) bankFields.style.display = 'none';
+              } else if (val === 'PayPal' || val === 'Payoneer') {
+                if (cryptoFields) cryptoFields.style.display = 'none';
+                if (emailFields) emailFields.style.display = 'block';
+                if (bankFields) bankFields.style.display = 'none';
                 document.getElementById('new-withdraw-email').placeholder = 'Enter ' + val + ' Email';
               } else {
-                document.getElementById('withdraw-fields-email').style.display = 'none';
-                document.getElementById('withdraw-fields-bank').style.display = 'block';
+                if (cryptoFields) cryptoFields.style.display = 'none';
+                if (emailFields) emailFields.style.display = 'none';
+                if (bankFields) bankFields.style.display = 'block';
               }
             }
             document.addEventListener('DOMContentLoaded', toggleWithdrawFields);
           </script>
-          <button id="withdraw-btn" class="btn btn-g" style="width:100%;justify-content:center;padding:10px; <?php echo empty($withdrawalMethods) ? 'display:none' : 'display:flex'; ?>" onclick="initiateWithdrawal(<?php echo $user['balance'] ?? 0; ?>)">Withdraw $<?php echo number_format($user['balance'] ?? 0, 2); ?> →</button>
+          <button id="withdraw-btn" class="btn btn-g" style="width:100%;justify-content:center;padding:10px; <?php echo empty($withdrawalMethods) ? 'display:none' : 'display:flex'; ?>" onclick="initiateWithdrawal(<?php echo $user['balance'] ?? 0; ?>)">Withdraw →</button>
         </div>
         <div style="background:var(--off);border-radius:9px;padding:14px">
           <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">Service Fees</div>

@@ -130,6 +130,11 @@ const M={
             ${window.COUNTRY_OPTIONS_HTML || ''}
           </select>
         </div>
+        <div class="form-group">
+          <label>Referral Code <span class="auth-optional">(optional)</span></label>
+          <input type="text" name="referral_code" id="register-referral-code" maxlength="16" autocomplete="off" placeholder="Enter referral code" class="auth-referral-input">
+          <div id="register-referral-status" class="auth-referral-status" style="display:none;" aria-live="polite"></div>
+        </div>
         <div class="form-group"><label>I want to...</label>
           <div class="budget-opts">
             <label class="budget-opt sel auth-role" onclick="this.parentElement.querySelectorAll('.budget-opt').forEach(b=>b.classList.remove('sel'));this.classList.add('sel')">
@@ -326,6 +331,10 @@ document.querySelectorAll('.hiw-c,.tc,.test-c,.cat-c,.pc-c,.blog-c,.em,.wf,.af')
 const urlParams = new URLSearchParams(window.location.search);
 if (urlParams.has('show_login')) {
     openModal('login');
+}
+if (urlParams.get('ref')) {
+    window.__pendingReferralCode = String(urlParams.get('ref')).trim();
+    openModal('signup');
 }
 if (urlParams.has('error')) {
     const err = urlParams.get('error');
