@@ -1,4 +1,8 @@
+<?php
+require_once __DIR__ . '/../../includes/job_reports.php';
+?>
 <script>
+  window.JOB_REPORT_TYPES = <?php echo json_encode(jobReportTypesForSelect(), JSON_UNESCAPED_UNICODE); ?>;
   // Core Navigation (replaces header stub with full version including deferred renders)
   window.showPage = function(id) {
     if (!id) id = 'home';
@@ -42,6 +46,8 @@
     const titleEl = document.getElementById('page-title');
     if (titleEl) titleEl.textContent = titles[id] || id;
 
+    document.body.classList.toggle('page-messages-active', id === 'messages');
+
     // Mobile sidebar close
     const sb = document.getElementById('main-sidebar');
     const ov = document.getElementById('mob-overlay');
@@ -57,8 +63,14 @@
       if (id === 'profile' && typeof renderSuggestedSkills === 'function') renderSuggestedSkills();
       if (id === 'connects' && typeof loadConnectsPageData === 'function') loadConnectsPageData();
       if (id === 'referral' && typeof loadReferralPage === 'function') loadReferralPage();
-      if (id === 'messages' && typeof startConversationsPolling === 'function') startConversationsPolling();
-      if (id !== 'messages' && typeof stopConversationsPolling === 'function') stopConversationsPolling();
+      if (id === 'messages') {
+        if (typeof startConversationsPolling === 'function') startConversationsPolling();
+        if (typeof closeMessagesChat === 'function') closeMessagesChat();
+      }
+      if (id !== 'messages') {
+        if (typeof stopConversationsPolling === 'function') stopConversationsPolling();
+        if (typeof setMessagesChatOpen === 'function') setMessagesChatOpen(false);
+      }
     } catch (e) { console.warn("Deferred render error:", e); }
   };
 
@@ -192,8 +204,9 @@
     }
     
     toast('Processing...', 'Saving method...');
-    fetch(BASE_URL + 'freelancer/api/add-withdrawal-method.php', {
+    fetch(BASE_URL + 'add-withdrawal-method', {
       method: 'POST',
+      credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ method_type: method, details: details })
     })
@@ -1137,6 +1150,7 @@
                 <input type="text" readonly value="${BASE_URL}j/${encodeJobId(job.id)}" style="width:100%;padding:10px 12px;font-size:13px;border:1.5px solid var(--border);border-radius:8px;background:#f9fafb;color:var(--dark);outline:none;font-family:inherit;cursor:pointer" onclick="this.select();document.execCommand('copy');toast('Copied!','Job link copied to clipboard')">
                 <button class="btn btn-w" style="padding:10px;height:38px;border-radius:8px;border:1.5px solid var(--border);flex-shrink:0;cursor:pointer" onclick="navigator.clipboard.writeText('${BASE_URL}j/${encodeJobId(job.id)}');toast('Copied!','Job link copied to clipboard')" title="Copy Link">📋</button>
               </div>
+              <button type="button" class="btn btn-w" style="width:100%;margin-top:14px;padding:10px;font-size:13px;color:#b45309;border-color:#fde68a" onclick="event.stopPropagation();openReportJobModal(${job.id})">🚩 Report Job</button>
             </div>
           </div>
         </div>
@@ -1755,6 +1769,34 @@
         <div style="display:flex;gap:12px;margin-top:20px">
           <button class="btn btn-w" style="flex:1;padding:12px;font-size:14px" onclick="closeModal()">Cancel</button>
           <button class="btn btn-o" style="flex:1.5;padding:12px;font-size:14px;font-weight:700" onclick="submitDispute(${contractId})">Raise Dispute ⚠️</button>
+        </div>
+      </div>
+      `;
+      overlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    else if (type === 'report-job') {
+      const jobId = data;
+      const reportOptions = (window.JOB_REPORT_TYPES || []).map(function(opt) {
+        return '<option value="' + opt.value + '">' + opt.label + '</option>';
+      }).join('');
+      document.getElementById('mh-title').innerText = 'Report Job';
+      modal.style.maxWidth = '480px';
+      mc.innerHTML = `
+      <div style="padding:25px">
+        <p style="font-size:13.5px;color:var(--muted2);line-height:1.5;margin-bottom:15px">
+          Report suspicious, fraudulent, or inappropriate job posts. Our team will review your report.
+        </p>
+        <div style="margin-bottom:16px">
+          <label style="font-weight:700;font-size:12.5px;color:var(--dark);display:block;margin-bottom:8px">Report Type</label>
+          <select id="job-report-type" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:inherit;font-size:13px;background:#fff;outline:none">
+            <option value="">Select a reason…</option>
+            ${reportOptions}
+          </select>
+        </div>
+        <div style="display:flex;gap:12px;margin-top:20px">
+          <button class="btn btn-w" style="flex:1;padding:12px;font-size:14px" onclick="closeModal()">Cancel</button>
+          <button class="btn btn-o" style="flex:1.5;padding:12px;font-size:14px;font-weight:700" onclick="submitJobReport(${jobId})">Submit Report</button>
         </div>
       </div>
       `;
@@ -3040,6 +3082,32 @@
     return page && page.classList.contains('active');
   }
 
+  const MSG_MOBILE_MAX_WIDTH = 900;
+
+  function isMobileMessagesLayout() {
+    return window.matchMedia(`(max-width: ${MSG_MOBILE_MAX_WIDTH}px)`).matches;
+  }
+
+  function getMsgContainer() {
+    return document.getElementById('msg-container');
+  }
+
+  function setMessagesChatOpen(open) {
+    const container = getMsgContainer();
+    if (!container) return;
+    if (!isMobileMessagesLayout()) {
+      container.classList.remove('chat-open');
+      document.body.classList.remove('messages-chat-open');
+      return;
+    }
+    container.classList.toggle('chat-open', !!open);
+    document.body.classList.toggle('messages-chat-open', !!open);
+  }
+
+  function closeMessagesChat() {
+    setMessagesChatOpen(false);
+  }
+
   function autoGrowChatInput(el) {
     if (!el) return;
     el.style.height = 'auto';
@@ -3068,6 +3136,8 @@
       const dot = el.querySelector('.msg-dot');
       if(dot) dot.remove();
     }
+
+    setMessagesChatOpen(true);
 
     const chatWindow = document.getElementById('chat-window');
     chatWindow.innerHTML = `<div style="flex:1;display:flex;align-items:center;justify-content:center"><span class="spinner"></span></div>`;
@@ -3145,10 +3215,15 @@
       `;
     }).join('');
 
+    const backBtn = isMobileMessagesLayout()
+      ? `<button type="button" class="chat-back-btn" onclick="closeMessagesChat()" aria-label="Back to conversations">←</button>`
+      : '';
+
     chatWindow.innerHTML = `
-      <div style="padding:15px;background:white;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px">
-        <div style="display:flex;align-items:center;gap:12px">
-          <div class="av" style="width:32px;height:32px">
+      <div class="chat-pane-header" style="padding:15px;background:white;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-shrink:0">
+        <div style="display:flex;align-items:center;gap:12px;min-width:0">
+          ${backBtn}
+          <div class="av" style="width:32px;height:32px;flex-shrink:0">
             ${avatar ? `<div class="av" style="position:relative;width:100%;height:100%"><img src="${getAvatarUrl(avatar)}" style="width:100%;height:100%;border-radius:50%;object-fit:cover" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div style="display:none;background:var(--gl);color:var(--forest);width:100%;height:100%;align-items:center;justify-content:center;border-radius:50%;font-weight:700;font-size:11px">${initials}</div></div>` :
             `<div style="background:var(--gl);color:var(--forest);width:100%;height:100%;display:flex;align-items:center;justify-content:center;border-radius:50%;font-weight:700;font-size:11px">${initials}</div>`}
           </div>
@@ -3424,6 +3499,11 @@
   }
 
   window.loadChat = loadChat;
+  window.closeMessagesChat = closeMessagesChat;
+  window.setMessagesChatOpen = setMessagesChatOpen;
+  window.addEventListener('resize', function () {
+    if (!isMobileMessagesLayout()) setMessagesChatOpen(false);
+  });
   window.startConversationsPolling = startConversationsPolling;
   window.stopConversationsPolling = stopConversationsPolling;
   window.startUnreadMessagesBadgePolling = startUnreadMessagesBadgePolling;
@@ -4390,6 +4470,55 @@ window.submitFreelancerComplete = async function(event, contractId) {
 
 window.openDisputeModal = function(contractId) {
   openModal('file-dispute', contractId);
+};
+
+window.openReportJobModal = function(jobId) {
+  openModal('report-job', jobId);
+};
+
+window.submitJobReport = async function(jobId) {
+  const select = document.getElementById('job-report-type');
+  const reportType = select ? select.value.trim() : '';
+  if (!reportType) {
+    remoAlert('Please select a report type.', 'Report Job');
+    return;
+  }
+
+  const btn = document.querySelector('[onclick*="submitJobReport"]');
+  const originalText = btn ? btn.innerText : '';
+  if (btn) {
+    btn.disabled = true;
+    btn.innerText = 'Submitting...';
+  }
+
+  const formData = new FormData();
+  formData.append('job_id', jobId);
+  formData.append('report_type', reportType);
+
+  try {
+    const res = await fetch(BASE_URL + 'actions/report_job.php', {
+      method: 'POST',
+      body: formData,
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    });
+    const data = await res.json();
+    if (data.success) {
+      closeModal();
+      toast('Report Submitted', data.message || 'Thank you for your report.');
+    } else {
+      remoAlert(data.error || data.message || 'Could not submit report.', 'Report Job');
+      if (btn) {
+        btn.disabled = false;
+        btn.innerText = originalText;
+      }
+    }
+  } catch (err) {
+    toast('Error', 'Communication failed');
+    if (btn) {
+      btn.disabled = false;
+      btn.innerText = originalText;
+    }
+  }
 };
 
 window.submitDispute = async function(contractId) {

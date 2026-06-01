@@ -9,6 +9,15 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'OPTIONS') {
 applyCorsHeaders();
 header('Content-Type: application/json');
 
+if (!referralProgramEnabled()) {
+    echo json_encode([
+        'success' => true,
+        'found' => false,
+        'message' => 'Referral program is currently unavailable.',
+    ]);
+    exit;
+}
+
 $code = (string) ($_GET['code'] ?? '');
 
 if (trim($code) === '') {

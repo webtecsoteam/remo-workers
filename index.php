@@ -88,6 +88,10 @@ switch ($section) {
         include __DIR__ . '/actions/get_referral.php';
         break;
 
+    case 'add-withdrawal-method':
+        include __DIR__ . '/actions/add_withdrawal_method.php';
+        break;
+
     case 'verify-referral':
         include __DIR__ . '/actions/verify_referral.php';
         break;

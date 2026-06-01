@@ -52,7 +52,7 @@ $getReferralUrl = baseUrl('get-referral');
         <li>Copy your referral code or share link above.</li>
         <li>Send it to friends who want to join RemoWorkers.</li>
         <li>They sign up using your link or enter code <strong id="referral-code-inline">--------</strong> during registration.</li>
-        <li>When <strong id="referral-threshold-text">10</strong> referred users verify their email and upload a profile photo, you earn <strong id="referral-reward-text">$1</strong> in wallet balance.</li>
+        <li>When <strong id="referral-threshold-text">10</strong> referred users verify their email, complete account verification, and upload a profile photo, you earn <strong id="referral-reward-text">$1</strong> in wallet balance.</li>
       </ol>
     </div>
 
@@ -90,6 +90,7 @@ $getReferralUrl = baseUrl('get-referral');
               <th style="padding:10px 12px;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.04em">User</th>
               <th style="padding:10px 12px;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.04em">Joined</th>
               <th style="padding:10px 12px;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.04em">Email Verified</th>
+              <th style="padding:10px 12px;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.04em">Account Verified</th>
               <th style="padding:10px 12px;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.04em">Profile Photo</th>
               <th style="padding:10px 12px;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.04em">Qualified</th>
             </tr>
@@ -206,6 +207,7 @@ $getReferralUrl = baseUrl('get-referral');
         + '<td style="padding:12px;font-weight:600;color:#111827">' + name + '</td>'
         + '<td style="padding:12px;color:#6b7280">' + formatJoinedDate(r.joined_at) + '</td>'
         + '<td style="padding:12px">' + statusBadge(!!r.email_verified, 'Verified', 'Pending') + '</td>'
+        + '<td style="padding:12px">' + statusBadge(!!r.account_verified, 'Verified', 'Pending') + '</td>'
         + '<td style="padding:12px">' + statusBadge(!!r.profile_photo, 'Uploaded', 'Missing') + '</td>'
         + '<td style="padding:12px">' + statusBadge(!!r.qualified, 'Yes', 'Not yet') + '</td>'
         + '</tr>';

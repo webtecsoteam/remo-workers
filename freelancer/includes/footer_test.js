@@ -1,6 +1,3 @@
-
-Warning: Module "imagick" is already loaded in Unknown on line 0
-
 const BASE_URL = '';
 // ─── CLIENT DATABASE ───────────────────────────────────────────────
 // Add any client here. Their spent badge appears automatically on every

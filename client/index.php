@@ -1,6 +1,7 @@
 <?php 
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/classes/Auth.php';
+require_once __DIR__ . '/../includes/referral.php';
 $user = Auth::user();
 if(!$user) { redirect(baseUrl()); }
 
@@ -233,6 +234,9 @@ foreach ($allContracts as $ac) {
     }
 }
 // 9. Transaction History for Payments Page
+if (referralProgramEnabled()) {
+    referralSyncMissingPaymentRecords((int) $user['id']);
+}
 $clientTransactionsStmt = $db->prepare("
     SELECT p.*, u.name as freelancer_name, j.title as job_title 
     FROM payments p 
@@ -457,7 +461,9 @@ window.closeModal = function() {
     <div class="sb-item" onclick="showPage('verification',this)"><span class="ico">🪪</span>Identity Verification</div>
     <div class="sb-item" onclick="toast('Uma AI','AI work assistant analyzing your active projects...')"><span class="ico">✨</span>AI Assistant</div>
     <div class="sb-section">Account</div>
+    <?php if (referralProgramEnabled()): ?>
     <div class="sb-item" onclick="showPage('referral',this)"><span class="ico">🎁</span>Refer &amp; Share</div>
+    <?php endif; ?>
     <div class="sb-item" onclick="showPage('settings',this)"><span class="ico">⚙️</span>Settings</div>
     <div class="sb-item" onclick="toast('Help Center','Loading support articles...')"><span class="ico">❓</span>Help & Support</div>
   </nav>
@@ -1445,14 +1451,23 @@ window.closeModal = function() {
               <?php else: ?>
                   <?php foreach($clientTransactions as $ct): 
                       $isDeposit = ($ct['payee_id'] == $user['id']);
+                      $isReferralReward = strcasecmp((string)($ct['payment_method'] ?? ''), 'Referral Reward') === 0;
                       $fee = (float)($ct['platform_fee'] ?? 0);
                       $total = (float)$ct['amount'] + ($isDeposit ? 0 : $fee);
+                      $txDescription = $isReferralReward
+                          ? ($ct['description'] ?: 'Referral Reward')
+                          : ($isDeposit ? 'Add Funds (Deposit)' : (!empty($ct['job_title']) ? 'Payment for: ' . htmlspecialchars($ct['job_title']) : 'Payment for contract'));
+                      $txSource = $isReferralReward
+                          ? 'Referral Program'
+                          : ($isDeposit ? (strcasecmp($ct['payment_method'] ?? '', 'paystack') === 0 ? 'Paystack' : ucfirst($ct['payment_method'] ?? 'Deposit')) : ($ct['freelancer_name'] ?: 'System'));
+                      $txTypeLabel = $isReferralReward ? 'Referral' : ($isDeposit ? 'Deposit' : 'Fixed');
+                      $txTypeClass = $isReferralReward ? 'b-green' : ($isDeposit ? 'b-blue' : 'b-purple');
                   ?>
                   <tr>
                     <td><?php echo date('M j, Y', strtotime($ct['created_at'])); ?></td>
-                    <td><?php echo $isDeposit ? 'Add Funds (Deposit)' : (!empty($ct['job_title']) ? 'Payment for: ' . htmlspecialchars($ct['job_title']) : 'Payment for contract'); ?></td>
-                    <td><?php echo $isDeposit ? (strcasecmp($ct['payment_method'] ?? '', 'paystack') === 0 ? 'Paystack' : ucfirst($ct['payment_method'] ?? 'Deposit')) : ($ct['freelancer_name'] ?: 'System'); ?></td>
-                    <td><span class="badge <?php echo $isDeposit ? 'b-blue' : 'b-purple'; ?>"><?php echo $isDeposit ? 'Deposit' : 'Fixed'; ?></span></td>
+                    <td><?php echo htmlspecialchars($txDescription); ?></td>
+                    <td><?php echo htmlspecialchars($txSource); ?></td>
+                    <td><span class="badge <?php echo $txTypeClass; ?>"><?php echo $txTypeLabel; ?></span></td>
                     <td style="font-weight:600;color:<?php echo $isDeposit ? 'var(--uw-green)' : 'var(--uw-dark)'; ?>">
                       <?php echo $isDeposit ? '+' : ''; ?>$<?php echo number_format($ct['amount'], 2); ?>
                     </td>
@@ -1477,17 +1492,26 @@ window.closeModal = function() {
             <?php else: ?>
                 <?php foreach($clientTransactions as $ct): 
                     $isDeposit = ($ct['payee_id'] == $user['id']);
+                    $isReferralReward = strcasecmp((string)($ct['payment_method'] ?? ''), 'Referral Reward') === 0;
                     $fee = (float)($ct['platform_fee'] ?? 0);
                     $total = (float)$ct['amount'] + ($isDeposit ? 0 : $fee);
+                    $txDescription = $isReferralReward
+                        ? ($ct['description'] ?: 'Referral Reward')
+                        : ($isDeposit ? 'Add Funds (Deposit)' : (!empty($ct['job_title']) ? 'Payment for: ' . htmlspecialchars($ct['job_title']) : 'Payment for contract'));
+                    $txSource = $isReferralReward
+                        ? 'Referral Program'
+                        : ($isDeposit ? (strcasecmp($ct['payment_method'] ?? '', 'paystack') === 0 ? 'Paystack' : ucfirst($ct['payment_method'] ?? 'Deposit')) : ($ct['freelancer_name'] ?: 'System'));
+                    $txTypeLabel = $isReferralReward ? 'Referral' : ($isDeposit ? 'Deposit' : 'Fixed');
+                    $txTypeClass = $isReferralReward ? 'b-green' : ($isDeposit ? 'b-blue' : 'b-purple');
                 ?>
                 <div class="tx-item" style="padding:15px 0;border-bottom:1px solid var(--uw-border);display:flex;justify-content:space-between;align-items:flex-start">
                   <div style="flex:1;min-width:0">
-                    <div style="font-weight:700;font-size:14px;color:var(--uw-black);margin-bottom:2px"><?php echo $isDeposit ? 'Add Funds (Deposit)' : (!empty($ct['job_title']) ? 'Payment for: ' . htmlspecialchars($ct['job_title']) : 'Payment for contract'); ?></div>
+                    <div style="font-weight:700;font-size:14px;color:var(--uw-black);margin-bottom:2px"><?php echo htmlspecialchars($txDescription); ?></div>
                     <div style="font-size:11.5px;color:var(--uw-gray);margin-bottom:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
-                      <?php echo $isDeposit ? (strcasecmp($ct['payment_method'] ?? '', 'paystack') === 0 ? 'Paystack' : ucfirst($ct['payment_method'] ?? 'Deposit')) : ($ct['freelancer_name'] ?: 'System'); ?>
+                      <?php echo htmlspecialchars($txSource); ?>
                     </div>
                     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                      <span class="badge <?php echo $isDeposit ? 'b-blue' : 'b-purple'; ?>" style="font-size:9px;padding:1px 6px"><?php echo $isDeposit ? 'Deposit' : 'Fixed'; ?></span>
+                      <span class="badge <?php echo $txTypeClass; ?>" style="font-size:9px;padding:1px 6px"><?php echo $txTypeLabel; ?></span>
                       <span style="font-size:11px;color:var(--uw-gray2)"><?php echo date('M j, Y', strtotime($ct['created_at'])); ?></span>
                       <?php if ($fee > 0): ?>
                         <span style="font-size:10px;color:#dc2626;background:#fef2f2;padding:1px 6px;border-radius:4px;font-weight:600">Fee: $<?php echo number_format($fee, 2); ?></span>
@@ -1709,7 +1733,9 @@ window.closeModal = function() {
       <?php endif; ?>
     </div>
 
+    <?php if (referralProgramEnabled()): ?>
     <?php include __DIR__ . '/../includes/views/referral-page.php'; ?>
+    <?php endif; ?>
 
   </div>
 </div>

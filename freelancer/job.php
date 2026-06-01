@@ -365,7 +365,8 @@ include __DIR__ . '/includes/header.php';
           <?php if (!$userProposal): ?>
           <button type="button" class="btn btn-g" style="width:100%;padding:14px;font-size:15px;font-weight:700;margin-bottom:12px;border-radius:8px" onclick="document.getElementById('job-apply-section').scrollIntoView({behavior:'smooth'})">Apply Now</button>
           <?php endif; ?>
-          <button type="button" id="job-save-btn" class="btn btn-w" style="width:100%;padding:12px;font-size:14px;margin-bottom:25px;border:1px solid var(--border);<?php echo $isSaved ? 'background-color:#10b981;color:#fff;border-color:#10b981;' : ''; ?>" onclick="toggleSaveJob(<?php echo (int)$jobId; ?>, this)"><?php echo $isSaved ? 'Saved' : 'Save Job'; ?></button>
+          <button type="button" id="job-save-btn" class="btn btn-w" style="width:100%;padding:12px;font-size:14px;margin-bottom:12px;border:1px solid var(--border);<?php echo $isSaved ? 'background-color:#10b981;color:#fff;border-color:#10b981;' : ''; ?>" onclick="toggleSaveJob(<?php echo (int)$jobId; ?>, this)"><?php echo $isSaved ? 'Saved' : 'Save Job'; ?></button>
+          <button type="button" class="btn btn-w" style="width:100%;padding:12px;font-size:13px;margin-bottom:25px;color:#b45309;border-color:#fde68a" onclick="openReportJobModal(<?php echo (int)$jobId; ?>)">🚩 Report Job</button>
 
           <div style="margin-bottom:25px">
             <h4 style="font-size:14px;margin-bottom:15px;font-weight:700">About the Client</h4>

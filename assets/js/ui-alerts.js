@@ -2,12 +2,44 @@
  * Theme-aligned toast, confirm, and prompt dialogs (replaces alert/confirm/prompt).
  */
 (function () {
+  const REMO_DIALOG_Z_INDEX = 15000;
   let confirmResolve = null;
   let promptResolve = null;
   let linkPromptResolve = null;
   let cryptoWithdrawResolve = null;
   let toastTimer = null;
   let remoToastRunning = false;
+
+  function applyDialogOverlayShell(el) {
+    const prevDisplay = el.style.display;
+    el.className = 'remo-dialog-overlay';
+    Object.assign(el.style, {
+      position: 'fixed',
+      inset: '0',
+      zIndex: String(REMO_DIALOG_Z_INDEX),
+      background: 'rgba(0, 0, 0, 0.5)',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '20px',
+    });
+    if (prevDisplay) el.style.display = prevDisplay;
+  }
+
+  function overlayBackdropShouldClose(el, e) {
+    return e.target === el && el.dataset.ignoreBackdrop !== '1';
+  }
+
+  function showDialogOverlay(el, focusEl) {
+    el.dataset.ignoreBackdrop = '1';
+    requestAnimationFrame(() => {
+      el.style.display = 'flex';
+      el.style.zIndex = String(REMO_DIALOG_Z_INDEX);
+      setTimeout(() => {
+        delete el.dataset.ignoreBackdrop;
+        if (focusEl) focusEl.focus();
+      }, 0);
+    });
+  }
 
   function ensureToast() {
     let el = document.getElementById('toast');
@@ -22,10 +54,13 @@
 
   function ensureConfirmModal() {
     let el = document.getElementById('remoConfirmModal');
-    if (el) return el;
+    if (el) {
+      applyDialogOverlayShell(el);
+      return el;
+    }
     el = document.createElement('div');
     el.id = 'remoConfirmModal';
-    el.className = 'remo-dialog-overlay';
+    applyDialogOverlayShell(el);
     el.style.display = 'none';
     el.innerHTML = `
       <div class="remo-dialog-card" role="dialog" aria-modal="true">
@@ -46,17 +81,20 @@
     el.querySelector('#remoConfirmClose').addEventListener('click', () => finishConfirm(false));
     el.querySelector('#remoConfirmOk').addEventListener('click', () => finishConfirm(true));
     el.addEventListener('click', (e) => {
-      if (e.target === el) finishConfirm(false);
+      if (overlayBackdropShouldClose(el, e)) finishConfirm(false);
     });
     return el;
   }
 
   function ensurePromptModal() {
     let el = document.getElementById('remoPromptModal');
-    if (el) return el;
+    if (el) {
+      applyDialogOverlayShell(el);
+      return el;
+    }
     el = document.createElement('div');
     el.id = 'remoPromptModal';
-    el.className = 'remo-dialog-overlay';
+    applyDialogOverlayShell(el);
     el.style.display = 'none';
     el.innerHTML = `
       <div class="remo-dialog-card" role="dialog" aria-modal="true">
@@ -81,7 +119,7 @@
       finishPrompt(val);
     });
     el.addEventListener('click', (e) => {
-      if (e.target === el) finishPrompt(null);
+      if (overlayBackdropShouldClose(el, e)) finishPrompt(null);
     });
     return el;
   }
@@ -108,10 +146,13 @@
 
   function ensureLinkPromptModal() {
     let el = document.getElementById('remoLinkPromptModal');
-    if (el) return el;
+    if (el) {
+      applyDialogOverlayShell(el);
+      return el;
+    }
     el = document.createElement('div');
     el.id = 'remoLinkPromptModal';
-    el.className = 'remo-dialog-overlay';
+    applyDialogOverlayShell(el);
     el.style.display = 'none';
     el.innerHTML = `
       <div class="remo-dialog-card" role="dialog" aria-modal="true">
@@ -147,7 +188,7 @@
       finishLinkPrompt({ text, url });
     });
     el.addEventListener('click', (e) => {
-      if (e.target === el) finishLinkPrompt(null);
+      if (overlayBackdropShouldClose(el, e)) finishLinkPrompt(null);
     });
     return el;
   }
@@ -164,10 +205,13 @@
 
   function ensureCryptoWithdrawModal() {
     let el = document.getElementById('remoCryptoWithdrawModal');
-    if (el) return el;
+    if (el) {
+      applyDialogOverlayShell(el);
+      return el;
+    }
     el = document.createElement('div');
     el.id = 'remoCryptoWithdrawModal';
-    el.className = 'remo-dialog-overlay';
+    applyDialogOverlayShell(el);
     el.style.display = 'none';
     el.innerHTML = `
       <div class="remo-dialog-card" role="dialog" aria-modal="true">
@@ -215,7 +259,7 @@
       finishCryptoWithdraw({ amount, address });
     });
     el.addEventListener('click', (e) => {
-      if (e.target === el) finishCryptoWithdraw(null);
+      if (overlayBackdropShouldClose(el, e)) finishCryptoWithdraw(null);
     });
     return el;
   }
@@ -287,7 +331,7 @@
       okBtn.className = 'remo-dialog-btn ' + (options.danger ? 'remo-dialog-btn-danger' : 'remo-dialog-btn-primary');
       document.getElementById('remoConfirmCancel').textContent = options.cancelLabel || 'Cancel';
       confirmResolve = resolve;
-      el.style.display = 'flex';
+      showDialogOverlay(el);
     });
   };
 
@@ -316,8 +360,7 @@
         document.getElementById('remoPromptInput').replaceWith(inp);
       }
       promptResolve = resolve;
-      el.style.display = 'flex';
-      setTimeout(() => document.getElementById('remoPromptInput').focus(), 50);
+      showDialogOverlay(el, document.getElementById('remoPromptInput'));
     });
   };
 
@@ -343,8 +386,7 @@
       amountInput.max = available > 0 ? available : undefined;
       addressInput.value = '';
       cryptoWithdrawResolve = resolve;
-      el.style.display = 'flex';
-      setTimeout(() => amountInput.focus(), 50);
+      showDialogOverlay(el, amountInput);
     });
   };
 
@@ -358,8 +400,7 @@
       textInput.value = defaults.text || '';
       urlInput.value = defaults.url || 'https://';
       linkPromptResolve = resolve;
-      el.style.display = 'flex';
-      setTimeout(() => (defaults.text ? urlInput : textInput).focus(), 50);
+      showDialogOverlay(el, defaults.text ? urlInput : textInput);
     });
   };
 

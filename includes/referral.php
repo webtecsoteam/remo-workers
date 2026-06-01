@@ -142,17 +142,26 @@ function lookupReferrerByCode(string $code, ?PDO $db = null): ?array
     ];
 }
 
+/** Whether the referral program is enabled (admin platform setting). */
+function referralProgramEnabled(): bool
+{
+    if (!function_exists('getPlatformSettingString')) {
+        return true;
+    }
+    return getPlatformSettingString('referral_enabled', '1') === '1';
+}
+
 /** Qualified referrals required before each wallet reward. */
 function referralRewardThreshold(): int
 {
-    $value = (int) env('REFERRAL_REWARD_THRESHOLD', 10);
+    $value = (int) getPlatformSetting('referral_reward_threshold', 10);
     return $value > 0 ? $value : 10;
 }
 
 /** USD amount credited to referrer wallet per milestone. */
 function referralRewardAmount(): float
 {
-    $value = (float) env('REFERRAL_REWARD_AMOUNT', 1.0);
+    $value = (float) getPlatformSetting('referral_reward_amount', 1.0);
     return $value > 0 ? round($value, 2) : 1.0;
 }
 
@@ -215,7 +224,7 @@ function userHasProfilePhoto(array $userRow): bool
 }
 
 /**
- * Whether a referred user has verified their email (account verified).
+ * Whether a referred user has verified their email.
  */
 function userHasVerifiedEmail(array $userRow): bool
 {
@@ -223,11 +232,21 @@ function userHasVerifiedEmail(array $userRow): bool
 }
 
 /**
- * A referral counts toward rewards only when email is verified and photo is uploaded.
+ * Whether a referred user has completed identity / account verification (admin-approved).
+ */
+function userHasVerifiedAccount(array $userRow): bool
+{
+    return !empty($userRow['is_verified']);
+}
+
+/**
+ * A referral counts toward rewards when email, account, and profile photo are complete.
  */
 function isReferralUserQualified(array $userRow): bool
 {
-    return userHasVerifiedEmail($userRow) && userHasProfilePhoto($userRow);
+    return userHasVerifiedEmail($userRow)
+        && userHasVerifiedAccount($userRow)
+        && userHasProfilePhoto($userRow);
 }
 
 /**
@@ -235,6 +254,10 @@ function isReferralUserQualified(array $userRow): bool
  */
 function recordReferralOnSignup(int $referredUserId, string $referralCode, ?PDO $db = null): bool
 {
+    if (!referralProgramEnabled()) {
+        return false;
+    }
+
     if ($referredUserId <= 0) {
         return false;
     }
@@ -273,7 +296,7 @@ function recordReferralOnSignup(int $referredUserId, string $referralCode, ?PDO 
  */
 function referralOnReferredUserUpdated(int $referredUserId, ?PDO $db = null): void
 {
-    if ($referredUserId <= 0) {
+    if (!referralProgramEnabled() || $referredUserId <= 0) {
         return;
     }
 
@@ -299,6 +322,7 @@ function referralOnReferredUserUpdated(int $referredUserId, ?PDO $db = null): vo
  *     name:string,
  *     joined_at:string,
  *     email_verified:bool,
+ *     account_verified:bool,
  *     profile_photo:bool,
  *     qualified:bool
  *   }>,
@@ -325,6 +349,7 @@ function getReferrerReferralSummary(int $referrerId, ?PDO $db = null): array
             u.id,
             u.name,
             u.email_verified_at,
+            u.is_verified,
             u.avatar_url,
             ur.created_at AS joined_at
         FROM user_referrals ur
@@ -340,8 +365,9 @@ function getReferrerReferralSummary(int $referrerId, ?PDO $db = null): array
 
     foreach ($rows as $row) {
         $emailVerified = userHasVerifiedEmail($row);
+        $accountVerified = userHasVerifiedAccount($row);
         $profilePhoto = userHasProfilePhoto($row);
-        $qualified = $emailVerified && $profilePhoto;
+        $qualified = isReferralUserQualified($row);
         if ($qualified) {
             $qualifiedCount++;
         }
@@ -351,6 +377,7 @@ function getReferrerReferralSummary(int $referrerId, ?PDO $db = null): array
             'name' => (string) $row['name'],
             'joined_at' => (string) ($row['joined_at'] ?? ''),
             'email_verified' => $emailVerified,
+            'account_verified' => $accountVerified,
             'profile_photo' => $profilePhoto,
             'qualified' => $qualified,
         ];
@@ -383,13 +410,102 @@ function getReferrerReferralSummary(int $referrerId, ?PDO $db = null): array
 }
 
 /**
+ * Stable payment reference for a referral reward milestone (prevents duplicate history rows).
+ */
+function referralPaymentTransactionId(int $referrerId, int $milestone): string
+{
+    return sprintf('REF-%d-M%d', $referrerId, $milestone);
+}
+
+/**
+ * Human-readable label for transaction history.
+ */
+function referralRewardDescription(int $milestone, int $threshold): string
+{
+    $qualifiedTarget = $milestone * $threshold;
+    return sprintf(
+        'Referral Reward — %d qualified referral%s (milestone %d)',
+        $qualifiedTarget,
+        $qualifiedTarget === 1 ? '' : 's',
+        $milestone
+    );
+}
+
+/**
+ * Log referral reward in payments table for Transaction History (idempotent).
+ */
+function referralEnsurePaymentRecord(
+    PDO $db,
+    int $referrerId,
+    int $milestone,
+    float $amount,
+    int $threshold
+): void {
+    $transactionId = referralPaymentTransactionId($referrerId, $milestone);
+
+    $check = $db->prepare('SELECT id FROM payments WHERE transaction_id = ? LIMIT 1');
+    $check->execute([$transactionId]);
+    if ($check->fetch()) {
+        return;
+    }
+
+    $description = referralRewardDescription($milestone, $threshold);
+    $systemUserId = 1;
+
+    $insert = $db->prepare("
+        INSERT INTO payments (transaction_id, payer_id, payee_id, amount, status, payment_method, description, platform_fee)
+        VALUES (?, ?, ?, ?, 'completed', 'Referral Reward', ?, 0.0)
+    ");
+    $insert->execute([
+        $transactionId,
+        $systemUserId,
+        $referrerId,
+        round($amount, 2),
+        $description,
+    ]);
+}
+
+/**
+ * Backfill payment history rows for referral rewards already paid before logging existed.
+ */
+function referralSyncMissingPaymentRecords(int $referrerId, ?PDO $db = null): void
+{
+    if ($referrerId <= 0) {
+        return;
+    }
+
+    $db = $db ?? getDB();
+    ensureReferralTables($db);
+    $threshold = referralRewardThreshold();
+
+    $stmt = $db->prepare('
+        SELECT milestone, amount, qualified_count
+        FROM referral_rewards
+        WHERE referrer_id = ?
+        ORDER BY milestone ASC
+    ');
+    $stmt->execute([$referrerId]);
+    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+
+    foreach ($rows as $row) {
+        referralEnsurePaymentRecord(
+            $db,
+            $referrerId,
+            (int) $row['milestone'],
+            (float) $row['amount'],
+            $threshold
+        );
+    }
+}
+
+/**
  * Credit referrer wallet for each unpaid 10-qualified-referral milestone.
  *
  * @return array{paid_milestones:int,amount_credited:float,new_balance:float|null}
  */
 function processReferralRewards(int $referrerId, ?PDO $db = null): array
 {
-    if ($referrerId <= 0) {
+    if (!referralProgramEnabled() || $referrerId <= 0) {
         return ['paid_milestones' => 0, 'amount_credited' => 0.0, 'new_balance' => null];
     }
 
@@ -410,12 +526,15 @@ function processReferralRewards(int $referrerId, ?PDO $db = null): array
             return ['paid_milestones' => 0, 'amount_credited' => 0.0, 'new_balance' => null];
         }
 
+        referralSyncMissingPaymentRecords($referrerId, $db);
+
         $countStmt = $db->prepare('
             SELECT COUNT(*) AS cnt
             FROM user_referrals ur
             INNER JOIN users u ON u.id = ur.referred_user_id
             WHERE ur.referrer_id = ?
               AND u.email_verified_at IS NOT NULL
+              AND u.is_verified = 1
               AND u.avatar_url IS NOT NULL
               AND TRIM(u.avatar_url) <> \'\'
         ');
@@ -450,6 +569,14 @@ function processReferralRewards(int $referrerId, ?PDO $db = null): array
                 VALUES (?, ?, ?, ?)
             ');
             $insert->execute([$referrerId, $milestone, $rewardAmount, $qualifiedCount]);
+
+            referralEnsurePaymentRecord(
+                $db,
+                $referrerId,
+                $milestone,
+                $rewardAmount,
+                $threshold
+            );
 
             $balance += $rewardAmount;
             $amountCredited += $rewardAmount;

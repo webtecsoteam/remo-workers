@@ -280,6 +280,39 @@ function ensureFreelancerSchema() {
     }
     
     ensureAgencySchema();
+    ensureWithdrawalMethodsSchema();
+    $done = true;
+}
+
+/** Ensure withdrawal method storage exists (safe to call repeatedly). */
+function ensureWithdrawalMethodsSchema(): void
+{
+    static $done = false;
+    if ($done) {
+        return;
+    }
+
+    $db = getDB();
+    try {
+        $db->exec("
+            CREATE TABLE IF NOT EXISTS user_withdrawal_methods (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                user_id INT NOT NULL,
+                method_type VARCHAR(64) NOT NULL,
+                details JSON NOT NULL,
+                is_default TINYINT(1) NOT NULL DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                INDEX idx_user_withdrawal_methods_user (user_id),
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+        ");
+    } catch (PDOException $e) {
+        if (defined('APP_DEBUG') && APP_DEBUG) {
+            error_log('Withdrawal methods schema check failed: ' . $e->getMessage());
+        }
+    }
+
     $done = true;
 }
 
@@ -458,7 +491,10 @@ function ensurePlatformSettingsTable() {
         'client_fee_hourly' => ['0.00', 'Platform fee percentage charged to clients for Hourly contracts.'],
         'client_fee_monthly' => ['0.00', 'Platform fee percentage charged to clients for Monthly contracts.'],
         'google_analytics_enabled' => ['0', 'Enable Google Analytics tracking on the public site (1 = on, 0 = off).'],
-        'google_analytics_id' => ['', 'Google Analytics 4 Measurement ID (e.g. G-XXXXXXXXXX).']
+        'google_analytics_id' => ['', 'Google Analytics 4 Measurement ID (e.g. G-XXXXXXXXXX).'],
+        'referral_enabled' => ['1', 'Enable the referral program for clients and freelancers (1 = on, 0 = off).'],
+        'referral_reward_threshold' => ['10', 'Number of fully qualified referrals required before each wallet reward.'],
+        'referral_reward_amount' => ['1.00', 'USD amount credited to referrer wallet per milestone.'],
     ];
     
     $checkStmt = $db->prepare("SELECT COUNT(*) FROM platform_settings WHERE setting_key = ?");

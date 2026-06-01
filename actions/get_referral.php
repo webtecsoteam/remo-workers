@@ -11,6 +11,11 @@ if (!$user) {
     exit;
 }
 
+if (!referralProgramEnabled()) {
+    echo json_encode(['success' => false, 'message' => 'Referral program is currently unavailable.', 'disabled' => true]);
+    exit;
+}
+
 try {
     $referrerId = (int) $user['id'];
     $referralCode = ensureUserReferralCode($referrerId);

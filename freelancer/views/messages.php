@@ -1,16 +1,8 @@
 <!-- MESSAGES -->
 <div class="page" id="page-messages">
-  <div class="msg-container" style="background:white;border:1px solid var(--border);border-radius:12px;overflow:hidden;height:calc(100vh - 140px)">
-    <style>
-      .msg-container{display:grid;grid-template-columns:300px 1fr}
-      @media(max-width:900px){
-        .msg-container{grid-template-columns:1fr}
-        .msg-container.chat-open .msg-sidebar{display:none}
-        .msg-container:not(.chat-open) .msg-window{display:none}
-      }
-    </style>
+  <div class="msg-container" id="msg-container">
     <!-- Sidebar -->
-    <div class="msg-sidebar" style="border-right:1px solid var(--border);display:flex;flex-direction:column;min-height:0;min-width:0">
+    <div class="msg-sidebar">
       <div style="padding:15px;border-bottom:1px solid var(--border)">
         <input type="text" placeholder="Search messages..." style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:13px" onkeyup="filterConversations(this.value)">
       </div>
@@ -43,7 +35,7 @@
       </div>
     </div>
     <!-- Chat Area -->
-    <div class="msg-window" style="display:flex;flex-direction:column;background:var(--off);min-height:0;min-width:0" id="chat-window">
+    <div class="msg-window" id="chat-window">
       <div style="flex:1;display:flex;align-items:center;justify-content:center;color:var(--muted);flex-direction:column;gap:15px">
         <span style="font-size:40px">💬</span>
         <div>Select a conversation to start chatting</div>

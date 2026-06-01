@@ -104,6 +104,8 @@ function scheduleReferralLookup(code) {
 }
 
 function initSignupReferralField() {
+  if (window.REFERRAL_PROGRAM_ENABLED === false) return;
+
   const input = document.getElementById('register-referral-code');
   if (!input || input.dataset.referralBound === '1') return;
 

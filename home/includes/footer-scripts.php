@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../../includes/config.php';
+require_once __DIR__ . '/../../includes/referral.php';
 $signupCountryOptionsHtml = buildCountryOptionsHtml(null, 'United Kingdom');
 
 if (!isset($usePublicTemplate)) {
@@ -8,6 +9,7 @@ if (!isset($usePublicTemplate)) {
 ?>
 <script>
 window.COUNTRY_OPTIONS_HTML = <?php echo json_encode($signupCountryOptionsHtml, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
+window.REFERRAL_PROGRAM_ENABLED = <?php echo referralProgramEnabled() ? 'true' : 'false'; ?>;
 </script>
 <?php include __DIR__ . '/auth-modal-shell.php'; ?>
 <?php if ($usePublicTemplate): ?>

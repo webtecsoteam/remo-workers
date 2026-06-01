@@ -19,9 +19,17 @@ if (!$user || $user['role'] !== 'admin') {
 <title>Admin Panel - RemoWorkers</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
 <link rel="icon" type="image/png" href="<?php echo baseUrl("favicon.png?v=1.0.0"); ?>">
-<link rel="stylesheet" href="<?php echo baseUrl('assets/css/ui-alerts.css'); ?>">
+<?php
+$uiAlertsCssPath = __DIR__ . '/../assets/css/ui-alerts.css';
+$uiAlertsJsPath = __DIR__ . '/../assets/js/ui-alerts.js';
+$uiAlertsAssetVer = max(
+    is_file($uiAlertsCssPath) ? filemtime($uiAlertsCssPath) : 0,
+    is_file($uiAlertsJsPath) ? filemtime($uiAlertsJsPath) : 0
+);
+?>
+<link rel="stylesheet" href="<?php echo baseUrl('assets/css/ui-alerts.css?v=' . $uiAlertsAssetVer); ?>">
 <script src="<?php echo baseUrl('assets/js/pagination.js'); ?>"></script>
-<script src="<?php echo baseUrl('assets/js/ui-alerts.js'); ?>"></script>
+<script src="<?php echo baseUrl('assets/js/ui-alerts.js?v=' . $uiAlertsAssetVer); ?>"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -359,6 +367,10 @@ if (!$user || $user['role'] !== 'admin') {
       <div class="nav-item" onclick="showPage('disputes', this)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
         Dispute
+      </div>
+      <div class="nav-item" onclick="showPage('job-reports', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+        Job Reports
       </div>
       <div class="nav-item" onclick="showPage('verifications', this)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
@@ -1028,6 +1040,16 @@ if (!$user || $user['role'] !== 'admin') {
       </div>
     </div>
 
+    <!-- JOB REPORTS -->
+    <div class="page" id="page-job-reports">
+      <div class="card">
+        <div class="card-header"><span class="card-title">Reported Jobs</span></div>
+        <div class="table-wrapper" id="jobReportsTable">
+          <div class="loading"><span class="spinner"></span>Loading job reports…</div>
+        </div>
+      </div>
+    </div>
+
     <!-- MARKETING -->
     <div class="page" id="page-marketing">
       <div class="card">
@@ -1145,6 +1167,33 @@ if (!$user || $user['role'] !== 'admin') {
             <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;">Save Analytics Settings</button>
           </form>
           <div id="analyticsStatus" style="margin-top: 15px; font-size: 13px;"></div>
+        </div>
+      </div>
+
+      <div class="card" style="max-width: 600px; margin-top: 24px;">
+        <div class="card-header"><span class="card-title">Referral Program</span></div>
+        <div class="card-body">
+          <p style="font-size: 13px; color: var(--text-2); margin-bottom: 16px; line-height: 1.5;">
+            Control the refer-and-share feature for clients and freelancers. When enabled, users earn wallet credits after referred users complete verification steps.
+          </p>
+          <form id="referralForm" onsubmit="saveReferralSettings(event)">
+            <div style="margin-bottom: 16px; display: flex; align-items: center; gap: 10px;">
+              <input type="checkbox" id="set_referral_enabled" name="referral_enabled" value="1" style="width: 18px; height: 18px; cursor: pointer;">
+              <label for="set_referral_enabled" style="font-size: 13px; color: var(--text-1); cursor: pointer;">Enable referral program</label>
+            </div>
+            <div style="margin-bottom: 16px;">
+              <label style="display:block; font-size:12px; margin-bottom:6px; color:var(--text-2);">Qualified referrals per reward</label>
+              <input type="number" step="1" min="1" id="set_referral_reward_threshold" name="referral_reward_threshold" required style="width:100%; padding:10px; border:1px solid var(--border); border-radius:8px; outline:none;">
+              <span style="display:block; font-size: 11px; color: var(--text-3); margin-top: 6px;">How many fully qualified referrals unlock each wallet credit.</span>
+            </div>
+            <div style="margin-bottom: 20px;">
+              <label style="display:block; font-size:12px; margin-bottom:6px; color:var(--text-2);">Reward amount (USD)</label>
+              <input type="number" step="0.01" min="0.01" id="set_referral_reward_amount" name="referral_reward_amount" required style="width:100%; padding:10px; border:1px solid var(--border); border-radius:8px; outline:none;">
+              <span style="display:block; font-size: 11px; color: var(--text-3); margin-top: 6px;">Wallet credit paid for each milestone reached.</span>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;">Save Referral Settings</button>
+          </form>
+          <div id="referralSettingsStatus" style="margin-top: 15px; font-size: 13px;"></div>
         </div>
       </div>
     </div>
@@ -1654,7 +1703,7 @@ function verificationDocLinks(filePath) {
   return link('View Doc', raw);
 }
 
-const PAGE_TITLES = { disputes: 'Dispute', payments: 'Payments Management', 'payment-holds': 'Payment Holds', messages: 'Chats', blogs: 'Blog Management', 'cms-pages': 'Pages', seo: 'SEO Settings', countries: 'Countries', marketing: 'Marketing Emails', 'user-profile': 'User Profile', contracts: 'Contracts', 'job-detail': 'Job Detail', 'job-categories': 'Job Categories', agencies: 'Agencies' };
+const PAGE_TITLES = { disputes: 'Dispute', 'job-reports': 'Job Reports', payments: 'Payments Management', 'payment-holds': 'Payment Holds', messages: 'Chats', blogs: 'Blog Management', 'cms-pages': 'Pages', seo: 'SEO Settings', countries: 'Countries', marketing: 'Marketing Emails', 'user-profile': 'User Profile', contracts: 'Contracts', 'job-detail': 'Job Detail', 'job-categories': 'Job Categories', agencies: 'Agencies' };
 let marketingVerifiedFilter = '';
 let marketingFreelancersCache = [];
 let marketingSelectedIds = new Set();
@@ -1713,6 +1762,7 @@ function refreshPage(name) {
   if (active === 'seo') loadSeoSettings();
   if (active === 'countries') loadCountries();
   if (active === 'disputes') loadDisputes();
+  if (active === 'job-reports') loadJobReports();
   if (active === 'payments') loadPayments();
   if (active === 'messages') loadConversations();
   if (active === 'user-profile' && viewingUserId) loadUserProfile(viewingUserId);
@@ -2573,6 +2623,11 @@ async function loadSettings() {
     const gaEnabled = s.google_analytics_enabled ? String(s.google_analytics_enabled.value) : '0';
     document.getElementById('set_google_analytics_enabled').checked = gaEnabled === '1' || gaEnabled === 'true';
     document.getElementById('set_google_analytics_id').value = s.google_analytics_id ? (s.google_analytics_id.value || '') : '';
+
+    const referralEnabled = s.referral_enabled ? String(s.referral_enabled.value) : '1';
+    document.getElementById('set_referral_enabled').checked = referralEnabled === '1' || referralEnabled === 'true';
+    document.getElementById('set_referral_reward_threshold').value = s.referral_reward_threshold ? s.referral_reward_threshold.value : 10;
+    document.getElementById('set_referral_reward_amount').value = s.referral_reward_amount ? s.referral_reward_amount.value : 1;
   } else {
     status.innerHTML = `<span class="error">Failed to load settings: ${res.message}</span>`;
   }
@@ -2619,6 +2674,34 @@ async function saveAnalyticsSettings(e) {
   const payload = {
     google_analytics_enabled: document.getElementById('set_google_analytics_enabled').checked ? '1' : '0',
     google_analytics_id: document.getElementById('set_google_analytics_id').value.trim()
+  };
+
+  const url = new URL(API);
+  url.searchParams.append('action', 'save_settings');
+
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  }).then(r => r.json());
+
+  if (res.success) {
+    status.innerHTML = `<span class="success" style="color:var(--accent); font-weight: 500;">${res.message}</span>`;
+    setTimeout(() => { status.innerHTML = ''; }, 3000);
+  } else {
+    status.innerHTML = `<span class="error">${res.message}</span>`;
+  }
+}
+
+async function saveReferralSettings(e) {
+  e.preventDefault();
+  const status = document.getElementById('referralSettingsStatus');
+  status.innerHTML = '<span class="info">Saving referral settings…</span>';
+
+  const payload = {
+    referral_enabled: document.getElementById('set_referral_enabled').checked ? '1' : '0',
+    referral_reward_threshold: document.getElementById('set_referral_reward_threshold').value,
+    referral_reward_amount: document.getElementById('set_referral_reward_amount').value
   };
 
   const url = new URL(API);
@@ -3287,6 +3370,86 @@ async function loadDisputes() {
     applyPagination('#disputesTable', 'tbody tr', 10);
   } else {
     table.innerHTML = `<div class="loading" style="color:var(--red);">${escapeHtml(data.message)}</div>`;
+  }
+}
+
+const JOB_REPORT_TYPE_LABELS = {
+  suspicious: 'Suspicious activity',
+  fraud: 'Fraud / scam attempt',
+  spam: 'Spam or duplicate posting',
+  inappropriate: 'Inappropriate content',
+  misleading: 'Misleading job details',
+  scam: 'Payment scam',
+  other: 'Other',
+};
+
+function jobReportTypeLabel(type) {
+  return JOB_REPORT_TYPE_LABELS[(type || '').toLowerCase()] || type || '—';
+}
+
+async function loadJobReports() {
+  const table = document.getElementById('jobReportsTable');
+  if (!table) return;
+  table.innerHTML = '<div class="loading"><span class="spinner"></span>Loading job reports…</div>';
+  const data = await apiFetch('get_job_reports');
+  if (!data.success) {
+    table.innerHTML = `<div class="loading" style="color:var(--red);">${escapeHtml(data.message || 'Failed to load job reports.')}</div>`;
+    return;
+  }
+  table.innerHTML = renderJobReportsTable(data.data || []);
+  applyPagination('#jobReportsTable', 'tbody tr', 10);
+}
+
+function renderJobReportsTable(reports) {
+  if (!reports.length) return '<div class="loading">No job reports found.</div>';
+  return `<table>
+    <thead><tr>
+      <th>ID</th><th>Job</th><th>Reported User</th><th>Reporter</th><th>Report Type</th><th>Date</th><th>Actions</th>
+    </tr></thead>
+    <tbody>
+      ${reports.map(r => `<tr>
+        <td>#${r.id}</td>
+        <td>
+          <strong>${escapeHtml(r.job_title || 'Job #' + r.job_id)}</strong>
+          ${r.job_status ? `<br><span class="badge badge-gray" style="margin-top:4px">${escapeHtml(r.job_status)}</span>` : ''}
+        </td>
+        <td>
+          <strong>${escapeHtml(r.reported_user_name || 'User #' + r.reported_user_id)}</strong>
+          ${r.reported_user_email ? `<br><small style="color:var(--text-2)">${escapeHtml(r.reported_user_email)}</small>` : ''}
+          ${r.reported_user_role ? `<br><span class="badge badge-blue" style="margin-top:4px">${escapeHtml(r.reported_user_role)}</span>` : ''}
+        </td>
+        <td>
+          <strong>${escapeHtml(r.reporter_name || 'User #' + r.reporter_id)}</strong>
+          ${r.reporter_email ? `<br><small style="color:var(--text-2)">${escapeHtml(r.reporter_email)}</small>` : ''}
+          ${r.reporter_role ? `<br><span class="badge badge-gray" style="margin-top:4px">${escapeHtml(r.reporter_role)}</span>` : ''}
+        </td>
+        <td><span class="badge badge-amber">${escapeHtml(jobReportTypeLabel(r.report_type))}</span></td>
+        <td style="white-space:nowrap; font-size:12px">${r.created_at ? new Date(r.created_at).toLocaleString() : '—'}</td>
+        <td style="white-space:nowrap">
+          <div style="display:flex; flex-direction:column; gap:6px; min-width:120px">
+            ${r.job_id ? `<button class="btn btn-outline btn-sm" onclick="openJobDetail(${r.job_id})">View Job</button>` : ''}
+            ${r.job_id ? `<button class="btn btn-danger btn-sm" onclick="deleteJobFromReport(${r.job_id})">Delete Job</button>` : ''}
+            ${r.reported_user_id ? `<button class="btn btn-outline btn-sm" onclick="openUserProfile(${r.reported_user_id})">View Client</button>` : ''}
+          </div>
+        </td>
+      </tr>`).join('')}
+    </tbody>
+  </table>`;
+}
+
+async function deleteJobFromReport(jobId) {
+  const ok = await remoConfirm(
+    'This will permanently delete the job and related proposals/contracts.',
+    'Delete this reported job?',
+    { danger: true, confirmLabel: 'Delete Job' }
+  );
+  if (!ok) return;
+  const res = await apiFetch('delete_job', { job_id: jobId });
+  if (res.success) {
+    toast('Deleted', 'Job post removed', 'success');
+    loadJobReports();
+  } else {
+    remoAlert(res.message || 'Could not delete job.', 'Error');
   }
 }
 
@@ -4862,7 +5025,17 @@ async function rteInsertLink(editor) {
   if (sel && !sel.isCollapsed && sel.rangeCount && editor.contains(sel.anchorNode)) {
     defaultText = sel.toString().trim();
   }
-  const link = await remoLinkPrompt('Insert link', { text: defaultText, url: 'https://' });
+  let link = null;
+  if (typeof remoLinkPrompt === 'function') {
+    link = await remoLinkPrompt('Insert link', { text: defaultText, url: 'https://' });
+  } else if (typeof remoPrompt === 'function') {
+    const url = await remoPrompt('Enter link URL:', 'Insert link', 'https://');
+    if (!url) return;
+    link = { text: defaultText || url, url };
+  } else {
+    remoAlert('Link dialog failed to load. Hard-refresh the admin page and try again.', 'Insert link');
+    return;
+  }
   if (!link) return;
   insertRteLink(editor, link.text, link.url);
 }
@@ -4923,6 +5096,7 @@ function initPromoEmailRichEditor() {
   toolbar.querySelectorAll('button[data-cmd]').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.preventDefault();
+      e.stopPropagation();
       const cmd = btn.getAttribute('data-cmd');
       const val = btn.getAttribute('data-value') || null;
       editor.focus();

@@ -1,18 +1,23 @@
 <?php
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/classes/Auth.php';
+require_once __DIR__ . '/../includes/referral.php';
 
 ensureFreelancerSchema();
 $db = getDB();
 
-// Fetch real user from DB
 $user = Auth::user();
 if (!$user) {
-    // Default fallback for testing
-    $userId = 2; 
-    $stmt = $db->prepare("SELECT * FROM users WHERE id = ?");
-    $stmt->execute([$userId]);
-    $user = $stmt->fetch() ?: ['id'=>2, 'name'=>'Freelancer', 'connects'=>0, 'balance'=>0, 'role'=>'freelancer'];
+    redirect(baseUrl('?show_login=1'));
+}
+if (($user['role'] ?? '') !== 'freelancer') {
+    if (($user['role'] ?? '') === 'client') {
+        redirect(baseUrl('client'));
+    }
+    if (($user['role'] ?? '') === 'admin') {
+        redirect(baseUrl('admin'));
+    }
+    redirect(baseUrl());
 }
 
 // Initial jobs fetch
@@ -228,6 +233,9 @@ try {
     $fStats['is_top_rated'] = ($dynStats['badge'] === 'top_rated' || $dynStats['badge'] === 'top_rated_plus' || $dynStats['badge'] === 'expert_vetted');
 
     // Transactions (Payments) with virtual type and description
+    if (referralProgramEnabled()) {
+        referralSyncMissingPaymentRecords((int) $user['id']);
+    }
     $transactionsStmt = $db->prepare("
         SELECT p.*, j.title as job_title,
         CASE WHEN p.payee_id = ? THEN 'credit' ELSE 'debit' END as type,
@@ -460,7 +468,9 @@ include __DIR__ . '/includes/header.php';
     <div id="nav-catalog" class="sb-item" onclick="showPage('catalog')"><span class="sb-ico">📦</span>My Services</div>
     
     <div class="sb-section">Settings</div>
+    <?php if (referralProgramEnabled()): ?>
     <div id="nav-referral" class="sb-item" onclick="showPage('referral')"><span class="sb-ico">🎁</span>Refer &amp; Share</div>
+    <?php endif; ?>
     <div id="nav-profile" class="sb-item" onclick="showPage('profile')"><span class="sb-ico">👤</span>My Profile</div>
     <div id="nav-password" class="sb-item" onclick="openModal('change-password')"><span class="sb-ico">🔑</span>Change Password</div>
     <div id="nav-verification" class="sb-item" onclick="showPage('verification')">
@@ -518,7 +528,9 @@ include __DIR__ . '/includes/header.php';
     include __DIR__ . '/views/profile.php';
     include __DIR__ . '/views/verification.php';
     include __DIR__ . '/views/connects.php';
-    include __DIR__ . '/../includes/views/referral-page.php';
+    if (referralProgramEnabled()) {
+        include __DIR__ . '/../includes/views/referral-page.php';
+    }
     ?>
   </div>
 </main>

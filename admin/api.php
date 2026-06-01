@@ -3,6 +3,7 @@ require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/classes/Auth.php';
 require_once __DIR__ . '/../includes/cms_pages.php';
 require_once __DIR__ . '/../includes/seo_public.php';
+require_once __DIR__ . '/../includes/job_reports.php';
 
 // Security Check: Only admins can access API
 $user = Auth::user();
@@ -980,6 +981,11 @@ switch ($action) {
                 $doc->execute([$id]);
                 $userId = $doc->fetchColumn();
                 $db->prepare("UPDATE users SET is_verified = 1, verified_at = NOW() WHERE id = ?")->execute([$userId]);
+
+                if (file_exists(__DIR__ . '/../includes/referral.php')) {
+                    require_once __DIR__ . '/../includes/referral.php';
+                    referralOnReferredUserUpdated((int) $userId);
+                }
                 
                 // Fetch user info to send congratulation email
                 $stmt = $db->prepare("SELECT name, email, role FROM users WHERE id = ?");
@@ -1047,6 +1053,26 @@ switch ($action) {
                 LEFT JOIN users fr ON c.freelancer_id = fr.id
                 LEFT JOIN jobs j ON c.job_id = j.id
                 ORDER BY d.created_at DESC
+            ");
+            echo json_encode(['success' => true, 'data' => $stmt->fetchAll(PDO::FETCH_ASSOC)]);
+        } catch (PDOException $e) {
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+        break;
+
+    case 'get_job_reports':
+        try {
+            ensureJobReportedTable($db);
+            $stmt = $db->query("
+                SELECT jr.id, jr.job_id, jr.reporter_id, jr.reported_user_id, jr.report_type, jr.created_at,
+                       j.title AS job_title, j.status AS job_status,
+                       rep.name AS reporter_name, rep.email AS reporter_email, rep.role AS reporter_role,
+                       ru.name AS reported_user_name, ru.email AS reported_user_email, ru.role AS reported_user_role
+                FROM job_reported jr
+                LEFT JOIN jobs j ON jr.job_id = j.id
+                LEFT JOIN users rep ON jr.reporter_id = rep.id
+                LEFT JOIN users ru ON jr.reported_user_id = ru.id
+                ORDER BY jr.created_at DESC
             ");
             echo json_encode(['success' => true, 'data' => $stmt->fetchAll(PDO::FETCH_ASSOC)]);
         } catch (PDOException $e) {
@@ -1307,6 +1333,8 @@ switch ($action) {
                 'client_fee_fixed',
                 'client_fee_hourly',
                 'client_fee_monthly',
+                'referral_reward_threshold',
+                'referral_reward_amount',
             ];
 
             $formatted = [];
@@ -1364,6 +1392,29 @@ switch ($action) {
                     throw new Exception('Invalid Google Analytics Measurement ID. Use format G-XXXXXXXXXX.');
                 }
                 $stmt->execute([$gaId, 'google_analytics_id']);
+            }
+
+            if (array_key_exists('referral_enabled', $input)) {
+                $enabled = filter_var($input['referral_enabled'], FILTER_VALIDATE_BOOLEAN)
+                    || $input['referral_enabled'] === '1'
+                    || $input['referral_enabled'] === 1;
+                $stmt->execute([$enabled ? '1' : '0', 'referral_enabled']);
+            }
+
+            if (array_key_exists('referral_reward_threshold', $input)) {
+                $threshold = (int) $input['referral_reward_threshold'];
+                if ($threshold < 1) {
+                    throw new Exception('Referral reward threshold must be at least 1.');
+                }
+                $stmt->execute([(string) $threshold, 'referral_reward_threshold']);
+            }
+
+            if (array_key_exists('referral_reward_amount', $input)) {
+                $amount = round((float) $input['referral_reward_amount'], 2);
+                if ($amount <= 0) {
+                    throw new Exception('Referral reward amount must be greater than zero.');
+                }
+                $stmt->execute([number_format($amount, 2, '.', ''), 'referral_reward_amount']);
             }
 
             echo json_encode(['success' => true, 'message' => 'Platform settings saved successfully']);
